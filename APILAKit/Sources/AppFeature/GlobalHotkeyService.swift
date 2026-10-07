@@ -3,8 +3,8 @@ import AppKit
 import Carbon.HIToolbox
 
 /// Global hotkey via Carbon's RegisterEventHotKey — the standard, dependency-free
-/// way to get a system-wide shortcut on macOS. Default: ⌥-Space. Fires require
-/// Accessibility/Input Monitoring permission (handled by PermissionManager).
+/// way to get a system-wide shortcut on macOS. Default: ⌘⇧Space. Needs no TCC
+/// permission.
 public final class GlobalHotkeyService: HotkeyService, @unchecked Sendable {
     public let events: AsyncStream<HotkeyEvent>
     private let continuation: AsyncStream<HotkeyEvent>.Continuation
@@ -14,26 +14,27 @@ public final class GlobalHotkeyService: HotkeyService, @unchecked Sendable {
 
     public init(identifier: String = "toggle-panel") {
         self.identifier = identifier
-        var captured: AsyncStream<HotkeyEvent>.Continuation!
-        self.events = AsyncStream { captured = $0 }
-        self.continuation = captured
+        (events, continuation) = AsyncStream.makeStream()
     }
 
-    public func start() {
+    /// Returns false if the shortcut couldn't be registered (usually: another app
+    /// already owns it). Safe to call again after `stop()`.
+    @discardableResult
+    public func start() -> Bool {
         // Default: ⌘⇧Space. ⌥Space / ⌃Space are often taken (input-source
         // switching, other launchers). Alternatives if this conflicts:
         //   ⌃⌥Space → UInt32(controlKey | optionKey)
         //   ⌘⌥Space → UInt32(cmdKey | optionKey)   (Finder uses this — avoid)
-        register(keyCode: UInt32(kVK_Space), modifiers: UInt32(cmdKey | shiftKey))
+        guard hotKeyRef == nil else { return true }
+        return register(keyCode: UInt32(kVK_Space), modifiers: UInt32(cmdKey | shiftKey))
     }
 
     public func stop() {
         if let handlerRef { RemoveEventHandler(handlerRef); self.handlerRef = nil }
         if let hotKeyRef { UnregisterEventHotKey(hotKeyRef); self.hotKeyRef = nil }
-        continuation.finish()
     }
 
-    private func register(keyCode: UInt32, modifiers: UInt32) {
+    private func register(keyCode: UInt32, modifiers: UInt32) -> Bool {
         var eventType = EventTypeSpec(
             eventClass: OSType(kEventClassKeyboard),
             eventKind: UInt32(kEventHotKeyPressed)
@@ -46,13 +47,18 @@ public final class GlobalHotkeyService: HotkeyService, @unchecked Sendable {
             service.continuation.yield(HotkeyEvent(identifier: service.identifier))
             return noErr
         }
-        InstallEventHandler(
+        let installed = InstallEventHandler(
             GetApplicationEventTarget(),
             callback, 1, &eventType,
             Unmanaged.passUnretained(self).toOpaque(),
             &handlerRef
         )
         let hotKeyID = EventHotKeyID(signature: OSType(0x4150_494C), id: 1) // 'APIL'
-        RegisterEventHotKey(keyCode, modifiers, hotKeyID, GetApplicationEventTarget(), 0, &hotKeyRef)
+        let registered = RegisterEventHotKey(keyCode, modifiers, hotKeyID, GetApplicationEventTarget(), 0, &hotKeyRef)
+        guard installed == noErr, registered == noErr else {
+            stop()
+            return false
+        }
+        return true
     }
 }

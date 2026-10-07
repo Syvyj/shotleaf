@@ -63,12 +63,13 @@ struct InferenceFlowTests {
     @Test("Event bus reports action + provider events")
     func eventBus() async throws {
         let events = EventBus()
-        var received: [AppEvent] = []
+        // Subscribing happens synchronously here, so no event can be missed.
+        let stream = events.events()
         let collector = Task {
-            for await event in events.events() { received.append(event) }
+            var received: [AppEvent] = []
+            for await event in stream { received.append(event) }
+            return received
         }
-        // give the subscriber a moment to register
-        try await Task.sleep(nanoseconds: 20_000_000)
 
         let registry = InferenceProviderRegistry(events: events)
         await registry.register(MockStreamingProvider(reply: "hi", perTokenDelayMs: 0), makeCurrent: true)
@@ -77,6 +78,7 @@ struct InferenceFlowTests {
 
         try await Task.sleep(nanoseconds: 30_000_000)
         collector.cancel()
+        let received = await collector.value
 
         #expect(received.contains(.providerChanged(id: "mock")))
         #expect(received.contains(.actionStarted(id: "rewrite")))

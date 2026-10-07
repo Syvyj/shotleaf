@@ -17,6 +17,9 @@ public struct MenuBarRootView: View {
         Divider()
 
         Text("Provider: \(coordinator.currentProviderName)")
+        if !coordinator.hotkeyRegistered {
+            Text("⚠︎ ⌘⇧Space is taken by another app")
+        }
 
         Divider()
 

@@ -31,9 +31,12 @@ public final class AppCoordinator {
         )
     }
 
+    /// False when the global shortcut couldn't be registered (e.g. taken by another app).
+    public private(set) var hotkeyRegistered = true
+
     public func start() async {
         await container.bootstrap()
-        currentProviderName = await container.registry.current() ?? "—"
+        await refreshProvider()
         refreshPermissions()
 
         let panel = FloatingPanelController { [weak self] in
@@ -43,7 +46,7 @@ public final class AppCoordinator {
         self.panel = panel
         panelVM.onClose = { [weak self] in self?.panel?.hide() }
 
-        container.hotkeys.start()
+        hotkeyRegistered = container.hotkeys.start()
         hotkeyTask = Task { [weak self] in
             guard let self else { return }
             for await _ in self.container.hotkeys.events {
@@ -60,6 +63,14 @@ public final class AppCoordinator {
         let sourceApp = NSWorkspace.shared.frontmostApplication
         panelVM.present(snapshot: snapshot, sourceApp: sourceApp)
         panel?.show()
+        // Detached from the hotkey loop, so a slow/hung endpoint never delays the panel.
+        Task { await refreshProvider() }
+    }
+
+    private func refreshProvider() async {
+        let id = await container.refreshProvider()
+        currentProviderName = id ?? "—"
+        panelVM.isMockProvider = id == AppContainer.mockProviderID
     }
 
     public func openFromMenu() { Task { await present() } }

@@ -20,6 +20,11 @@ public final class AppContainer: Sendable {
     public let settings: SettingsStore
     public let actionRunner: ActionRunner
     public let clipboard: SystemClipboard
+    private let local = LMStudioAdapter.make(model: "local-model")
+    private let mock = MockStreamingProvider(
+        id: AppContainer.mockProviderID,
+        reply: "This is a mock response from APILA. Connect LM Studio, Ollama, or an OpenAI-compatible endpoint to get real results."
+    )
 
     public init() {
         let events = EventBus()
@@ -47,20 +52,22 @@ public final class AppContainer: Sendable {
     }
 
     /// Async wiring that can't happen in a synchronous init (actor calls).
-    /// Mock Mode: register the local provider AND a mock; pick the mock if the
-    /// local endpoint isn't reachable, so the UI always works.
     public func bootstrap() async {
-        let local = LMStudioAdapter.make(model: "local-model")
-        let mock = MockStreamingProvider(
-            reply: "This is a mock response from APILA. Connect LM Studio, Ollama, or an OpenAI-compatible endpoint to get real results."
-        )
         await registry.register(local)
         await registry.register(mock)
-
-        if case .healthy = await local.healthCheck() {
-            await registry.setCurrent(id: local.id)
-        } else {
-            await registry.setCurrent(id: mock.id)
-        }
+        await refreshProvider()
     }
+
+    /// Mock Mode: use the local endpoint when it answers, otherwise the mock, so
+    /// the UI always works. Called on every panel show, so starting LM Studio
+    /// later is picked up without restarting APILA.
+    /// ponytail: local-vs-mock only; becomes "user's chosen provider" with provider settings.
+    @discardableResult
+    public func refreshProvider() async -> String? {
+        let healthy = await local.healthCheck() == .healthy
+        await registry.setCurrent(id: healthy ? local.id : mock.id)
+        return await registry.current()
+    }
+
+    public static let mockProviderID = "mock"
 }

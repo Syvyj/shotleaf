@@ -54,6 +54,7 @@ public struct HotkeyEvent: Sendable, Equatable {
 /// Registers global hotkeys and emits events.
 public protocol HotkeyService: Sendable {
     var events: AsyncStream<HotkeyEvent> { get }
-    func start()
+    /// False if the shortcut couldn't be registered (e.g. owned by another app).
+    @discardableResult func start() -> Bool
     func stop()
 }

@@ -36,6 +36,8 @@ public final class PanelViewModel {
     public private(set) var errorText: String?
     public private(set) var noticeText: String?
     public let items: [Item]
+    /// The current provider is the canned Mock (no real model reachable).
+    public var isMockProvider = false
 
     private let runner: ActionRunner
     private let inserter: ResultInserter
@@ -109,8 +111,11 @@ public final class PanelViewModel {
                     }
                 }
             } catch {
+                // Closed mid-generation: the panel is already gone, don't flip it to an error.
+                if Task.isCancelled { return }
                 self.errorText = Self.friendlyMessage(for: error)
             }
+            if Task.isCancelled { return }
             self.screen = .result
         }
     }
@@ -122,7 +127,21 @@ public final class PanelViewModel {
         if case AppError.providerUnavailable = error {
             return "No AI provider is available. Start LM Studio (or an OpenAI-compatible server), or rely on Mock."
         }
-        return "\(error)"
+        guard let error = error as? InferenceError else { return error.localizedDescription }
+        switch error {
+        case .network, .timedOut, .unhealthy, .invalidURL:
+            return "Can't reach the model server. Is LM Studio running with a model loaded?"
+        case .noModelSelected:
+            return "No model selected. Load a model in LM Studio."
+        case .api(let message, _, _):
+            return "Model server error: \(message)"
+        case .http(let status, let body):
+            return "Model server error (HTTP \(status)): \(body ?? "")"
+        case .decoding:
+            return "Unexpected response from the model server."
+        case .cancelled:
+            return "Cancelled."
+        }
     }
 
     public func copyResult() async {

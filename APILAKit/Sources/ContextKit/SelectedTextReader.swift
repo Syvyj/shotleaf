@@ -45,9 +45,10 @@ public struct AXSelectedTextReader: SelectedTextReading {
 
     // MARK: ⌘C fallback (saves & restores the clipboard)
 
+    @MainActor
     private static func readViaCopy() async -> String? {
         let pasteboard = NSPasteboard.general
-        let original = pasteboard.string(forType: .string)
+        let original = PasteboardSnapshot(pasteboard)
         let beforeCount = pasteboard.changeCount
 
         // The activation hotkey (e.g. ⌘⇧Space) may still be physically held; a
@@ -62,12 +63,10 @@ public struct AXSelectedTextReader: SelectedTextReading {
             try? await Task.sleep(nanoseconds: 10_000_000)
             if pasteboard.changeCount != beforeCount { changed = true; break }
         }
-        let grabbed = changed ? pasteboard.string(forType: .string) : nil
-
-        // restore the user's clipboard
-        pasteboard.clearContents()
-        if let original { pasteboard.setString(original, forType: .string) }
-
+        // Nothing was copied (no selection) → the clipboard is untouched; leave it.
+        guard changed else { return nil }
+        let grabbed = pasteboard.string(forType: .string)
+        original.restore(to: pasteboard)
         return grabbed
     }
 

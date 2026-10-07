@@ -32,7 +32,15 @@ public struct PanelView: View {
 
     private var actionsScreen: some View {
         VStack(alignment: .leading, spacing: 4) {
-            header("APILA")
+            HStack {
+                header("APILA")
+                Spacer()
+                if vm.isMockProvider {
+                    Label("Mock — no model connected", systemImage: "bolt.horizontal.circle")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+            }
             if !vm.hasText {
                 Label("No text captured — select text, or copy it first.", systemImage: "exclamationmark.triangle")
                     .font(.caption)

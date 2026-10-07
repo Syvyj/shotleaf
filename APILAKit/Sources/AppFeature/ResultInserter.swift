@@ -1,4 +1,5 @@
 import Core
+import ContextKit
 import AppKit
 import CoreGraphics
 import Carbon.HIToolbox
@@ -19,13 +20,25 @@ public struct ResultInserter {
     }
 
     public func replaceSelection(_ text: String, in app: NSRunningApplication?) async {
-        try? await clipboard.writeText(text)
-        await activateAndPaste(app: app, insertBelow: false)
+        await pasteBorrowingClipboard(text, app: app, insertBelow: false)
     }
 
     public func insertBelow(_ text: String, in app: NSRunningApplication?) async {
+        await pasteBorrowingClipboard(text, app: app, insertBelow: true)
+    }
+
+    /// The clipboard is only a transport for ⌘V: afterwards the user's own
+    /// clipboard (any types) comes back, unless they copied something meanwhile.
+    private func pasteBorrowingClipboard(_ text: String, app: NSRunningApplication?, insertBelow: Bool) async {
+        let pasteboard = NSPasteboard.general
+        let original = PasteboardSnapshot(pasteboard)
         try? await clipboard.writeText(text)
-        await activateAndPaste(app: app, insertBelow: true)
+        let ours = pasteboard.changeCount
+        await activateAndPaste(app: app, insertBelow: insertBelow)
+        // ponytail: fixed delay for the target app to read the pasteboard; slow apps
+        // (Electron under load) may need more — make it a setting if users report it.
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        if pasteboard.changeCount == ours { original.restore(to: pasteboard) }
     }
 
     private func activateAndPaste(app: NSRunningApplication?, insertBelow: Bool) async {
