@@ -1,0 +1,258 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1A1A0000000000000000AA21 /* APILAApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA20 /* APILAApp.swift */; };
+		1A1A0000000000000000AA61 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 1A1A0000000000000000AA51 /* AppFeature */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1A1A0000000000000000AA11 /* APILA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = APILA.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A1A0000000000000000AA20 /* APILAApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APILAApp.swift; sourceTree = "<group>"; };
+		1A1A0000000000000000AA22 /* APILA.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = APILA.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1A1A0000000000000000AA31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A1A0000000000000000AA61 /* AppFeature in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1A1A0000000000000000AA02 = {
+			isa = PBXGroup;
+			children = (
+				1A1A0000000000000000AA04 /* App */,
+				1A1A0000000000000000AA03 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1A1A0000000000000000AA03 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1A1A0000000000000000AA11 /* APILA.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1A1A0000000000000000AA04 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				1A1A0000000000000000AA20 /* APILAApp.swift */,
+				1A1A0000000000000000AA22 /* APILA.entitlements */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1A1A0000000000000000AA10 /* APILA */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1A1A0000000000000000AA40 /* Build configuration list for PBXNativeTarget "APILA" */;
+			buildPhases = (
+				1A1A0000000000000000AA30 /* Sources */,
+				1A1A0000000000000000AA31 /* Frameworks */,
+				1A1A0000000000000000AA32 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = APILA;
+			packageProductDependencies = (
+				1A1A0000000000000000AA51 /* AppFeature */,
+			);
+			productName = APILA;
+			productReference = 1A1A0000000000000000AA11 /* APILA.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1A1A0000000000000000AA01 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					1A1A0000000000000000AA10 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = 1A1A0000000000000000AA45 /* Build configuration list for PBXProject "APILA" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1A1A0000000000000000AA02;
+			packageReferences = (
+				1A1A0000000000000000AA50 /* XCLocalSwiftPackageReference "APILAKit" */,
+			);
+			productRefGroup = 1A1A0000000000000000AA03 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1A1A0000000000000000AA10 /* APILA */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1A1A0000000000000000AA32 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1A1A0000000000000000AA30 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A1A0000000000000000AA21 /* APILAApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1A1A0000000000000000AA43 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		1A1A0000000000000000AA44 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		1A1A0000000000000000AA41 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = App/APILA.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = APILA;
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.apila.APILA;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		1A1A0000000000000000AA42 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = App/APILA.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = APILA;
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.apila.APILA;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1A1A0000000000000000AA45 /* Build configuration list for PBXProject "APILA" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A1A0000000000000000AA43 /* Debug */,
+				1A1A0000000000000000AA44 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1A1A0000000000000000AA40 /* Build configuration list for PBXNativeTarget "APILA" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A1A0000000000000000AA41 /* Debug */,
+				1A1A0000000000000000AA42 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		1A1A0000000000000000AA50 /* XCLocalSwiftPackageReference "APILAKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = APILAKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1A1A0000000000000000AA51 /* AppFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppFeature;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 1A1A0000000000000000AA01 /* Project object */;
+}
