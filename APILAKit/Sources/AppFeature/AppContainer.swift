@@ -1,7 +1,6 @@
 import Core
 import InferenceKit
 import ContextKit
-import CaptureKit
 import PerceptionKit
 import ActionKit
 import SettingsKit
@@ -14,7 +13,6 @@ public final class AppContainer: Sendable {
     public let registry: InferenceProviderRegistry
     public let context: ContextAggregator
     public let recognizer: VisionTextRecognizer
-    public let capture: ScreenCaptureService
     public let hotkeys: GlobalHotkeyService
     public let permissions: PermissionManager
     public let settings: SettingsStore
@@ -37,7 +35,6 @@ public final class AppContainer: Sendable {
         self.registry = registry
         self.context = context
         self.recognizer = recognizer
-        self.capture = ScreenCaptureService()
         self.hotkeys = GlobalHotkeyService()
         self.permissions = PermissionManager(events: events)
         self.settings = SettingsStore()

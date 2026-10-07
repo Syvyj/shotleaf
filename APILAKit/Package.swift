@@ -20,7 +20,6 @@ let package = Package(
         .library(name: "PerceptionKit", targets: ["PerceptionKit"]),
         .library(name: "ActionKit", targets: ["ActionKit"]),
         .library(name: "SettingsKit", targets: ["SettingsKit"]),
-        .library(name: "AppUI", targets: ["AppUI"]),
         .library(name: "AppFeature", targets: ["AppFeature"]),
     ],
     targets: [
@@ -34,7 +33,6 @@ let package = Package(
         .target(name: "PerceptionKit", dependencies: ["Core"]),
         .target(name: "ActionKit", dependencies: ["Core"]),
         .target(name: "SettingsKit", dependencies: ["Core"]),
-        .target(name: "AppUI", dependencies: ["Core"]),
 
         // App composition layer (the only module that knows everything). The
         // .xcodeproj app target links this; `swift build` also compiles it so
@@ -42,8 +40,8 @@ let package = Package(
         .target(
             name: "AppFeature",
             dependencies: [
-                "Core", "InferenceKit", "ContextKit", "CaptureKit",
-                "PerceptionKit", "ActionKit", "SettingsKit", "AppUI",
+                "Core", "InferenceKit", "ContextKit",
+                "PerceptionKit", "ActionKit", "SettingsKit",
             ]
         ),
 

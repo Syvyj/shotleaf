@@ -19,7 +19,7 @@ public enum ProviderPreset {
     }
 
     public static func openRouter(apiKey: String, model: String, appName: String = "APILA") -> OpenAICompatibleProvider {
-        // OpenRouter model ids embed the upstream runtime, e.g. "anthropic/claude-3.5-sonnet".
+        // OpenRouter model ids embed the upstream runtime, e.g. "anthropic/<model>".
         let runtime = model.contains("/") ? String(model.split(separator: "/")[0]) : nil
         return OpenAICompatibleProvider(
             id: "openrouter",
