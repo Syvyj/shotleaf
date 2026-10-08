@@ -32,6 +32,9 @@ struct ScreenshotSizingTests {
         panel.setFrame(grown, display: true)
         panel.contentView?.layoutSubtreeIfNeeded()
         #expect(panel.frame.size == grown.size)
+        // Shrinking past the minimum — by any path — stops at the minimum.
+        panel.setFrame(NSRect(x: grown.minX, y: grown.minY, width: 300, height: 200), display: true)
+        #expect(panel.frame.size == panel.contentMinSize)
         if let dir = ProcessInfo.processInfo.environment["APILA_PREVIEW_DIR"], let view = panel.contentView,
            let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
             view.cacheDisplay(in: view.bounds, to: rep)

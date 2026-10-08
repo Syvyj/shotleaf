@@ -7,6 +7,24 @@ import SwiftUI
 final class FloatingPanel: NSPanel {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
+
+    /// Every resize path (our grips, system edges, code) goes through here, so
+    /// the minimum size holds no matter who resizes — below it the SwiftUI
+    /// content would spill out of the window.
+    override func setFrame(_ frame: NSRect, display: Bool) {
+        var f = frame
+        let min = contentMinSize
+        if f.width < min.width {
+            // Keep the edge that wasn't dragged in place.
+            if f.minX != self.frame.minX { f.origin.x = f.maxX - min.width }
+            f.size.width = min.width
+        }
+        if f.height < min.height {
+            if f.maxY == self.frame.maxY { f.origin.y = f.maxY - min.height } else { f.origin.y = f.minY }
+            f.size.height = min.height
+        }
+        super.setFrame(f, display: display)
+    }
 }
 
 /// Owns the floating panel: a translucent, non-activating `NSPanel` shown near

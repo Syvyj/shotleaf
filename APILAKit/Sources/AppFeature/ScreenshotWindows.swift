@@ -102,7 +102,10 @@ final class ScreenshotWindows {
         controller.sizingOptions = [] // we size the window ourselves, once
         panel.contentViewController = controller
         panel.setContentSize(size)
-        if resizable { panel.contentMinSize = size }
+        if resizable {
+            panel.contentMinSize = size
+            panel.minSize = size // borderless: frame size == content size
+        }
         return panel
     }
 
