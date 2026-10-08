@@ -2,11 +2,10 @@ import Core
 import CoreGraphics
 import Foundation
 import ImageIO
+import UniformTypeIdentifiers
 
-/// Region screenshot: the user drags a region (or Space → picks a window), Esc
-/// cancels. Uses the system `screencapture -i` — the exact ⌘⇧4 UI users know.
-/// ponytail: system picker instead of a custom ScreenCaptureKit overlay; build our
-/// own overlay only when we need in-picker extras (magnifier, annotations).
+/// Region screenshot with APILA's own picker (`RegionPicker`): frozen screen,
+/// loupe, window pick, full screen, repeat last region. Esc → `AppError.cancelled`.
 public struct ScreenCaptureService: CaptureService {
     public init() {}
 
@@ -16,22 +15,18 @@ public struct ScreenCaptureService: CaptureService {
             CGRequestScreenCaptureAccess()
             throw AppError.permissionDenied("Screen Recording")
         }
+        let image = try await RegionPicker.shared.pick()
+        return try Self.payload(png: Self.png(image))
+    }
 
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("apila-capture-\(UUID().uuidString).png")
-        defer { try? FileManager.default.removeItem(at: url) }
-
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
-        process.arguments = ["-i", "-x", url.path] // interactive, no shutter sound
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            process.terminationHandler = { _ in continuation.resume() }
-            do { try process.run() } catch { continuation.resume(throwing: error) }
+    static func png(_ image: CGImage) throws -> Data {
+        let data = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, nil) else {
+            throw AppError.missingContext("Can't encode screenshot")
         }
-
-        // Esc → screencapture exits without writing a file.
-        guard let data = try? Data(contentsOf: url), !data.isEmpty else { throw AppError.cancelled }
-        return try Self.payload(png: data)
+        CGImageDestinationAddImage(dest, image, nil)
+        guard CGImageDestinationFinalize(dest) else { throw AppError.missingContext("Can't encode screenshot") }
+        return data as Data
     }
 
     static func payload(png data: Data) throws -> ImagePayload {
