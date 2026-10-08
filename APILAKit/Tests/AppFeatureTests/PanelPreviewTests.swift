@@ -27,21 +27,7 @@ struct PanelPreviewTests {
     }
 
     private func render(_ vm: PanelViewModel, _ name: String, dark: Bool) throws {
-        let view = ZStack {
-            LinearGradient(colors: dark ? [Color(white: 0.12), Color(white: 0.2)] : [Color(white: 0.92), Color(white: 0.82)],
-                           startPoint: .top, endPoint: .bottom)
-            PanelView(vm: vm).shadow(radius: 20, y: 8)
-        }
-        .frame(width: 560, height: 520)
-        .environment(\.colorScheme, dark ? .dark : .light)
-        let renderer = ImageRenderer(content: view)
-        renderer.scale = 2
-        let image = try #require(renderer.nsImage)
-        if let dir = ProcessInfo.processInfo.environment["APILA_PREVIEW_DIR"],
-           let tiff = image.tiffRepresentation,
-           let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) {
-            try png.write(to: URL(fileURLWithPath: dir).appendingPathComponent(name))
-        }
+        try renderPreview(PanelView(vm: vm), name, dark: dark)
     }
 
     @Test("Actions and result screens render in light and dark")

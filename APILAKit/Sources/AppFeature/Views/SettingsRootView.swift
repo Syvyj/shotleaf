@@ -162,18 +162,20 @@ public struct SettingsRootView: View {
                 onCancel: { coordinator.resumeHotkey() }
             )
 
-            Picker("Text from Screenshot", selection: Binding(
-                get: { coordinator.screenshotHotkey?.id ?? "off" },
-                set: { applyScreenshot($0 == "off" ? nil : HotkeyShortcut.with(id: $0)) }
-            )) {
-                Text("Off").tag("off")
-                ForEach(screenshotOptions) { Text($0.title).tag($0.id) }
+            ForEach(HotkeyAction.allCases) { action in
+                Picker(action.title, selection: Binding(
+                    get: { coordinator.actionHotkeys[action]?.id ?? "off" },
+                    set: { applyAction($0 == "off" ? nil : HotkeyShortcut.with(id: $0), action) }
+                )) {
+                    Text("Off").tag("off")
+                    ForEach(actionOptions(action)) { Text($0.title).tag($0.id) }
+                }
+                HotkeyRecorder(
+                    onStart: { hotkeyError = nil; coordinator.pauseHotkey() },
+                    onRecord: { applyAction($0, action) },
+                    onCancel: { coordinator.resumeHotkey() }
+                )
             }
-            HotkeyRecorder(
-                onStart: { hotkeyError = nil; coordinator.pauseHotkey() },
-                onRecord: { applyScreenshot($0) },
-                onCancel: { coordinator.resumeHotkey() }
-            )
 
             if let hotkeyError {
                 Text(hotkeyError).font(.caption).foregroundStyle(.orange)
@@ -188,9 +190,9 @@ public struct SettingsRootView: View {
         HotkeyShortcut.all.contains(coordinator.hotkey) ? HotkeyShortcut.all : HotkeyShortcut.all + [coordinator.hotkey]
     }
 
-    private var screenshotOptions: [HotkeyShortcut] {
-        let base = [HotkeyShortcut.screenshotDefault]
-        guard let current = coordinator.screenshotHotkey, !base.contains(current) else { return base }
+    private func actionOptions(_ action: HotkeyAction) -> [HotkeyShortcut] {
+        let base = [action.defaultShortcut]
+        guard let current = coordinator.actionHotkeys[action], !base.contains(current) else { return base }
         return base + [current]
     }
 
@@ -198,14 +200,14 @@ public struct SettingsRootView: View {
         report(coordinator.setHotkey(shortcut), shortcut, kept: coordinator.hotkey.title)
     }
 
-    private func applyScreenshot(_ shortcut: HotkeyShortcut?) {
-        report(coordinator.setScreenshotHotkey(shortcut), shortcut, kept: coordinator.screenshotHotkey?.title ?? "Off")
+    private func applyAction(_ shortcut: HotkeyShortcut?, _ action: HotkeyAction) {
+        report(coordinator.setHotkey(shortcut, for: action), shortcut, kept: coordinator.actionHotkeys[action]?.title ?? "Off")
     }
 
     private func report(_ ok: Bool, _ shortcut: HotkeyShortcut?, kept: String) {
         hotkeyError = ok || shortcut == nil
             ? nil
-            : "\(shortcut!.title) is taken (by another app or the other APILA shortcut) — kept \(kept)."
+            : "\(shortcut!.title) is taken (by another app or another APILA shortcut) — kept \(kept)."
     }
 
     // MARK: Translate

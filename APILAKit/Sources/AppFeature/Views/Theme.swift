@@ -181,3 +181,28 @@ struct FittingScrollText: View {
             .textSelection(.enabled)
     }
 }
+
+/// The look of every APILA floating window: glass, a light wash (light theme),
+/// a breath of leaf green from the top, a hairline border; empty spots drag it.
+struct LeafPanelChrome: ViewModifier {
+    private let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
+
+    func body(content: Content) -> some View {
+        content
+            .background {
+                ZStack {
+                    WindowDragArea() // empty spots of the window drag it
+                    shape.fill(.ultraThinMaterial).allowsHitTesting(false)
+                    shape.fill(Leaf.surface).allowsHitTesting(false)
+                    shape.fill(LinearGradient(colors: [Leaf.fresh.opacity(0.10), .clear], startPoint: .top, endPoint: .center))
+                        .allowsHitTesting(false)
+                }
+            }
+            .overlay(shape.strokeBorder(.primary.opacity(0.10)))
+            .clipShape(shape)
+    }
+}
+
+extension View {
+    func leafPanelChrome() -> some View { modifier(LeafPanelChrome()) }
+}

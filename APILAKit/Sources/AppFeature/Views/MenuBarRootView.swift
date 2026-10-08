@@ -11,7 +11,10 @@ public struct MenuBarRootView: View {
 
     public var body: some View {
         Button("Open APILA (\(coordinator.hotkey.title))") { coordinator.openFromMenu() }
-        Button(coordinator.screenshotHotkey.map { "Text from Screenshot… (\($0.title))" } ?? "Text from Screenshot…") {
+        Button(Self.label("Screenshot…", coordinator.actionHotkeys[.capture])) {
+            coordinator.takeScreenshot()
+        }
+        Button(Self.label("Text from Screenshot…", coordinator.actionHotkeys[.screenshotText])) {
             coordinator.screenshotFromMenu(ask: false)
         }
         Button("Ask about Screenshot…") { coordinator.screenshotFromMenu(ask: true) }
@@ -42,6 +45,10 @@ public struct MenuBarRootView: View {
 
         Button("Quit APILA") { NSApplication.shared.terminate(nil) }
             .keyboardShortcut("q")
+    }
+
+    private static func label(_ title: String, _ shortcut: HotkeyShortcut?) -> String {
+        shortcut.map { "\(title) (\($0.title))" } ?? title
     }
 
     private static func preview(_ text: String) -> String {

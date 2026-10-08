@@ -80,13 +80,24 @@ public final class AppCoordinator {
         self.panel = panel
         panelVM.onClose = { [weak self] in self?.panel?.hide() }
         panelVM.onHide = { [weak self] in self?.panel?.hide() }
+        screenshots.onText = { [weak self] image in
+            self?.openPanelForScreenshot()
+            self?.panelVM.useScreenshot(image, ask: false)
+        }
+        screenshots.onAsk = { [weak self] image in
+            self?.openPanelForScreenshot()
+            self?.panelVM.useScreenshot(image, ask: true)
+        }
         panelVM.onShow = { [weak self] in self?.panel?.show() }
 
         let hotkeys = container.hotkeys
         hotkeyRegistered = hotkeys.setShortcut(.with(id: container.settings.hotkey), for: Self.panelHotkey)
         hotkey = hotkeys.shortcut(for: Self.panelHotkey) ?? .default
-        hotkeys.setShortcut(Self.savedScreenshotHotkey(container.settings.screenshotHotkey), for: Self.screenshotHotkeyID)
-        screenshotHotkey = hotkeys.shortcut(for: Self.screenshotHotkeyID)
+        for action in HotkeyAction.allCases {
+            let saved = Self.savedHotkey(container.settings.hotkeyID(for: action.rawValue), default: action.defaultShortcut)
+            hotkeys.setShortcut(saved, for: action.rawValue)
+            actionHotkeys[action] = hotkeys.shortcut(for: action.rawValue)
+        }
 
         // Auto-shown once; afterwards it lives in the menu ("Setup Guide…").
         if !container.settings.onboardingCompleted {
@@ -97,7 +108,8 @@ public final class AppCoordinator {
             guard let self else { return }
             for await event in self.container.hotkeys.events {
                 switch event.identifier {
-                case Self.screenshotHotkeyID: self.screenshotFromMenu(ask: false)
+                case HotkeyAction.screenshotText.rawValue: self.screenshotFromMenu(ask: false)
+                case HotkeyAction.capture.rawValue: self.takeScreenshot()
                 default: await self.present()
                 }
             }
@@ -134,6 +146,30 @@ public final class AppCoordinator {
 
     public func openFromMenu() { Task { await present() } }
 
+    // MARK: Screenshots
+
+    private let screenshots = ScreenshotWindows()
+
+    /// Shottr-style: pick a region → preview window (copy, save, pin, drag, OCR, ask).
+    public func takeScreenshot() {
+        Task {
+            do {
+                screenshots.show(try await container.capture.captureRegion())
+            } catch AppError.cancelled {
+                // Esc in the picker: nothing to show.
+            } catch {
+                openPanelForScreenshot()
+                panelVM.showError(error)
+            }
+        }
+    }
+
+    /// The panel, opened fresh for working on a screenshot (no text selection).
+    private func openPanelForScreenshot() {
+        panelVM.present(snapshot: ContextSnapshot(capturedAt: Date()), sourceApp: NSWorkspace.shared.frontmostApplication)
+        panel?.show()
+    }
+
     /// Menu entry points for screenshots: no selection needed. The panel opens
     /// straight into the region picker.
     public func screenshotFromMenu(ask: Bool) {
@@ -144,17 +180,16 @@ public final class AppCoordinator {
     // MARK: Settings
 
     static let panelHotkey = "panel"
-    static let screenshotHotkeyID = "screenshot-text"
 
     /// The active shortcuts (stored, so SwiftUI observes changes).
     public private(set) var hotkey: HotkeyShortcut = .default
-    /// "Text from Screenshot" shortcut; nil = off.
-    public private(set) var screenshotHotkey: HotkeyShortcut?
+    /// Shortcuts of the other actions; missing = off.
+    public private(set) var actionHotkeys: [HotkeyAction: HotkeyShortcut] = [:]
 
     /// Settings value → shortcut: nil = never set (default on), "off" = disabled.
-    static func savedScreenshotHotkey(_ saved: String?) -> HotkeyShortcut? {
+    static func savedHotkey(_ saved: String?, default fallback: HotkeyShortcut) -> HotkeyShortcut? {
         switch saved {
-        case nil: .screenshotDefault
+        case nil: fallback
         case "off": nil
         case let id: .with(id: id)
         }
@@ -171,12 +206,12 @@ public final class AppCoordinator {
         return ok
     }
 
-    /// nil turns the screenshot hotkey off. False if the shortcut is taken.
-    public func setScreenshotHotkey(_ shortcut: HotkeyShortcut?) -> Bool {
+    /// nil turns the action's hotkey off. False if the shortcut is taken.
+    public func setHotkey(_ shortcut: HotkeyShortcut?, for action: HotkeyAction) -> Bool {
         let hotkeys = container.hotkeys
-        let ok = hotkeys.setShortcut(shortcut, for: Self.screenshotHotkeyID)
-        if ok { container.settings.screenshotHotkey = shortcut?.id ?? "off" }
-        screenshotHotkey = hotkeys.shortcut(for: Self.screenshotHotkeyID)
+        let ok = hotkeys.setShortcut(shortcut, for: action.rawValue)
+        if ok { container.settings.setHotkeyID(shortcut?.id ?? "off", for: action.rawValue) }
+        actionHotkeys[action] = hotkeys.shortcut(for: action.rawValue)
         hotkeys.start()
         return ok
     }

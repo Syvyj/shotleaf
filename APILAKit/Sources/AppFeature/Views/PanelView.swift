@@ -8,27 +8,13 @@ public struct PanelView: View {
 
     public init(vm: PanelViewModel) { self.vm = vm }
 
-    private let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
-
     public var body: some View {
         ZStack {
             content
             shortcuts
         }
         .frame(width: 500)
-        .background {
-            ZStack {
-                WindowDragArea() // empty spots of the panel drag it
-                shape.fill(.ultraThinMaterial)
-                    .allowsHitTesting(false)
-                shape.fill(Leaf.surface).allowsHitTesting(false)
-                // A breath of leaf green from the top, like light through foliage.
-                shape.fill(LinearGradient(colors: [Leaf.fresh.opacity(0.10), .clear], startPoint: .top, endPoint: .center))
-                    .allowsHitTesting(false)
-            }
-        }
-        .overlay(shape.strokeBorder(.primary.opacity(0.10)))
-        .clipShape(shape)
+        .leafPanelChrome()
     }
 
     @ViewBuilder

@@ -60,10 +60,11 @@ struct MultiHotkeyTests {
         #expect(service.shortcut(for: "shot") == a)
     }
 
-    @Test("Screenshot hotkey setting: unset → ⌘⇧2, \"off\" → none, id → that shortcut")
+    @Test("Action hotkey setting: unset → default, \"off\" → none, id → that shortcut")
     func savedSetting() {
-        #expect(AppCoordinator.savedScreenshotHotkey(nil) == .screenshotDefault)
-        #expect(AppCoordinator.savedScreenshotHotkey("off") == nil)
-        #expect(AppCoordinator.savedScreenshotHotkey(a.id) == a)
+        #expect(AppCoordinator.savedHotkey(nil, default: .screenshotDefault) == .screenshotDefault)
+        #expect(AppCoordinator.savedHotkey("off", default: .screenshotDefault) == nil)
+        #expect(AppCoordinator.savedHotkey(a.id, default: .screenshotDefault) == a)
+        #expect(HotkeyShortcut.with(id: HotkeyShortcut.captureDefault.id) == .captureDefault)
     }
 }

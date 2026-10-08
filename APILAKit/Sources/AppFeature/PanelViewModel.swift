@@ -158,13 +158,30 @@ public final class PanelViewModel {
     public func startScreenshot(ask: Bool, reopenOnCancel: Bool = true) {
         Task {
             guard let shot = await captureRegion(reopenOnCancel: reopenOnCancel) else { return }
-            if ask {
-                screenshotSnapshot = shot
-                openPrompt(.screenshot)
-            } else {
-                run(ScreenshotTextAction(), on: shot)
-            }
+            use(shot, ask: ask)
         }
+    }
+
+    /// An already-captured image (e.g. from the screenshot window): OCR it or ask about it.
+    public func useScreenshot(_ image: ImagePayload, ask: Bool) {
+        guard let snapshot else { return }
+        use(snapshot.withScreenImage(image), ask: ask)
+    }
+
+    private func use(_ shot: ContextSnapshot, ask: Bool) {
+        if ask {
+            screenshotSnapshot = shot
+            openPrompt(.screenshot)
+        } else {
+            run(ScreenshotTextAction(), on: shot)
+        }
+    }
+
+    /// Shows an error on the result screen (e.g. a failed capture outside the panel).
+    public func showError(_ error: Error) {
+        errorText = Self.friendlyMessage(for: error)
+        output = ""
+        screen = .result
     }
 
     private func openPrompt(_ mode: PromptMode) {

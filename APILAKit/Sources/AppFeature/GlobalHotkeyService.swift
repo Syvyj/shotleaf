@@ -21,7 +21,10 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
     /// ⌥Space / ⌃Space are often taken by input-source switching, hence ⌘⇧Space.
     public static let `default` = all[0]
 
-    /// Default for "Text from Screenshot": next to the system's ⌘⇧3/4/5.
+    /// Defaults for the screenshot actions: next to the system's ⌘⇧3/4/5.
+    public static let captureDefault = HotkeyShortcut(
+        id: "cmd-shift-1", title: "⌘⇧1", keyCode: UInt32(kVK_ANSI_1), modifiers: UInt32(cmdKey | shiftKey)
+    )
     public static let screenshotDefault = HotkeyShortcut(
         id: "cmd-shift-2", title: "⌘⇧2", keyCode: UInt32(kVK_ANSI_2), modifiers: UInt32(cmdKey | shiftKey)
     )
@@ -44,7 +47,7 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
                 return HotkeyShortcut(customKeyCode: code, modifiers: mods, title: String(parts[3]))
             }
         }
-        return (all + [screenshotDefault]).first { $0.id == id } ?? .default
+        return (all + [captureDefault, screenshotDefault]).first { $0.id == id } ?? .default
     }
 
     /// Builds a shortcut from a key press in the recorder. Nil when it has no
@@ -79,6 +82,28 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
         UInt16(kVK_F5): "F5", UInt16(kVK_F6): "F6", UInt16(kVK_F7): "F7", UInt16(kVK_F8): "F8",
         UInt16(kVK_F9): "F9", UInt16(kVK_F10): "F10", UInt16(kVK_F11): "F11", UInt16(kVK_F12): "F12",
     ]
+}
+
+/// Actions with their own (optional) global shortcut, besides opening the panel.
+public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
+    case capture                            // screenshot → preview window
+    case screenshotText = "screenshot-text" // screenshot → OCR text
+
+    public var id: String { rawValue }
+
+    public var title: String {
+        switch self {
+        case .capture: "Screenshot"
+        case .screenshotText: "Text from Screenshot"
+        }
+    }
+
+    public var defaultShortcut: HotkeyShortcut {
+        switch self {
+        case .capture: .captureDefault
+        case .screenshotText: .screenshotDefault
+        }
+    }
 }
 
 /// Global hotkeys via Carbon's RegisterEventHotKey — the standard, dependency-free

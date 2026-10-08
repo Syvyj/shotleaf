@@ -46,10 +46,18 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "hotkey") }
     }
 
-    /// Id of the "Text from Screenshot" shortcut; nil = default, "off" = disabled.
-    public var screenshotHotkey: String? {
-        get { defaults.string(forKey: "screenshotHotkey") }
-        set { defaults.set(newValue, forKey: "screenshotHotkey") }
+    /// Shortcut id for an action ("capture", "screenshot-text"…); nil = the
+    /// action's default, "off" = disabled.
+    public func hotkeyID(for action: String) -> String? {
+        defaults.string(forKey: Self.hotkeyKey(action))
+    }
+
+    public func setHotkeyID(_ id: String, for action: String) {
+        defaults.set(id, forKey: Self.hotkeyKey(action))
+    }
+
+    private static func hotkeyKey(_ action: String) -> String {
+        action == "screenshot-text" ? "screenshotHotkey" : "hotkey.\(action)" // first one predates the scheme
     }
 
     /// Translate turns text into this language…

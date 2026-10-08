@@ -361,3 +361,7 @@
 ## ADR-0057 — Екран вибору як non-activating NSPanel ✅
 **Рішення.** `OverlayWindow` — `NSPanel` з `.nonactivatingPanel`, `canBecomeKey`, `hidesOnDeactivate = false`; без `NSApp.activate()`.
 **Чому.** Кооперативна активація macOS 14+ могла не активувати APILA → вікно не ставало key → Esc/↩ потрапляли в програму під ним (скасування «не працювало»). Той самий прийом, що й у плаваючої панелі (ADR-0036).
+
+## ADR-0058 — Вікно після знімка + дії з хоткеями ✅
+**Рішення.** `HotkeyAction` (capture ⌘⇧1, screenshot-text ⌘⇧2) — необов'язкові хоткеї одним списком (налаштування: `hotkeyID(for:)`, "off" = вимкнено). `ScreenshotWindows` відкриває для кожного знімка окрему non-activating панель (`ScreenshotView` у стилі «Листя», спільний `leafPanelChrome()`): Copy (PNG+TIFF у буфер), Save (Desktop, `APILA yyyy-MM-dd at HH.mm.ss.png`), drag-and-drop файлу в інші програми, Pin (окрема плаваюча панель лише з картинкою), Text/Ask → панель через `PanelViewModel.useScreenshot`.
+**Прев'ю дизайну** рендеряться через справжній `NSHostingView` (`renderPreview`), бо `ImageRenderer` не малює AppKit-частини.
