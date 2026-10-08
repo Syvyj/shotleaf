@@ -19,6 +19,19 @@ enum Leaf {
             : NSColor(srgbRed: 0x4F / 255, green: 0x7F / 255, blue: 0x2A / 255, alpha: 1)
     })
 
+    /// Panel wash over the material: makes the light theme airy, leaves dark as is.
+    static let surface = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(white: 0, alpha: 0)
+            : NSColor(white: 1, alpha: 0.62)
+    })
+    /// Cards inside the panel (context, result).
+    static let card = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(white: 1, alpha: 0.05)
+            : NSColor(white: 1, alpha: 0.85)
+    })
+
     static let accent = LinearGradient(colors: [fresh, lime], startPoint: .leading, endPoint: .trailing)
     /// For small marks (spark, focus ring): stays visible on light backgrounds.
     static let markGradient = LinearGradient(colors: [ink, fresh], startPoint: .bottomLeading, endPoint: .topTrailing)
@@ -45,7 +58,7 @@ struct Keycap: View {
     let key: String
     var body: some View {
         Text(key)
-            .font(Leaf.font(10, .semibold))
+            .font(Leaf.font(11, .semibold))
             .padding(.horizontal, 5)
             .padding(.vertical, 2)
             .background(.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 5))
@@ -61,11 +74,10 @@ struct HintBar: View {
             ForEach(items, id: \.key) { item in
                 HStack(spacing: 4) {
                     Keycap(key: item.key)
-                    Text(item.label).font(Leaf.font(11)).foregroundStyle(.secondary)
+                    Text(item.label).font(Leaf.font(12))
                 }
             }
         }
-        .foregroundStyle(.secondary)
     }
 }
 
@@ -75,9 +87,9 @@ struct LeafButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(Leaf.font(12, .semibold))
-            .padding(.horizontal, 11)
-            .padding(.vertical, 6)
+            .font(Leaf.font(13, .semibold))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
             .foregroundStyle(prominent ? Leaf.forest : Color.primary)
             .background {
                 RoundedRectangle(cornerRadius: 8)
@@ -97,10 +109,9 @@ struct ProviderChip: View {
         HStack(spacing: 5) {
             Circle().fill(isMock ? Leaf.amber : Leaf.ink).frame(width: 6, height: 6)
             Text(isMock ? "Mock — no model" : name)
-                .font(Leaf.font(10, .medium))
+                .font(Leaf.font(11, .medium))
                 .lineLimit(1)
         }
-        .foregroundStyle(.secondary)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
         .background(.primary.opacity(0.06), in: Capsule())
@@ -123,7 +134,8 @@ struct FittingScrollText: View {
 
     private var label: some View {
         Text(text.isEmpty ? " " : text)
-            .font(Leaf.font(13))
+            .font(Leaf.font(15))
+            .lineSpacing(2)
             .foregroundStyle(color)
             .frame(maxWidth: .infinity, alignment: .leading)
             .fixedSize(horizontal: false, vertical: true)

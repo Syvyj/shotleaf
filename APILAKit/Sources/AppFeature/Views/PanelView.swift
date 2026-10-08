@@ -15,10 +15,11 @@ public struct PanelView: View {
             content
             shortcuts
         }
-        .frame(width: 480)
+        .frame(width: 500)
         .background {
             ZStack {
                 shape.fill(.ultraThinMaterial)
+                shape.fill(Leaf.surface)
                 // A breath of leaf green from the top, like light through foliage.
                 shape.fill(LinearGradient(colors: [Leaf.fresh.opacity(0.10), .clear], startPoint: .top, endPoint: .center))
             }
@@ -43,10 +44,10 @@ public struct PanelView: View {
         HStack(spacing: 8) {
             SparkMark()
                 .fill(Leaf.markGradient)
-                .frame(width: 14, height: 14)
+                .frame(width: 16, height: 16)
                 .rotationEffect(.degrees(spinning ? 360 : 0))
                 .animation(spinning ? .linear(duration: 1.6).repeatForever(autoreverses: false) : .default, value: spinning)
-            Text(title).font(Leaf.font(14, .semibold))
+            Text(title).font(Leaf.font(16, .semibold))
             Spacer()
             ProviderChip(name: vm.providerName, isMock: vm.isMockProvider)
         }
@@ -78,30 +79,28 @@ public struct PanelView: View {
             if let preview = vm.contextPreview {
                 let fromClipboard = preview.source == "Clipboard"
                 Text(preview.source)
-                    .font(Leaf.font(10, .semibold))
+                    .font(Leaf.font(11, .semibold))
                     .foregroundStyle(fromClipboard ? Leaf.amber : Leaf.ink)
                     .padding(.horizontal, 6).padding(.vertical, 2)
                     .background((fromClipboard ? Leaf.amber : Leaf.ink).opacity(0.15), in: Capsule())
                 Text(preview.text)
-                    .font(Leaf.font(12))
-                    .foregroundStyle(.secondary)
+                    .font(Leaf.font(14))
                     .lineLimit(2)
             } else {
                 Text("No text captured — select text or copy it first. Screenshots work anyway.")
-                    .font(Leaf.font(12))
+                    .font(Leaf.font(14))
                     .foregroundStyle(Leaf.amber)
             }
             Spacer(minLength: 0)
         }
         .padding(10)
-        .background(.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .background(Leaf.card, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 
     private func sectionLabel(_ text: String) -> some View {
         Text(text.uppercased())
-            .font(Leaf.font(9, .bold))
+            .font(Leaf.font(10, .bold))
             .tracking(0.8)
-            .foregroundStyle(.tertiary)
             .padding(.horizontal, 12)
             .padding(.top, 8)
             .padding(.bottom, 2)
@@ -113,7 +112,7 @@ public struct PanelView: View {
                 .fill(selected ? AnyShapeStyle(Leaf.accent) : AnyShapeStyle(Color.clear))
                 .frame(width: 3, height: 16)
             Text(item.title)
-                .font(Leaf.font(13, selected ? .semibold : .regular))
+                .font(Leaf.font(15, selected ? .semibold : .regular))
             Spacer()
             if selected { Keycap(key: "↩") }
         }
@@ -131,9 +130,9 @@ public struct PanelView: View {
             header(promptTitle)
             TextField(promptPlaceholder, text: $vm.customPromptText)
                 .textFieldStyle(.plain)
-                .font(Leaf.font(13))
+                .font(Leaf.font(15))
                 .padding(11)
-                .background(.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(Leaf.card, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .strokeBorder(promptFocused ? AnyShapeStyle(Leaf.markGradient) : AnyShapeStyle(.primary.opacity(0.10)), lineWidth: promptFocused ? 1.5 : 1)
@@ -160,7 +159,7 @@ public struct PanelView: View {
             header(vm.errorText == nil ? "Result" : "Something went wrong")
             FittingScrollText(text: vm.errorText ?? vm.output, color: vm.errorText == nil ? .primary : .red)
                 .padding(12)
-                .background(.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(Leaf.card, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             HStack(spacing: 6) {
                 Button("Copy") { Task { await vm.copyResult() } }
@@ -186,7 +185,7 @@ public struct PanelView: View {
             }
 
             if let notice = vm.noticeText {
-                Text(notice).font(Leaf.font(11)).foregroundStyle(Leaf.amber)
+                Text(notice).font(Leaf.font(12)).foregroundStyle(Leaf.amber)
             }
             HintBar(items: [("⌘C", "copy"), ("⌘R", "replace"), ("⌘↩", "retry"), ("⌘E", "refine"), ("esc", "close")])
         }
