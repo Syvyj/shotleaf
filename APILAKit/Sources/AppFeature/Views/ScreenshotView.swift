@@ -15,9 +15,10 @@ struct ScreenshotActions {
 }
 
 /// Shottr-style window after a capture: the shot on a canvas that grows with
-/// the window, annotation tools (1–8), and the actions, in the "Leaves" style.
-/// Keyboard: ↩/⌘C copy, ⌘S save, P pin, T text, A ask, 1–8 tools, ⌘Z undo,
-/// esc — drop the tool, then close.
+/// the window, annotation tools (0–9), and the actions, in the "Leaves" style.
+/// Click a mark to select it: drag to move, drag handles to resize, ⌫ deletes.
+/// Keyboard: ↩/⌘C copy, ⌘S save, P pin, T text, A ask, 0 select, 1–9 tools,
+/// ⌘Z undo, esc — deselect / drop the tool, then close.
 struct ScreenshotView: View {
     let image: NSImage
     let cgImage: CGImage
@@ -26,16 +27,23 @@ struct ScreenshotView: View {
     let actions: ScreenshotActions
     @Bindable var doc: AnnotationDocument
 
+    /// What the current pointer drag is doing.
+    private enum Drag {
+        case draw
+        case move(Annotation.ID, original: Annotation.Kind)
+        case resize(Annotation.ID, AnnotationEditing.Handle, original: Annotation.Kind)
+        case tap
+    }
+
     @State private var toast: String?
     @State private var dragStart: CGPoint?
     @State private var dragNow: CGPoint?
-    /// The cut piece being moved, and its offset when the drag began.
-    @State private var moving: (id: Annotation.ID, startOffset: CGSize)?
+    @State private var drag: Drag?
     @State private var textDraft: (origin: CGPoint, string: String)?
     @FocusState private var textFocused: Bool
 
     /// Wide enough for the tool row, the toolbar and the hint line.
-    static let minContentWidth: CGFloat = 600
+    static let minContentWidth: CGFloat = 640
 
     private var editingText: Bool { textDraft != nil }
 
@@ -45,7 +53,7 @@ struct ScreenshotView: View {
             toolRow
             canvas
             toolbar
-            HintBar(items: [("↩", "copy & close"), ("⌘S", "save"), ("1–8", "tools"), ("⌘Z", "undo"), ("esc", doc.tool == nil ? "close" : "drop tool")])
+            HintBar(items: [("↩", "copy & close"), ("⌘S", "save"), ("0–9", "tools"), ("⌫", "delete"), ("⌘Z", "undo"), ("esc", escHint)])
         }
         .frame(minWidth: max(displaySize.width, Self.minContentWidth), maxWidth: .infinity,
                maxHeight: .infinity, alignment: .topLeading)
@@ -56,6 +64,10 @@ struct ScreenshotView: View {
         }
         .overlay(WindowEdgeResizer()) // grab any edge or corner
         .background { keyboard }
+    }
+
+    private var escHint: String {
+        doc.selection != nil ? "deselect" : doc.tool != nil ? "drop tool" : "close"
     }
 
     // MARK: Header & tools
@@ -75,45 +87,61 @@ struct ScreenshotView: View {
                     .foregroundStyle(Leaf.ink)
                     .transition(.opacity)
             }
+            dragOutChip
         }
         .overlay(WindowDragArea())
     }
 
+    /// Drag this into any app to drop the screenshot (with its marks). Clicks
+    /// on the shot itself select marks, so dragging out lives here.
+    private var dragOutChip: some View {
+        HStack(spacing: 6) {
+            Image(nsImage: image)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 22, height: 16)
+                .clipShape(RoundedRectangle(cornerRadius: 3))
+            Text("Drag").font(Leaf.font(12, .semibold))
+        }
+        .padding(.horizontal, 8).padding(.vertical, 4)
+        .background(.primary.opacity(0.07), in: Capsule())
+        .overlay(Capsule().strokeBorder(.primary.opacity(0.10)))
+        .onDrag { NSItemProvider(contentsOf: actions.dragFile()) ?? NSItemProvider() }
+        .help("Drag into any app")
+        .zIndex(1)
+    }
+
     private var toolRow: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 3) {
+            toolButton(nil, key: "0", title: "Select")
             ForEach(AnnotationTool.allCases) { tool in
-                let on = doc.tool == tool
-                Button { doc.tool = on ? nil : tool } label: {
-                    HStack(spacing: 4) {
-                        Text(String(tool.key)).font(Leaf.font(10, .bold)).opacity(0.55)
-                        Text(tool.title).font(Leaf.font(12, on ? .semibold : .medium))
-                    }
-                    .padding(.horizontal, 8).padding(.vertical, 5)
-                    .background {
-                        RoundedRectangle(cornerRadius: 7, style: .continuous)
-                            .fill(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.primary.opacity(0.05)))
-                    }
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 7, style: .continuous)
-                            .strokeBorder(on ? AnyShapeStyle(Leaf.markGradient) : AnyShapeStyle(.clear), lineWidth: 1.2)
-                    }
+                toolButton(tool, key: tool.key, title: tool.title)
+            }
+            divider
+            ForEach(Array(AnnotationStyle.widths.enumerated()), id: \.offset) { i, width in
+                let on = abs(currentWidth - width) < 0.1
+                Button { setWidth(width) } label: {
+                    WidthIcon(width: width)
+                        .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.75))
+                        .frame(width: 26, height: 26)
+                        .background(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.clear), in: RoundedRectangle(cornerRadius: 7))
                 }
                 .buttonStyle(.plain)
-                .keyboardShortcut(KeyEquivalent(tool.key), modifiers: [])
-                .disabled(editingText)
+                .help(["Thin", "Medium", "Thick"][i] + " line")
             }
-            Spacer(minLength: 8)
+            divider
             ForEach(AnnotationColor.allCases) { color in
-                Button { doc.color = color } label: {
+                Button { setColor(color) } label: {
                     Circle()
                         .fill(Color(nsColor: color.nsColor))
-                        .frame(width: 16, height: 16)
+                        .frame(width: 15, height: 15)
                         .overlay(Circle().strokeBorder(.primary.opacity(0.25), lineWidth: 1))
                         .padding(3)
-                        .overlay(Circle().strokeBorder(doc.color == color ? Leaf.ink : .clear, lineWidth: 2))
+                        .overlay(Circle().strokeBorder(currentColor == color ? Leaf.ink : .clear, lineWidth: 2))
                 }
                 .buttonStyle(.plain)
             }
+            Spacer(minLength: 6)
             Button("Undo") { doc.undo() }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("z", modifiers: .command)
@@ -124,6 +152,51 @@ struct ScreenshotView: View {
                 .disabled(!doc.canRedo || editingText)
                 .frame(width: 0, height: 0).opacity(0).accessibilityHidden(true)
         }
+    }
+
+    private var divider: some View {
+        Rectangle().fill(.primary.opacity(0.12)).frame(width: 1, height: 18).padding(.horizontal, 4)
+    }
+
+    private func toolButton(_ tool: AnnotationTool?, key: Character, title: String) -> some View {
+        let on = doc.tool == tool
+        return Button {
+            doc.tool = tool
+            if tool != nil { doc.selection = nil }
+        } label: {
+            ToolIcon(tool: tool)
+                .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.8))
+                .frame(width: 30, height: 28)
+                .background {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.primary.opacity(0.04)))
+                }
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(on ? AnyShapeStyle(Leaf.markGradient) : AnyShapeStyle(.clear), lineWidth: 1.2)
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    Text(String(key)).font(.system(size: 7.5, weight: .bold, design: .rounded)).opacity(0.45).padding(2)
+                }
+        }
+        .buttonStyle(.plain)
+        .help(Text(verbatim: "\(title) (\(key))"))
+        .keyboardShortcut(KeyEquivalent(key), modifiers: [])
+        .disabled(editingText)
+    }
+
+    // The toolbar shows — and edits — the selected mark's style when there is one.
+    private var currentColor: AnnotationColor { doc.selected?.color ?? doc.color }
+    private var currentWidth: CGFloat { doc.selected?.lineWidth ?? doc.lineWidth }
+
+    private func setColor(_ color: AnnotationColor) {
+        doc.color = color
+        if let id = doc.selection { doc.restyle(id, color: color) }
+    }
+
+    private func setWidth(_ width: CGFloat) {
+        doc.lineWidth = width
+        if let id = doc.selection { doc.restyle(id, lineWidth: width) }
     }
 
     // MARK: Canvas
@@ -143,21 +216,21 @@ struct ScreenshotView: View {
                     .clipShape(RoundedRectangle(cornerRadius: doc.isEmpty ? 8 : 0, style: .continuous))
                     .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
                     .offset(x: origin.x, y: origin.y)
-                    .onDrag { NSItemProvider(contentsOf: actions.dragFile()) ?? NSItemProvider() }
-                    .help(doc.tool == nil ? "Drag into any app" : "")
                 Canvas { context, _ in
                     context.translateBy(x: origin.x, y: origin.y)
                     context.withCGContext { cg in
                         AnnotationRenderer.draw(visibleItems, image: cgImage, imageSize: displaySize, in: cg)
                     }
+                    if let selected = visibleSelection { drawSelection(selected, in: &context) }
                 }
                 .allowsHitTesting(false)
-                if doc.tool != nil {
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .gesture(drawGesture(origin: origin))
-                        .onHover { inside in (inside ? NSCursor.crosshair : NSCursor.arrow).set() }
-                }
+                Color.clear
+                    .contentShape(Rectangle())
+                    .gesture(pointerGesture(origin: origin))
+                    .onContinuousHover { phase in
+                        if case .active(let at) = phase { updateCursor(CGPoint(x: at.x - origin.x, y: at.y - origin.y)) }
+                        else { NSCursor.arrow.set() }
+                    }
                 if let draft = textDraft {
                     TextField("Type, then ↩", text: Binding(
                         get: { textDraft?.string ?? "" }, set: { textDraft?.string = $0 }
@@ -178,81 +251,135 @@ struct ScreenshotView: View {
         .frame(minWidth: displaySize.width, maxWidth: .infinity, minHeight: displaySize.height, maxHeight: .infinity)
     }
 
-    /// Committed marks plus the one being drawn or moved right now.
+    /// Dashed outline + round handles around the selected mark (screen only).
+    private func drawSelection(_ item: Annotation, in context: inout GraphicsContext) {
+        let frame = AnnotationEditing.frame(of: item.kind).insetBy(dx: -4, dy: -4)
+        let outline = Path(roundedRect: frame, cornerRadius: 4)
+        context.stroke(outline, with: .color(.white.opacity(0.9)), style: StrokeStyle(lineWidth: 3))
+        context.stroke(outline, with: .color(Leaf.leaf), style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
+        for (_, point) in AnnotationEditing.handles(of: item.kind) {
+            let dot = Path(ellipseIn: CGRect(x: point.x - 5.5, y: point.y - 5.5, width: 11, height: 11))
+            context.fill(dot, with: .color(.white))
+            context.stroke(dot, with: .color(Leaf.leaf), style: StrokeStyle(lineWidth: 2))
+        }
+    }
+
+    /// Committed marks, with the one being drawn / moved / resized right now.
     private var visibleItems: [Annotation] {
         var items = doc.items
-        if let moving, let start = dragStart, let now = dragNow,
-           let i = items.firstIndex(where: { $0.id == moving.id }),
-           case .piece(let source, _, let fill) = items[i].kind {
-            items[i].kind = .piece(source: source, offset: CGSize(width: moving.startOffset.width + now.x - start.x,
-                                                                 height: moving.startOffset.height + now.y - start.y), fill: fill)
-        } else if let kind = pendingKind(final: false) {
-            items.append(Annotation(kind: kind, color: doc.color))
+        if let live = liveEdit, let i = items.firstIndex(where: { $0.id == live.id }) {
+            items[i].kind = live.kind
+        } else if case .draw = drag, let kind = pendingKind(final: false) {
+            items.append(Annotation(kind: kind, color: doc.color, lineWidth: doc.lineWidth))
         }
         return items
     }
 
-    private func drawGesture(origin: CGPoint) -> some Gesture {
+    private var visibleSelection: Annotation? {
+        guard let id = doc.selection else { return nil }
+        return visibleItems.first { $0.id == id }
+    }
+
+    /// The move/resize in progress, applied to its mark.
+    private var liveEdit: (id: Annotation.ID, kind: Annotation.Kind)? {
+        guard let start = dragStart, let now = dragNow else { return nil }
+        switch drag {
+        case .move(let id, let original):
+            return (id, AnnotationEditing.moved(original, by: CGSize(width: now.x - start.x, height: now.y - start.y)))
+        case .resize(let id, let handle, let original):
+            return (id, AnnotationEditing.resized(original, handle, to: now))
+        default:
+            return nil
+        }
+    }
+
+    private func pointerGesture(origin: CGPoint) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
                 let p = CGPoint(x: value.location.x - origin.x, y: value.location.y - origin.y)
-                if dragStart == nil {
-                    dragStart = p
-                    if doc.tool == .cut, let hit = piece(at: p) { moving = hit }
-                }
+                if dragStart == nil { begin(at: p) }
                 dragNow = p
             }
             .onEnded { _ in
-                defer { dragStart = nil; dragNow = nil; moving = nil }
-                if let moving, let start = dragStart, let now = dragNow,
-                   let item = doc.items.first(where: { $0.id == moving.id }),
-                   case .piece(let source, _, let fill) = item.kind {
-                    doc.update(moving.id, to: .piece(source: source, offset: CGSize(
-                        width: moving.startOffset.width + now.x - start.x, height: moving.startOffset.height + now.y - start.y), fill: fill))
-                    return
-                }
-                if doc.tool == .text, let at = dragNow {
-                    textDraft = (at, "")
-                    textFocused = true
-                    return
-                }
-                if let kind = pendingKind(final: true) { doc.add(kind) }
+                finish()
+                dragStart = nil
+                dragNow = nil
+                drag = nil
             }
     }
 
-    /// The topmost cut piece under `p` (in its moved position).
-    private func piece(at p: CGPoint) -> (id: Annotation.ID, startOffset: CGSize)? {
-        for item in doc.items.reversed() {
-            if case .piece(let source, let offset, _) = item.kind,
-               source.offsetBy(dx: offset.width, dy: offset.height).contains(p) {
-                return (item.id, offset)
-            }
+    /// Decide what this drag is: a handle of the selected mark, a mark (select
+    /// + move), or empty space (draw with the tool / deselect).
+    private func begin(at p: CGPoint) {
+        dragStart = p
+        if let selected = doc.selected, let handle = AnnotationEditing.handle(of: selected.kind, at: p) {
+            drag = .resize(selected.id, handle, original: selected.kind)
+        } else if let id = AnnotationEditing.hit(doc.items, at: p), let item = doc.items.first(where: { $0.id == id }) {
+            doc.selection = id
+            drag = .move(id, original: item.kind)
+        } else if let tool = doc.tool, tool != .text, tool != .step {
+            doc.selection = nil
+            drag = .draw
+        } else {
+            drag = .tap
         }
-        return nil
     }
 
-    /// What the current drag would create. `final` adds the expensive bits
+    private func finish() {
+        guard let start = dragStart, let now = dragNow else { return }
+        let moved = hypot(now.x - start.x, now.y - start.y) > 1
+        switch drag {
+        case .move, .resize:
+            if moved, let live = liveEdit { doc.update(live.id, to: live.kind) }
+        case .draw:
+            if let kind = pendingKind(final: true) { doc.add(kind) }
+        case .tap:
+            switch doc.tool {
+            case .text:
+                textDraft = (now, "")
+                textFocused = true
+            case .step:
+                doc.add(.step(center: now, number: doc.nextStep))
+            default:
+                doc.selection = nil
+            }
+        case nil:
+            break
+        }
+    }
+
+    private func updateCursor(_ p: CGPoint) {
+        if let selected = doc.selected, AnnotationEditing.handle(of: selected.kind, at: p) != nil {
+            NSCursor.crosshair.set()
+        } else if AnnotationEditing.hit(doc.items, at: p) != nil {
+            NSCursor.openHand.set()
+        } else if doc.tool != nil {
+            (doc.tool == .text ? NSCursor.iBeam : NSCursor.crosshair).set()
+        } else {
+            NSCursor.arrow.set()
+        }
+    }
+
+    /// What the current drag would draw. `final` adds the expensive bits
     /// (sampling the erase color) only once, on release.
     private func pendingKind(final: Bool) -> Annotation.Kind? {
-        guard let tool = doc.tool, let a = dragStart, let b = dragNow, moving == nil else { return nil }
+        guard let tool = doc.tool, let a = dragStart, let b = dragNow else { return nil }
         let rect = CaptureMath.rect(a, b)
         let big = rect.width >= 4 && rect.height >= 4
+        func sampled() -> NSColor {
+            final ? AnnotationRenderer.surroundingColor(of: rect, image: cgImage, imageSize: displaySize) : .gray.withAlphaComponent(0.5)
+        }
         switch tool {
         case .arrow: return hypot(b.x - a.x, b.y - a.y) > 4 ? .arrow(from: a, to: b) : nil
         case .rectangle: return big ? .rectangle(rect) : nil
         case .highlight: return big ? .highlight(rect) : nil
         case .blur: return big ? .blur(rect) : nil
-        case .step: return final ? .step(center: b, number: doc.nextStep) : .step(center: b, number: doc.nextStep)
-        case .text: return nil
-        case .erase:
-            guard big else { return nil }
-            return .erase(rect, fill: final ? AnnotationRenderer.surroundingColor(of: rect, image: cgImage, imageSize: displaySize) : .gray.withAlphaComponent(0.5))
+        case .focus: return big ? .focus(rect) : nil
+        case .erase: return big ? .erase(rect, fill: sampled()) : nil
         case .cut:
             guard big else { return nil }
-            if final {
-                return .piece(source: rect, offset: .zero, fill: AnnotationRenderer.surroundingColor(of: rect, image: cgImage, imageSize: displaySize))
-            }
-            return .rectangle(rect) // outline while selecting
+            return final ? .piece(source: rect, offset: .zero, fill: sampled()) : .rectangle(rect) // outline while selecting
+        case .text, .step: return nil
         }
     }
 
@@ -294,14 +421,21 @@ struct ScreenshotView: View {
         }
     }
 
-    /// Esc and ↩ — off while typing a text mark, so they reach the text field.
+    /// Esc, ↩ and ⌫ — off while typing a text mark, so they reach the text field.
     @ViewBuilder
     private var keyboard: some View {
         if !editingText {
-            Button("") { if doc.tool != nil { doc.tool = nil } else { actions.close() } }
-                .keyboardShortcut(.cancelAction)
+            Button("") {
+                if doc.selection != nil { doc.selection = nil }
+                else if doc.tool != nil { doc.tool = nil }
+                else { actions.close() }
+            }
+            .keyboardShortcut(.cancelAction)
             Button("") { actions.copy(); actions.close() }
                 .keyboardShortcut(.defaultAction)
+            Button("") { if let id = doc.selection { doc.remove(id) } }
+                .keyboardShortcut(.delete, modifiers: [])
+                .disabled(doc.selection == nil)
         }
     }
 

@@ -8,12 +8,26 @@ enum AnnotationRenderer {
     ///   - image: the original screenshot (needed to pixelate under Blur).
     ///   - imageSize: the screenshot's size in image points.
     static func draw(_ items: [Annotation], image: CGImage, imageSize: CGSize, in ctx: CGContext) {
+        // Three layers: marks that change the picture itself (blur, erase, cut
+        // pieces), then the focus dimming over that picture, then the marks
+        // drawn on top of it (arrows, boxes, text…), which must never be dimmed.
+        func changesPicture(_ k: Annotation.Kind) -> Bool {
+            switch k { case .blur, .erase, .piece: true; default: false }
+        }
+        drawEach(items.filter { changesPicture($0.kind) }, image: image, imageSize: imageSize, in: ctx)
+        let spots = items.compactMap { if case .focus(let r) = $0.kind { r } else { nil } }
+        if !spots.isEmpty { focus(spots, imageSize: imageSize, in: ctx) }
+        drawEach(items.filter { !changesPicture($0.kind) }, image: image, imageSize: imageSize, in: ctx)
+    }
+
+    private static func drawEach(_ items: [Annotation], image: CGImage, imageSize: CGSize, in ctx: CGContext) {
         for item in items {
             ctx.saveGState()
             let color = item.color.nsColor.cgColor
             switch item.kind {
-            case .arrow(let a, let b): arrow(from: a, to: b, color: color, in: ctx)
-            case .rectangle(let r): box(r, color: color, in: ctx)
+            case .arrow(let a, let b): arrow(from: a, to: b, width: item.lineWidth, color: color, in: ctx)
+            case .rectangle(let r): box(r, width: item.lineWidth, color: color, in: ctx)
+            case .focus: break // drawn above
             case .highlight(let r): highlight(r, color: color, in: ctx)
             case .blur(let r): pixelate(r, image: image, imageSize: imageSize, in: ctx)
             case .step(let c, let n): step(c, number: n, color: item.color.nsColor, in: ctx)
@@ -33,16 +47,16 @@ enum AnnotationRenderer {
         ctx.setShadow(offset: CGSize(width: 0, height: 1), blur: 3, color: NSColor.black.withAlphaComponent(0.35).cgColor)
     }
 
-    private static func arrow(from a: CGPoint, to b: CGPoint, color: CGColor, in ctx: CGContext) {
+    private static func arrow(from a: CGPoint, to b: CGPoint, width: CGFloat, color: CGColor, in ctx: CGContext) {
         let length = hypot(b.x - a.x, b.y - a.y)
         guard length > 2 else { return }
         let angle = atan2(b.y - a.y, b.x - a.x)
-        let head = min(AnnotationStyle.arrowHead, length * 0.6)
+        let head = min(AnnotationStyle.arrowHead(for: width), length * 0.6)
         // Shaft stops inside the head so the tip stays sharp.
         let shaftEnd = CGPoint(x: b.x - cos(angle) * head * 0.6, y: b.y - sin(angle) * head * 0.6)
         softShadow(ctx)
         ctx.setStrokeColor(color)
-        ctx.setLineWidth(AnnotationStyle.stroke)
+        ctx.setLineWidth(width)
         ctx.setLineCap(.round)
         ctx.move(to: a)
         ctx.addLine(to: shaftEnd)
@@ -56,10 +70,10 @@ enum AnnotationRenderer {
         ctx.fillPath()
     }
 
-    private static func box(_ r: CGRect, color: CGColor, in ctx: CGContext) {
+    private static func box(_ r: CGRect, width: CGFloat, color: CGColor, in ctx: CGContext) {
         softShadow(ctx)
         ctx.setStrokeColor(color)
-        ctx.setLineWidth(AnnotationStyle.stroke)
+        ctx.setLineWidth(width)
         ctx.addPath(CGPath(roundedRect: r, cornerWidth: 4, cornerHeight: 4, transform: nil))
         ctx.strokePath()
     }
@@ -109,6 +123,21 @@ enum AnnotationRenderer {
 
     private static func text(_ s: String, at o: CGPoint, color: NSColor, in ctx: CGContext) {
         drawText(NSAttributedString(string: s, attributes: AnnotationStyle.textAttributes(color: color)), at: o, in: ctx)
+    }
+
+    /// Dims the image outside the focus areas, and rims them with a soft light.
+    /// ponytail: overlapping focus areas cancel out (even-odd); merge if it matters.
+    private static func focus(_ spots: [CGRect], imageSize: CGSize, in ctx: CGContext) {
+        ctx.saveGState()
+        ctx.addRect(CGRect(origin: .zero, size: imageSize))
+        for r in spots { ctx.addPath(CGPath(roundedRect: r, cornerWidth: 6, cornerHeight: 6, transform: nil)) }
+        ctx.setFillColor(NSColor.black.withAlphaComponent(0.5).cgColor)
+        ctx.fillPath(using: .evenOdd)
+        ctx.setStrokeColor(NSColor.white.withAlphaComponent(0.7).cgColor)
+        ctx.setLineWidth(1.5)
+        for r in spots { ctx.addPath(CGPath(roundedRect: r, cornerWidth: 6, cornerHeight: 6, transform: nil)) }
+        ctx.strokePath()
+        ctx.restoreGState()
     }
 
     /// Erasing only touches the image (the canvas around it is already plain).

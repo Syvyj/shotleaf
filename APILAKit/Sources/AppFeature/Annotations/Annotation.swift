@@ -18,20 +18,27 @@ struct Annotation: Identifiable, Equatable {
         /// A cut-out piece of the image moved by `offset`; its old place is
         /// erased like `.erase`.
         case piece(source: CGRect, offset: CGSize, fill: NSColor)
+        /// Spotlight: everything in the image outside the area is dimmed.
+        case focus(CGRect)
     }
 
     let id = UUID()
     var kind: Kind
     var color: AnnotationColor
+    /// Line thickness for arrows and boxes, in image points.
+    var lineWidth: CGFloat = AnnotationStyle.stroke
 
     /// Area the mark covers (for export bounds), in image points.
     var bounds: CGRect {
         switch kind {
         case .arrow(let a, let b):
-            return CaptureMath.rect(a, b).insetBy(dx: -AnnotationStyle.arrowHead, dy: -AnnotationStyle.arrowHead)
-        case .rectangle(let r), .highlight(let r), .blur(let r):
-            return r.insetBy(dx: -AnnotationStyle.stroke, dy: -AnnotationStyle.stroke)
-        case .erase(let r, _):
+            let head = AnnotationStyle.arrowHead(for: lineWidth)
+            return CaptureMath.rect(a, b).insetBy(dx: -head, dy: -head)
+        case .rectangle(let r):
+            return r.insetBy(dx: -lineWidth, dy: -lineWidth)
+        case .highlight(let r), .blur(let r):
+            return r
+        case .erase(let r, _), .focus(let r):
             return r
         case .piece(let source, let offset, _):
             return source.union(source.offsetBy(dx: offset.width, dy: offset.height))
@@ -69,7 +76,7 @@ enum AnnotationColor: String, CaseIterable, Identifiable {
 }
 
 enum AnnotationTool: String, CaseIterable, Identifiable {
-    case arrow, rectangle, text, highlight, blur, step, erase, cut
+    case arrow, rectangle, text, highlight, blur, step, erase, cut, focus
     var id: String { rawValue }
 
     var title: String {
@@ -82,10 +89,14 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
         case .step: "Steps"
         case .erase: "Erase"
         case .cut: "Cut"
+        case .focus: "Focus"
         }
     }
 
-    /// 1…8 — number keys, so they never clash with letters used elsewhere.
+    /// Tools whose marks have a line thickness.
+    var usesLineWidth: Bool { self == .arrow || self == .rectangle }
+
+    /// 1…9 — number keys, so they never clash with letters used elsewhere.
     var key: Character { Character(String((Self.allCases.firstIndex(of: self) ?? 0) + 1)) }
 }
 
@@ -97,9 +108,14 @@ final class AnnotationDocument {
     private var redoStack: [[Annotation]] = []
     private var undoStack: [[Annotation]] = []
 
-    /// nil = no tool: the image can be dragged out to other apps.
+    /// nil = Select: click a mark to select, move, resize or delete it.
     var tool: AnnotationTool?
     var color: AnnotationColor = .coral
+    var lineWidth: CGFloat = AnnotationStyle.stroke
+    /// The mark showing handles (newly drawn marks are selected too).
+    var selection: Annotation.ID?
+
+    var selected: Annotation? { items.first { $0.id == selection } }
 
     var canUndo: Bool { !undoStack.isEmpty }
     var canRedo: Bool { !redoStack.isEmpty }
@@ -110,12 +126,28 @@ final class AnnotationDocument {
         items.reduce(0) { if case .step(_, let n) = $1.kind { max($0, n) } else { $0 } } + 1
     }
 
-    func add(_ kind: Annotation.Kind) {
-        commit(items + [Annotation(kind: kind, color: color)])
+    /// Adds a mark in the current color/width and selects it.
+    @discardableResult
+    func add(_ kind: Annotation.Kind) -> Annotation.ID {
+        let item = Annotation(kind: kind, color: color, lineWidth: lineWidth)
+        commit(items + [item])
+        selection = item.id
+        return item.id
     }
 
-    func add(_ annotation: Annotation) {
-        commit(items + [annotation])
+    func remove(_ id: Annotation.ID) {
+        commit(items.filter { $0.id != id })
+        if selection == id { selection = nil }
+    }
+
+    /// Recolors / re-thickens one mark (the selected one, from the toolbar).
+    func restyle(_ id: Annotation.ID, color: AnnotationColor? = nil, lineWidth: CGFloat? = nil) {
+        guard let i = items.firstIndex(where: { $0.id == id }) else { return }
+        var new = items
+        if let color { new[i].color = color }
+        if let lineWidth { new[i].lineWidth = lineWidth }
+        guard new != items else { return }
+        commit(new)
     }
 
     /// Replaces one mark (e.g. a cut piece after it was moved) — one undo step.
@@ -130,12 +162,18 @@ final class AnnotationDocument {
         guard let previous = undoStack.popLast() else { return }
         redoStack.append(items)
         items = previous
+        dropStaleSelection()
     }
 
     func redo() {
         guard let next = redoStack.popLast() else { return }
         undoStack.append(items)
         items = next
+        dropStaleSelection()
+    }
+
+    private func dropStaleSelection() {
+        if let selection, !items.contains(where: { $0.id == selection }) { self.selection = nil }
     }
 
     private func commit(_ new: [Annotation]) {
@@ -148,7 +186,11 @@ final class AnnotationDocument {
 /// Sizes shared by the live view and the export, in image points.
 enum AnnotationStyle {
     static let stroke: CGFloat = 4
+    /// S / M / L line thickness choices.
+    static let widths: [CGFloat] = [2.5, 4, 7]
     static let arrowHead: CGFloat = 18
+    /// The head grows with the line so thick arrows don't look stubby.
+    static func arrowHead(for width: CGFloat) -> CGFloat { 10 + width * 2 }
     static let stepRadius: CGFloat = 15
     static let blurBlock: CGFloat = 10 // pixelation cell, in image points
 
