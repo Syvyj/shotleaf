@@ -28,6 +28,9 @@ struct ScreenshotSizingTests {
         // It can grow (room around the shot for annotations) and stays grown;
         // it can't shrink below where it started.
         #expect(panel.contentMinSize == panel.frame.size)
+        // Even if something resets the system minimum, ours holds.
+        panel.contentMinSize = .zero
+        #expect(panel.contentMinSize == panel.frame.size)
         let grown = NSRect(x: panel.frame.minX, y: panel.frame.minY - 200, width: panel.frame.width + 300, height: panel.frame.height + 200)
         panel.setFrame(grown, display: true)
         panel.contentView?.layoutSubtreeIfNeeded()

@@ -10,7 +10,7 @@ final class ScreenshotWindows {
     var onText: (ImagePayload) -> Void = { _ in }
     var onAsk: (ImagePayload) -> Void = { _ in }
 
-    private(set) var open: [ObjectIdentifier: NSPanel] = [:] // internal for tests
+    private(set) var open: [ObjectIdentifier: FloatingPanel] = [:] // internal for tests
 
     func show(_ payload: ImagePayload) {
         guard let image = NSImage(data: payload.data) else { return }
@@ -33,7 +33,7 @@ final class ScreenshotWindows {
             return png
         }
 
-        var panel: NSPanel!
+        var panel: FloatingPanel!
         let close: () -> Void = { [weak self] in self?.close(panel) }
         let actions = ScreenshotActions(
             copy: { Self.copy(result()) },
@@ -64,7 +64,7 @@ final class ScreenshotWindows {
     private func pin(_ image: NSImage, size: CGSize, data: Data) {
         // Pinned copies start at their real size, capped so they don't cover the screen.
         let size = Self.fit(points: size, in: CGSize(width: 900, height: 700))
-        var panel: NSPanel!
+        var panel: FloatingPanel!
         panel = makePanel(PinnedScreenshotView(
             image: image, size: size,
             copy: { Self.copy(data) },
@@ -79,10 +79,11 @@ final class ScreenshotWindows {
 
     /// `proposedWidth` + `resizable`: the window opens at that width and the
     /// smallest height the view allows, and can only grow from there.
-    private func makePanel<V: View>(_ view: V, proposedWidth: CGFloat? = nil, resizable: Bool = false) -> NSPanel {
+    private func makePanel<V: View>(_ view: V, proposedWidth: CGFloat? = nil, resizable: Bool = false) -> FloatingPanel {
         let panel = FloatingPanel(
             contentRect: .zero,
-            styleMask: resizable ? [.borderless, .nonactivatingPanel, .resizable] : [.borderless, .nonactivatingPanel],
+            // No system .resizable: it ignored our minimum; our grips/edges resize.
+            styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered, defer: false
         )
         panel.isFloatingPanel = true
@@ -102,19 +103,16 @@ final class ScreenshotWindows {
         controller.sizingOptions = [] // we size the window ourselves, once
         panel.contentViewController = controller
         panel.setContentSize(size)
-        if resizable {
-            panel.contentMinSize = size
-            panel.minSize = size // borderless: frame size == content size
-        }
+        if resizable { panel.minimumSize = size }
         return panel
     }
 
-    private func present(_ panel: NSPanel) {
+    private func present(_ panel: FloatingPanel) {
         open[ObjectIdentifier(panel)] = panel
         panel.makeKeyAndOrderFront(nil)
     }
 
-    private func close(_ panel: NSPanel?) {
+    private func close(_ panel: FloatingPanel?) {
         guard let panel else { return }
         panel.orderOut(nil)
         open[ObjectIdentifier(panel)] = nil

@@ -78,3 +78,29 @@ struct DragOutTests {
         #expect(view.hitTest(NSPoint(x: 150, y: 50)) == nil)    // a tool draws instead
     }
 }
+
+@Suite("Drag payload")
+@MainActor
+struct DragPayloadTests {
+    @Test("Finder gets a file promise it can fulfil; chats get a file URL")
+    func promise() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("apila-drag-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let source = dir.appendingPathComponent("APILA test.png")
+        try Data([1, 2, 3]).write(to: source)
+
+        let promise = ShotPromise(file: source)
+        let types = promise.writableTypes(for: NSPasteboard(name: .init("apila.test.drag")))
+        #expect(types.contains(.fileURL))
+        #expect(types.contains(NSPasteboard.PasteboardType("com.apple.NSFilePromiseItemMetaData")) || types.count > 1)
+        let name = promise.filePromiseProvider(promise, fileNameForType: "public.png")
+        #expect(name == "APILA test.png")
+
+        let target = dir.appendingPathComponent("dropped.png")
+        var result: Error?? = .none
+        promise.filePromiseProvider(promise, writePromiseTo: target) { result = .some($0) }
+        #expect(result != nil && result! == nil)
+        #expect(try Data(contentsOf: target) == Data([1, 2, 3]))
+    }
+}
