@@ -248,6 +248,107 @@ struct WindowResizeGrip: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
+/// Resize by any edge or corner, like a normal window: a thin invisible band
+/// around the window takes the drag and shows the resize cursor; everything
+/// inside the band passes through. (System edge-resizing doesn't engage for
+/// our borderless non-activating panels, same as dragging.)
+struct WindowEdgeResizer: NSViewRepresentable {
+    final class EdgeView: NSView {
+        private let band: CGFloat = 6
+        private var start: (mouse: NSPoint, frame: NSRect, edges: Edges)?
+
+        struct Edges: OptionSet {
+            let rawValue: Int
+            static let left = Edges(rawValue: 1), right = Edges(rawValue: 2)
+            static let top = Edges(rawValue: 4), bottom = Edges(rawValue: 8)
+        }
+
+        override var isFlipped: Bool { true }
+        override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+        /// Only the band is "ours"; clicks inside fall through to the content.
+        override func hitTest(_ point: NSPoint) -> NSView? {
+            edges(at: convert(point, from: superview)).isEmpty ? nil : self
+        }
+
+        override func updateTrackingAreas() {
+            super.updateTrackingAreas()
+            trackingAreas.forEach(removeTrackingArea)
+            addTrackingArea(NSTrackingArea(rect: bounds, options: [.mouseMoved, .mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self))
+        }
+
+        // Cursor rects need the active app; set the cursor by hand instead.
+        private var showingResizeCursor = false
+
+        override func mouseMoved(with event: NSEvent) {
+            guard start == nil else { return }
+            if let cursor = Self.cursor(for: edges(at: convert(event.locationInWindow, from: nil))) {
+                cursor.set()
+                showingResizeCursor = true
+            } else if showingResizeCursor {
+                NSCursor.arrow.set() // left the band: back to normal, once
+                showingResizeCursor = false
+            }
+        }
+        override func mouseExited(with event: NSEvent) {
+            if start == nil, showingResizeCursor { NSCursor.arrow.set(); showingResizeCursor = false }
+        }
+
+        override func mouseDown(with event: NSEvent) {
+            guard let window else { return }
+            start = (NSEvent.mouseLocation, window.frame, edges(at: convert(event.locationInWindow, from: nil)))
+        }
+
+        override func mouseDragged(with event: NSEvent) {
+            guard let start, let window else { return }
+            let now = NSEvent.mouseLocation
+            let dx = now.x - start.mouse.x, dy = now.y - start.mouse.y
+            let min = window.contentMinSize
+            var f = start.frame
+            if start.edges.contains(.right) { f.size.width = max(min.width, start.frame.width + dx) }
+            if start.edges.contains(.left) {
+                f.size.width = max(min.width, start.frame.width - dx)
+                f.origin.x = start.frame.maxX - f.width
+            }
+            if start.edges.contains(.top) { f.size.height = max(min.height, start.frame.height + dy) } // screen y is up
+            if start.edges.contains(.bottom) {
+                f.size.height = max(min.height, start.frame.height - dy)
+                f.origin.y = start.frame.maxY - f.height
+            }
+            window.setFrame(f, display: true)
+        }
+
+        override func mouseUp(with event: NSEvent) { start = nil }
+
+        func edges(at p: NSPoint) -> Edges { // internal for tests
+            var e: Edges = []
+            if p.x <= band { e.insert(.left) }
+            if p.x >= bounds.width - band { e.insert(.right) }
+            if p.y <= band { e.insert(.top) }          // flipped: y = 0 is the top
+            if p.y >= bounds.height - band { e.insert(.bottom) }
+            return e
+        }
+
+        private static func cursor(for e: Edges) -> NSCursor? {
+            let position: NSCursor.FrameResizePosition
+            switch e {
+            case [.top, .left]: position = .topLeft
+            case [.top, .right]: position = .topRight
+            case [.bottom, .left]: position = .bottomLeft
+            case [.bottom, .right]: position = .bottomRight
+            case .top: position = .top
+            case .bottom: position = .bottom
+            case .left: position = .left
+            case .right: position = .right
+            default: return nil
+            }
+            return NSCursor.frameResize(position: position, directions: .all)
+        }
+    }
+    func makeNSView(context: Context) -> NSView { EdgeView() }
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
 /// The look of every APILA floating window: glass, a light wash (light theme),
 /// a breath of leaf green from the top, a hairline border; empty spots drag it.
 struct LeafPanelChrome: ViewModifier {

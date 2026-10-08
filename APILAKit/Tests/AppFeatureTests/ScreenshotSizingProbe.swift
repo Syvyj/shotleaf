@@ -39,3 +39,20 @@ struct ScreenshotSizingTests {
         }
     }
 }
+
+@Suite("Edge resizing")
+@MainActor
+struct EdgeResizerTests {
+    @Test("The band catches edges and corners; the inside passes clicks through")
+    func band() {
+        let parent = NSView(frame: NSRect(x: 0, y: 0, width: 400, height: 300))
+        let edge = WindowEdgeResizer.EdgeView(frame: parent.bounds)
+        parent.addSubview(edge)
+        #expect(edge.hitTest(NSPoint(x: 200, y: 150)) == nil)
+        #expect(edge.hitTest(NSPoint(x: 2, y: 150)) === edge)
+        #expect(edge.hitTest(NSPoint(x: 398, y: 150)) === edge)
+        #expect(edge.edges(at: NSPoint(x: 2, y: 2)) == [.left, .top])       // flipped: top-left corner
+        #expect(edge.edges(at: NSPoint(x: 398, y: 298)) == [.right, .bottom])
+        #expect(edge.edges(at: NSPoint(x: 200, y: 150)).isEmpty)
+    }
+}

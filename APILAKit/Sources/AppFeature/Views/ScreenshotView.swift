@@ -41,6 +41,7 @@ struct ScreenshotView: View {
         .overlay(alignment: .bottomTrailing) {
             WindowResizeGrip().frame(width: 18, height: 18).padding(4)
         }
+        .overlay(WindowEdgeResizer()) // grab any edge or corner
     }
 
     /// The image at its own size, centred on a canvas that grows with the
