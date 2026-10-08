@@ -24,6 +24,17 @@ public struct SettingsRootView: View {
 
     public var body: some View {
         Form {
+            Section {
+                HStack(spacing: 12) {
+                    Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 40, height: 40)
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("APILA").font(Leaf.font(16, .bold))
+                        Text(Self.version).font(Leaf.font(11)).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    ProviderChip(name: coordinator.currentProviderName, isMock: coordinator.providerProblem != nil)
+                }
+            }
             providerSection
             shortcutSection
             translateSection
@@ -37,6 +48,12 @@ public struct SettingsRootView: View {
             draft = coordinator.savedProviderSettings()
             (translateTarget, translateFallback) = coordinator.translateLanguages
         }
+    }
+
+    private static var version: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "dev"
+        return "Version \(short)"
     }
 
     // MARK: Provider

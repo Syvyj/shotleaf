@@ -1,21 +1,30 @@
 import SwiftUI
 
-/// The Floating Panel UI. Fully keyboard-first: ↑↓ navigate, ⏎ confirm, esc close,
-/// ⌘C/⌘R/⌘I on the result. Translucent material background.
+/// The Floating Panel UI, in the "Leaves" style. Fully keyboard-first:
+/// ↑↓ navigate, ⏎ confirm, esc close, ⌘C/⌘R/⌘I/⌘↩/⌘E on the result.
 public struct PanelView: View {
     @Bindable private var vm: PanelViewModel
     @FocusState private var promptFocused: Bool
 
     public init(vm: PanelViewModel) { self.vm = vm }
 
+    private let shape = RoundedRectangle(cornerRadius: 16, style: .continuous)
+
     public var body: some View {
         ZStack {
             content
             shortcuts
         }
-        .frame(width: 460)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .frame(width: 480)
+        .background {
+            ZStack {
+                shape.fill(.ultraThinMaterial)
+                // A breath of leaf green from the top, like light through foliage.
+                shape.fill(LinearGradient(colors: [Leaf.fresh.opacity(0.10), .clear], startPoint: .top, endPoint: .center))
+            }
+        }
+        .overlay(shape.strokeBorder(.primary.opacity(0.10)))
+        .clipShape(shape)
     }
 
     @ViewBuilder
@@ -28,116 +37,160 @@ public struct PanelView: View {
         }
     }
 
+    // MARK: Header
+
+    private func header(_ title: String, spinning: Bool = false) -> some View {
+        HStack(spacing: 8) {
+            SparkMark()
+                .fill(Leaf.markGradient)
+                .frame(width: 14, height: 14)
+                .rotationEffect(.degrees(spinning ? 360 : 0))
+                .animation(spinning ? .linear(duration: 1.6).repeatForever(autoreverses: false) : .default, value: spinning)
+            Text(title).font(Leaf.font(14, .semibold))
+            Spacer()
+            ProviderChip(name: vm.providerName, isMock: vm.isMockProvider)
+        }
+    }
+
     // MARK: Screens
 
     private var actionsScreen: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                header("APILA")
-                Spacer()
-                if vm.isMockProvider {
-                    Label("Mock — no model connected", systemImage: "bolt.horizontal.circle")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                }
-            }
-            if let preview = vm.contextPreview {
-                (Text("\(preview.source): ").bold() + Text(preview.text))
-                    .font(.caption)
-                    .foregroundStyle(preview.source == "Clipboard" ? Color.orange : Color.secondary)
-                    .lineLimit(2)
-                    .padding(.horizontal, 12).padding(.bottom, 4)
-            } else {
-                Label("No text captured — select text, or copy it first.", systemImage: "exclamationmark.triangle")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-                    .padding(.horizontal, 12).padding(.bottom, 4)
-            }
-            ForEach(Array(vm.items.enumerated()), id: \.element.id) { index, item in
-                HStack {
-                    Text(item.title)
-                    Spacer()
-                    if index == vm.selectedIndex {
-                        Image(systemName: "return").font(.caption).foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 10) {
+            header("APILA")
+            contextCard
+            VStack(alignment: .leading, spacing: 2) {
+                ForEach(Array(vm.items.enumerated()), id: \.element.id) { index, item in
+                    if case .screenshotText = item {
+                        sectionLabel("Screenshot")
                     }
+                    row(item, selected: index == vm.selectedIndex)
+                        .onTapGesture { vm.selectedIndex = index; vm.confirm() }
                 }
-                .padding(.horizontal, 12).padding(.vertical, 8)
-                .background(
-                    index == vm.selectedIndex ? Color.accentColor.opacity(0.25) : Color.clear,
-                    in: RoundedRectangle(cornerRadius: 8)
-                )
-                .contentShape(Rectangle())
-                .onTapGesture { vm.selectedIndex = index; vm.confirm() }
             }
-            hint("↑↓ navigate · ⏎ select · esc close")
+            HintBar(items: [("↑↓", "navigate"), ("↩", "select"), ("esc", "close")])
+                .padding(.top, 2)
         }
-        .padding(12)
+        .padding(14)
+    }
+
+    private var contextCard: some View {
+        HStack(alignment: .top, spacing: 8) {
+            if let preview = vm.contextPreview {
+                let fromClipboard = preview.source == "Clipboard"
+                Text(preview.source)
+                    .font(Leaf.font(10, .semibold))
+                    .foregroundStyle(fromClipboard ? Leaf.amber : Leaf.ink)
+                    .padding(.horizontal, 6).padding(.vertical, 2)
+                    .background((fromClipboard ? Leaf.amber : Leaf.ink).opacity(0.15), in: Capsule())
+                Text(preview.text)
+                    .font(Leaf.font(12))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            } else {
+                Text("No text captured — select text or copy it first. Screenshots work anyway.")
+                    .font(Leaf.font(12))
+                    .foregroundStyle(Leaf.amber)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(10)
+        .background(.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    private func sectionLabel(_ text: String) -> some View {
+        Text(text.uppercased())
+            .font(Leaf.font(9, .bold))
+            .tracking(0.8)
+            .foregroundStyle(.tertiary)
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
+            .padding(.bottom, 2)
+    }
+
+    private func row(_ item: PanelViewModel.Item, selected: Bool) -> some View {
+        HStack(spacing: 10) {
+            Capsule()
+                .fill(selected ? AnyShapeStyle(Leaf.accent) : AnyShapeStyle(Color.clear))
+                .frame(width: 3, height: 16)
+            Text(item.title)
+                .font(Leaf.font(13, selected ? .semibold : .regular))
+            Spacer()
+            if selected { Keycap(key: "↩") }
+        }
+        .padding(.leading, 4).padding(.trailing, 10).padding(.vertical, 7)
+        .background {
+            if selected {
+                RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Leaf.selection)
+            }
+        }
+        .contentShape(Rectangle())
     }
 
     private var customPromptScreen: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 12) {
             header(promptTitle)
             TextField(promptPlaceholder, text: $vm.customPromptText)
                 .textFieldStyle(.plain)
-                .padding(10)
-                .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+                .font(Leaf.font(13))
+                .padding(11)
+                .background(.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(promptFocused ? AnyShapeStyle(Leaf.markGradient) : AnyShapeStyle(.primary.opacity(0.10)), lineWidth: promptFocused ? 1.5 : 1)
+                }
                 .focused($promptFocused)
                 .onSubmit { vm.confirm() }
-            hint("⏎ run · esc cancel")
+            HintBar(items: [("↩", "run"), ("esc", vm.isRefining ? "back" : "cancel")])
         }
-        .padding(12)
+        .padding(14)
         .onAppear { promptFocused = true }
     }
 
     private var generatingScreen: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                ProgressView().controlSize(.small)
-                Text("Generating…").foregroundStyle(.secondary)
-            }
-            ScrollView {
-                Text(vm.output.isEmpty ? " " : vm.output)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
-            }
-            .frame(maxHeight: 220)
-            hint("esc cancel")
+        VStack(alignment: .leading, spacing: 12) {
+            header("Thinking…", spinning: true)
+            FittingScrollText(text: vm.output, maxHeight: 220)
+            HintBar(items: [("esc", "stop")])
         }
-        .padding(12)
+        .padding(14)
     }
 
     private var resultScreen: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            header("Result")
-            ScrollView {
-                Text(vm.errorText ?? vm.output)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
-                    .foregroundStyle(vm.errorText == nil ? Color.primary : Color.red)
-            }
-            .frame(maxHeight: 240)
-            Divider()
-            HStack {
+        VStack(alignment: .leading, spacing: 12) {
+            header(vm.errorText == nil ? "Result" : "Something went wrong")
+            FittingScrollText(text: vm.errorText ?? vm.output, color: vm.errorText == nil ? .primary : .red)
+                .padding(12)
+                .background(.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            HStack(spacing: 6) {
                 Button("Copy") { Task { await vm.copyResult() } }
+                    .buttonStyle(LeafButtonStyle(prominent: true))
                     .keyboardShortcut("c", modifiers: .command)
                 Button("Replace") { Task { await vm.replaceSelection() } }
+                    .buttonStyle(LeafButtonStyle())
                     .keyboardShortcut("r", modifiers: .command)
                 Button("Insert Below") { Task { await vm.insertBelow() } }
+                    .buttonStyle(LeafButtonStyle())
                     .keyboardShortcut("i", modifiers: .command)
                 Spacer()
                 Button("Retry") { vm.retry() }
+                    .buttonStyle(LeafButtonStyle())
                     .keyboardShortcut(.return, modifiers: .command)
                 Button("Refine") { vm.refine() }
+                    .buttonStyle(LeafButtonStyle())
                     .keyboardShortcut("e", modifiers: .command)
                     .disabled(vm.errorText != nil)
+                    .opacity(vm.errorText != nil ? 0.4 : 1)
                 Button("Close") { vm.close() }
+                    .buttonStyle(LeafButtonStyle())
             }
+
             if let notice = vm.noticeText {
-                Text(notice).font(.caption).foregroundStyle(.orange)
+                Text(notice).font(Leaf.font(11)).foregroundStyle(Leaf.amber)
             }
-            hint("⌘C copy · ⌘R replace · ⌘I insert · ⌘↩ retry · ⌘E refine · esc close")
+            HintBar(items: [("⌘C", "copy"), ("⌘R", "replace"), ("⌘↩", "retry"), ("⌘E", "refine"), ("esc", "close")])
         }
-        .padding(12)
+        .padding(14)
     }
 
     // MARK: Hidden keyboard handlers (active while the panel is key)
@@ -176,12 +229,5 @@ public struct PanelView: View {
         case .refine: "How should the result change? (shorter, more formal…)"
         case .screenshot: "What do you want to know about it?"
         }
-    }
-
-    private func header(_ text: String) -> some View {
-        Text(text).font(.headline).padding(.bottom, 2)
-    }
-    private func hint(_ text: String) -> some View {
-        Text(text).font(.caption2).foregroundStyle(.secondary).padding(.top, 4)
     }
 }

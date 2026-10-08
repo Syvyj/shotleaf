@@ -14,7 +14,7 @@ final class RegionPicker {
     /// ponytail: in memory only; persist if users want it across launches.
     private var last: (displayID: CGDirectDisplayID, rect: CGRect)?
 
-    private var windows: [NSWindow] = []
+    private var windows: [NSPanel] = []
     private var continuation: CheckedContinuation<CGImage, Error>?
 
     func pick() async throws -> CGImage {
@@ -100,9 +100,11 @@ final class RegionPicker {
                 self?.complete(outcome, on: item, frozen: frozen)
             }
             let window = OverlayWindow(
-                contentRect: item.screen.frame, styleMask: [.borderless], backing: .buffered, defer: false
+                contentRect: item.screen.frame, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false
             )
             window.level = .screenSaver
+            window.hidesOnDeactivate = false
+            window.isFloatingPanel = true
             window.isOpaque = true
             window.hasShadow = false
             window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
@@ -112,7 +114,9 @@ final class RegionPicker {
             window.orderFrontRegardless()
             windows.append(window)
         }
-        NSApp.activate()
+        // Non-activating panels take the keyboard without activating APILA —
+        // macOS may refuse to activate us (cooperative activation), and then
+        // Esc / Return would go to the app underneath.
         // Keyboard goes to the screen under the mouse.
         let mouse = NSEvent.mouseLocation
         let keyWindow = windows.first { $0.frame.contains(mouse) } ?? windows.first
@@ -155,8 +159,8 @@ final class RegionPicker {
     }
 }
 
-/// Borderless windows can't become key by default — the picker needs keys.
-private final class OverlayWindow: NSWindow {
+/// Borderless panels can't become key by default — the picker needs keys.
+private final class OverlayWindow: NSPanel {
     override var canBecomeKey: Bool { true }
-    override var canBecomeMain: Bool { true }
+    override var canBecomeMain: Bool { false }
 }

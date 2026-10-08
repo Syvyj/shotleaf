@@ -129,6 +129,7 @@ public final class AppCoordinator {
             providerProblem = reason
         }
         panelVM.isMockProvider = health != .healthy
+        panelVM.providerName = currentProviderName
     }
 
     public func openFromMenu() { Task { await present() } }

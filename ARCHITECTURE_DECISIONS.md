@@ -354,3 +354,10 @@
 - Значок меню-бару — template-зображення `BrandMark.menuBarIcon` (той самий знак, macOS сама фарбує).
 - Екран вибору перефарбовано (`CaptureStyle`: зелень → лайм).
 - «Show in Dock» (за замовчуванням увімкнено): `NSApp.setActivationPolicy(.regular/.accessory)`; клік по іконці в Dock відкриває Settings.
+
+## ADR-0056 — Дизайн-система «Листя» у SwiftUI ✅
+**Рішення.** `Views/Theme.swift`: палітра `Leaf` (+ адаптивний `ink`: свіжа зелень у темній темі, глибше листя у світлій), `SparkMark`, `Keycap`, `HintBar`, `LeafButtonStyle`, `ProviderChip`, `FittingScrollText` (висота за текстом, прокрутка понад ліміт). Панель, Settings і майстер першого запуску переведені на неї. Перевірка — рендер у PNG (`PanelPreviewTests`).
+
+## ADR-0057 — Екран вибору як non-activating NSPanel ✅
+**Рішення.** `OverlayWindow` — `NSPanel` з `.nonactivatingPanel`, `canBecomeKey`, `hidesOnDeactivate = false`; без `NSApp.activate()`.
+**Чому.** Кооперативна активація macOS 14+ могла не активувати APILA → вікно не ставало key → Esc/↩ потрапляли в програму під ним (скасування «не працювало»). Той самий прийом, що й у плаваючої панелі (ADR-0036).

@@ -53,6 +53,8 @@ public final class PanelViewModel {
     public private(set) var items: [Item] = []
     /// The current provider is the canned Mock (no real model reachable).
     public var isMockProvider = false
+    /// e.g. "LM Studio · local-model" — shown in the panel header.
+    public var providerName = ""
 
     private let runner: ActionRunner
     private let inserter: ResultInserter
