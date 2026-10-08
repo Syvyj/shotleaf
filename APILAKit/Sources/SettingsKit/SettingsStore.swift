@@ -64,6 +64,12 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "translateFallback") }
     }
 
+    /// Show APILA in the Dock (otherwise it lives in the menu bar only).
+    public var showInDock: Bool {
+        get { defaults.object(forKey: "showInDock") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "showInDock") }
+    }
+
     /// The first-run setup guide was finished (or dismissed).
     public var onboardingCompleted: Bool {
         get { defaults.bool(forKey: "onboardingCompleted") }

@@ -1,16 +1,16 @@
 import AppKit
 
-/// APILA's own look for the capture overlay: a violet → cyan accent, soft glass
-/// capsules, rounded type. No system "screenshot" iconography.
+/// APILA's own look for the capture overlay — the "Leaves" palette (fresh green
+/// → lime), soft glass capsules, rounded type. No system screenshot iconography.
 enum CaptureStyle {
-    static let violet = NSColor(srgbRed: 0.55, green: 0.36, blue: 1.00, alpha: 1)
-    static let cyan = NSColor(srgbRed: 0.20, green: 0.84, blue: 0.95, alpha: 1)
-    static var accentGradient: NSGradient { NSGradient(starting: violet, ending: cyan)! }
+    static let leaf = NSColor(srgbRed: 0x8F / 255.0, green: 0xBF / 255.0, blue: 0x3A / 255.0, alpha: 1)
+    static let lime = NSColor(srgbRed: 0xC9 / 255.0, green: 0xE8 / 255.0, blue: 0x6A / 255.0, alpha: 1)
+    static var accentGradient: NSGradient { NSGradient(starting: leaf, ending: lime)! }
 
     /// Outside the selection.
     static let dim = NSColor(white: 0.04, alpha: 0.48)
     /// Glass capsule behind labels and hints.
-    static let capsule = NSColor(white: 0.08, alpha: 0.78)
+    static let capsule = NSColor(srgbRed: 0x12 / 255.0, green: 0x1A / 255.0, blue: 0x12 / 255.0, alpha: 0.82)
     static let capsuleStroke = NSColor(white: 1, alpha: 0.10)
     static let keycap = NSColor(white: 1, alpha: 0.14)
 

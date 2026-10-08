@@ -216,6 +216,10 @@ public struct SettingsRootView: View {
 
     private var generalSection: some View {
         Section {
+            Toggle("Show in Dock", isOn: Binding(
+                get: { coordinator.showInDock },
+                set: { coordinator.setShowInDock($0) }
+            ))
             Toggle("Open APILA at login", isOn: Binding(
                 get: { coordinator.launchAtLogin },
                 set: { coordinator.setLaunchAtLogin($0) }

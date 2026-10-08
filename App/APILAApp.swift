@@ -3,14 +3,17 @@ import AppFeature
 
 /// Thin entry point. All logic lives in the AppFeature package; this target only
 /// provides the `@main`, the scenes, and the signable bundle for TCC permissions.
-/// Menu-bar-only agent app (LSUIElement = YES); the UI is the floating panel.
+/// Starts as a menu-bar agent (LSUIElement = YES); "Show in Dock" in Settings
+/// switches to a regular Dock app at runtime. The main UI is the floating panel.
 @main
 struct APILAApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
-        MenuBarExtra("APILA", systemImage: "sparkles") {
+        MenuBarExtra {
             MenuBarRootView(coordinator: delegate.coordinator)
+        } label: {
+            Image(nsImage: BrandMark.menuBarIcon)
         }
 
         Settings {
@@ -34,5 +37,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         Task { await coordinator.start() }
+    }
+
+    /// Clicking the Dock icon (when shown) opens Settings — there's no main window.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        if !hasVisibleWindows { coordinator.openSettingsWindow() }
+        return true
     }
 }

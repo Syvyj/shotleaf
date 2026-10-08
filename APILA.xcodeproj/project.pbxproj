@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		1A1A0000000000000000AA21 /* APILAApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA20 /* APILAApp.swift */; };
+		1A1A0000000000000000AA23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA24 /* Assets.xcassets */; };
 		1A1A0000000000000000AA61 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 1A1A0000000000000000AA51 /* AppFeature */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1A1A0000000000000000AA11 /* APILA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = APILA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A1A0000000000000000AA20 /* APILAApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APILAApp.swift; sourceTree = "<group>"; };
+		1A1A0000000000000000AA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1A1A0000000000000000AA22 /* APILA.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = APILA.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -50,6 +52,7 @@
 			children = (
 				1A1A0000000000000000AA20 /* APILAApp.swift */,
 				1A1A0000000000000000AA22 /* APILA.entitlements */,
+				1A1A0000000000000000AA24 /* Assets.xcassets */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -118,6 +121,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1A1A0000000000000000AA23 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,6 +184,8 @@
 		1A1A0000000000000000AA41 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/APILA.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -200,6 +206,8 @@
 		1A1A0000000000000000AA42 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = App/APILA.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;

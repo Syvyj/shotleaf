@@ -67,6 +67,7 @@ public final class AppCoordinator {
     public func clearHistory() { history = [] }
 
     public func start() async {
+        applyDockPolicy()
         await container.bootstrap()
         await refreshProvider()
         refreshPermissions()
@@ -246,6 +247,26 @@ public final class AppCoordinator {
             translateTo: container.settings.translateTarget,
             otherwise: container.settings.translateFallback
         ))
+    }
+
+    // MARK: Dock
+
+    /// Dock icon on/off: a regular app vs. a menu-bar-only (accessory) app.
+    public var showInDock: Bool { container.settings.showInDock }
+
+    public func setShowInDock(_ show: Bool) {
+        container.settings.showInDock = show
+        applyDockPolicy()
+    }
+
+    private func applyDockPolicy() {
+        NSApp.setActivationPolicy(container.settings.showInDock ? .regular : .accessory)
+    }
+
+    /// The SwiftUI Settings scene, opened from AppKit (Dock click).
+    public func openSettingsWindow() {
+        NSApp.activate()
+        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
     }
 
     // MARK: Launch at login

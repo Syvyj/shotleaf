@@ -135,10 +135,10 @@ final class SelectionView: NSView {
         // Soft glow, then the gradient stroke on top.
         NSGraphicsContext.saveGraphicsState()
         let glow = NSShadow()
-        glow.shadowColor = CaptureStyle.violet.withAlphaComponent(0.8)
+        glow.shadowColor = CaptureStyle.lime.withAlphaComponent(0.7)
         glow.shadowBlurRadius = 14
         glow.set()
-        CaptureStyle.violet.withAlphaComponent(0.6).setStroke()
+        CaptureStyle.leaf.withAlphaComponent(0.6).setStroke()
         outline.lineWidth = 2
         outline.stroke()
         NSGraphicsContext.restoreGraphicsState()
