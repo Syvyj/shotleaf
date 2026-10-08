@@ -46,10 +46,13 @@ struct ScreenshotView: View {
     /// For double-click detection on marks.
     @State private var lastClick: (id: Annotation.ID, at: Date)?
     @FocusState private var textFocused: Bool
+    private enum Flyout { case shapes, style }
+    @State private var flyout: Flyout?
+    /// The shape the shapes button shows when another tool is in use.
+    @State private var lastShape: AnnotationTool = .arrow
 
-    /// Wide enough for the tool row (12 tools, 3 widths, 6 colors) in one line,
-    /// and for the action row and the hint line.
-    static let minContentWidth: CGFloat = 700
+    /// Wide enough for the tool row and the action row in one line each.
+    static let minContentWidth: CGFloat = 780
 
     private var editingText: Bool { textDraft != nil }
 
@@ -62,10 +65,12 @@ struct ScreenshotView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
-            toolRow
+            toolRow.zIndex(1) // tips and menus draw over the canvas
             canvas
             toolbar
-            HintBar(items: [("↩", "copy & close"), ("⌘S", "save"), ("0–9 O C", "tools"), ("⌫", "delete"), ("⌘Z", "undo"), ("esc", escHint)])
+        }
+        .onChange(of: doc.tool) { _, tool in
+            if let tool, Self.shapeTools.contains(tool) { lastShape = tool }
         }
         .frame(minWidth: max(displaySize.width, Self.minContentWidth), maxWidth: .infinity,
                maxHeight: .infinity, alignment: .topLeading)
@@ -76,10 +81,6 @@ struct ScreenshotView: View {
         }
         .overlay(WindowEdgeResizer()) // grab any edge or corner
         .background { keyboard }
-    }
-
-    private var escHint: String {
-        doc.selection != nil ? "deselect" : doc.tool != nil ? "drop tool" : "close"
     }
 
     // MARK: Header & tools
@@ -103,70 +104,163 @@ struct ScreenshotView: View {
         .overlay(WindowDragArea())
     }
 
+    /// Arrow, box and oval share one button; its menu picks which.
+    static let shapeTools: [AnnotationTool] = [.arrow, .rectangle, .ellipse]
+    private static let singleTools = AnnotationTool.allCases.filter { !shapeTools.contains($0) }
+
     private var toolRow: some View {
-        HStack(spacing: 3) {
-            toolButton(nil, key: "0", title: "Select")
-            ForEach(AnnotationTool.allCases) { tool in
-                toolButton(tool, key: tool.key, title: tool.title)
+        HStack(spacing: 4) {
+            toolButton(nil, title: "Select · drag the shot out", key: "0")
+            shapesButton
+            ForEach(Self.singleTools) { tool in
+                toolButton(tool, title: tool.title, key: tool.key)
             }
             divider
-            ForEach(Array(AnnotationStyle.widths.enumerated()), id: \.offset) { i, width in
-                let on = abs(currentWidth - width) < 0.1
-                Button { setWidth(width) } label: {
-                    WidthIcon(width: width)
-                        .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.75))
-                        .frame(width: 26, height: 26)
-                        .background(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.clear), in: RoundedRectangle(cornerRadius: 7))
-                }
-                .buttonStyle(.plain)
-                .help(["Thin", "Medium", "Thick"][i] + " line")
-            }
-            divider
-            ForEach(AnnotationColor.allCases) { color in
-                Button { setColor(color) } label: {
-                    Circle()
-                        .fill(Color(nsColor: color.nsColor))
-                        .frame(width: 15, height: 15)
-                        .overlay(Circle().strokeBorder(.primary.opacity(0.25), lineWidth: 1))
-                        .padding(3)
-                        .overlay(Circle().strokeBorder(currentColor == color ? Leaf.ink : .clear, lineWidth: 2))
-                }
-                .buttonStyle(.plain)
-            }
+            styleButton
             Spacer(minLength: 0)
         }
         .fixedSize(horizontal: false, vertical: true)
+        .disabled(editingText)
     }
 
     private var divider: some View {
-        Rectangle().fill(.primary.opacity(0.12)).frame(width: 1, height: 18).padding(.horizontal, 4)
+        Rectangle().fill(.primary.opacity(0.12)).frame(width: 1, height: 22).padding(.horizontal, 4)
     }
 
-    private func toolButton(_ tool: AnnotationTool?, key: Character, title: String) -> some View {
+    private func tile(_ on: Bool) -> some View {
+        RoundedRectangle(cornerRadius: 9, style: .continuous)
+            .fill(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.primary.opacity(0.04)))
+            .overlay {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .strokeBorder(on ? AnyShapeStyle(Leaf.markGradient) : AnyShapeStyle(.clear), lineWidth: 1.2)
+            }
+    }
+
+    private func pick(_ tool: AnnotationTool?) {
+        doc.tool = tool
+        if tool != nil { doc.selection = nil }
+        flyout = nil
+    }
+
+    private func toolButton(_ tool: AnnotationTool?, title: String, key: Character) -> some View {
         let on = doc.tool == tool
-        return Button {
-            doc.tool = tool
-            if tool != nil { doc.selection = nil }
-        } label: {
-            ToolIcon(tool: tool)
+        return Button { pick(tool) } label: {
+            ToolIcon(tool: tool, size: 22)
                 .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.8))
-                .frame(width: 30, height: 28)
-                .background {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.primary.opacity(0.04)))
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .strokeBorder(on ? AnyShapeStyle(Leaf.markGradient) : AnyShapeStyle(.clear), lineWidth: 1.2)
-                }
-                .overlay(alignment: .bottomTrailing) {
-                    Text(String(key)).font(.system(size: 7.5, weight: .bold, design: .rounded)).opacity(0.45).padding(2)
-                }
+                .frame(width: 38, height: 36)
+                .background(tile(on))
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(Text(verbatim: "\(title) (\(key))"))
-        .keyboardShortcut(KeyEquivalent(key), modifiers: [])
-        .disabled(editingText)
+        .instantTip("\(title)  \(String(key).uppercased())")
+    }
+
+    private var shapesButton: some View {
+        let on = doc.tool.map(Self.shapeTools.contains) ?? false
+        let shown = on ? doc.tool! : lastShape
+        return HStack(spacing: 0) {
+            Button { pick(shown) } label: {
+                ToolIcon(tool: shown, size: 22).frame(width: 34, height: 36).contentShape(Rectangle())
+            }
+            Button { flyout = flyout == .shapes ? nil : .shapes } label: {
+                chevron.frame(width: 16, height: 36).contentShape(Rectangle())
+            }
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.8))
+        .background(tile(on))
+        .instantTip("\(shown.title)  \(String(shown.key).uppercased())", hidden: flyout == .shapes)
+        .overlay(alignment: .topLeading) {
+            if flyout == .shapes {
+                flyoutCard {
+                    ForEach(Self.shapeTools) { tool in
+                        Button { pick(tool) } label: {
+                            HStack(spacing: 10) {
+                                ToolIcon(tool: tool, size: 20)
+                                Text(tool.title).font(Leaf.font(13, .medium))
+                                Spacer(minLength: 16)
+                                Keycap(key: String(tool.key).uppercased())
+                            }
+                            .padding(.horizontal, 8).padding(.vertical, 5)
+                            .frame(width: 150)
+                            .background(tile(doc.tool == tool).opacity(doc.tool == tool ? 1 : 0))
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
+    /// The current color and thickness; its menu changes both (for the
+    /// selected mark too).
+    private var styleButton: some View {
+        Button { flyout = flyout == .style ? nil : .style } label: {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(Color(nsColor: currentColor.nsColor))
+                    .frame(width: 18, height: 18)
+                    .overlay(Circle().strokeBorder(.primary.opacity(0.25), lineWidth: 1))
+                WidthIcon(width: currentWidth)
+                chevron
+            }
+            .padding(.horizontal, 8)
+            .frame(height: 36)
+            .background(tile(flyout == .style))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .instantTip("Color & thickness", hidden: flyout == .style)
+        .overlay(alignment: .topLeading) {
+            if flyout == .style {
+                flyoutCard {
+                    HStack(spacing: 6) {
+                        ForEach(AnnotationColor.allCases) { color in
+                            Button { setColor(color) } label: {
+                                Circle()
+                                    .fill(Color(nsColor: color.nsColor))
+                                    .frame(width: 20, height: 20)
+                                    .overlay(Circle().strokeBorder(.primary.opacity(0.25), lineWidth: 1))
+                                    .padding(3)
+                                    .overlay(Circle().strokeBorder(currentColor == color ? Leaf.ink : .clear, lineWidth: 2))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    HStack(spacing: 6) {
+                        ForEach(Array(AnnotationStyle.widths.enumerated()), id: \.offset) { i, width in
+                            let on = abs(currentWidth - width) < 0.1
+                            Button { setWidth(width) } label: {
+                                HStack(spacing: 4) {
+                                    WidthIcon(width: width)
+                                    Text(["Thin", "Medium", "Thick"][i]).font(Leaf.font(12, .medium))
+                                }
+                                .padding(.horizontal, 6).frame(height: 28)
+                                .background(tile(on).opacity(on ? 1 : 0))
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var chevron: some View {
+        Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold)).opacity(0.6)
+    }
+
+    private func flyoutCard<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 6, content: content)
+            .padding(8)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(Leaf.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(.primary.opacity(0.1)))
+            .shadow(color: .black.opacity(0.18), radius: 12, y: 4)
+            .fixedSize()
+            .offset(y: 42)
     }
 
     // The toolbar shows — and edits — the selected mark's style when there is one.
@@ -218,7 +312,7 @@ struct ScreenshotView: View {
                 // Shottr-style: in Select mode, pressing on the shot (not on a
                 // mark) drags the whole result out — marks included.
                 DragOutView(
-                    wantsDrag: { p in doc.tool == nil && AnnotationEditing.hit(doc.items, at: p) == nil },
+                    wantsDrag: { p in flyout == nil && doc.tool == nil && AnnotationEditing.hit(doc.items, at: p) == nil },
                     onPress: { doc.selection = nil },
                     file: actions.dragFile,
                     thumbnail: image
@@ -238,10 +332,11 @@ struct ScreenshotView: View {
                     .offset(x: origin.x + draft.origin.x - 4, y: origin.y + draft.origin.y - 4)
                     .focused($textFocused)
                     .onSubmit(commitText)
-                    .onExitCommand { textDraft = nil; editingTextID = nil }
+                    .onExitCommand { textDraft = nil; editingTextID = nil; doc.tool = nil }
                 }
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous)) // nothing spills over the toolbars
         .frame(minWidth: displaySize.width, maxWidth: .infinity, minHeight: displaySize.height, maxHeight: .infinity)
     }
 
@@ -306,7 +401,13 @@ struct ScreenshotView: View {
     /// + move), or empty space (draw with the tool / deselect).
     private func begin(at p: CGPoint) {
         dragStart = p
-        if let selected = doc.selected, let handle = AnnotationEditing.handle(of: selected.kind, at: p) {
+        flyout = nil
+        if editingText {
+            // A click away from the text field finishes the text (it doesn't
+            // move the field around).
+            commitText()
+            drag = nil
+        } else if let selected = doc.selected, let handle = AnnotationEditing.handle(of: selected.kind, at: p) {
             drag = .resize(selected.id, handle, original: selected.kind)
         } else if let id = AnnotationEditing.hit(doc.items, at: p), let item = doc.items.first(where: { $0.id == id }) {
             doc.selection = id
@@ -406,61 +507,75 @@ struct ScreenshotView: View {
         }
         textDraft = nil
         editingTextID = nil
+        if doc.tool == .text { doc.tool = nil } // one text per click of the tool
     }
 
     // MARK: Toolbar
 
+    /// Actions with their keys on them — one row instead of buttons + hints.
     private var toolbar: some View {
         HStack(spacing: 6) {
-            Button("Copy") { actions.copy(); flash("Copied") }
+            Button { actions.copy(); flash("Copied") } label: { keyed("Copy", "↩") }
                 .buttonStyle(LeafButtonStyle(prominent: true))
                 .keyboardShortcut("c", modifiers: .command)
-                .disabled(editingText)
-            Button("Save") {
+            Button {
                 if let url = actions.save() { flash("Saved to \(url.deletingLastPathComponent().lastPathComponent)") }
-            }
+            } label: { keyed("Save", "⌘S") }
             .buttonStyle(LeafButtonStyle())
             .keyboardShortcut("s", modifiers: .command)
-            Button("Pin") { actions.pin() }
+            Button { actions.pin() } label: { keyed("Pin", "P") }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("p", modifiers: [])
-                .disabled(editingText)
-            Button("Text") { actions.text() }
+            Button { actions.text() } label: { keyed("Text", "T") }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("t", modifiers: [])
-                .disabled(editingText)
-            Button("Ask AI") { actions.ask() }
+            Button { actions.ask() } label: { keyed("Ask AI", "A") }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("a", modifiers: [])
-                .disabled(editingText)
-            Spacer()
+            Spacer(minLength: 6)
             if doc.crop != nil {
                 Button("Apply crop") { doc.applyCrop(original: cgImage, size: displaySize) }
                     .buttonStyle(LeafButtonStyle(prominent: true))
-                    .help(Text(verbatim: "Keep only the cropped area (⌘Z brings the rest back)"))
-                    .disabled(editingText)
+                    .instantTip("Keep only the cropped area — ⌘Z brings the rest back")
             }
-            Button("Undo") { doc.undo() }
+            if doc.selection != nil {
+                Button { if let id = doc.selection { doc.remove(id) } } label: { keyed("Delete", "⌫") }
+                    .buttonStyle(LeafButtonStyle())
+            }
+            Button { doc.undo() } label: { keyed("Undo", "⌘Z") }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("z", modifiers: .command)
-                .disabled(!doc.canUndo || editingText)
+                .disabled(!doc.canUndo)
                 .opacity(doc.canUndo ? 1 : 0.4)
-            Button("") { doc.redo() }
-                .keyboardShortcut("z", modifiers: [.command, .shift])
-                .disabled(!doc.canRedo || editingText)
-                .frame(width: 0, height: 0).opacity(0).accessibilityHidden(true)
-            Button("Close") { actions.close() }
+            Button { actions.close() } label: { keyed("Close", "esc") }
                 .buttonStyle(LeafButtonStyle())
         }
+        .disabled(editingText)
         .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// Esc, ↩ and ⌫ — off while typing a text mark, so they reach the text field.
+    private func keyed(_ title: String, _ key: String) -> some View {
+        HStack(spacing: 5) {
+            Text(title)
+            Text(key)
+                .font(Leaf.font(10.5, .semibold))
+                .opacity(0.5)
+                .padding(.horizontal, 3).padding(.vertical, 1)
+                .background(.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 4))
+        }
+    }
+
+    /// Esc, ↩, ⌫ and tool keys — off while typing a text mark (they belong to
+    /// the field then), except esc, which always drops the text being typed.
     @ViewBuilder
     private var keyboard: some View {
-        if !editingText {
+        if editingText {
+            Button("") { textDraft = nil; editingTextID = nil; doc.tool = nil }
+                .keyboardShortcut(.cancelAction)
+        } else {
             Button("") {
-                if doc.selection != nil { doc.selection = nil }
+                if flyout != nil { flyout = nil }
+                else if doc.selection != nil { doc.selection = nil }
                 else if doc.tool != nil { doc.tool = nil }
                 else { actions.close() }
             }
@@ -470,6 +585,13 @@ struct ScreenshotView: View {
             Button("") { if let id = doc.selection { doc.remove(id) } }
                 .keyboardShortcut(.delete, modifiers: [])
                 .disabled(doc.selection == nil)
+            Button("") { doc.redo() }
+                .keyboardShortcut("z", modifiers: [.command, .shift])
+                .disabled(!doc.canRedo)
+            Button("") { pick(nil) }.keyboardShortcut("0", modifiers: [])
+            ForEach(AnnotationTool.allCases) { tool in
+                Button("") { pick(tool) }.keyboardShortcut(KeyEquivalent(tool.key), modifiers: [])
+            }
         }
     }
 

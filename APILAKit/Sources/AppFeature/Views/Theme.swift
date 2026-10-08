@@ -124,7 +124,7 @@ private struct HoverableButton: View {
             .font(Leaf.font(13, .semibold))
             .lineLimit(1)
             .fixedSize() // never squeeze a button into a sliver
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 10)
             .padding(.vertical, 7)
             .foregroundStyle(prominent ? Leaf.forest : Color.primary)
             .background {
@@ -374,4 +374,34 @@ struct LeafPanelChrome: ViewModifier {
 
 extension View {
     func leafPanelChrome() -> some View { modifier(LeafPanelChrome()) }
+}
+
+/// A tooltip that shows at once on hover (the system `.help` waits ~1 s),
+/// as a dark capsule under the view. Give the row it sits in a `zIndex` so it
+/// draws over what comes below.
+struct InstantTip: ViewModifier {
+    let text: String
+    var hidden = false
+    @State private var hovered = false
+
+    func body(content: Content) -> some View {
+        content
+            .onHover { hovered = $0 }
+            .overlay(alignment: .bottom) {
+                if hovered && !hidden {
+                    Text(text)
+                        .font(Leaf.font(12, .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 8).padding(.vertical, 4)
+                        .background(Leaf.forest.opacity(0.92), in: Capsule())
+                        .fixedSize()
+                        .offset(y: 30)
+                        .allowsHitTesting(false)
+                }
+            }
+    }
+}
+
+extension View {
+    func instantTip(_ text: String, hidden: Bool = false) -> some View { modifier(InstantTip(text: text, hidden: hidden)) }
 }
