@@ -79,8 +79,11 @@ public final class AppCoordinator {
         panelVM.onHide = { [weak self] in self?.panel?.hide() }
         panelVM.onShow = { [weak self] in self?.panel?.show() }
 
-        hotkeyRegistered = container.hotkeys.setShortcut(.with(id: container.settings.hotkey))
-        hotkey = container.hotkeys.shortcut
+        let hotkeys = container.hotkeys
+        hotkeyRegistered = hotkeys.setShortcut(.with(id: container.settings.hotkey), for: Self.panelHotkey)
+        hotkey = hotkeys.shortcut(for: Self.panelHotkey) ?? .default
+        hotkeys.setShortcut(Self.savedScreenshotHotkey(container.settings.screenshotHotkey), for: Self.screenshotHotkeyID)
+        screenshotHotkey = hotkeys.shortcut(for: Self.screenshotHotkeyID)
 
         // Auto-shown once; afterwards it lives in the menu ("Setup Guide…").
         if !container.settings.onboardingCompleted {
@@ -89,8 +92,11 @@ public final class AppCoordinator {
         }
         hotkeyTask = Task { [weak self] in
             guard let self else { return }
-            for await _ in self.container.hotkeys.events {
-                await self.present()
+            for await event in self.container.hotkeys.events {
+                switch event.identifier {
+                case Self.screenshotHotkeyID: self.screenshotFromMenu(ask: false)
+                default: await self.present()
+                }
             }
         }
     }
@@ -133,19 +139,45 @@ public final class AppCoordinator {
 
     // MARK: Settings
 
-    /// The active shortcut (stored, so SwiftUI observes changes).
+    static let panelHotkey = "panel"
+    static let screenshotHotkeyID = "screenshot-text"
+
+    /// The active shortcuts (stored, so SwiftUI observes changes).
     public private(set) var hotkey: HotkeyShortcut = .default
+    /// "Text from Screenshot" shortcut; nil = off.
+    public private(set) var screenshotHotkey: HotkeyShortcut?
+
+    /// Settings value → shortcut: nil = never set (default on), "off" = disabled.
+    static func savedScreenshotHotkey(_ saved: String?) -> HotkeyShortcut? {
+        switch saved {
+        case nil: .screenshotDefault
+        case "off": nil
+        case let id: .with(id: id)
+        }
+    }
 
     /// Returns false (and keeps the old one) if the shortcut is taken.
     public func setHotkey(_ shortcut: HotkeyShortcut) -> Bool {
-        let ok = container.hotkeys.setShortcut(shortcut)
+        let hotkeys = container.hotkeys
+        let ok = hotkeys.setShortcut(shortcut, for: Self.panelHotkey)
         if ok { container.settings.hotkey = shortcut.id }
         hotkeyRegistered = ok || hotkeyRegistered
-        hotkey = container.hotkeys.shortcut
+        hotkey = hotkeys.shortcut(for: Self.panelHotkey) ?? .default
+        hotkeys.start() // re-register any paused while recording
         return ok
     }
 
-    /// While recording a new shortcut the current one must not fire (Carbon
+    /// nil turns the screenshot hotkey off. False if the shortcut is taken.
+    public func setScreenshotHotkey(_ shortcut: HotkeyShortcut?) -> Bool {
+        let hotkeys = container.hotkeys
+        let ok = hotkeys.setShortcut(shortcut, for: Self.screenshotHotkeyID)
+        if ok { container.settings.screenshotHotkey = shortcut?.id ?? "off" }
+        screenshotHotkey = hotkeys.shortcut(for: Self.screenshotHotkeyID)
+        hotkeys.start()
+        return ok
+    }
+
+    /// While recording a new shortcut the current ones must not fire (Carbon
     /// would swallow the key press and open the panel).
     public func pauseHotkey() { container.hotkeys.stop() }
     public func resumeHotkey() { container.hotkeys.start() }

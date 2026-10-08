@@ -332,3 +332,7 @@
 **Рішення.** `VisionTextRecognizer` (VNRecognizeTextRequest, accurate, автодетект мови) поза актором; `OCRExecutor` (PerceptionKit) виконує `OCRCommand`. Дії `ScreenshotTextAction` (OCR → екран результату з Copy/Replace/Insert) і `AskAboutScreenshotAction` (InferenceCommand з `includeScreenText`: vision-модель отримує картинку, текстова — OCR, як і задумано в ADR-0007).
 **Перемикач** «Model can see images» у Settings перекриває дефолт провайдера (`supportsVision`).
 **Вхід.** Пункти «Text from Screenshot…» / «Ask about Screenshot…» у панелі та в меню (з меню — без виділеного тексту; Esc нічого не відкриває).
+
+## ADR-0053 — Кілька глобальних хоткеїв в одному сервісі ✅
+**Рішення.** `GlobalHotkeyService` тримає хоткеї за рядковими id ("panel", "screenshot-text"): один Carbon-обробник, номер натиснутого хоткея читається з події (`GetEventParameter` → `EventHotKeyID.id`). Вибір користувача (`wanted`) переживає `stop()/start()` (пауза під час запису). Дві дії не можуть мати однакову комбінацію; при конфлікті лишається попередня.
+**Скріншот-хоткей:** за замовчуванням ⌘⇧2 (поруч із системними ⌘⇧3/4/5), у Settings — Off / ⌘⇧2 / записати свій; збереження `screenshotHotkey` (nil = дефолт, "off" = вимкнено).

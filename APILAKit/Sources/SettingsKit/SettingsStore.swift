@@ -46,6 +46,12 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "hotkey") }
     }
 
+    /// Id of the "Text from Screenshot" shortcut; nil = default, "off" = disabled.
+    public var screenshotHotkey: String? {
+        get { defaults.string(forKey: "screenshotHotkey") }
+        set { defaults.set(newValue, forKey: "screenshotHotkey") }
+    }
+
     /// Translate turns text into this language…
     public var translateTarget: String {
         get { defaults.string(forKey: "translateTarget") ?? "English" }

@@ -21,6 +21,11 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
     /// ⌥Space / ⌃Space are often taken by input-source switching, hence ⌘⇧Space.
     public static let `default` = all[0]
 
+    /// Default for "Text from Screenshot": next to the system's ⌘⇧3/4/5.
+    public static let screenshotDefault = HotkeyShortcut(
+        id: "cmd-shift-2", title: "⌘⇧2", keyCode: UInt32(kVK_ANSI_2), modifiers: UInt32(cmdKey | shiftKey)
+    )
+
     init(id: String, title: String, keyCode: UInt32, modifiers: UInt32) {
         self.id = id
         self.title = title
@@ -39,7 +44,7 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
                 return HotkeyShortcut(customKeyCode: code, modifiers: mods, title: String(parts[3]))
             }
         }
-        return all.first { $0.id == id } ?? .default
+        return (all + [screenshotDefault]).first { $0.id == id } ?? .default
     }
 
     /// Builds a shortcut from a key press in the recorder. Nil when it has no
@@ -76,71 +81,114 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
     ]
 }
 
-/// Global hotkey via Carbon's RegisterEventHotKey — the standard, dependency-free
-/// way to get a system-wide shortcut on macOS. Needs no TCC permission.
+/// Global hotkeys via Carbon's RegisterEventHotKey — the standard, dependency-free
+/// way to get system-wide shortcuts on macOS. Needs no TCC permission. Several
+/// hotkeys at once, each under a string id ("panel", "screenshot-text"…);
+/// a press is emitted as `HotkeyEvent(identifier: id)`.
 public final class GlobalHotkeyService: HotkeyService, @unchecked Sendable {
     public let events: AsyncStream<HotkeyEvent>
     private let continuation: AsyncStream<HotkeyEvent>.Continuation
-    private let identifier: String
-    private var hotKeyRef: EventHotKeyRef?
     private var handlerRef: EventHandlerRef?
-    public private(set) var shortcut: HotkeyShortcut = .default
+    /// What the user chose; survives stop()/start() (pause while recording).
+    private var wanted: [String: HotkeyShortcut] = [:]
+    /// What is registered with Carbon right now, by Carbon's numeric id.
+    private var active: [UInt32: (id: String, ref: EventHotKeyRef)] = [:]
+    private var nextNumber: UInt32 = 1
 
-    public init(identifier: String = "toggle-panel") {
-        self.identifier = identifier
+    public init() {
         (events, continuation) = AsyncStream.makeStream()
     }
 
-    /// Returns false if the shortcut couldn't be registered (usually: another app
-    /// already owns it). Safe to call again after `stop()`.
+    public func shortcut(for id: String) -> HotkeyShortcut? { wanted[id] }
+
+    /// Registers every chosen hotkey. False if any couldn't be registered.
+    /// Safe to call again after `stop()`.
     @discardableResult
     public func start() -> Bool {
-        guard hotKeyRef == nil else { return true }
-        return register(shortcut)
+        installHandlerIfNeeded()
+        var allOK = true
+        for (id, shortcut) in wanted where !isActive(id) {
+            allOK = register(shortcut, as: id) && allOK
+        }
+        return allOK
     }
 
-    /// Switches to `new`. If it can't be registered, the previous shortcut stays
-    /// active and false is returned.
+    /// Unregisters everything (choices are kept for the next `start()`).
+    public func stop() {
+        for (_, entry) in active { UnregisterEventHotKey(entry.ref) }
+        active = [:]
+        if let handlerRef { RemoveEventHandler(handlerRef); self.handlerRef = nil }
+    }
+
+    /// Sets (or with nil, removes) the hotkey for `id`. If the new one can't be
+    /// registered — taken by another app, or by another APILA hotkey — the
+    /// previous one stays and false is returned.
     @discardableResult
-    public func setShortcut(_ new: HotkeyShortcut) -> Bool {
-        guard new != shortcut || hotKeyRef == nil else { return true }
-        let previous = shortcut
-        stop()
-        if register(new) { shortcut = new; return true }
-        _ = register(previous)
+    public func setShortcut(_ new: HotkeyShortcut?, for id: String) -> Bool {
+        let previous = wanted[id]
+        unregister(id)
+        guard let new else {
+            wanted[id] = nil
+            return true
+        }
+        let clash = wanted.contains { $0.key != id && $0.value.keyCode == new.keyCode && $0.value.modifiers == new.modifiers }
+        installHandlerIfNeeded()
+        if !clash, register(new, as: id) {
+            wanted[id] = new
+            return true
+        }
+        if let previous { _ = register(previous, as: id) }
         return false
     }
 
-    public func stop() {
-        if let handlerRef { RemoveEventHandler(handlerRef); self.handlerRef = nil }
-        if let hotKeyRef { UnregisterEventHotKey(hotKeyRef); self.hotKeyRef = nil }
+    // MARK: Carbon
+
+    private func isActive(_ id: String) -> Bool { active.values.contains { $0.id == id } }
+
+    private func unregister(_ id: String) {
+        for (number, entry) in active where entry.id == id {
+            UnregisterEventHotKey(entry.ref)
+            active[number] = nil
+        }
     }
 
-    private func register(_ shortcut: HotkeyShortcut) -> Bool {
+    private func register(_ shortcut: HotkeyShortcut, as id: String) -> Bool {
+        let number = nextNumber
+        nextNumber += 1
+        var ref: EventHotKeyRef?
+        let hotKeyID = EventHotKeyID(signature: OSType(0x4150_494C), id: number) // 'APIL'
+        guard RegisterEventHotKey(shortcut.keyCode, shortcut.modifiers, hotKeyID, GetApplicationEventTarget(), 0, &ref) == noErr,
+              let ref
+        else { return false }
+        active[number] = (id, ref)
+        return true
+    }
+
+    private func installHandlerIfNeeded() {
+        guard handlerRef == nil else { return }
         var eventType = EventTypeSpec(
             eventClass: OSType(kEventClassKeyboard),
             eventKind: UInt32(kEventHotKeyPressed)
         )
-        // C callback: no captures, so it converts to a function pointer. We pass
-        // `self` through userData and recover it inside.
-        let callback: EventHandlerUPP = { _, _, userData in
-            guard let userData else { return noErr }
+        // C callback: no captures, so it converts to a function pointer. `self`
+        // travels through userData; the pressed hotkey's number through the event.
+        let callback: EventHandlerUPP = { _, event, userData in
+            guard let event, let userData else { return noErr }
+            var hotKeyID = EventHotKeyID()
+            let status = GetEventParameter(
+                event, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID),
+                nil, MemoryLayout<EventHotKeyID>.size, nil, &hotKeyID
+            )
+            guard status == noErr else { return status }
             let service = Unmanaged<GlobalHotkeyService>.fromOpaque(userData).takeUnretainedValue()
-            service.continuation.yield(HotkeyEvent(identifier: service.identifier))
+            if let id = service.active[hotKeyID.id]?.id {
+                service.continuation.yield(HotkeyEvent(identifier: id))
+            }
             return noErr
         }
-        let installed = InstallEventHandler(
-            GetApplicationEventTarget(),
-            callback, 1, &eventType,
-            Unmanaged.passUnretained(self).toOpaque(),
-            &handlerRef
+        InstallEventHandler(
+            GetApplicationEventTarget(), callback, 1, &eventType,
+            Unmanaged.passUnretained(self).toOpaque(), &handlerRef
         )
-        let hotKeyID = EventHotKeyID(signature: OSType(0x4150_494C), id: 1) // 'APIL'
-        let registered = RegisterEventHotKey(shortcut.keyCode, shortcut.modifiers, hotKeyID, GetApplicationEventTarget(), 0, &hotKeyRef)
-        guard installed == noErr, registered == noErr else {
-            stop()
-            return false
-        }
-        return true
     }
 }

@@ -135,32 +135,60 @@ public struct SettingsRootView: View {
         Section {
             Picker("Open APILA", selection: Binding(
                 get: { coordinator.hotkey.id },
-                set: { apply(HotkeyShortcut.with(id: $0)) }
+                set: { applyPanel(HotkeyShortcut.with(id: $0)) }
             )) {
-                ForEach(shortcutOptions) { Text($0.title).tag($0.id) }
+                ForEach(panelOptions) { Text($0.title).tag($0.id) }
             }
             HotkeyRecorder(
                 onStart: { hotkeyError = nil; coordinator.pauseHotkey() },
-                onRecord: { apply($0) },
+                onRecord: { applyPanel($0) },
                 onCancel: { coordinator.resumeHotkey() }
             )
+
+            Picker("Text from Screenshot", selection: Binding(
+                get: { coordinator.screenshotHotkey?.id ?? "off" },
+                set: { applyScreenshot($0 == "off" ? nil : HotkeyShortcut.with(id: $0)) }
+            )) {
+                Text("Off").tag("off")
+                ForEach(screenshotOptions) { Text($0.title).tag($0.id) }
+            }
+            HotkeyRecorder(
+                onStart: { hotkeyError = nil; coordinator.pauseHotkey() },
+                onRecord: { applyScreenshot($0) },
+                onCancel: { coordinator.resumeHotkey() }
+            )
+
             if let hotkeyError {
                 Text(hotkeyError).font(.caption).foregroundStyle(.orange)
             }
         } header: {
-            Text("Shortcut")
+            Text("Shortcuts")
         }
     }
 
     /// Presets plus the current recorded shortcut, if any.
-    private var shortcutOptions: [HotkeyShortcut] {
+    private var panelOptions: [HotkeyShortcut] {
         HotkeyShortcut.all.contains(coordinator.hotkey) ? HotkeyShortcut.all : HotkeyShortcut.all + [coordinator.hotkey]
     }
 
-    private func apply(_ shortcut: HotkeyShortcut) {
-        hotkeyError = coordinator.setHotkey(shortcut)
+    private var screenshotOptions: [HotkeyShortcut] {
+        let base = [HotkeyShortcut.screenshotDefault]
+        guard let current = coordinator.screenshotHotkey, !base.contains(current) else { return base }
+        return base + [current]
+    }
+
+    private func applyPanel(_ shortcut: HotkeyShortcut) {
+        report(coordinator.setHotkey(shortcut), shortcut, kept: coordinator.hotkey.title)
+    }
+
+    private func applyScreenshot(_ shortcut: HotkeyShortcut?) {
+        report(coordinator.setScreenshotHotkey(shortcut), shortcut, kept: coordinator.screenshotHotkey?.title ?? "Off")
+    }
+
+    private func report(_ ok: Bool, _ shortcut: HotkeyShortcut?, kept: String) {
+        hotkeyError = ok || shortcut == nil
             ? nil
-            : "\(shortcut.title) is taken by another app — kept \(coordinator.hotkey.title)."
+            : "\(shortcut!.title) is taken (by another app or the other APILA shortcut) — kept \(kept)."
     }
 
     // MARK: Translate

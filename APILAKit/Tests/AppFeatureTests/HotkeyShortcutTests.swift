@@ -34,3 +34,36 @@ struct HotkeyShortcutTests {
         #expect(HotkeyShortcut.with(id: "ctrl-space").title == "⌃Space")
     }
 }
+
+@Suite("Several global hotkeys")
+@MainActor
+struct MultiHotkeyTests {
+    // Exotic combos so the test never collides with real shortcuts on the Mac.
+    private let a = HotkeyShortcut.recorded(keyCode: UInt16(kVK_F11), flags: [.command, .option, .control, .shift], characters: nil)!
+    private let b = HotkeyShortcut.recorded(keyCode: UInt16(kVK_F12), flags: [.command, .option, .control, .shift], characters: nil)!
+
+    @Test("Two ids can't share a combo; removing frees it; stop/start keeps choices")
+    func clashes() {
+        let service = GlobalHotkeyService()
+        defer { service.stop() }
+        #expect(service.setShortcut(a, for: "panel"))
+        #expect(!service.setShortcut(a, for: "shot"))
+        #expect(service.shortcut(for: "shot") == nil)
+        #expect(service.setShortcut(b, for: "shot"))
+
+        #expect(service.setShortcut(nil, for: "panel"))
+        #expect(service.setShortcut(a, for: "shot"))
+        #expect(service.shortcut(for: "shot") == a)
+
+        service.stop()
+        #expect(service.start())
+        #expect(service.shortcut(for: "shot") == a)
+    }
+
+    @Test("Screenshot hotkey setting: unset → ⌘⇧2, \"off\" → none, id → that shortcut")
+    func savedSetting() {
+        #expect(AppCoordinator.savedScreenshotHotkey(nil) == .screenshotDefault)
+        #expect(AppCoordinator.savedScreenshotHotkey("off") == nil)
+        #expect(AppCoordinator.savedScreenshotHotkey(a.id) == a)
+    }
+}
