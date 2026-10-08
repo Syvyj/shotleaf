@@ -25,6 +25,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let coordinator = AppCoordinator()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // One APILA at a time: two copies fight over the global hotkeys.
+        let me = NSRunningApplication.current
+        let others = NSRunningApplication.runningApplications(withBundleIdentifier: Bundle.main.bundleIdentifier ?? "")
+            .filter { $0 != me }
+        guard others.isEmpty else {
+            NSApp.terminate(nil)
+            return
+        }
         Task { await coordinator.start() }
     }
 }

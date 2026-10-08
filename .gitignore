@@ -5,3 +5,4 @@ xcuserdata/
 DerivedData/
 *.xcuserstate
 .claude/settings.local.json
+build/
