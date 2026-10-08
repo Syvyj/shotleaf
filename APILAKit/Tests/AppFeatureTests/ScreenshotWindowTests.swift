@@ -38,6 +38,20 @@ struct ScreenshotWindowTests {
         #expect(extra > 0 && extra <= ScreenshotWindows.chromeHeight, "chrome is \(extra) pt")
     }
 
+    @Test("A tiny shot with a crop: rows fit the minimum width without squeezing")
+    func narrow() throws {
+        let display = CGSize(width: 260, height: 160)
+        let doc = AnnotationDocument()
+        doc.add(.crop(CGRect(x: 10, y: 10, width: 100, height: 60)))
+        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, text: {}, ask: {}, close: {}, dragFile: { nil })
+        let view = ScreenshotView(image: NSImage(size: display), cgImage: Self.blankImage, pixelSize: CGSize(width: 520, height: 320),
+                                  displaySize: display, actions: noop, doc: doc)
+        let fit = NSHostingView(rootView: view).fittingSize
+        #expect(fit.width <= ScreenshotView.minContentWidth + 28 + 0.5, "width \(fit.width)")
+        #expect(fit.height - display.height <= ScreenshotWindows.chromeHeight, "chrome \(fit.height - display.height)")
+        try renderPreview(view, "screenshot-narrow.png")
+    }
+
     @Test("Window is kept inside the screen even when it's taller than the centre allows")
     func placement() {
         let visible = CGRect(x: 0, y: 25, width: 1512, height: 920)

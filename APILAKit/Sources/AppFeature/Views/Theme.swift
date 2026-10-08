@@ -122,6 +122,8 @@ private struct HoverableButton: View {
     var body: some View {
         configuration.label
             .font(Leaf.font(13, .semibold))
+            .lineLimit(1)
+            .fixedSize() // never squeeze a button into a sliver
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
             .foregroundStyle(prominent ? Leaf.forest : Color.primary)

@@ -47,8 +47,9 @@ struct ScreenshotView: View {
     @State private var lastClick: (id: Annotation.ID, at: Date)?
     @FocusState private var textFocused: Bool
 
-    /// Wide enough for the tool row, the toolbar and the hint line.
-    static let minContentWidth: CGFloat = 640
+    /// Wide enough for the tool row (12 tools, 3 widths, 6 colors) in one line,
+    /// and for the action row and the hint line.
+    static let minContentWidth: CGFloat = 700
 
     private var editingText: Bool { textDraft != nil }
 
@@ -132,23 +133,9 @@ struct ScreenshotView: View {
                 }
                 .buttonStyle(.plain)
             }
-            Spacer(minLength: 6)
-            if doc.crop != nil {
-                Button("Apply crop") { doc.applyCrop(original: cgImage, size: displaySize) }
-                    .buttonStyle(LeafButtonStyle(prominent: true))
-                    .help(Text(verbatim: "Keep only the cropped area (⌘Z brings the rest back)"))
-                    .disabled(editingText)
-            }
-            Button("Undo") { doc.undo() }
-                .buttonStyle(LeafButtonStyle())
-                .keyboardShortcut("z", modifiers: .command)
-                .disabled(!doc.canUndo || editingText)
-                .opacity(doc.canUndo ? 1 : 0.4)
-            Button("") { doc.redo() }
-                .keyboardShortcut("z", modifiers: [.command, .shift])
-                .disabled(!doc.canRedo || editingText)
-                .frame(width: 0, height: 0).opacity(0).accessibilityHidden(true)
+            Spacer(minLength: 0)
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var divider: some View {
@@ -447,9 +434,25 @@ struct ScreenshotView: View {
                 .keyboardShortcut("a", modifiers: [])
                 .disabled(editingText)
             Spacer()
+            if doc.crop != nil {
+                Button("Apply crop") { doc.applyCrop(original: cgImage, size: displaySize) }
+                    .buttonStyle(LeafButtonStyle(prominent: true))
+                    .help(Text(verbatim: "Keep only the cropped area (⌘Z brings the rest back)"))
+                    .disabled(editingText)
+            }
+            Button("Undo") { doc.undo() }
+                .buttonStyle(LeafButtonStyle())
+                .keyboardShortcut("z", modifiers: .command)
+                .disabled(!doc.canUndo || editingText)
+                .opacity(doc.canUndo ? 1 : 0.4)
+            Button("") { doc.redo() }
+                .keyboardShortcut("z", modifiers: [.command, .shift])
+                .disabled(!doc.canRedo || editingText)
+                .frame(width: 0, height: 0).opacity(0).accessibilityHidden(true)
             Button("Close") { actions.close() }
                 .buttonStyle(LeafButtonStyle())
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     /// Esc, ↩ and ⌫ — off while typing a text mark, so they reach the text field.
