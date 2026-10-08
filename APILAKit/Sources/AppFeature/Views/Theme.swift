@@ -115,9 +115,26 @@ private struct HoverableButton: View {
 
 /// Lets the user drag the borderless panel by this area (header, gaps).
 struct WindowDragArea: NSViewRepresentable {
+    /// Moves the window by hand: `performDrag(with:)` is ignored for our
+    /// non-activating panel (APILA isn't the active app while it's shown).
     final class DragView: NSView {
-        override func mouseDown(with event: NSEvent) { window?.performDrag(with: event) }
+        private var start: (mouse: NSPoint, origin: NSPoint)?
+
         override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+        override func mouseDown(with event: NSEvent) {
+            guard let window else { return }
+            start = (NSEvent.mouseLocation, window.frame.origin)
+        }
+
+        override func mouseDragged(with event: NSEvent) {
+            guard let start, let window else { return }
+            let now = NSEvent.mouseLocation
+            window.setFrameOrigin(NSPoint(x: start.origin.x + now.x - start.mouse.x,
+                                          y: start.origin.y + now.y - start.mouse.y))
+        }
+
+        override func mouseUp(with event: NSEvent) { start = nil }
     }
     func makeNSView(context: Context) -> NSView { DragView() }
     func updateNSView(_ nsView: NSView, context: Context) {}
