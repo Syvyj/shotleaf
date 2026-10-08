@@ -7,7 +7,9 @@ enum AnnotationRenderer {
     /// - Parameters:
     ///   - image: the original screenshot (needed to pixelate under Blur).
     ///   - imageSize: the screenshot's size in image points.
-    static func draw(_ items: [Annotation], image: CGImage, imageSize: CGSize, in ctx: CGContext) {
+    /// - Parameter cropGuide: dim and outline what a crop will cut away (on
+    ///   screen only — the export simply leaves it out).
+    static func draw(_ items: [Annotation], image: CGImage, imageSize: CGSize, in ctx: CGContext, cropGuide: Bool = true) {
         // Three layers: marks that change the picture itself (blur, erase, cut
         // pieces), then the focus dimming over that picture, then the marks
         // drawn on top of it (arrows, boxes, text…), which must never be dimmed.
@@ -18,6 +20,23 @@ enum AnnotationRenderer {
         let spots = items.compactMap { if case .focus(let r) = $0.kind { r } else { nil } }
         if !spots.isEmpty { focus(spots, imageSize: imageSize, in: ctx) }
         drawEach(items.filter { !changesPicture($0.kind) }, image: image, imageSize: imageSize, in: ctx)
+        if cropGuide, let crop = items.lazy.compactMap({ if case .crop(let r) = $0.kind { r } else { nil } }).first {
+            cropGuideLayer(crop, in: ctx)
+        }
+    }
+
+    /// Everything outside the crop gets a heavy veil and the edge a dashed line.
+    private static func cropGuideLayer(_ r: CGRect, in ctx: CGContext) {
+        ctx.saveGState()
+        ctx.addRect(r.insetBy(dx: -10_000, dy: -10_000))
+        ctx.addRect(r)
+        ctx.setFillColor(NSColor.black.withAlphaComponent(0.55).cgColor)
+        ctx.fillPath(using: .evenOdd)
+        ctx.setStrokeColor(NSColor.white.cgColor)
+        ctx.setLineWidth(1.5)
+        ctx.setLineDash(phase: 0, lengths: [6, 4])
+        ctx.stroke(r)
+        ctx.restoreGState()
     }
 
     private static func drawEach(_ items: [Annotation], image: CGImage, imageSize: CGSize, in ctx: CGContext) {
@@ -27,7 +46,12 @@ enum AnnotationRenderer {
             switch item.kind {
             case .arrow(let a, let b): arrow(from: a, to: b, width: item.lineWidth, color: color, in: ctx)
             case .rectangle(let r): box(r, width: item.lineWidth, color: color, in: ctx)
-            case .focus: break // drawn above
+            case .focus, .crop: break // focus drawn above; crop is a guide / export bound
+            case .ellipse(let r):
+                softShadow(ctx)
+                ctx.setStrokeColor(color)
+                ctx.setLineWidth(item.lineWidth)
+                ctx.strokeEllipse(in: r)
             case .highlight(let r): highlight(r, color: color, in: ctx)
             case .blur(let r): pixelate(r, image: image, imageSize: imageSize, in: ctx)
             case .step(let c, let n): step(c, number: n, color: item.color.nsColor, in: ctx)
@@ -208,6 +232,9 @@ enum AnnotationRenderer {
     /// The area to export, in image points: the image, grown to include any
     /// marks drawn on the canvas around it (plus a little margin).
     static func exportBounds(_ items: [Annotation], imageSize: CGSize) -> CGRect {
+        if let crop = items.lazy.compactMap({ if case .crop(let r) = $0.kind { r } else { nil } }).first {
+            return crop.integral
+        }
         let image = CGRect(origin: .zero, size: imageSize)
         let marks = items.reduce(CGRect.null) { $0.union($1.bounds) }
         guard !marks.isNull, !image.contains(marks) else { return image }
@@ -232,7 +259,7 @@ enum AnnotationRenderer {
         ctx.fill(bounds)
         ctx.interpolationQuality = .high
         drawUpright(image, in: CGRect(origin: .zero, size: imageSize), ctx: ctx)
-        draw(items, image: image, imageSize: imageSize, in: ctx)
+        draw(items, image: image, imageSize: imageSize, in: ctx, cropGuide: false)
         return ctx.makeImage()
     }
 }

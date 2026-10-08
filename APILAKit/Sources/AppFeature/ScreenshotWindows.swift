@@ -26,8 +26,10 @@ final class ScreenshotWindows {
 
         /// The shot with its marks (or the untouched original), as PNG.
         let result: () -> Data = {
-            guard !doc.isEmpty,
-                  let composed = AnnotationRenderer.export(cgImage, imageSize: display, items: doc.items),
+            let picture = doc.base?.image ?? cgImage
+            let size = doc.base?.size ?? display
+            guard !doc.isEmpty || doc.base != nil,
+                  let composed = AnnotationRenderer.export(picture, imageSize: size, items: doc.items),
                   let png = NSBitmapImageRep(cgImage: composed).representation(using: .png, properties: [:])
             else { return payload.data }
             return png
@@ -44,7 +46,11 @@ final class ScreenshotWindows {
                 close()
                 self?.pin(pinned, size: CGSize(width: CGFloat(rep.pixelsWide) / scale, height: CGFloat(rep.pixelsHigh) / scale), data: png)
             },
-            text: { [weak self] in close(); self?.onText(payload) },              // OCR the clean original
+            text: { [weak self] in                                                // OCR the clean picture (cropped, if applied)
+                close()
+                let picture = doc.base.flatMap { NSBitmapImageRep(cgImage: $0.image).representation(using: .png, properties: [:]) }
+                self?.onText(picture.map(Self.payload) ?? payload)
+            },
             ask: { [weak self] in close(); self?.onAsk(Self.payload(result())) },  // marks help the model
             close: close,
             dragFile: { Self.writeTempPNG(result()) }

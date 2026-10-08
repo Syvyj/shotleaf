@@ -91,3 +91,61 @@ struct AnnotationExportTests {
         #expect(doc.items.count == 2 && !doc.canRedo)
     }
 }
+
+@Suite("Crop & oval")
+@MainActor
+struct CropTests {
+    @Test("Crop: export is exactly the crop; a new crop replaces the old one")
+    func crop() throws {
+        let doc = AnnotationDocument()
+        doc.add(.crop(CGRect(x: 10, y: 10, width: 40, height: 20)))
+        doc.add(.crop(CGRect(x: 20, y: 5, width: 30, height: 30)))
+        #expect(doc.items.count == 1 && doc.crop == CGRect(x: 20, y: 5, width: 30, height: 30))
+        #expect(AnnotationRenderer.exportBounds(doc.items, imageSize: CGSize(width: 100, height: 50)) == CGRect(x: 20, y: 5, width: 30, height: 30))
+        let ctx = CGContext(data: nil, width: 200, height: 100, bitsPerComponent: 8, bytesPerRow: 0,
+                            space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        let out = try #require(AnnotationRenderer.export(ctx.makeImage()!, imageSize: CGSize(width: 100, height: 50), items: doc.items))
+        #expect(out.width == 60 && out.height == 60) // 30×30 pt at 2×
+    }
+
+    @Test("Crop is picked by its border, so marks inside stay clickable")
+    func cropHit() {
+        let crop: Annotation.Kind = .crop(CGRect(x: 0, y: 0, width: 100, height: 100))
+        #expect(AnnotationEditing.contains(crop, CGPoint(x: 0, y: 50)))
+        #expect(!AnnotationEditing.contains(crop, CGPoint(x: 50, y: 50)))
+    }
+
+    @Test("Oval resizes by its corners like a box")
+    func oval() {
+        let oval: Annotation.Kind = .ellipse(CGRect(x: 0, y: 0, width: 10, height: 10))
+        #expect(AnnotationEditing.resized(oval, .corner(2), to: CGPoint(x: 30, y: 20)) == .ellipse(CGRect(x: 0, y: 0, width: 30, height: 20)))
+        #expect(AnnotationTool.ellipse.key == "o" && AnnotationTool.crop.key == "c" && AnnotationTool.focus.key == "9")
+    }
+}
+
+@Suite("Apply crop")
+@MainActor
+struct ApplyCropTests {
+    @Test("Keeps only the crop, shifts marks with it, and undo brings it all back")
+    func apply() throws {
+        let ctx = CGContext(data: nil, width: 200, height: 100, bitsPerComponent: 8, bytesPerRow: 0,
+                            space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        let original = ctx.makeImage()!
+        let size = CGSize(width: 100, height: 50)
+        let doc = AnnotationDocument()
+        doc.add(.arrow(from: CGPoint(x: 30, y: 20), to: CGPoint(x: 50, y: 30)))
+        doc.add(.crop(CGRect(x: 20, y: 10, width: 40, height: 30)))
+
+        doc.applyCrop(original: original, size: size)
+        let base = try #require(doc.base)
+        #expect(base.size == CGSize(width: 40, height: 30))
+        #expect(base.image.width == 80 && base.image.height == 60) // 2× pixels kept
+        #expect(doc.crop == nil && doc.items.count == 1)
+        #expect(doc.items[0].kind == .arrow(from: CGPoint(x: 10, y: 10), to: CGPoint(x: 30, y: 20)))
+
+        doc.undo()
+        #expect(doc.base == nil && doc.crop != nil && doc.items.count == 2)
+        doc.redo()
+        #expect(doc.base?.size == CGSize(width: 40, height: 30))
+    }
+}

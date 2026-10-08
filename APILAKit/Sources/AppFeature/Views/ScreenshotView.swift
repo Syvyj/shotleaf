@@ -41,6 +41,10 @@ struct ScreenshotView: View {
     @State private var dragNow: CGPoint?
     @State private var drag: Drag?
     @State private var textDraft: (origin: CGPoint, string: String)?
+    /// The text mark being re-edited (double-click), hidden while its field is open.
+    @State private var editingTextID: Annotation.ID?
+    /// For double-click detection on marks.
+    @State private var lastClick: (id: Annotation.ID, at: Date)?
     @FocusState private var textFocused: Bool
 
     /// Wide enough for the tool row, the toolbar and the hint line.
@@ -48,13 +52,19 @@ struct ScreenshotView: View {
 
     private var editingText: Bool { textDraft != nil }
 
+    // The picture marks are drawn on: the capture, or its applied crop.
+    private var pictureCG: CGImage { doc.base?.image ?? cgImage }
+    private var pictureSize: CGSize { doc.base?.size ?? displaySize }
+    private var pictureNS: NSImage { doc.base.map { NSImage(cgImage: $0.image, size: $0.size) } ?? image }
+    private var picturePixels: CGSize { doc.base.map { CGSize(width: $0.image.width, height: $0.image.height) } ?? pixelSize }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
             toolRow
             canvas
             toolbar
-            HintBar(items: [("↩", "copy & close"), ("⌘S", "save"), ("0–9", "tools"), ("⌫", "delete"), ("⌘Z", "undo"), ("esc", escHint)])
+            HintBar(items: [("↩", "copy & close"), ("⌘S", "save"), ("0–9 O C", "tools"), ("⌫", "delete"), ("⌘Z", "undo"), ("esc", escHint)])
         }
         .frame(minWidth: max(displaySize.width, Self.minContentWidth), maxWidth: .infinity,
                maxHeight: .infinity, alignment: .topLeading)
@@ -77,7 +87,7 @@ struct ScreenshotView: View {
         HStack(spacing: 8) {
             BrandLogo()
             Text("Screenshot").font(Leaf.font(16, .semibold))
-            Text(verbatim: "\(Int(pixelSize.width)) × \(Int(pixelSize.height))") // no locale grouping
+            Text(verbatim: "\(Int(picturePixels.width)) × \(Int(picturePixels.height))") // no locale grouping
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                 .padding(.horizontal, 7).padding(.vertical, 2)
                 .background(.primary.opacity(0.06), in: Capsule())
@@ -123,6 +133,12 @@ struct ScreenshotView: View {
                 .buttonStyle(.plain)
             }
             Spacer(minLength: 6)
+            if doc.crop != nil {
+                Button("Apply crop") { doc.applyCrop(original: cgImage, size: displaySize) }
+                    .buttonStyle(LeafButtonStyle(prominent: true))
+                    .help(Text(verbatim: "Keep only the cropped area (⌘Z brings the rest back)"))
+                    .disabled(editingText)
+            }
             Button("Undo") { doc.undo() }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("z", modifiers: .command)
@@ -186,21 +202,21 @@ struct ScreenshotView: View {
     /// window; marks are drawn over both (in image points).
     private var canvas: some View {
         GeometryReader { geo in
-            let origin = CGPoint(x: (geo.size.width - displaySize.width) / 2, y: (geo.size.height - displaySize.height) / 2)
+            let origin = CGPoint(x: (geo.size.width - pictureSize.width) / 2, y: (geo.size.height - pictureSize.height) / 2)
             ZStack(alignment: .topLeading) {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(.primary.opacity(0.035))
-                Image(nsImage: image)
+                Image(nsImage: pictureNS)
                     .resizable()
                     .interpolation(.high)
-                    .frame(width: displaySize.width, height: displaySize.height)
+                    .frame(width: pictureSize.width, height: pictureSize.height)
                     .clipShape(RoundedRectangle(cornerRadius: doc.isEmpty ? 8 : 0, style: .continuous))
                     .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
                     .offset(x: origin.x, y: origin.y)
                 Canvas { context, _ in
                     context.translateBy(x: origin.x, y: origin.y)
                     context.withCGContext { cg in
-                        AnnotationRenderer.draw(visibleItems, image: cgImage, imageSize: displaySize, in: cg)
+                        AnnotationRenderer.draw(visibleItems, image: pictureCG, imageSize: pictureSize, in: cg)
                     }
                     if let selected = visibleSelection { drawSelection(selected, in: &context) }
                 }
@@ -220,7 +236,7 @@ struct ScreenshotView: View {
                     file: actions.dragFile,
                     thumbnail: image
                 )
-                .frame(width: displaySize.width, height: displaySize.height)
+                .frame(width: pictureSize.width, height: pictureSize.height)
                 .offset(x: origin.x, y: origin.y)
                 if let draft = textDraft {
                     TextField("Type, then ↩", text: Binding(
@@ -235,7 +251,7 @@ struct ScreenshotView: View {
                     .offset(x: origin.x + draft.origin.x - 4, y: origin.y + draft.origin.y - 4)
                     .focused($textFocused)
                     .onSubmit(commitText)
-                    .onExitCommand { textDraft = nil }
+                    .onExitCommand { textDraft = nil; editingTextID = nil }
                 }
             }
         }
@@ -257,7 +273,7 @@ struct ScreenshotView: View {
 
     /// Committed marks, with the one being drawn / moved / resized right now.
     private var visibleItems: [Annotation] {
-        var items = doc.items
+        var items = doc.items.filter { $0.id != editingTextID }
         if let live = liveEdit, let i = items.firstIndex(where: { $0.id == live.id }) {
             items[i].kind = live.kind
         } else if case .draw = drag, let kind = pendingKind(final: false) {
@@ -320,7 +336,20 @@ struct ScreenshotView: View {
         guard let start = dragStart, let now = dragNow else { return }
         let moved = hypot(now.x - start.x, now.y - start.y) > 1
         switch drag {
-        case .move, .resize:
+        case .move(let id, let original):
+            if moved, let live = liveEdit { doc.update(live.id, to: live.kind); break }
+            // A double-click on a text mark opens it for editing.
+            if case .text(let origin, let string) = original,
+               let last = lastClick, last.id == id, Date().timeIntervalSince(last.at) < 0.4 {
+                if let item = doc.items.first(where: { $0.id == id }) { doc.color = item.color }
+                editingTextID = id
+                textDraft = (origin, string)
+                textFocused = true
+                lastClick = nil
+            } else {
+                lastClick = (id, Date())
+            }
+        case .resize:
             if moved, let live = liveEdit { doc.update(live.id, to: live.kind) }
         case .draw:
             if let kind = pendingKind(final: true) { doc.add(kind) }
@@ -346,7 +375,7 @@ struct ScreenshotView: View {
             NSCursor.openHand.set()
         } else if doc.tool != nil {
             (doc.tool == .text ? NSCursor.iBeam : NSCursor.crosshair).set()
-        } else if CGRect(origin: .zero, size: displaySize).contains(p) {
+        } else if CGRect(origin: .zero, size: pictureSize).contains(p) {
             NSCursor.openHand.set() // Select mode over the shot: drag it out
         } else {
             NSCursor.arrow.set()
@@ -360,7 +389,7 @@ struct ScreenshotView: View {
         let rect = CaptureMath.rect(a, b)
         let big = rect.width >= 4 && rect.height >= 4
         func sampled() -> NSColor {
-            final ? AnnotationRenderer.surroundingColor(of: rect, image: cgImage, imageSize: displaySize) : .gray.withAlphaComponent(0.5)
+            final ? AnnotationRenderer.surroundingColor(of: rect, image: pictureCG, imageSize: pictureSize) : .gray.withAlphaComponent(0.5)
         }
         switch tool {
         case .arrow: return hypot(b.x - a.x, b.y - a.y) > 4 ? .arrow(from: a, to: b) : nil
@@ -368,6 +397,8 @@ struct ScreenshotView: View {
         case .highlight: return big ? .highlight(rect) : nil
         case .blur: return big ? .blur(rect) : nil
         case .focus: return big ? .focus(rect) : nil
+        case .ellipse: return big ? .ellipse(rect) : nil
+        case .crop: return big ? .crop(rect) : nil
         case .erase: return big ? .erase(rect, fill: sampled()) : nil
         case .cut:
             guard big else { return nil }
@@ -377,10 +408,17 @@ struct ScreenshotView: View {
     }
 
     private func commitText() {
-        if let draft = textDraft, !draft.string.trimmingCharacters(in: .whitespaces).isEmpty {
-            doc.add(.text(origin: draft.origin, string: draft.string))
+        let string = textDraft?.string.trimmingCharacters(in: .whitespaces) ?? ""
+        if let draft = textDraft {
+            if let id = editingTextID {
+                // Editing: an emptied text removes the mark.
+                if string.isEmpty { doc.remove(id) } else { doc.update(id, to: .text(origin: draft.origin, string: draft.string)) }
+            } else if !string.isEmpty {
+                doc.add(.text(origin: draft.origin, string: draft.string))
+            }
         }
         textDraft = nil
+        editingTextID = nil
     }
 
     // MARK: Toolbar

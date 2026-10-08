@@ -66,6 +66,13 @@ struct ToolIcon: View {
                            style: StrokeStyle(lineWidth: size / 13, lineCap: .round, dash: [1.4 * u, 1.9 * u]))
                 ctx.fill(Path(roundedRect: r(7.5, 7.5, 8, 7.5), cornerRadius: 1.8 * u), with: soft)
                 ctx.stroke(Path(roundedRect: r(7.5, 7.5, 8, 7.5), cornerRadius: 1.8 * u), with: ink, style: line)
+            case .ellipse:
+                ctx.stroke(Path(ellipseIn: r(2.5, 4, 13, 10)), with: ink, style: line)
+            case .crop:
+                var path = Path()
+                path.move(to: p(5, 1.5)); path.addLine(to: p(5, 13)); path.addLine(to: p(16.5, 13))
+                path.move(to: p(1.5, 5)); path.addLine(to: p(13, 5)); path.addLine(to: p(13, 16.5))
+                ctx.stroke(path, with: ink, style: line)
             case .focus:
                 var dim = Path(roundedRect: r(1.5, 2.5, 15, 13), cornerRadius: 2.2 * u)
                 dim.addPath(Path(roundedRect: r(5.5, 6, 7, 6), cornerRadius: 1.5 * u))

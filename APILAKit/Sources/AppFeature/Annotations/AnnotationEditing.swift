@@ -18,9 +18,13 @@ enum AnnotationEditing {
     }
 
     static func contains(_ kind: Annotation.Kind, _ p: CGPoint) -> Bool {
+        if case .crop(let r) = kind {
+            // Only its border: the inside belongs to the marks and the shot.
+            return r.insetBy(dx: -tolerance, dy: -tolerance).contains(p) && !r.insetBy(dx: tolerance, dy: tolerance).contains(p)
+        }
         switch kind {
         case .arrow(let a, let b): return distance(from: p, toSegment: a, b) <= tolerance
-        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r):
+        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r):
             return r.insetBy(dx: -tolerance / 2, dy: -tolerance / 2).contains(p)
         case .piece(let source, let offset, _):
             return source.offsetBy(dx: offset.width, dy: offset.height).contains(p)
@@ -35,7 +39,7 @@ enum AnnotationEditing {
     static func frame(of kind: Annotation.Kind) -> CGRect {
         switch kind {
         case .arrow(let a, let b): return CaptureMath.rect(a, b)
-        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r): return r
+        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r): return r
         case .piece(let source, let offset, _): return source.offsetBy(dx: offset.width, dy: offset.height)
         default: return Annotation(kind: kind, color: .coral).bounds
         }
@@ -47,7 +51,7 @@ enum AnnotationEditing {
         switch kind {
         case .arrow(let a, let b):
             return [(.arrowStart, a), (.arrowEnd, b)]
-        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r):
+        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r):
             return [(.corner(0), CGPoint(x: r.minX, y: r.minY)), (.corner(1), CGPoint(x: r.maxX, y: r.minY)),
                     (.corner(2), CGPoint(x: r.maxX, y: r.maxY)), (.corner(3), CGPoint(x: r.minX, y: r.maxY))]
         default:
@@ -70,12 +74,24 @@ enum AnnotationEditing {
         case .highlight(let r): return .highlight(m(r))
         case .blur(let r): return .blur(m(r))
         case .focus(let r): return .focus(m(r))
+        case .ellipse(let r): return .ellipse(m(r))
+        case .crop(let r): return .crop(m(r))
         case .erase(let r, let fill): return .erase(m(r), fill: fill)
         case .step(let c, let n): return .step(center: m(c), number: n)
         case .text(let o, let s): return .text(origin: m(o), string: s)
         case .piece(let source, let offset, let fill):
             return .piece(source: source, offset: CGSize(width: offset.width + d.width, height: offset.height + d.height), fill: fill)
         }
+    }
+
+    /// The mark when the picture under it moves by `d` (after "Apply crop"):
+    /// like `moved`, except a cut piece's *source* moves too — it is a place
+    /// in the picture, not just where the piece sits.
+    static func shiftedWithPicture(_ kind: Annotation.Kind, by d: CGSize) -> Annotation.Kind {
+        if case .piece(let source, let offset, let fill) = kind {
+            return .piece(source: source.offsetBy(dx: d.width, dy: d.height), offset: offset, fill: fill)
+        }
+        return moved(kind, by: d)
     }
 
     /// The mark with `handle` dragged to `p`. Corners keep the opposite corner
@@ -94,6 +110,8 @@ enum AnnotationEditing {
         case (.highlight(let r), _): return .highlight(box(r))
         case (.blur(let r), _): return .blur(box(r))
         case (.focus(let r), _): return .focus(box(r))
+        case (.ellipse(let r), _): return .ellipse(box(r))
+        case (.crop(let r), _): return .crop(box(r))
         case (.erase(let r, let fill), _): return .erase(box(r), fill: fill)
         default: return kind
         }

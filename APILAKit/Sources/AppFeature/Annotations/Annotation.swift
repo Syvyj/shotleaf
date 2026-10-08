@@ -20,6 +20,9 @@ struct Annotation: Identifiable, Equatable {
         case piece(source: CGRect, offset: CGSize, fill: NSColor)
         /// Spotlight: everything in the image outside the area is dimmed.
         case focus(CGRect)
+        case ellipse(CGRect)
+        /// The part of the canvas to keep on export (at most one per shot).
+        case crop(CGRect)
     }
 
     let id = UUID()
@@ -34,8 +37,10 @@ struct Annotation: Identifiable, Equatable {
         case .arrow(let a, let b):
             let head = AnnotationStyle.arrowHead(for: lineWidth)
             return CaptureMath.rect(a, b).insetBy(dx: -head, dy: -head)
-        case .rectangle(let r):
+        case .rectangle(let r), .ellipse(let r):
             return r.insetBy(dx: -lineWidth, dy: -lineWidth)
+        case .crop(let r):
+            return r
         case .highlight(let r), .blur(let r):
             return r
         case .erase(let r, _), .focus(let r):
@@ -76,7 +81,7 @@ enum AnnotationColor: String, CaseIterable, Identifiable {
 }
 
 enum AnnotationTool: String, CaseIterable, Identifiable {
-    case arrow, rectangle, text, highlight, blur, step, erase, cut, focus
+    case arrow, rectangle, text, highlight, blur, step, erase, cut, focus, ellipse, crop
     var id: String { rawValue }
 
     var title: String {
@@ -90,23 +95,46 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
         case .erase: "Erase"
         case .cut: "Cut"
         case .focus: "Focus"
+        case .ellipse: "Oval"
+        case .crop: "Crop"
         }
     }
 
     /// Tools whose marks have a line thickness.
-    var usesLineWidth: Bool { self == .arrow || self == .rectangle }
+    var usesLineWidth: Bool { self == .arrow || self == .rectangle || self == .ellipse }
 
-    /// 1…9 — number keys, so they never clash with letters used elsewhere.
-    var key: Character { Character(String((Self.allCases.firstIndex(of: self) ?? 0) + 1)) }
+    /// 1…9 for the original tools (kept stable), letters for later ones —
+    /// none of them clash with P / T / A in the toolbar.
+    var key: Character {
+        switch self {
+        case .ellipse: "o"
+        case .crop: "c"
+        default: Character(String((Self.allCases.firstIndex(of: self) ?? 0) + 1))
+        }
+    }
 }
 
 /// The marks on one screenshot, with undo/redo and the tool/color in use.
 @MainActor
 @Observable
 final class AnnotationDocument {
+    /// The picture marks are drawn on, after "Apply crop" (nil = the original).
+    struct Base: Equatable {
+        let image: CGImage
+        /// In image points.
+        let size: CGSize
+    }
+
+    /// One undo step: the marks and the picture under them.
+    private struct Snapshot {
+        var items: [Annotation]
+        var base: Base?
+    }
+
     private(set) var items: [Annotation] = []
-    private var redoStack: [[Annotation]] = []
-    private var undoStack: [[Annotation]] = []
+    private(set) var base: Base?
+    private var redoStack: [Snapshot] = []
+    private var undoStack: [Snapshot] = []
 
     /// nil = Select: click a mark to select, move, resize or delete it.
     var tool: AnnotationTool?
@@ -126,11 +154,19 @@ final class AnnotationDocument {
         items.reduce(0) { if case .step(_, let n) = $1.kind { max($0, n) } else { $0 } } + 1
     }
 
-    /// Adds a mark in the current color/width and selects it.
+    /// The crop area, if any.
+    var crop: CGRect? {
+        items.lazy.compactMap { if case .crop(let r) = $0.kind { r } else { nil } }.first
+    }
+
+    /// Adds a mark in the current color/width and selects it. A new crop
+    /// replaces the old one.
     @discardableResult
     func add(_ kind: Annotation.Kind) -> Annotation.ID {
         let item = Annotation(kind: kind, color: color, lineWidth: lineWidth)
-        commit(items + [item])
+        var kept = items
+        if case .crop = kind { kept.removeAll { if case .crop = $0.kind { true } else { false } } }
+        commit(kept + [item])
         selection = item.id
         return item.id
     }
@@ -158,17 +194,43 @@ final class AnnotationDocument {
         commit(new)
     }
 
+    /// "Apply crop": keep only the cropped part of the picture for good (still
+    /// undoable). Marks shift with it and stay editable; the crop mark goes.
+    /// - Parameters: the original picture, used until a crop has been applied.
+    func applyCrop(original image: CGImage, size: CGSize) {
+        let current = base ?? Base(image: image, size: size)
+        guard let crop else { return }
+        let area = crop.intersection(CGRect(origin: .zero, size: current.size)).integral
+        let scale = CGFloat(current.image.width) / current.size.width
+        guard !area.isEmpty,
+              let cropped = current.image.cropping(to: CGRect(x: area.minX * scale, y: area.minY * scale,
+                                                              width: area.width * scale, height: area.height * scale))
+        else { return }
+        let shift = CGSize(width: -area.minX, height: -area.minY)
+        let kept = items.compactMap { item -> Annotation? in
+            if case .crop = item.kind { return nil }
+            var moved = item
+            moved.kind = AnnotationEditing.shiftedWithPicture(item.kind, by: shift)
+            return moved
+        }
+        undoStack.append(Snapshot(items: items, base: base))
+        redoStack.removeAll()
+        items = kept
+        base = Base(image: cropped, size: area.size)
+        selection = nil
+    }
+
     func undo() {
         guard let previous = undoStack.popLast() else { return }
-        redoStack.append(items)
-        items = previous
+        redoStack.append(Snapshot(items: items, base: base))
+        (items, base) = (previous.items, previous.base)
         dropStaleSelection()
     }
 
     func redo() {
         guard let next = redoStack.popLast() else { return }
-        undoStack.append(items)
-        items = next
+        undoStack.append(Snapshot(items: items, base: base))
+        (items, base) = (next.items, next.base)
         dropStaleSelection()
     }
 
@@ -177,7 +239,7 @@ final class AnnotationDocument {
     }
 
     private func commit(_ new: [Annotation]) {
-        undoStack.append(items)
+        undoStack.append(Snapshot(items: items, base: base))
         redoStack.removeAll()
         items = new
     }

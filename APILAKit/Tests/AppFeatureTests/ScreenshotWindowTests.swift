@@ -96,6 +96,12 @@ struct ScreenshotWindowTests {
         let view = ScreenshotView(image: image, cgImage: cg, pixelSize: CGSize(width: 1280, height: 720),
                                   displaySize: CGSize(width: 640, height: 360), actions: noop, doc: doc)
         try renderPreview(view, "screenshot-window.png")
+        doc.color = .sky
+        doc.add(.ellipse(CGRect(x: 380, y: 40, width: 160, height: 90)))
+        doc.add(.crop(CGRect(x: 10, y: 20, width: 560, height: 300)))
+        try renderPreview(view, "screenshot-crop.png")
+        doc.applyCrop(original: cg, size: CGSize(width: 640, height: 360))
+        try renderPreview(view, "screenshot-cropped.png")
         try renderPreview(view, "screenshot-window-dark.png", dark: true)
     }
 }
