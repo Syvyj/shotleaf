@@ -81,11 +81,21 @@ struct HintBar: View {
     }
 }
 
-/// Primary: green gradient. Secondary: quiet tinted fill.
+/// Primary: green gradient. Secondary: quiet tinted fill. Both brighten on hover.
 struct LeafButtonStyle: ButtonStyle {
     var prominent = false
 
     func makeBody(configuration: Configuration) -> some View {
+        HoverableButton(configuration: configuration, prominent: prominent)
+    }
+}
+
+private struct HoverableButton: View {
+    let configuration: ButtonStyleConfiguration
+    let prominent: Bool
+    @State private var hovered = false
+
+    var body: some View {
         configuration.label
             .font(Leaf.font(13, .semibold))
             .padding(.horizontal, 12)
@@ -93,12 +103,24 @@ struct LeafButtonStyle: ButtonStyle {
             .foregroundStyle(prominent ? Leaf.forest : Color.primary)
             .background {
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(prominent ? AnyShapeStyle(Leaf.accent) : AnyShapeStyle(.primary.opacity(0.07)))
+                    .fill(prominent ? AnyShapeStyle(Leaf.accent) : AnyShapeStyle(.primary.opacity(hovered ? 0.13 : 0.07)))
             }
             .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.primary.opacity(prominent ? 0 : 0.08)))
+            .brightness(prominent && hovered ? 0.06 : 0)
             .opacity(configuration.isPressed ? 0.75 : 1)
             .contentShape(RoundedRectangle(cornerRadius: 8))
+            .onHover { hovered = $0 }
     }
+}
+
+/// Lets the user drag the borderless panel by this area (header, gaps).
+struct WindowDragArea: NSViewRepresentable {
+    final class DragView: NSView {
+        override func mouseDown(with event: NSEvent) { window?.performDrag(with: event) }
+        override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    }
+    func makeNSView(context: Context) -> NSView { DragView() }
+    func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
 /// Capsule showing which model answers; amber when it's the Mock.

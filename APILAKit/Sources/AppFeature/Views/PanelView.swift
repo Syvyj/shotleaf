@@ -18,10 +18,13 @@ public struct PanelView: View {
         .frame(width: 500)
         .background {
             ZStack {
+                WindowDragArea() // empty spots of the panel drag it
                 shape.fill(.ultraThinMaterial)
-                shape.fill(Leaf.surface)
+                    .allowsHitTesting(false)
+                shape.fill(Leaf.surface).allowsHitTesting(false)
                 // A breath of leaf green from the top, like light through foliage.
                 shape.fill(LinearGradient(colors: [Leaf.fresh.opacity(0.10), .clear], startPoint: .top, endPoint: .center))
+                    .allowsHitTesting(false)
             }
         }
         .overlay(shape.strokeBorder(.primary.opacity(0.10)))
@@ -51,6 +54,7 @@ public struct PanelView: View {
             Spacer()
             ProviderChip(name: vm.providerName, isMock: vm.isMockProvider)
         }
+        .overlay(WindowDragArea()) // the header is the drag handle
     }
 
     // MARK: Screens
@@ -65,6 +69,7 @@ public struct PanelView: View {
                         sectionLabel("Screenshot")
                     }
                     row(item, selected: index == vm.selectedIndex)
+                        .onHover { if $0 { vm.selectedIndex = index } }
                         .onTapGesture { vm.selectedIndex = index; vm.confirm() }
                 }
             }

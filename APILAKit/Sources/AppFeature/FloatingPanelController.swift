@@ -49,6 +49,7 @@ public final class FloatingPanelController {
         panel.level = .floating
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
         panel.isMovableByWindowBackground = true
+        panel.acceptsMouseMovedEvents = true // hover highlight follows the mouse
         panel.hidesOnDeactivate = false
         panel.isOpaque = false
         panel.backgroundColor = .clear
