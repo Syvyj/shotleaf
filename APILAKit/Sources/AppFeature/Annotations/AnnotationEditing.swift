@@ -6,6 +6,8 @@ enum AnnotationEditing {
     /// A grab point on a selected mark.
     enum Handle: Equatable {
         case arrowStart, arrowEnd
+        /// A callout's tail tip (or, without a tail, the spot to pull one out).
+        case tail
         case corner(Int) // 0 top-left, 1 top-right, 2 bottom-right, 3 bottom-left
     }
 
@@ -30,8 +32,8 @@ enum AnnotationEditing {
             return source.offsetBy(dx: offset.width, dy: offset.height).contains(p)
         case .step(let c, _):
             return hypot(p.x - c.x, p.y - c.y) <= AnnotationStyle.stepRadius + tolerance / 2
-        case .text:
-            return Annotation(kind: kind, color: .coral).bounds.contains(p)
+        case .text(let o, let s, _):
+            return AnnotationStyle.bubble(origin: o, string: s).contains(p)
         }
     }
 
@@ -41,16 +43,20 @@ enum AnnotationEditing {
         case .arrow(let a, let b): return CaptureMath.rect(a, b)
         case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r): return r
         case .piece(let source, let offset, _): return source.offsetBy(dx: offset.width, dy: offset.height)
+        case .text(let o, let s, _): return AnnotationStyle.bubble(origin: o, string: s)
         default: return Annotation(kind: kind, color: .coral).bounds
         }
     }
 
     /// Handles a mark offers: arrow ends, or the four corners of area marks.
-    /// Steps, text and cut pieces only move.
+    /// A callout's tail. Steps and cut pieces only move.
     static func handles(of kind: Annotation.Kind) -> [(Handle, CGPoint)] {
         switch kind {
         case .arrow(let a, let b):
             return [(.arrowStart, a), (.arrowEnd, b)]
+        case .text(let o, let s, let tail):
+            let bubble = AnnotationStyle.bubble(origin: o, string: s)
+            return [(.tail, tail ?? CGPoint(x: bubble.minX + 14, y: bubble.maxY))]
         case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r):
             return [(.corner(0), CGPoint(x: r.minX, y: r.minY)), (.corner(1), CGPoint(x: r.maxX, y: r.minY)),
                     (.corner(2), CGPoint(x: r.maxX, y: r.maxY)), (.corner(3), CGPoint(x: r.minX, y: r.maxY))]
@@ -78,7 +84,7 @@ enum AnnotationEditing {
         case .crop(let r): return .crop(m(r))
         case .erase(let r, let fill): return .erase(m(r), fill: fill)
         case .step(let c, let n): return .step(center: m(c), number: n)
-        case .text(let o, let s): return .text(origin: m(o), string: s)
+        case .text(let o, let s, let tail): return .text(origin: m(o), string: s, tail: tail) // the tail keeps pointing
         case .piece(let source, let offset, let fill):
             return .piece(source: source, offset: CGSize(width: offset.width + d.width, height: offset.height + d.height), fill: fill)
         }
@@ -90,6 +96,10 @@ enum AnnotationEditing {
     static func shiftedWithPicture(_ kind: Annotation.Kind, by d: CGSize) -> Annotation.Kind {
         if case .piece(let source, let offset, let fill) = kind {
             return .piece(source: source.offsetBy(dx: d.width, dy: d.height), offset: offset, fill: fill)
+        }
+        if case .text(let o, let s, let tail?) = kind {
+            return .text(origin: CGPoint(x: o.x + d.width, y: o.y + d.height), string: s,
+                         tail: CGPoint(x: tail.x + d.width, y: tail.y + d.height))
         }
         return moved(kind, by: d)
     }
@@ -106,6 +116,10 @@ enum AnnotationEditing {
         switch (kind, handle) {
         case (.arrow(_, let b), .arrowStart): return .arrow(from: p, to: b)
         case (.arrow(let a, _), .arrowEnd): return .arrow(from: a, to: p)
+        case (.text(let o, let s, _), .tail):
+            // Dropped back on the bubble: no tail.
+            let inside = AnnotationStyle.bubble(origin: o, string: s).insetBy(dx: -4, dy: -4).contains(p)
+            return .text(origin: o, string: s, tail: inside ? nil : p)
         case (.rectangle(let r), _): return .rectangle(box(r))
         case (.highlight(let r), _): return .highlight(box(r))
         case (.blur(let r), _): return .blur(box(r))

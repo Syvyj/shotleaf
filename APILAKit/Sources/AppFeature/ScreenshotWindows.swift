@@ -19,7 +19,8 @@ final class ScreenshotWindows {
         let pixels = CGSize(width: payload.width, height: payload.height)
         let visible = screen?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1200, height: 800)
         // Leave room for the header, toolbar and hints around the image.
-        let room = CGSize(width: visible.width - 80, height: visible.height - Self.chromeHeight)
+        let margin = 2 * ScreenshotView.margin
+        let room = CGSize(width: visible.width - 80 - margin, height: visible.height - Self.chromeHeight - margin)
         let display = Self.fit(points: CGSize(width: pixels.width / scale, height: pixels.height / scale), in: room)
         guard let cgImage = NSBitmapImageRep(data: payload.data)?.cgImage else { return }
         let doc = AnnotationDocument()
@@ -55,7 +56,7 @@ final class ScreenshotWindows {
             close: close,
             dragFile: { Self.writeTempPNG(result()) }
         )
-        let width = max(display.width, ScreenshotView.minContentWidth) + 28
+        let width = max(display.width + margin, ScreenshotView.minContentWidth) + 28
         panel = makePanel(ScreenshotView(image: image, cgImage: cgImage, pixelSize: pixels, displaySize: display, actions: actions, doc: doc),
                           proposedWidth: width, resizable: true)
         panel.setFrameOrigin(Self.placed(panel.frame.size, centeredIn: visible))
@@ -157,7 +158,7 @@ final class ScreenshotWindows {
 
     // MARK: Geometry
 
-    /// Header + toolbar + hint line + padding around the image, in points.
+    /// Header + action row + padding, in points (the canvas margin is extra).
     static let chromeHeight: CGFloat = 190
 
     /// Scales `points` down (never up) to fit `available` (tall captures shrink

@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import VisionKit
 
 /// What the screenshot window can do; wired by `ScreenshotWindows`. Copy,
 /// save, pin and drag use the screenshot *with* its annotations.
@@ -50,8 +51,13 @@ struct ScreenshotView: View {
     @State private var flyout: Flyout?
     /// The shape the shapes button shows when another tool is in use.
     @State private var lastShape: AnnotationTool = .arrow
+    /// Live Text mode: the shot's text is selectable (nil = off).
+    @State private var liveText: ImageAnalysisOverlayView?
 
-    /// Wide enough for the tool row and the action row in one line each.
+    /// Empty canvas around the shot from the start, for marks outside it.
+    static let margin: CGFloat = 40
+
+    /// Wide enough for the header (with the tools) and the action row.
     static let minContentWidth: CGFloat = 780
 
     private var editingText: Bool { textDraft != nil }
@@ -64,15 +70,15 @@ struct ScreenshotView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            header
-            toolRow.zIndex(1) // tips and menus draw over the canvas
+            header.zIndex(1) // tips and menus draw over the canvas
             canvas
             toolbar
         }
         .onChange(of: doc.tool) { _, tool in
             if let tool, Self.shapeTools.contains(tool) { lastShape = tool }
         }
-        .frame(minWidth: max(displaySize.width, Self.minContentWidth), maxWidth: .infinity,
+        .onChange(of: doc.base) { liveText = nil } // its text is for the old picture
+        .frame(minWidth: max(displaySize.width + 2 * Self.margin, Self.minContentWidth), maxWidth: .infinity,
                maxHeight: .infinity, alignment: .topLeading)
         .padding(14)
         .leafPanelChrome()
@@ -85,23 +91,35 @@ struct ScreenshotView: View {
 
     // MARK: Header & tools
 
+    /// Name and size on the left, the tools right after; the empty parts
+    /// drag the window.
     private var header: some View {
-        HStack(spacing: 8) {
-            BrandLogo()
-            Text("Screenshot").font(Leaf.font(16, .semibold))
-            Text(verbatim: "\(Int(picturePixels.width)) × \(Int(picturePixels.height))") // no locale grouping
-                .font(.system(size: 12, weight: .medium, design: .monospaced))
-                .padding(.horizontal, 7).padding(.vertical, 2)
-                .background(.primary.opacity(0.06), in: Capsule())
-            Spacer()
-            if let toast {
-                Text(toast)
-                    .font(Leaf.font(12, .semibold))
-                    .foregroundStyle(Leaf.ink)
-                    .transition(.opacity)
+        HStack(spacing: 12) {
+            HStack(spacing: 8) {
+                BrandLogo()
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Screenshot").font(Leaf.font(15, .semibold))
+                    Text(verbatim: "\(Int(picturePixels.width)) × \(Int(picturePixels.height))") // no locale grouping
+                        .font(.system(size: 10.5, weight: .medium, design: .monospaced))
+                        .opacity(0.5)
+                }
+                .fixedSize()
             }
+            .overlay(WindowDragArea())
+            toolRow
+            Color.clear
+                .frame(maxWidth: .infinity, maxHeight: 36)
+                .overlay(alignment: .trailing) {
+                    if let toast {
+                        Text(toast)
+                            .font(Leaf.font(12, .semibold))
+                            .foregroundStyle(Leaf.ink)
+                            .fixedSize()
+                            .transition(.opacity)
+                    }
+                }
+                .overlay(WindowDragArea())
         }
-        .overlay(WindowDragArea())
     }
 
     /// Arrow, box and oval share one button; its menu picks which.
@@ -117,7 +135,6 @@ struct ScreenshotView: View {
             }
             divider
             styleButton
-            Spacer(minLength: 0)
         }
         .fixedSize(horizontal: false, vertical: true)
         .disabled(editingText)
@@ -137,6 +154,7 @@ struct ScreenshotView: View {
     }
 
     private func pick(_ tool: AnnotationTool?) {
+        if tool != nil { liveText = nil }
         doc.tool = tool
         if tool != nil { doc.selection = nil }
         flyout = nil
@@ -312,7 +330,7 @@ struct ScreenshotView: View {
                 // Shottr-style: in Select mode, pressing on the shot (not on a
                 // mark) drags the whole result out — marks included.
                 DragOutView(
-                    wantsDrag: { p in flyout == nil && doc.tool == nil && AnnotationEditing.hit(doc.items, at: p) == nil },
+                    wantsDrag: { p in flyout == nil && liveText == nil && doc.tool == nil && AnnotationEditing.hit(doc.items, at: p) == nil },
                     onPress: { doc.selection = nil },
                     file: actions.dragFile,
                     thumbnail: image
@@ -334,10 +352,16 @@ struct ScreenshotView: View {
                     .onSubmit(commitText)
                     .onExitCommand { textDraft = nil; editingTextID = nil; doc.tool = nil }
                 }
+                if let liveText {
+                    LiveTextView(overlay: liveText, image: pictureCG)
+                        .frame(width: pictureSize.width, height: pictureSize.height)
+                        .offset(x: origin.x, y: origin.y)
+                }
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous)) // nothing spills over the toolbars
-        .frame(minWidth: displaySize.width, maxWidth: .infinity, minHeight: displaySize.height, maxHeight: .infinity)
+        .frame(minWidth: displaySize.width + 2 * Self.margin, maxWidth: .infinity,
+               minHeight: displaySize.height + 2 * Self.margin, maxHeight: .infinity)
     }
 
     /// Dashed outline + round handles around the selected mark (screen only).
@@ -427,7 +451,7 @@ struct ScreenshotView: View {
         case .move(let id, let original):
             if moved, let live = liveEdit { doc.update(live.id, to: live.kind); break }
             // A double-click on a text mark opens it for editing.
-            if case .text(let origin, let string) = original,
+            if case .text(let origin, let string, _) = original,
                let last = lastClick, last.id == id, Date().timeIntervalSince(last.at) < 0.4 {
                 if let item = doc.items.first(where: { $0.id == id }) { doc.color = item.color }
                 editingTextID = id
@@ -500,9 +524,13 @@ struct ScreenshotView: View {
         if let draft = textDraft {
             if let id = editingTextID {
                 // Editing: an emptied text removes the mark.
-                if string.isEmpty { doc.remove(id) } else { doc.update(id, to: .text(origin: draft.origin, string: draft.string)) }
+                if string.isEmpty { doc.remove(id) } else {
+                    let tail: CGPoint? = if case .text(_, _, let t) = doc.items.first(where: { $0.id == id })?.kind { t } else { nil }
+                    doc.update(id, to: .text(origin: draft.origin, string: draft.string, tail: tail))
+                }
             } else if !string.isEmpty {
-                doc.add(.text(origin: draft.origin, string: draft.string))
+                doc.add(.text(origin: draft.origin, string: draft.string,
+                              tail: AnnotationStyle.defaultTail(origin: draft.origin, string: draft.string)))
             }
         }
         textDraft = nil
@@ -515,7 +543,7 @@ struct ScreenshotView: View {
     /// Actions with their keys on them — one row instead of buttons + hints.
     private var toolbar: some View {
         HStack(spacing: 6) {
-            Button { actions.copy(); flash("Copied") } label: { keyed("Copy", "↩") }
+            Button { copy() } label: { keyed(liveText == nil ? "Copy" : "Copy text", "↩") }
                 .buttonStyle(LeafButtonStyle(prominent: true))
                 .keyboardShortcut("c", modifiers: .command)
             Button {
@@ -526,9 +554,10 @@ struct ScreenshotView: View {
             Button { actions.pin() } label: { keyed("Pin", "P") }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("p", modifiers: [])
-            Button { actions.text() } label: { keyed("Text", "T") }
-                .buttonStyle(LeafButtonStyle())
+            Button { toggleLiveText() } label: { keyed("Text", "T") }
+                .buttonStyle(LeafButtonStyle(prominent: liveText != nil))
                 .keyboardShortcut("t", modifiers: [])
+                .instantTip(liveText == nil ? "Select text on the shot" : "Back to marks")
             Button { actions.ask() } label: { keyed("Ask AI", "A") }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("a", modifiers: [])
@@ -575,12 +604,13 @@ struct ScreenshotView: View {
         } else {
             Button("") {
                 if flyout != nil { flyout = nil }
+                else if liveText != nil { liveText = nil }
                 else if doc.selection != nil { doc.selection = nil }
                 else if doc.tool != nil { doc.tool = nil }
                 else { actions.close() }
             }
             .keyboardShortcut(.cancelAction)
-            Button("") { actions.copy(); actions.close() }
+            Button("") { copy(); actions.close() }
                 .keyboardShortcut(.defaultAction)
             Button("") { if let id = doc.selection { doc.remove(id) } }
                 .keyboardShortcut(.delete, modifiers: [])
@@ -593,6 +623,25 @@ struct ScreenshotView: View {
                 Button("") { pick(tool) }.keyboardShortcut(KeyEquivalent(tool.key), modifiers: [])
             }
         }
+    }
+
+    /// The image — or, in Live Text mode, the selected text (all of it when
+    /// nothing is selected).
+    private func copy() {
+        guard let liveText else { actions.copy(); flash("Copied"); return }
+        let text = liveText.selectedText.isEmpty ? liveText.analysis?.transcript ?? "" : liveText.selectedText
+        guard !text.isEmpty else { flash("No text found"); return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+        flash(liveText.selectedText.isEmpty ? "Copied all text" : "Copied")
+    }
+
+    private func toggleLiveText() {
+        if liveText != nil { liveText = nil; return }
+        doc.tool = nil
+        doc.selection = nil
+        liveText = ImageAnalysisOverlayView()
+        flash("Select text · ↩ copies it")
     }
 
     private func flash(_ text: String) {

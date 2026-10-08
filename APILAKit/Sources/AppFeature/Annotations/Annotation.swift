@@ -11,7 +11,8 @@ struct Annotation: Identifiable, Equatable {
         case highlight(CGRect)
         case blur(CGRect)
         case step(center: CGPoint, number: Int)
-        case text(origin: CGPoint, string: String)
+        /// A callout: text on a bubble, with an optional tail pointing at `tail`.
+        case text(origin: CGPoint, string: String, tail: CGPoint? = nil)
         /// "Smart eraser": paints the area with the color around it (wipes text
         /// off a plain background).
         case erase(CGRect, fill: NSColor)
@@ -50,9 +51,9 @@ struct Annotation: Identifiable, Equatable {
         case .step(let c, _):
             let r = AnnotationStyle.stepRadius
             return CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)
-        case .text(let o, let s):
-            let size = NSAttributedString(string: s, attributes: AnnotationStyle.textAttributes(color: .black)).size()
-            return CGRect(origin: o, size: size).insetBy(dx: -6, dy: -4)
+        case .text(let o, let s, let tail):
+            let bubble = AnnotationStyle.bubble(origin: o, string: s)
+            return tail.map { bubble.union(CGRect(origin: $0, size: .zero)).insetBy(dx: -2, dy: -2) } ?? bubble
         }
     }
 }
@@ -264,6 +265,18 @@ enum AnnotationStyle {
     static func arrowHead(for width: CGFloat) -> CGFloat { 10 + width * 2 }
     static let stepRadius: CGFloat = 15
     static let blurBlock: CGFloat = 10 // pixelation cell, in image points
+
+    /// The callout bubble around a text mark (text starts at `origin`).
+    static func bubble(origin: CGPoint, string: String) -> CGRect {
+        let size = NSAttributedString(string: string, attributes: textAttributes(color: .black)).size()
+        return CGRect(origin: origin, size: size).insetBy(dx: -10, dy: -5)
+    }
+
+    /// Where a new callout's tail points: down-left of the bubble.
+    static func defaultTail(origin: CGPoint, string: String) -> CGPoint {
+        let b = bubble(origin: origin, string: string)
+        return CGPoint(x: b.minX - 28, y: b.maxY + 40)
+    }
 
     static func textAttributes(color: NSColor) -> [NSAttributedString.Key: Any] {
         let shadow = NSShadow()

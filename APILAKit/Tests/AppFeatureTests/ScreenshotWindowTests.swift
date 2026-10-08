@@ -34,7 +34,7 @@ struct ScreenshotWindowTests {
         let host = NSHostingView(rootView: ScreenshotView(
             image: NSImage(size: display), cgImage: Self.blankImage, pixelSize: CGSize(width: 680, height: 1560),
             displaySize: display, actions: noop, doc: AnnotationDocument()))
-        let extra = host.fittingSize.height - display.height
+        let extra = host.fittingSize.height - display.height - 2 * ScreenshotView.margin
         #expect(extra > 0 && extra <= ScreenshotWindows.chromeHeight, "chrome is \(extra) pt")
     }
 
@@ -48,7 +48,8 @@ struct ScreenshotWindowTests {
                                   displaySize: display, actions: noop, doc: doc)
         let fit = NSHostingView(rootView: view).fittingSize
         #expect(fit.width <= ScreenshotView.minContentWidth + 28 + 0.5, "width \(fit.width)")
-        #expect(fit.height - display.height <= ScreenshotWindows.chromeHeight, "chrome \(fit.height - display.height)")
+        let chrome = fit.height - display.height - 2 * ScreenshotView.margin
+        #expect(chrome <= ScreenshotWindows.chromeHeight, "chrome \(chrome)")
         try renderPreview(view, "screenshot-narrow.png")
     }
 
@@ -99,7 +100,7 @@ struct ScreenshotWindowTests {
         doc.add(.rectangle(CGRect(x: 30, y: 140, width: 300, height: 70)))
         doc.add(.step(center: CGPoint(x: 30, y: 140), number: 1))
         doc.color = .white
-        doc.add(.text(origin: CGPoint(x: 360, y: 240), string: "look here"))
+        doc.add(.text(origin: CGPoint(x: 360, y: 240), string: "look here", tail: CGPoint(x: 330, y: 300)))
         doc.add(.blur(CGRect(x: 480, y: 280, width: 140, height: 60)))
         doc.add(.focus(CGRect(x: 20, y: 120, width: 340, height: 120)))
         doc.color = .coral

@@ -20,9 +20,10 @@ struct ScreenshotSizingTests {
         let panel = try #require(windows.open.values.first)
         defer { panel.orderOut(nil) }
         print("SIZING panel", panel.frame, "screens", NSScreen.screens.map(\.visibleFrame))
-        // 800×800 pt image + 14 pt padding each side; + header/toolbar/hints below.
-        #expect(panel.frame.width == 828)
-        #expect(panel.frame.height > 800 && panel.frame.height <= 800 + ScreenshotWindows.chromeHeight)
+        // 800×800 pt image + canvas margin + 14 pt padding each side; + header/actions.
+        let m = 2 * ScreenshotView.margin
+        #expect(panel.frame.width == 800 + m + 28)
+        #expect(panel.frame.height > 800 + m && panel.frame.height <= 800 + m + ScreenshotWindows.chromeHeight)
         #expect(NSScreen.screens.contains { $0.visibleFrame.contains(panel.frame) })
 
         // It can grow (room around the shot for annotations) and stays grown;

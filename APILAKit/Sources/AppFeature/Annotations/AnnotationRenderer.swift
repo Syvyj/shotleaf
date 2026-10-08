@@ -55,7 +55,7 @@ enum AnnotationRenderer {
             case .highlight(let r): highlight(r, color: color, in: ctx)
             case .blur(let r): pixelate(r, image: image, imageSize: imageSize, in: ctx)
             case .step(let c, let n): step(c, number: n, color: item.color.nsColor, in: ctx)
-            case .text(let o, let s): text(s, at: o, color: item.color.nsColor, in: ctx)
+            case .text(let o, let s, let tail): callout(s, at: o, tail: tail, color: item.color.nsColor, in: ctx)
             case .erase(let r, let fill): erase(r, fill: fill, imageSize: imageSize, in: ctx)
             case .piece(let source, let offset, let fill):
                 erase(source, fill: fill, imageSize: imageSize, in: ctx)
@@ -145,8 +145,32 @@ enum AnnotationRenderer {
         drawText(label, at: CGPoint(x: c.x - size.width / 2, y: c.y - size.height / 2), in: ctx)
     }
 
-    private static func text(_ s: String, at o: CGPoint, color: NSColor, in ctx: CGContext) {
-        drawText(NSAttributedString(string: s, attributes: AnnotationStyle.textAttributes(color: color)), at: o, in: ctx)
+    /// A bubble in the mark's color with the text on it, and a tapering tail
+    /// from the bubble's middle to `tail` (the bubble hides its root).
+    private static func callout(_ s: String, at o: CGPoint, tail: CGPoint?, color: NSColor, in ctx: CGContext) {
+        let bubble = AnnotationStyle.bubble(origin: o, string: s)
+        ctx.saveGState()
+        softShadow(ctx)
+        ctx.setFillColor(color.cgColor)
+        ctx.beginTransparencyLayer(auxiliaryInfo: nil) // one shadow for bubble + tail
+        if let tail {
+            let c = CGPoint(x: bubble.midX, y: bubble.midY)
+            let angle = atan2(tail.y - c.y, tail.x - c.x) + .pi / 2
+            let half = min(12, bubble.height / 2 - 2)
+            ctx.move(to: CGPoint(x: c.x + cos(angle) * half, y: c.y + sin(angle) * half))
+            ctx.addLine(to: tail)
+            ctx.addLine(to: CGPoint(x: c.x - cos(angle) * half, y: c.y - sin(angle) * half))
+            ctx.closePath()
+            ctx.fillPath()
+        }
+        ctx.addPath(CGPath(roundedRect: bubble, cornerWidth: 9, cornerHeight: 9, transform: nil))
+        ctx.fillPath()
+        ctx.endTransparencyLayer()
+        ctx.restoreGState()
+        let light = [AnnotationColor.white, .amber].map(\.nsColor).contains(color)
+        var attributes = AnnotationStyle.textAttributes(color: light ? .black : .white)
+        attributes[.shadow] = nil
+        drawText(NSAttributedString(string: s, attributes: attributes), at: o, in: ctx)
     }
 
     /// Dims the image outside the focus areas, and rims them with a soft light.

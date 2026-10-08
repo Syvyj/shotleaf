@@ -53,6 +53,20 @@ struct AnnotationEditingTests {
         #expect(doc.isEmpty)
     }
 
+    @Test("Callout tail: drag it anywhere; drop it on the bubble and it's gone; moving keeps it pointing")
+    func calloutTail() {
+        let o = CGPoint(x: 100, y: 100)
+        let text = Annotation.Kind.text(origin: o, string: "hi", tail: CGPoint(x: 50, y: 200))
+        #expect(E.handle(of: text, at: CGPoint(x: 52, y: 198)) == .tail)
+        #expect(E.resized(text, .tail, to: CGPoint(x: 300, y: 20)) == .text(origin: o, string: "hi", tail: CGPoint(x: 300, y: 20)))
+        let bubble = AnnotationStyle.bubble(origin: o, string: "hi")
+        let tailless = E.resized(text, .tail, to: CGPoint(x: bubble.midX, y: bubble.midY))
+        #expect(tailless == .text(origin: o, string: "hi", tail: nil))
+        // Without a tail there's still a handle on the bubble's edge to pull one out.
+        #expect(E.handles(of: tailless).count == 1)
+        #expect(E.moved(text, by: CGSize(width: 10, height: 0)) == .text(origin: CGPoint(x: 110, y: 100), string: "hi", tail: CGPoint(x: 50, y: 200)))
+    }
+
     @Test("Thicker arrows get bigger heads")
     func arrowHead() {
         #expect(AnnotationStyle.arrowHead(for: 7) > AnnotationStyle.arrowHead(for: 2.5))
