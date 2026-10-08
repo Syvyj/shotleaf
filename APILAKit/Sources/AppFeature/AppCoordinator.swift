@@ -95,13 +95,18 @@ public final class AppCoordinator {
     public private(set) var hotkey: HotkeyShortcut = .default
 
     /// Returns false (and keeps the old one) if the shortcut is taken.
-    public func setHotkey(id: String) -> Bool {
-        let ok = container.hotkeys.setShortcut(.with(id: id))
-        if ok { container.settings.hotkey = id }
+    public func setHotkey(_ shortcut: HotkeyShortcut) -> Bool {
+        let ok = container.hotkeys.setShortcut(shortcut)
+        if ok { container.settings.hotkey = shortcut.id }
         hotkeyRegistered = ok || hotkeyRegistered
         hotkey = container.hotkeys.shortcut
         return ok
     }
+
+    /// While recording a new shortcut the current one must not fire (Carbon
+    /// would swallow the key press and open the panel).
+    public func pauseHotkey() { container.hotkeys.stop() }
+    public func resumeHotkey() { container.hotkeys.start() }
 
     public struct ProviderSettings: Equatable {
         public var kind: ProviderKind

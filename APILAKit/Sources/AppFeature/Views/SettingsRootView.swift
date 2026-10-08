@@ -134,20 +134,32 @@ public struct SettingsRootView: View {
         Section {
             Picker("Open APILA", selection: Binding(
                 get: { coordinator.hotkey.id },
-                set: { id in
-                    hotkeyError = coordinator.setHotkey(id: id)
-                        ? nil
-                        : "\(HotkeyShortcut.with(id: id).title) is taken by another app — kept \(coordinator.hotkey.title)."
-                }
+                set: { apply(HotkeyShortcut.with(id: $0)) }
             )) {
-                ForEach(HotkeyShortcut.all) { Text($0.title).tag($0.id) }
+                ForEach(shortcutOptions) { Text($0.title).tag($0.id) }
             }
+            HotkeyRecorder(
+                onStart: { hotkeyError = nil; coordinator.pauseHotkey() },
+                onRecord: { apply($0) },
+                onCancel: { coordinator.resumeHotkey() }
+            )
             if let hotkeyError {
                 Text(hotkeyError).font(.caption).foregroundStyle(.orange)
             }
         } header: {
             Text("Shortcut")
         }
+    }
+
+    /// Presets plus the current recorded shortcut, if any.
+    private var shortcutOptions: [HotkeyShortcut] {
+        HotkeyShortcut.all.contains(coordinator.hotkey) ? HotkeyShortcut.all : HotkeyShortcut.all + [coordinator.hotkey]
+    }
+
+    private func apply(_ shortcut: HotkeyShortcut) {
+        hotkeyError = coordinator.setHotkey(shortcut)
+            ? nil
+            : "\(shortcut.title) is taken by another app — kept \(coordinator.hotkey.title)."
     }
 
     // MARK: Translate
