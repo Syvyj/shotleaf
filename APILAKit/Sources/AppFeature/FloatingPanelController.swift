@@ -50,6 +50,9 @@ public final class FloatingPanelController {
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
         panel.isMovableByWindowBackground = true
         panel.acceptsMouseMovedEvents = true // hover highlight follows the mouse
+        // Set explicitly: a non-opaque window otherwise lets clicks on its
+        // translucent (material) areas fall through to the app underneath.
+        panel.ignoresMouseEvents = false
         panel.hidesOnDeactivate = false
         panel.isOpaque = false
         panel.backgroundColor = .clear
