@@ -72,7 +72,12 @@
 ./scripts/run.sh   # збірка → підпис «APILA Local Signing» → ~/Applications → старт
 ```
 
-Підпис локальним сертифікатом (login keychain) робить дозволи macOS сталими між перезбірками.
+Підпис локальним сертифікатом (login keychain) робить дозволи macOS сталими між перезбірками — але лише якщо сертифікат довірений для підпису коду (інакше TCC запам'ятовує cdhash конкретної збірки). Один раз:
+
+```bash
+security find-certificate -c "APILA Local Signing" -p > /tmp/apila-cert.pem && security add-trusted-cert -r trustRoot -p codeSign -k ~/Library/Keychains/login.keychain-db /tmp/apila-cert.pem
+tccutil reset ScreenCapture app.apila.APILA && tccutil reset Accessibility app.apila.APILA
+```
 
 ## Перевірка
 
