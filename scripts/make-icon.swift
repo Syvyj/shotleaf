@@ -80,11 +80,11 @@ func drawIcon(size: CGFloat) -> NSBitmapImageRep {
         .draw(in: CGRect(x: body.minX, y: body.midY, width: body.width, height: body.height / 2), angle: -90)
     NSGraphicsContext.restoreGraphicsState()
 
-    // The mark: lime corners, near-white spark.
+    // The mark: lime corners, white spark.
     let markRect = body.insetBy(dx: 210 * s, dy: 210 * s)
     lime.setStroke()
     corners(in: markRect, arm: 120 * s, width: 46 * s).stroke()
-    NSColor(srgbRed: 0.97, green: 1, blue: 0.90, alpha: 1).setFill()
+    NSColor.white.setFill()
     spark(center: CGPoint(x: body.midX, y: body.midY), radius: 168 * s).fill()
 
     NSGraphicsContext.restoreGraphicsState()
