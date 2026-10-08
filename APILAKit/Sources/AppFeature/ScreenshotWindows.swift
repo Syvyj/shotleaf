@@ -21,26 +21,44 @@ final class ScreenshotWindows {
         // Leave room for the header, toolbar and hints around the image.
         let room = CGSize(width: visible.width - 80, height: visible.height - Self.chromeHeight)
         let display = Self.fit(points: CGSize(width: pixels.width / scale, height: pixels.height / scale), in: room)
-        let fileURL = Self.writeTempPNG(payload.data)
+        guard let cgImage = NSBitmapImageRep(data: payload.data)?.cgImage else { return }
+        let doc = AnnotationDocument()
+
+        /// The shot with its marks (or the untouched original), as PNG.
+        let result: () -> Data = {
+            guard !doc.isEmpty,
+                  let composed = AnnotationRenderer.export(cgImage, imageSize: display, items: doc.items),
+                  let png = NSBitmapImageRep(cgImage: composed).representation(using: .png, properties: [:])
+            else { return payload.data }
+            return png
+        }
 
         var panel: NSPanel!
         let close: () -> Void = { [weak self] in self?.close(panel) }
         let actions = ScreenshotActions(
-            copy: { Self.copy(payload.data) },
-            save: { Self.save(payload.data) },
+            copy: { Self.copy(result()) },
+            save: { Self.save(result()) },
             pin: { [weak self] in
+                let png = result()
+                guard let pinned = NSImage(data: png), let rep = NSBitmapImageRep(data: png) else { return }
                 close()
-                self?.pin(image, size: CGSize(width: pixels.width / scale, height: pixels.height / scale), data: payload.data)
+                self?.pin(pinned, size: CGSize(width: CGFloat(rep.pixelsWide) / scale, height: CGFloat(rep.pixelsHigh) / scale), data: png)
             },
-            text: { [weak self] in close(); self?.onText(payload) },
-            ask: { [weak self] in close(); self?.onAsk(payload) },
-            close: close
+            text: { [weak self] in close(); self?.onText(payload) },              // OCR the clean original
+            ask: { [weak self] in close(); self?.onAsk(Self.payload(result())) },  // marks help the model
+            close: close,
+            dragFile: { Self.writeTempPNG(result()) }
         )
         let width = max(display.width, ScreenshotView.minContentWidth) + 28
-        panel = makePanel(ScreenshotView(image: image, pixelSize: pixels, fileURL: fileURL, displaySize: display, actions: actions),
+        panel = makePanel(ScreenshotView(image: image, cgImage: cgImage, pixelSize: pixels, displaySize: display, actions: actions, doc: doc),
                           proposedWidth: width, resizable: true)
         panel.setFrameOrigin(Self.placed(panel.frame.size, centeredIn: visible))
         present(panel)
+    }
+
+    static func payload(_ png: Data) -> ImagePayload {
+        let rep = NSBitmapImageRep(data: png)
+        return ImagePayload(data: png, width: rep?.pixelsWide ?? 0, height: rep?.pixelsHigh ?? 0)
     }
 
     private func pin(_ image: NSImage, size: CGSize, data: Data) {
@@ -133,7 +151,7 @@ final class ScreenshotWindows {
     // MARK: Geometry
 
     /// Header + toolbar + hint line + padding around the image, in points.
-    static let chromeHeight: CGFloat = 170
+    static let chromeHeight: CGFloat = 190
 
     /// Scales `points` down (never up) to fit `available` (tall captures shrink
     /// to the screen height, wide ones to its width).

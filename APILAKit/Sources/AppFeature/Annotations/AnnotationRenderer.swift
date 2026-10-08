@@ -1,0 +1,209 @@
+import AppKit
+
+/// Draws annotations with Core Graphics — used both live (SwiftUI Canvas) and
+/// for export, so the saved image is exactly what was on screen.
+/// All drawing is in image points with y pointing down (a flipped context).
+enum AnnotationRenderer {
+    /// - Parameters:
+    ///   - image: the original screenshot (needed to pixelate under Blur).
+    ///   - imageSize: the screenshot's size in image points.
+    static func draw(_ items: [Annotation], image: CGImage, imageSize: CGSize, in ctx: CGContext) {
+        for item in items {
+            ctx.saveGState()
+            let color = item.color.nsColor.cgColor
+            switch item.kind {
+            case .arrow(let a, let b): arrow(from: a, to: b, color: color, in: ctx)
+            case .rectangle(let r): box(r, color: color, in: ctx)
+            case .highlight(let r): highlight(r, color: color, in: ctx)
+            case .blur(let r): pixelate(r, image: image, imageSize: imageSize, in: ctx)
+            case .step(let c, let n): step(c, number: n, color: item.color.nsColor, in: ctx)
+            case .text(let o, let s): text(s, at: o, color: item.color.nsColor, in: ctx)
+            case .erase(let r, let fill): erase(r, fill: fill, imageSize: imageSize, in: ctx)
+            case .piece(let source, let offset, let fill):
+                erase(source, fill: fill, imageSize: imageSize, in: ctx)
+                piece(source, offset: offset, image: image, imageSize: imageSize, in: ctx)
+            }
+            ctx.restoreGState()
+        }
+    }
+
+    // MARK: Marks
+
+    private static func softShadow(_ ctx: CGContext) {
+        ctx.setShadow(offset: CGSize(width: 0, height: 1), blur: 3, color: NSColor.black.withAlphaComponent(0.35).cgColor)
+    }
+
+    private static func arrow(from a: CGPoint, to b: CGPoint, color: CGColor, in ctx: CGContext) {
+        let length = hypot(b.x - a.x, b.y - a.y)
+        guard length > 2 else { return }
+        let angle = atan2(b.y - a.y, b.x - a.x)
+        let head = min(AnnotationStyle.arrowHead, length * 0.6)
+        // Shaft stops inside the head so the tip stays sharp.
+        let shaftEnd = CGPoint(x: b.x - cos(angle) * head * 0.6, y: b.y - sin(angle) * head * 0.6)
+        softShadow(ctx)
+        ctx.setStrokeColor(color)
+        ctx.setLineWidth(AnnotationStyle.stroke)
+        ctx.setLineCap(.round)
+        ctx.move(to: a)
+        ctx.addLine(to: shaftEnd)
+        ctx.strokePath()
+        let spread: CGFloat = .pi / 7
+        ctx.setFillColor(color)
+        ctx.move(to: b)
+        ctx.addLine(to: CGPoint(x: b.x - cos(angle - spread) * head, y: b.y - sin(angle - spread) * head))
+        ctx.addLine(to: CGPoint(x: b.x - cos(angle + spread) * head, y: b.y - sin(angle + spread) * head))
+        ctx.closePath()
+        ctx.fillPath()
+    }
+
+    private static func box(_ r: CGRect, color: CGColor, in ctx: CGContext) {
+        softShadow(ctx)
+        ctx.setStrokeColor(color)
+        ctx.setLineWidth(AnnotationStyle.stroke)
+        ctx.addPath(CGPath(roundedRect: r, cornerWidth: 4, cornerHeight: 4, transform: nil))
+        ctx.strokePath()
+    }
+
+    private static func highlight(_ r: CGRect, color: CGColor, in ctx: CGContext) {
+        ctx.setBlendMode(.multiply)
+        ctx.setFillColor(color.copy(alpha: 0.45) ?? color)
+        ctx.fill(r)
+    }
+
+    /// Pixelates the image under `r` (the part inside the image).
+    private static func pixelate(_ r: CGRect, image: CGImage, imageSize: CGSize, in ctx: CGContext) {
+        let area = r.intersection(CGRect(origin: .zero, size: imageSize))
+        guard !area.isEmpty else { return }
+        let scale = CGFloat(image.width) / imageSize.width
+        let pixels = CGRect(x: area.minX * scale, y: area.minY * scale, width: area.width * scale, height: area.height * scale).integral
+        guard let crop = image.cropping(to: pixels) else { return }
+        let cells = CGSize(width: max(1, (area.width / AnnotationStyle.blurBlock).rounded()),
+                           height: max(1, (area.height / AnnotationStyle.blurBlock).rounded()))
+        guard let small = CGContext(data: nil, width: Int(cells.width), height: Int(cells.height), bitsPerComponent: 8, bytesPerRow: 0,
+                                    space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return }
+        small.interpolationQuality = .medium
+        small.draw(crop, in: CGRect(origin: .zero, size: cells))
+        guard let tiny = small.makeImage() else { return }
+        ctx.interpolationQuality = .none
+        drawUpright(tiny, in: area, ctx: ctx)
+    }
+
+    private static func step(_ c: CGPoint, number: Int, color: NSColor, in ctx: CGContext) {
+        let r = AnnotationStyle.stepRadius
+        let circle = CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)
+        softShadow(ctx)
+        ctx.setFillColor(color.cgColor)
+        ctx.fillEllipse(in: circle)
+        ctx.setShadow(offset: .zero, blur: 0)
+        ctx.setStrokeColor(NSColor.white.cgColor)
+        ctx.setLineWidth(2)
+        ctx.strokeEllipse(in: circle.insetBy(dx: 1, dy: 1))
+        let label = NSAttributedString(string: "\(number)", attributes: [
+            .font: NSFont.systemFont(ofSize: 15, weight: .heavy),
+            .foregroundColor: color == AnnotationColor.white.nsColor ? NSColor.black : NSColor.white,
+        ])
+        let size = label.size()
+        drawText(label, at: CGPoint(x: c.x - size.width / 2, y: c.y - size.height / 2), in: ctx)
+    }
+
+    private static func text(_ s: String, at o: CGPoint, color: NSColor, in ctx: CGContext) {
+        drawText(NSAttributedString(string: s, attributes: AnnotationStyle.textAttributes(color: color)), at: o, in: ctx)
+    }
+
+    /// Erasing only touches the image (the canvas around it is already plain).
+    private static func erase(_ r: CGRect, fill: NSColor, imageSize: CGSize, in ctx: CGContext) {
+        let area = r.intersection(CGRect(origin: .zero, size: imageSize))
+        guard !area.isEmpty else { return }
+        ctx.setFillColor(fill.cgColor)
+        ctx.fill(area)
+    }
+
+    private static func piece(_ source: CGRect, offset: CGSize, image: CGImage, imageSize: CGSize, in ctx: CGContext) {
+        let area = source.intersection(CGRect(origin: .zero, size: imageSize))
+        let scale = CGFloat(image.width) / imageSize.width
+        let pixels = CGRect(x: area.minX * scale, y: area.minY * scale, width: area.width * scale, height: area.height * scale).integral
+        guard !area.isEmpty, let crop = image.cropping(to: pixels) else { return }
+        let target = area.offsetBy(dx: offset.width, dy: offset.height)
+        ctx.saveGState()
+        ctx.setShadow(offset: CGSize(width: 0, height: 2), blur: 8, color: NSColor.black.withAlphaComponent(0.30).cgColor)
+        drawUpright(crop, in: target, ctx: ctx)
+        ctx.restoreGState()
+    }
+
+    /// The color around `r` in the image — the median of the pixels on its
+    /// border, so a few letters touching the edge don't tint it.
+    static func surroundingColor(of r: CGRect, image: CGImage, imageSize: CGSize) -> NSColor {
+        let scale = CGFloat(image.width) / imageSize.width
+        let px = CGRect(x: r.minX * scale, y: r.minY * scale, width: r.width * scale, height: r.height * scale)
+            .insetBy(dx: -2, dy: -2).integral
+            .intersection(CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        guard px.width >= 2, px.height >= 2, let crop = image.cropping(to: px) else { return .white }
+        let w = crop.width, h = crop.height
+        var data = [UInt8](repeating: 0, count: w * h * 4)
+        guard let ctx = CGContext(data: &data, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                                  space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return .white }
+        ctx.draw(crop, in: CGRect(x: 0, y: 0, width: w, height: h))
+        var r8: [UInt8] = [], g8: [UInt8] = [], b8: [UInt8] = []
+        func take(_ x: Int, _ y: Int) {
+            let i = (y * w + x) * 4
+            r8.append(data[i]); g8.append(data[i + 1]); b8.append(data[i + 2])
+        }
+        for x in 0..<w { take(x, 0); take(x, h - 1) }
+        for y in 1..<(h - 1) { take(0, y); take(w - 1, y) }
+        func median(_ v: [UInt8]) -> CGFloat { CGFloat(v.sorted()[v.count / 2]) / 255 }
+        return NSColor(srgbRed: median(r8), green: median(g8), blue: median(b8), alpha: 1)
+    }
+
+    // MARK: Helpers (the context is flipped: y down)
+
+    private static func drawText(_ text: NSAttributedString, at p: CGPoint, in ctx: CGContext) {
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: true)
+        text.draw(at: p)
+        NSGraphicsContext.restoreGraphicsState()
+    }
+
+    /// CGContext.draw puts images upside down in a flipped context.
+    static func drawUpright(_ image: CGImage, in rect: CGRect, ctx: CGContext) {
+        ctx.saveGState()
+        ctx.translateBy(x: rect.minX, y: rect.maxY)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(image, in: CGRect(origin: .zero, size: rect.size))
+        ctx.restoreGState()
+    }
+
+    // MARK: Export
+
+    /// The area to export, in image points: the image, grown to include any
+    /// marks drawn on the canvas around it (plus a little margin).
+    static func exportBounds(_ items: [Annotation], imageSize: CGSize) -> CGRect {
+        let image = CGRect(origin: .zero, size: imageSize)
+        let marks = items.reduce(CGRect.null) { $0.union($1.bounds) }
+        guard !marks.isNull, !image.contains(marks) else { return image }
+        return image.union(marks.insetBy(dx: -16, dy: -16)).integral
+    }
+
+    /// The screenshot with its marks, at the original pixel density. Canvas
+    /// area outside the image is filled with `canvas`.
+    static func export(_ image: CGImage, imageSize: CGSize, items: [Annotation], canvas: NSColor = .white) -> CGImage? {
+        guard !items.isEmpty else { return image }
+        let bounds = exportBounds(items, imageSize: imageSize)
+        let scale = CGFloat(image.width) / imageSize.width
+        guard let ctx = CGContext(data: nil, width: Int((bounds.width * scale).rounded()), height: Int((bounds.height * scale).rounded()),
+                                  bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return nil }
+        // Flip to y-down image points.
+        ctx.translateBy(x: 0, y: CGFloat(ctx.height))
+        ctx.scaleBy(x: scale, y: -scale)
+        ctx.translateBy(x: -bounds.minX, y: -bounds.minY)
+        ctx.setFillColor(canvas.cgColor)
+        ctx.fill(bounds)
+        ctx.interpolationQuality = .high
+        drawUpright(image, in: CGRect(origin: .zero, size: imageSize), ctx: ctx)
+        draw(items, image: image, imageSize: imageSize, in: ctx)
+        return ctx.makeImage()
+    }
+}

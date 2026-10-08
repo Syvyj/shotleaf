@@ -8,6 +8,9 @@ import SwiftUI
 @Suite("Screenshot window")
 @MainActor
 struct ScreenshotWindowTests {
+    static let blankImage: CGImage = CGContext(data: nil, width: 4, height: 4, bitsPerComponent: 8, bytesPerRow: 0,
+                                               space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!.makeImage()!
+
     @Test("File name is sortable and Finder-safe")
     func fileName() {
         var c = DateComponents(); c.year = 2026; c.month = 10; c.day = 8; c.hour = 16; c.minute = 5; c.second = 9
@@ -27,10 +30,10 @@ struct ScreenshotWindowTests {
     @Test("chromeHeight really covers header + toolbar + hints")
     func chrome() {
         let display = CGSize(width: 340, height: 780)
-        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, text: {}, ask: {}, close: {})
+        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, text: {}, ask: {}, close: {}, dragFile: { nil })
         let host = NSHostingView(rootView: ScreenshotView(
-            image: NSImage(size: display), pixelSize: CGSize(width: 680, height: 1560),
-            fileURL: URL(fileURLWithPath: "/tmp/x.png"), displaySize: display, actions: noop))
+            image: NSImage(size: display), cgImage: Self.blankImage, pixelSize: CGSize(width: 680, height: 1560),
+            displaySize: display, actions: noop, doc: AnnotationDocument()))
         let extra = host.fittingSize.height - display.height
         #expect(extra > 0 && extra <= ScreenshotWindows.chromeHeight, "chrome is \(extra) pt")
     }
@@ -73,9 +76,20 @@ struct ScreenshotWindowTests {
             ("Shottr-level APILA" as NSString).draw(at: NSPoint(x: 40, y: 160), withAttributes: [.font: NSFont.boldSystemFont(ofSize: 40), .foregroundColor: NSColor.white])
             return true
         }
-        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, text: {}, ask: {}, close: {})
-        let view = ScreenshotView(image: image, pixelSize: CGSize(width: 1280, height: 720), fileURL: URL(fileURLWithPath: "/tmp/x.png"),
-                                  displaySize: CGSize(width: 640, height: 360), actions: noop)
+        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, text: {}, ask: {}, close: {}, dragFile: { nil })
+        var rect = CGRect(x: 0, y: 0, width: 1280, height: 720)
+        let cg = try #require(image.cgImage(forProposedRect: &rect, context: nil, hints: nil))
+        let doc = AnnotationDocument()
+        doc.add(.arrow(from: CGPoint(x: 460, y: 80), to: CGPoint(x: 330, y: 160)))
+        doc.color = .amber
+        doc.add(.rectangle(CGRect(x: 30, y: 140, width: 300, height: 70)))
+        doc.add(.step(center: CGPoint(x: 30, y: 140), number: 1))
+        doc.color = .white
+        doc.add(.text(origin: CGPoint(x: 360, y: 240), string: "look here"))
+        doc.add(.blur(CGRect(x: 480, y: 280, width: 140, height: 60)))
+        doc.tool = .arrow
+        let view = ScreenshotView(image: image, cgImage: cg, pixelSize: CGSize(width: 1280, height: 720),
+                                  displaySize: CGSize(width: 640, height: 360), actions: noop, doc: doc)
         try renderPreview(view, "screenshot-window.png")
         try renderPreview(view, "screenshot-window-dark.png", dark: true)
     }
