@@ -206,6 +206,48 @@ struct FittingScrollText: View {
     }
 }
 
+/// Bottom-right grip that resizes the window by hand (like WindowDragArea —
+/// system resizing is unreliable for our non-activating panels). Keeps the
+/// top-left corner in place and respects the window's `contentMinSize`.
+struct WindowResizeGrip: NSViewRepresentable {
+    final class GripView: NSView {
+        private var start: (mouse: NSPoint, frame: NSRect)?
+
+        override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+        override func resetCursorRects() { addCursorRect(bounds, cursor: .crosshair) }
+
+        override func mouseDown(with event: NSEvent) {
+            guard let window else { return }
+            start = (NSEvent.mouseLocation, window.frame)
+        }
+
+        override func mouseDragged(with event: NSEvent) {
+            guard let start, let window else { return }
+            let now = NSEvent.mouseLocation
+            let min = window.contentMinSize
+            let width = max(min.width, start.frame.width + now.x - start.mouse.x)
+            let height = max(min.height, start.frame.height - (now.y - start.mouse.y))
+            window.setFrame(NSRect(x: start.frame.minX, y: start.frame.maxY - height, width: width, height: height), display: true)
+        }
+
+        override func mouseUp(with event: NSEvent) { start = nil }
+
+        override func draw(_ dirtyRect: NSRect) {
+            NSColor.secondaryLabelColor.withAlphaComponent(0.6).setStroke()
+            let p = NSBezierPath()
+            p.lineWidth = 1.4
+            p.lineCapStyle = .round
+            for k in [4.0, 8.0, 12.0] as [CGFloat] {
+                p.move(to: NSPoint(x: bounds.maxX - k, y: bounds.minY + 2))
+                p.line(to: NSPoint(x: bounds.maxX - 2, y: bounds.minY + k))
+            }
+            p.stroke()
+        }
+    }
+    func makeNSView(context: Context) -> NSView { GripView() }
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
+
 /// The look of every APILA floating window: glass, a light wash (light theme),
 /// a breath of leaf green from the top, a hairline border; empty spots drag it.
 struct LeafPanelChrome: ViewModifier {

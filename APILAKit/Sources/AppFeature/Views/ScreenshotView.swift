@@ -30,6 +30,26 @@ struct ScreenshotView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
+            canvas
+            toolbar
+            HintBar(items: [("↩", "copy & close"), ("⌘S", "save"), ("P", "pin"), ("T", "text"), ("A", "ask"), ("esc", "close")])
+        }
+        .frame(minWidth: max(displaySize.width, Self.minContentWidth), maxWidth: .infinity,
+               maxHeight: .infinity, alignment: .topLeading)
+        .padding(14)
+        .leafPanelChrome()
+        .overlay(alignment: .bottomTrailing) {
+            WindowResizeGrip().frame(width: 18, height: 18).padding(4)
+        }
+    }
+
+    /// The image at its own size, centred on a canvas that grows with the
+    /// window — room around the shot for arrows and notes (annotations).
+    private var canvas: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(.primary.opacity(0.035))
+                .allowsHitTesting(false)
             Image(nsImage: image)
                 .resizable()
                 .interpolation(.high)
@@ -39,14 +59,8 @@ struct ScreenshotView: View {
                 .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
                 .onDrag { NSItemProvider(contentsOf: fileURL) ?? NSItemProvider() }
                 .help("Drag into any app")
-            toolbar
-            HintBar(items: [("↩", "copy & close"), ("⌘S", "save"), ("P", "pin"), ("T", "text"), ("A", "ask"), ("esc", "close")])
         }
-        // A fixed width: the toolbar's Spacer would otherwise ask for "infinite"
-        // width and the window would be sized/centred from that.
-        .frame(width: max(displaySize.width, Self.minContentWidth), alignment: .leading)
-        .padding(14)
-        .leafPanelChrome()
+        .frame(minWidth: displaySize.width, maxWidth: .infinity, minHeight: displaySize.height, maxHeight: .infinity)
     }
 
     private var header: some View {

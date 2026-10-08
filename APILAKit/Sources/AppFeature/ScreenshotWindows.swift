@@ -36,7 +36,9 @@ final class ScreenshotWindows {
             ask: { [weak self] in close(); self?.onAsk(payload) },
             close: close
         )
-        panel = makePanel(ScreenshotView(image: image, pixelSize: pixels, fileURL: fileURL, displaySize: display, actions: actions))
+        let width = max(display.width, ScreenshotView.minContentWidth) + 28
+        panel = makePanel(ScreenshotView(image: image, pixelSize: pixels, fileURL: fileURL, displaySize: display, actions: actions),
+                          proposedWidth: width, resizable: true)
         panel.setFrameOrigin(Self.placed(panel.frame.size, centeredIn: visible))
         present(panel)
     }
@@ -57,9 +59,13 @@ final class ScreenshotWindows {
 
     // MARK: Windows
 
-    private func makePanel<V: View>(_ view: V) -> NSPanel {
+    /// `proposedWidth` + `resizable`: the window opens at that width and the
+    /// smallest height the view allows, and can only grow from there.
+    private func makePanel<V: View>(_ view: V, proposedWidth: CGFloat? = nil, resizable: Bool = false) -> NSPanel {
         let panel = FloatingPanel(
-            contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false
+            contentRect: .zero,
+            styleMask: resizable ? [.borderless, .nonactivatingPanel, .resizable] : [.borderless, .nonactivatingPanel],
+            backing: .buffered, defer: false
         )
         panel.isFloatingPanel = true
         panel.level = .floating
@@ -73,10 +79,12 @@ final class ScreenshotWindows {
         // Ask SwiftUI for the ideal size up front: a fresh hosting view reports
         // 0×0 until it's on screen, and placing a 0×0 window centres it wrong.
         let controller = NSHostingController(rootView: view)
-        let size = controller.sizeThatFits(in: NSSize(width: 10_000, height: 10_000))
+        // Height 0 asks for the view's minimum height at that width.
+        let size = controller.sizeThatFits(in: NSSize(width: proposedWidth ?? 10_000, height: proposedWidth == nil ? 10_000 : 0))
         controller.sizingOptions = [] // we size the window ourselves, once
         panel.contentViewController = controller
         panel.setContentSize(size)
+        if resizable { panel.contentMinSize = size }
         return panel
     }
 

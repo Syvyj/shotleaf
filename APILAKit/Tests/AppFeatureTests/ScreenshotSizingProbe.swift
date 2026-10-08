@@ -11,6 +11,10 @@ struct ScreenshotSizingTests {
         let size = 1600
         let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: size, pixelsHigh: size, bitsPerSample: 8, samplesPerPixel: 4,
                                    hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
+        NSGradient(starting: .systemTeal, ending: .systemIndigo)!.draw(in: NSRect(x: 0, y: 0, width: size, height: size), angle: 30)
+        NSGraphicsContext.restoreGraphicsState()
         let windows = ScreenshotWindows()
         windows.show(ImagePayload(data: rep.representation(using: .png, properties: [:])!, width: size, height: size))
         let panel = try #require(windows.open.values.first)
@@ -20,5 +24,18 @@ struct ScreenshotSizingTests {
         #expect(panel.frame.width == 828)
         #expect(panel.frame.height > 800 && panel.frame.height <= 800 + ScreenshotWindows.chromeHeight)
         #expect(NSScreen.screens.contains { $0.visibleFrame.contains(panel.frame) })
+
+        // It can grow (room around the shot for annotations) and stays grown;
+        // it can't shrink below where it started.
+        #expect(panel.contentMinSize == panel.frame.size)
+        let grown = NSRect(x: panel.frame.minX, y: panel.frame.minY - 200, width: panel.frame.width + 300, height: panel.frame.height + 200)
+        panel.setFrame(grown, display: true)
+        panel.contentView?.layoutSubtreeIfNeeded()
+        #expect(panel.frame.size == grown.size)
+        if let dir = ProcessInfo.processInfo.environment["APILA_PREVIEW_DIR"], let view = panel.contentView,
+           let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
+            view.cacheDisplay(in: view.bounds, to: rep)
+            try rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: dir).appendingPathComponent("screenshot-grown.png"))
+        }
     }
 }
