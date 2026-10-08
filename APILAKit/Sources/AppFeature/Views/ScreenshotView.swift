@@ -24,6 +24,9 @@ struct ScreenshotView: View {
 
     @State private var toast: String?
 
+    /// Wide enough for the toolbar and the hint line.
+    static let minContentWidth: CGFloat = 520
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
@@ -39,8 +42,10 @@ struct ScreenshotView: View {
             toolbar
             HintBar(items: [("↩", "copy & close"), ("⌘S", "save"), ("P", "pin"), ("T", "text"), ("A", "ask"), ("esc", "close")])
         }
+        // A fixed width: the toolbar's Spacer would otherwise ask for "infinite"
+        // width and the window would be sized/centred from that.
+        .frame(width: max(displaySize.width, Self.minContentWidth), alignment: .leading)
         .padding(14)
-        .frame(minWidth: 460)
         .leafPanelChrome()
     }
 

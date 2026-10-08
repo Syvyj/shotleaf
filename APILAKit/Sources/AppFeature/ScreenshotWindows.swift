@@ -10,7 +10,7 @@ final class ScreenshotWindows {
     var onText: (ImagePayload) -> Void = { _ in }
     var onAsk: (ImagePayload) -> Void = { _ in }
 
-    private var open: [ObjectIdentifier: NSPanel] = [:]
+    private(set) var open: [ObjectIdentifier: NSPanel] = [:] // internal for tests
 
     func show(_ payload: ImagePayload) {
         guard let image = NSImage(data: payload.data) else { return }
@@ -70,12 +70,13 @@ final class ScreenshotWindows {
         panel.hasShadow = true
         panel.acceptsMouseMovedEvents = true
         panel.ignoresMouseEvents = false
-        let hosting = NSHostingView(rootView: view)
-        hosting.sizingOptions = [.preferredContentSize]
-        panel.contentView = hosting
-        // Size from the fully laid-out SwiftUI view, *then* the caller places it.
-        hosting.layoutSubtreeIfNeeded()
-        panel.setContentSize(hosting.fittingSize)
+        // Ask SwiftUI for the ideal size up front: a fresh hosting view reports
+        // 0×0 until it's on screen, and placing a 0×0 window centres it wrong.
+        let controller = NSHostingController(rootView: view)
+        let size = controller.sizeThatFits(in: NSSize(width: 10_000, height: 10_000))
+        controller.sizingOptions = [] // we size the window ourselves, once
+        panel.contentViewController = controller
+        panel.setContentSize(size)
         return panel
     }
 

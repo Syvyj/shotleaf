@@ -10,17 +10,8 @@ public enum BrandMark {
         let image = NSImage(size: size, flipped: false) { rect in
             let mark = rect.insetBy(dx: 1.5, dy: 1.5)
             NSColor.black.setStroke()
-            let corners = NSBezierPath()
+            let corners = Self.corners(in: mark, arm: 5)
             corners.lineWidth = 1.8
-            corners.lineCapStyle = .round
-            corners.lineJoinStyle = .round
-            let arm: CGFloat = 5
-            corners.move(to: CGPoint(x: mark.minX, y: mark.maxY - arm))
-            corners.line(to: CGPoint(x: mark.minX, y: mark.maxY))
-            corners.line(to: CGPoint(x: mark.minX + arm, y: mark.maxY))
-            corners.move(to: CGPoint(x: mark.maxX, y: mark.minY + arm))
-            corners.line(to: CGPoint(x: mark.maxX, y: mark.minY))
-            corners.line(to: CGPoint(x: mark.maxX - arm, y: mark.minY))
             corners.stroke()
             NSColor.black.setFill()
             spark(center: CGPoint(x: rect.midX, y: rect.midY), radius: 5.6).fill()
@@ -29,6 +20,20 @@ public enum BrandMark {
         image.isTemplate = true
         return image
     }()
+
+    /// Top-left and bottom-right selection corners inside `rect` (y up).
+    static func corners(in rect: CGRect, arm: CGFloat) -> NSBezierPath {
+        let p = NSBezierPath()
+        p.lineCapStyle = .round
+        p.lineJoinStyle = .round
+        p.move(to: CGPoint(x: rect.minX, y: rect.maxY - arm))
+        p.line(to: CGPoint(x: rect.minX, y: rect.maxY))
+        p.line(to: CGPoint(x: rect.minX + arm, y: rect.maxY))
+        p.move(to: CGPoint(x: rect.maxX, y: rect.minY + arm))
+        p.line(to: CGPoint(x: rect.maxX, y: rect.minY))
+        p.line(to: CGPoint(x: rect.maxX - arm, y: rect.minY))
+        return p
+    }
 
     /// Four tips joined by soft concave curves.
     static func spark(center c: CGPoint, radius r: CGFloat) -> NSBezierPath {

@@ -53,15 +53,27 @@ struct SparkMark: Shape {
     }
 }
 
-/// The app icon as a small logo for window headers — the same mark people see
-/// in the Dock and Finder.
+/// APILA's mark for window headers — the icon's corners and spark without the
+/// tile, drawn in colors that contrast with the window (light or dark).
 struct BrandLogo: View {
     var size: CGFloat = 22
+
     var body: some View {
-        Image(nsImage: NSApp.applicationIconImage)
-            .resizable()
-            .interpolation(.high)
-            .frame(width: size, height: size)
+        ZStack {
+            CornersShape().stroke(Leaf.ink, style: StrokeStyle(lineWidth: size * 0.09, lineCap: .round, lineJoin: .round))
+            SparkMark().fill(Leaf.markGradient).padding(size * 0.16)
+        }
+        .frame(width: size, height: size)
+    }
+}
+
+/// The two selection corners of the mark (SwiftUI's y axis points down, so the
+/// AppKit path is flipped to keep top-left / bottom-right).
+struct CornersShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let inset = rect.insetBy(dx: rect.width * 0.08, dy: rect.height * 0.08)
+        let path = Path(BrandMark.corners(in: inset, arm: rect.width * 0.32).cgPath)
+        return path.applying(CGAffineTransform(translationX: 0, y: rect.height).scaledBy(x: 1, y: -1))
     }
 }
 
