@@ -5,6 +5,7 @@ import AppKit
 import Observation
 import SwiftUI
 import ServiceManagement
+import OSLog
 
 /// Orchestrates the full vertical slice — Hotkey → ContextKit → ActionRunner →
 /// InferenceKit → Floating Panel → Clipboard/Replace. Pure wiring: it owns no
@@ -69,6 +70,7 @@ public final class AppCoordinator {
         await container.bootstrap()
         await refreshProvider()
         refreshPermissions()
+        Self.log.notice("startup permissions: \(String(describing: self.permissions), privacy: .public) bundle: \(Bundle.main.bundlePath, privacy: .public)")
 
         let panel = FloatingPanelController { [weak self] in
             if let self { return AnyView(PanelView(vm: self.panelVM)) }
@@ -285,6 +287,8 @@ public final class AppCoordinator {
             permissions[kind] = container.permissions.status(kind)
         }
     }
+
+    private static let log = Logger(subsystem: "app.apila.APILA", category: "permissions")
 
     public func request(_ kind: PermissionKind) async {
         await container.permissions.request(kind)

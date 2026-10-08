@@ -13,6 +13,9 @@ xcodebuild -project APILA.xcodeproj -scheme APILA -configuration Debug \
   -derivedDataPath "$BUILD_DIR" -quiet ENABLE_DEBUG_DYLIB=NO build
 
 pkill -x APILA || true
+# Wait until the old copy is really gone: a new one that still sees it running
+# quits itself (single-instance guard).
+for _ in $(seq 50); do pgrep -x APILA >/dev/null || break; sleep 0.1; done
 mkdir -p "$HOME/Applications"
 rm -rf "$DEST"
 cp -R "$BUILD_DIR/Build/Products/Debug/APILA.app" "$DEST"
