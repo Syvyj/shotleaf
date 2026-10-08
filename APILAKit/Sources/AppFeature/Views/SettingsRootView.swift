@@ -28,6 +28,7 @@ public struct SettingsRootView: View {
             providerSection
             shortcutSection
             translateSection
+            generalSection
             permissionsSection
         }
         .formStyle(.grouped)
@@ -181,6 +182,22 @@ public struct SettingsRootView: View {
         let fallback = translateFallback.trimmingCharacters(in: .whitespaces)
         guard !target.isEmpty, !fallback.isEmpty else { return }
         coordinator.saveTranslate(target: target, fallback: fallback)
+    }
+
+    // MARK: General
+
+    private var generalSection: some View {
+        Section {
+            Toggle("Open APILA at login", isOn: Binding(
+                get: { coordinator.launchAtLogin },
+                set: { coordinator.setLaunchAtLogin($0) }
+            ))
+            if let error = coordinator.launchAtLoginError {
+                Text(error).font(.caption).foregroundStyle(.red)
+            }
+        } header: {
+            Text("General")
+        }
     }
 
     // MARK: Permissions

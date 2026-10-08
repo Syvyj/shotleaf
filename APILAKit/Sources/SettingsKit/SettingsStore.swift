@@ -52,6 +52,12 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "translateFallback") }
     }
 
+    /// The first-run setup guide was finished (or dismissed).
+    public var onboardingCompleted: Bool {
+        get { defaults.bool(forKey: "onboardingCompleted") }
+        set { defaults.set(newValue, forKey: "onboardingCompleted") }
+    }
+
     // MARK: Keychain
 
     public func apiKey(for kind: String) -> String? {

@@ -12,7 +12,20 @@ public struct MenuBarRootView: View {
     public var body: some View {
         Button("Open APILA (\(coordinator.hotkey.title))") { coordinator.openFromMenu() }
 
+        if !coordinator.history.isEmpty {
+            Menu("Recent Results") {
+                ForEach(coordinator.history) { entry in
+                    Button("\(entry.title): \(Self.preview(entry.output))") {
+                        coordinator.copyFromHistory(entry)
+                    }
+                }
+                Divider()
+                Button("Clear") { coordinator.clearHistory() }
+            }
+        }
+
         SettingsLink { Text("Settings…") }
+        Button("Setup Guide…") { coordinator.showOnboarding() }
 
         Divider()
 
@@ -25,5 +38,10 @@ public struct MenuBarRootView: View {
 
         Button("Quit APILA") { NSApplication.shared.terminate(nil) }
             .keyboardShortcut("q")
+    }
+
+    private static func preview(_ text: String) -> String {
+        let flat = text.split(whereSeparator: \.isNewline).joined(separator: " ")
+        return flat.count > 50 ? String(flat.prefix(50)) + "…" : flat
     }
 }

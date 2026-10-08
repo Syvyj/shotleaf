@@ -46,7 +46,11 @@ public final class PanelViewModel {
     private var sourceApp: NSRunningApplication?
     private var streamTask: Task<Void, Never>?
     public var onClose: () -> Void = {}
-
+    /// Called with each successful result (for History).
+    public var onResult: (_ title: String, _ output: String) -> Void = { _, _ in }
+    /// The custom-prompt screen is refining the current result, not the selection.
+    public private(set) var isRefining = false
+    private var lastRun: (action: any Action, snapshot: ContextSnapshot)?
 
     public init(
         runner: ActionRunner,
@@ -88,6 +92,8 @@ public final class PanelViewModel {
         errorText = nil
         noticeText = nil
         customPromptText = ""
+        isRefining = false
+        lastRun = nil
     }
 
     public func moveUp() { if screen == .actions { selectedIndex = max(0, selectedIndex - 1) } }
@@ -97,13 +103,15 @@ public final class PanelViewModel {
         switch screen {
         case .actions:
             switch items[selectedIndex] {
-            case .action(let action): run(action)
+            case .action(let action): if let snapshot { run(action, on: snapshot) }
             case .customPrompt: screen = .customPrompt
             }
         case .customPrompt:
             let text = customPromptText.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !text.isEmpty else { return }
-            run(CustomPromptAction(prompt: text))
+            guard !text.isEmpty, let snapshot else { return }
+            // Refining works on the previous result instead of the original selection.
+            let source = isRefining ? ContextSnapshot(selectedText: output, capturedAt: Date()) : snapshot
+            run(CustomPromptAction(prompt: text), on: source)
         case .generating:
             break
         case .result:
@@ -111,11 +119,26 @@ public final class PanelViewModel {
         }
     }
 
-    private func run(_ action: any Action) {
-        guard let snapshot else { return }
+    /// Runs the last action again (same input) — for a different take.
+    public func retry() {
+        guard screen == .result, let lastRun else { return }
+        run(lastRun.action, on: lastRun.snapshot)
+    }
+
+    /// Opens the prompt field to adjust the result ("shorter", "more formal"…).
+    public func refine() {
+        guard screen == .result, errorText == nil, !output.isEmpty else { return }
+        customPromptText = ""
+        isRefining = true
+        screen = .customPrompt
+    }
+
+    private func run(_ action: any Action, on snapshot: ContextSnapshot) {
+        lastRun = (action, snapshot)
         screen = .generating
         output = ""
         errorText = nil
+        noticeText = nil
         streamTask = Task { [weak self] in
             guard let self else { return }
             do {
@@ -133,6 +156,9 @@ public final class PanelViewModel {
             }
             if Task.isCancelled { return }
             self.screen = .result
+            if self.errorText == nil, !self.output.isEmpty {
+                self.onResult(action.title, self.output)
+            }
         }
     }
 
@@ -186,9 +212,20 @@ public final class PanelViewModel {
         }
     }
 
+    /// Esc: leaves Refine back to the result; otherwise closes the panel.
+    public func cancel() {
+        if screen == .customPrompt, isRefining {
+            isRefining = false
+            screen = .result
+        } else {
+            close()
+        }
+    }
+
     public func close() {
         streamTask?.cancel()
         screen = .actions
+        isRefining = false
         onClose()
     }
 }

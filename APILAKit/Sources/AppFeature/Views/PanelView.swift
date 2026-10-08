@@ -76,8 +76,8 @@ public struct PanelView: View {
 
     private var customPromptScreen: some View {
         VStack(alignment: .leading, spacing: 8) {
-            header("Custom Prompt")
-            TextField("Describe what to do with the selection…", text: $vm.customPromptText)
+            header(vm.isRefining ? "Refine Result" : "Custom Prompt")
+            TextField(vm.isRefining ? "How should the result change? (shorter, more formal…)" : "Describe what to do with the selection…", text: $vm.customPromptText)
                 .textFieldStyle(.plain)
                 .padding(10)
                 .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
@@ -125,12 +125,17 @@ public struct PanelView: View {
                 Button("Insert Below") { Task { await vm.insertBelow() } }
                     .keyboardShortcut("i", modifiers: .command)
                 Spacer()
+                Button("Retry") { vm.retry() }
+                    .keyboardShortcut(.return, modifiers: .command)
+                Button("Refine") { vm.refine() }
+                    .keyboardShortcut("e", modifiers: .command)
+                    .disabled(vm.errorText != nil)
                 Button("Close") { vm.close() }
             }
             if let notice = vm.noticeText {
                 Text(notice).font(.caption).foregroundStyle(.orange)
             }
-            hint("⌘C copy · ⌘R replace · ⌘I insert · esc close")
+            hint("⌘C copy · ⌘R replace · ⌘I insert · ⌘↩ retry · ⌘E refine · esc close")
         }
         .padding(12)
     }
@@ -140,7 +145,7 @@ public struct PanelView: View {
     @ViewBuilder
     private var shortcuts: some View {
         VStack {
-            Button("") { vm.close() }.keyboardShortcut(.cancelAction)
+            Button("") { vm.cancel() }.keyboardShortcut(.cancelAction)
             switch vm.screen {
             case .actions:
                 Button("") { vm.confirm() }.keyboardShortcut(.defaultAction)

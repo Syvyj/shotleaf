@@ -4,6 +4,7 @@ import InferenceKit
 import AppKit
 import Observation
 import SwiftUI
+import ServiceManagement
 
 /// Orchestrates the full vertical slice — Hotkey → ContextKit → ActionRunner →
 /// InferenceKit → Floating Panel → Clipboard/Replace. Pure wiring: it owns no
@@ -25,6 +26,17 @@ public final class AppCoordinator {
     /// False when the global shortcut couldn't be registered (e.g. taken by another app).
     public private(set) var hotkeyRegistered = true
 
+    public struct HistoryEntry: Identifiable, Equatable {
+        public let id = UUID()
+        public let title: String
+        public let output: String
+        public let date: Date
+    }
+    /// Recent results, newest first. Memory only — results may contain private
+    /// text, so nothing is written to disk.
+    public private(set) var history: [HistoryEntry] = []
+    static let historyLimit = 10
+
     public init(container: AppContainer = AppContainer()) {
         self.container = container
         let inserter = ResultInserter(clipboard: container.clipboard)
@@ -36,7 +48,21 @@ public final class AppCoordinator {
             accessibilityGranted: { permissions.status(.accessibility) == .granted }
         )
         applyTranslateSettings()
+        panelVM.onResult = { [weak self] title, output in
+            self?.remember(title: title, output: output)
+        }
     }
+
+    func remember(title: String, output: String) {
+        history.insert(HistoryEntry(title: title, output: output, date: Date()), at: 0)
+        history = Array(history.prefix(Self.historyLimit))
+    }
+
+    public func copyFromHistory(_ entry: HistoryEntry) {
+        Task { try? await container.clipboard.writeText(entry.output) }
+    }
+
+    public func clearHistory() { history = [] }
 
     public func start() async {
         await container.bootstrap()
@@ -52,6 +78,12 @@ public final class AppCoordinator {
 
         hotkeyRegistered = container.hotkeys.setShortcut(.with(id: container.settings.hotkey))
         hotkey = container.hotkeys.shortcut
+
+        // Auto-shown once; afterwards it lives in the menu ("Setup Guide…").
+        if !container.settings.onboardingCompleted {
+            container.settings.onboardingCompleted = true
+            showOnboarding()
+        }
         hotkeyTask = Task { [weak self] in
             guard let self else { return }
             for await _ in self.container.hotkeys.events {
@@ -167,6 +199,38 @@ public final class AppCoordinator {
             otherwise: container.settings.translateFallback
         ))
     }
+
+    // MARK: Launch at login
+
+    /// Whether APILA starts at login. Real only for the installed, signed app.
+    public private(set) var launchAtLogin = SMAppService.mainApp.status == .enabled
+    public private(set) var launchAtLoginError: String?
+
+    public func setLaunchAtLogin(_ enabled: Bool) {
+        do {
+            if enabled { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
+            launchAtLoginError = nil
+        } catch {
+            launchAtLoginError = error.localizedDescription
+        }
+        launchAtLogin = SMAppService.mainApp.status == .enabled
+    }
+
+    // MARK: Onboarding
+
+    private var onboarding: OnboardingWindowController?
+
+    /// The setup guide: shown once on first launch, and from the menu any time.
+    public func showOnboarding() {
+        let controller = onboarding ?? OnboardingWindowController { [weak self] in
+            guard let self else { return AnyView(EmptyView()) }
+            return AnyView(OnboardingView(coordinator: self))
+        }
+        onboarding = controller
+        controller.show()
+    }
+
+    public func closeOnboarding() { onboarding?.close() }
 
     // MARK: Permissions (for Settings)
 
