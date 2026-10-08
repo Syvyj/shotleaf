@@ -68,6 +68,9 @@ enum AnnotationColor: String, CaseIterable, Identifiable {
     case coral, amber, leaf, sky, ink, white
     var id: String { rawValue }
 
+    /// Badge colors for steps (white badges would vanish on light shots).
+    static let stepCycle: [AnnotationColor] = [.coral, .amber, .leaf, .sky, .ink]
+
     var nsColor: NSColor {
         switch self {
         case .coral: NSColor(srgbRed: 0.96, green: 0.30, blue: 0.27, alpha: 1)
@@ -160,10 +163,16 @@ final class AnnotationDocument {
     }
 
     /// Adds a mark in the current color/width and selects it. A new crop
-    /// replaces the old one.
+    /// replaces the old one. Steps take turns through the palette, starting
+    /// at the current color, so each badge stands out from the last.
     @discardableResult
     func add(_ kind: Annotation.Kind) -> Annotation.ID {
-        let item = Annotation(kind: kind, color: color, lineWidth: lineWidth)
+        var markColor = color
+        if case .step(_, let n) = kind {
+            let cycle = AnnotationColor.stepCycle
+            markColor = cycle[((cycle.firstIndex(of: color) ?? 0) + n - 1) % cycle.count]
+        }
+        let item = Annotation(kind: kind, color: markColor, lineWidth: lineWidth)
         var kept = items
         if case .crop = kind { kept.removeAll { if case .crop = $0.kind { true } else { false } } }
         commit(kept + [item])

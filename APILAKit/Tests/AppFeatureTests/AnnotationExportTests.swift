@@ -85,6 +85,7 @@ struct AnnotationExportTests {
         doc.add(.step(center: .zero, number: doc.nextStep))
         doc.add(.step(center: .zero, number: doc.nextStep))
         #expect(doc.nextStep == 3)
+        #expect(doc.items.map(\.color) == [.coral, .amber], "each step gets the next color")
         doc.undo()
         #expect(doc.items.count == 1 && doc.nextStep == 2 && doc.canRedo)
         doc.redo()
