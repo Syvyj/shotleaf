@@ -1,17 +1,87 @@
-import Core
 import Foundation
+import Security
 
-/// Persists user settings (selected provider, hotkeys, endpoints). Secrets go to
-/// the Keychain; non-secret prefs to UserDefaults. Currently an in-memory stub.
+/// Persists user settings. Non-secret prefs → UserDefaults; API keys → Keychain
+/// (one item per provider kind, so switching providers keeps each key).
+/// Values are plain strings: SettingsKit doesn't know InferenceKit's types.
 public final class SettingsStore: @unchecked Sendable {
     private let defaults: UserDefaults
+    private let keychainService: String
 
-    public init(defaults: UserDefaults = .standard) {
+    public init(defaults: UserDefaults = .standard, keychainService: String = "app.apila.APILA") {
         self.defaults = defaults
+        self.keychainService = keychainService
     }
 
-    public var selectedProviderID: String? {
-        get { defaults.string(forKey: "selectedProviderID") }
-        set { defaults.set(newValue, forKey: "selectedProviderID") }
+    // MARK: Provider
+
+    /// `ProviderKind.rawValue` of the chosen provider.
+    public var providerKind: String? {
+        get { defaults.string(forKey: "providerKind") }
+        set { defaults.set(newValue, forKey: "providerKind") }
+    }
+
+    /// Base URL override; nil = the kind's default.
+    public var baseURL: String? {
+        get { defaults.string(forKey: "baseURL") }
+        set { defaults.set(newValue, forKey: "baseURL") }
+    }
+
+    public var model: String? {
+        get { defaults.string(forKey: "model") }
+        set { defaults.set(newValue, forKey: "model") }
+    }
+
+    // MARK: Behaviour
+
+    /// Id of the chosen global shortcut preset.
+    public var hotkey: String? {
+        get { defaults.string(forKey: "hotkey") }
+        set { defaults.set(newValue, forKey: "hotkey") }
+    }
+
+    /// Translate turns text into this language…
+    public var translateTarget: String {
+        get { defaults.string(forKey: "translateTarget") ?? "English" }
+        set { defaults.set(newValue, forKey: "translateTarget") }
+    }
+
+    /// …or into this one when it is already in the target language.
+    public var translateFallback: String {
+        get { defaults.string(forKey: "translateFallback") ?? "Ukrainian" }
+        set { defaults.set(newValue, forKey: "translateFallback") }
+    }
+
+    // MARK: Keychain
+
+    public func apiKey(for kind: String) -> String? {
+        var query = keychainQuery(kind)
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        var result: CFTypeRef?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+              let data = result as? Data
+        else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    /// Empty or nil removes the key.
+    @discardableResult
+    public func setAPIKey(_ key: String?, for kind: String) -> Bool {
+        let query = keychainQuery(kind)
+        SecItemDelete(query as CFDictionary)
+        guard let key, !key.isEmpty else { return true }
+        var item = query
+        item[kSecValueData as String] = Data(key.utf8)
+        item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
+        return SecItemAdd(item as CFDictionary, nil) == errSecSuccess
+    }
+
+    private func keychainQuery(_ kind: String) -> [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: "apiKey.\(kind)",
+        ]
     }
 }

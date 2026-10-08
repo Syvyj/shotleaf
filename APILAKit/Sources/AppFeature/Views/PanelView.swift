@@ -41,7 +41,13 @@ public struct PanelView: View {
                         .foregroundStyle(.orange)
                 }
             }
-            if !vm.hasText {
+            if let preview = vm.contextPreview {
+                (Text("\(preview.source): ").bold() + Text(preview.text))
+                    .font(.caption)
+                    .foregroundStyle(preview.source == "Clipboard" ? Color.orange : Color.secondary)
+                    .lineLimit(2)
+                    .padding(.horizontal, 12).padding(.bottom, 4)
+            } else {
                 Label("No text captured — select text, or copy it first.", systemImage: "exclamationmark.triangle")
                     .font(.caption)
                     .foregroundStyle(.orange)

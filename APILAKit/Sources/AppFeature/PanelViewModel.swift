@@ -35,7 +35,7 @@ public final class PanelViewModel {
     public private(set) var output = ""
     public private(set) var errorText: String?
     public private(set) var noticeText: String?
-    public let items: [Item]
+    public private(set) var items: [Item] = []
     /// The current provider is the canned Mock (no real model reachable).
     public var isMockProvider = false
 
@@ -47,8 +47,6 @@ public final class PanelViewModel {
     private var streamTask: Task<Void, Never>?
     public var onClose: () -> Void = {}
 
-    /// Whether any text was captured (selection or clipboard).
-    public var hasText: Bool { snapshot?.primaryText?.isEmpty == false }
 
     public init(
         runner: ActionRunner,
@@ -59,7 +57,25 @@ public final class PanelViewModel {
         self.runner = runner
         self.inserter = inserter
         self.accessibilityGranted = accessibilityGranted
-        self.items = actions.map { .action($0) } + [.customPrompt]
+        setActions(actions)
+    }
+
+    public func setActions(_ actions: [any Action]) {
+        items = actions.map { .action($0) } + [.customPrompt]
+        selectedIndex = min(selectedIndex, items.count - 1)
+    }
+
+    /// What the actions will run on, so the user sees it before anything is sent:
+    /// the selection, or — when nothing is selected — the clipboard.
+    public var contextPreview: (source: String, text: String)? {
+        if let text = snapshot?.selectedText, !text.isEmpty { return ("Selection", Self.preview(text)) }
+        if let text = snapshot?.clipboardText, !text.isEmpty { return ("Clipboard", Self.preview(text)) }
+        return nil
+    }
+
+    private static func preview(_ text: String) -> String {
+        let flat = text.split(whereSeparator: \.isNewline).joined(separator: " ")
+        return flat.count > 90 ? String(flat.prefix(90)) + "…" : flat
     }
 
     public func present(snapshot: ContextSnapshot, sourceApp: NSRunningApplication?) {

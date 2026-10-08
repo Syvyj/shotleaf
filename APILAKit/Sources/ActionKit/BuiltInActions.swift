@@ -47,12 +47,20 @@ public struct TranslateAction: Action {
     public let id = "translate"
     public let title = "Translate"
     public let requirements = ContextRequirements(needsSelectedText: true, needsClipboard: true)
-    public init() {}
+    private let target: String
+    private let fallback: String
+
+    /// Translates into `target`; text already in `target` goes into `fallback`.
+    public init(target: String = "English", fallback: String = "Ukrainian") {
+        self.target = target
+        self.fallback = fallback
+    }
+
     public func plan(for snapshot: ContextSnapshot) throws -> ActionPlan {
         guard snapshot.primaryText?.isEmpty == false else { throw AppError.missingContext("Translate needs text") }
         let template = PromptTemplate(
-            system: "You are a professional translator. \(outputOnly)",
-            instruction: "Translate the text below into English. If it is already English, translate it into Ukrainian:\n\n{{selection}}"
+            system: "You are a professional translator. Output ONLY the translation. Do not explain, do not offer alternatives, do not add a preamble, headings, quotes, or Markdown.",
+            instruction: "Translate the text below into \(target). If it is already in \(target), translate it into \(fallback):\n\n{{selection}}"
         )
         return ActionPlan(executor: .inference, command: InferenceCommand(template: template, options: lowTemp))
     }
@@ -108,11 +116,11 @@ public struct CopyAction: Action {
 /// The default set of actions shipped with the app.
 public enum BuiltInActions {
     /// Inference actions shown in the Floating Panel picker.
-    public static func inferenceActions() -> [any Action] {
+    public static func inferenceActions(translateTo target: String = "English", otherwise fallback: String = "Ukrainian") -> [any Action] {
         [
             RewriteAction(),
             ExplainAction(),
-            TranslateAction(),
+            TranslateAction(target: target, fallback: fallback),
             SummarizeAction(),
         ]
     }

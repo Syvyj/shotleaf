@@ -5,7 +5,7 @@
 
 > Статуси: ✅ ПРИЙНЯТО · 🟡 ЗАПРОПОНОВАНО · ⏳ ОЧІКУЄ ПІДТВЕРДЖЕННЯ · ❌ ВІДХИЛЕНО · ⛔ СКАСОВАНО
 
-> **Поточний стан (2026-10-07).** Працює вертикальний зріз Kerlig-частини: ⌘⇧Space → плаваюча панель → Rewrite/Explain/Translate/Summarize/Custom → стрімінг → Copy/Replace/Insert. Провайдер: LM Studio (:1234) або Mock. CaptureKit/PerceptionKit — заглушки; MLX, скріншоти, inline-дописування — ще не почато. Xcode 26 встановлено: `swift test` і `xcodebuild` працюють. Дорожня карта — `PLAN.md`.
+> **Поточний стан (2026-10-07).** Працює вертикальний зріз Kerlig-частини: ⌘⇧Space → плаваюча панель → Rewrite/Explain/Translate/Summarize/Custom → стрімінг → Copy/Replace/Insert. Провайдер обирається в Settings (LM Studio / Ollama / OpenAI / OpenRouter / custom; ключ у Keychain), Mock — запасний варіант. CaptureKit/PerceptionKit — заглушки; MLX, скріншоти, inline-дописування — ще не почато. Xcode 26 встановлено: `swift test` і `xcodebuild` працюють. Дорожня карта — `PLAN.md`.
 
 ---
 
@@ -282,3 +282,20 @@
 ## ADR-0043 — Прибрано модуль AppUI ✅
 **Рішення.** Видалено `AppUI` (лише заглушки; справжні view — `AppFeature/Views`). `CaptureKit` лишається таргетом, але не підключений до `AppFeature`, доки порожній.
 **Чому.** Мертвий код вводив в оману щодо того, де живе UI.
+
+---
+
+# Етап 3 — налаштування ✅
+
+## ADR-0044 — Один «primary» провайдер, що переконфігуровується з Settings ✅
+**Рішення.** `ProviderKind` (InferenceKit) — єдине джерело дефолтів (URL, потреба в ключі, capabilities, заголовки OpenRouter); `ProviderPreset` будується поверх нього. В `AppContainer` один `OpenAICompatibleProvider(id: "primary")`, який `reconfigure` з `SettingsStore` (рядки) + Keychain (ключ на кожен kind). Mock лишається фолбеком при `unhealthy`.
+**Чому.** Реалізує ADR-0023/0024 без перестворення графа; SettingsKit не залежить від InferenceKit (зберігає лише рядки).
+**Альтернативи.** Окремий зареєстрований провайдер на кожен kind (зайвий стан, кілька health-check).
+
+## ADR-0045 — Хоткей: список пресетів замість запису клавіш ✅
+**Рішення.** `HotkeyShortcut.all` (5 комбінацій). `setShortcut` при конфлікті повертає попередній хоткей.
+**Чому.** Нуль кастомного UI; покриває реальні потреби. Запис довільної комбінації — коли попросять.
+
+## ADR-0046 — Обрізання виділення за контекстом ✅
+**Рішення.** `PromptBuilder.fit`: ≤ `maxContextTokens × 2` символів (≈ половина вікна при ~4 симв./токен) + маркер `[…truncated]`.
+**Чому.** Без токенізатора; захищає від помилки «context length exceeded» на великих виділеннях.

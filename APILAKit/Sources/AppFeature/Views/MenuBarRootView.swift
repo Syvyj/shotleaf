@@ -10,15 +10,15 @@ public struct MenuBarRootView: View {
     }
 
     public var body: some View {
-        Button("Open APILA (⌘⇧Space)") { coordinator.openFromMenu() }
+        Button("Open APILA (\(coordinator.hotkey.title))") { coordinator.openFromMenu() }
 
-        SettingsLink { Text("Permissions…") }
+        SettingsLink { Text("Settings…") }
 
         Divider()
 
         Text("Provider: \(coordinator.currentProviderName)")
         if !coordinator.hotkeyRegistered {
-            Text("⚠︎ ⌘⇧Space is taken by another app")
+            Text("⚠︎ \(coordinator.hotkey.title) is taken by another app")
         }
 
         Divider()

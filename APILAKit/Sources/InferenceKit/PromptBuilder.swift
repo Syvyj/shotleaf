@@ -16,7 +16,7 @@ public struct PromptBuilder: Sendable {
     ) -> AIRequest {
         var parts: [ContentPart] = []
 
-        let selection = snapshot.primaryText ?? ""
+        let selection = Self.fit(snapshot.primaryText ?? "", contextTokens: capabilities.maxContextTokens)
         let rendered = template.instruction.replacingOccurrences(of: "{{selection}}", with: selection)
         parts.append(.text(rendered))
 
@@ -28,5 +28,16 @@ public struct PromptBuilder: Sendable {
         }
 
         return AIRequest(system: template.system, parts: parts, preferredProviderID: preferredProviderID, options: options)
+    }
+
+    static let truncationMarker = "\n[…truncated]"
+
+    /// Keeps the selection within about half the context window, leaving room
+    /// for the instruction and the reply.
+    /// ponytail: ~4 chars/token estimate, no tokenizer; under-counts for CJK/code.
+    static func fit(_ text: String, contextTokens: Int) -> String {
+        let maxChars = contextTokens * 2
+        guard text.count > maxChars else { return text }
+        return String(text.prefix(maxChars)) + truncationMarker
     }
 }
