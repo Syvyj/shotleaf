@@ -31,11 +31,17 @@ public struct PanelView: View {
 
     private func header(_ title: String, spinning: Bool = false) -> some View {
         HStack(spacing: 8) {
-            SparkMark()
-                .fill(Leaf.markGradient)
-                .frame(width: 16, height: 16)
-                .rotationEffect(.degrees(spinning ? 360 : 0))
-                .animation(spinning ? .linear(duration: 1.6).repeatForever(autoreverses: false) : .default, value: spinning)
+            if spinning {
+                // While generating, the spark itself turns — the "thinking" indicator.
+                SparkMark()
+                    .fill(Leaf.markGradient)
+                    .frame(width: 16, height: 16)
+                    .rotationEffect(.degrees(360))
+                    .animation(.linear(duration: 1.6).repeatForever(autoreverses: false), value: spinning)
+                    .frame(width: 22, height: 22)
+            } else {
+                BrandLogo()
+            }
             Text(title).font(Leaf.font(16, .semibold))
             Spacer()
             ProviderChip(name: vm.providerName, isMock: vm.isMockProvider)

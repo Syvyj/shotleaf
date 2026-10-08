@@ -15,12 +15,32 @@ struct ScreenshotWindowTests {
         #expect(ScreenshotWindows.fileName(date) == "APILA 2026-10-08 at 16.05.09.png")
     }
 
-    @Test("Preview scales big captures down to 70% of the screen, never up")
+    @Test("Preview scales big captures down to the room, never up")
     func fit() {
-        let screen = CGSize(width: 1000, height: 800)
-        #expect(ScreenshotWindows.fit(points: CGSize(width: 200, height: 100), in: screen) == CGSize(width: 200, height: 100))
-        let big = ScreenshotWindows.fit(points: CGSize(width: 2000, height: 1000), in: screen)
-        #expect(big == CGSize(width: 700, height: 350))
+        let room = CGSize(width: 1000, height: 800)
+        #expect(ScreenshotWindows.fit(points: CGSize(width: 200, height: 100), in: room) == CGSize(width: 200, height: 100))
+        #expect(ScreenshotWindows.fit(points: CGSize(width: 2000, height: 1000), in: room) == CGSize(width: 1000, height: 500))
+        // A tall phone-like capture (1056×2436 px @2x) shrinks to the height.
+        #expect(ScreenshotWindows.fit(points: CGSize(width: 528, height: 1218), in: room).height == 800)
+    }
+
+    @Test("chromeHeight really covers header + toolbar + hints")
+    func chrome() {
+        let display = CGSize(width: 340, height: 780)
+        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, text: {}, ask: {}, close: {})
+        let host = NSHostingView(rootView: ScreenshotView(
+            image: NSImage(size: display), pixelSize: CGSize(width: 680, height: 1560),
+            fileURL: URL(fileURLWithPath: "/tmp/x.png"), displaySize: display, actions: noop))
+        let extra = host.fittingSize.height - display.height
+        #expect(extra > 0 && extra <= ScreenshotWindows.chromeHeight, "chrome is \(extra) pt")
+    }
+
+    @Test("Window is kept inside the screen even when it's taller than the centre allows")
+    func placement() {
+        let visible = CGRect(x: 0, y: 25, width: 1512, height: 920)
+        let p = ScreenshotWindows.placed(CGSize(width: 600, height: 900), centeredIn: visible)
+        #expect(p.y >= visible.minY && p.y + 900 <= visible.maxY)
+        #expect(p.x >= visible.minX && p.x + 600 <= visible.maxX)
     }
 
     @Test("Save writes the PNG into the folder")

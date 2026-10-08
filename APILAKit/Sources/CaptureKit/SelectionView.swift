@@ -56,7 +56,10 @@ final class SelectionView: NSView {
 
     private func point(_ event: NSEvent) -> CGPoint { convert(event.locationInWindow, from: nil) }
 
+    /// Cursor rects only apply while APILA is the active app, and the picker
+    /// deliberately doesn't activate it — so set the crosshair on every move.
     override func mouseMoved(with event: NSEvent) {
+        NSCursor.crosshair.set()
         cursor = point(event)
         hoveredWindow = CaptureGeometry.window(at: cursor!, in: windows)
         needsDisplay = true
@@ -74,6 +77,7 @@ final class SelectionView: NSView {
     }
 
     override func mouseDragged(with event: NSEvent) {
+        NSCursor.crosshair.set()
         guard let dragStart else { return }
         cursor = point(event)
         selection = CaptureGeometry.rect(from: dragStart, to: cursor!).intersection(bounds)

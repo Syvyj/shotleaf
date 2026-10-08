@@ -17,8 +17,10 @@ final class ScreenshotWindows {
         let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
         let scale = screen?.backingScaleFactor ?? 2
         let pixels = CGSize(width: payload.width, height: payload.height)
-        let display = Self.fit(points: CGSize(width: pixels.width / scale, height: pixels.height / scale),
-                               in: screen?.visibleFrame.size ?? CGSize(width: 1200, height: 800))
+        let visible = screen?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1200, height: 800)
+        // Leave room for the header, toolbar and hints around the image.
+        let room = CGSize(width: visible.width - 80, height: visible.height - Self.chromeHeight)
+        let display = Self.fit(points: CGSize(width: pixels.width / scale, height: pixels.height / scale), in: room)
         let fileURL = Self.writeTempPNG(payload.data)
 
         var panel: NSPanel!
@@ -35,7 +37,7 @@ final class ScreenshotWindows {
             close: close
         )
         panel = makePanel(ScreenshotView(image: image, pixelSize: pixels, fileURL: fileURL, displaySize: display, actions: actions))
-        if let screen { panel.setFrameOrigin(Self.centered(panel.frame.size, in: screen.visibleFrame)) }
+        panel.setFrameOrigin(Self.placed(panel.frame.size, centeredIn: visible))
         present(panel)
     }
 
@@ -71,6 +73,8 @@ final class ScreenshotWindows {
         let hosting = NSHostingView(rootView: view)
         hosting.sizingOptions = [.preferredContentSize]
         panel.contentView = hosting
+        // Size from the fully laid-out SwiftUI view, *then* the caller places it.
+        hosting.layoutSubtreeIfNeeded()
         panel.setContentSize(hosting.fittingSize)
         return panel
     }
@@ -119,14 +123,20 @@ final class ScreenshotWindows {
 
     // MARK: Geometry
 
-    /// Scales `points` down (never up) to fit 70% of `available`.
+    /// Header + toolbar + hint line + padding around the image, in points.
+    static let chromeHeight: CGFloat = 170
+
+    /// Scales `points` down (never up) to fit `available` (tall captures shrink
+    /// to the screen height, wide ones to its width).
     static func fit(points: CGSize, in available: CGSize) -> CGSize {
-        let maxW = available.width * 0.7, maxH = available.height * 0.7
-        let k = min(1, maxW / max(points.width, 1), maxH / max(points.height, 1))
+        let k = min(1, available.width / max(points.width, 1), available.height / max(points.height, 1))
         return CGSize(width: (points.width * k).rounded(), height: (points.height * k).rounded())
     }
 
-    static func centered(_ size: CGSize, in frame: CGRect) -> NSPoint {
-        NSPoint(x: frame.midX - size.width / 2, y: frame.midY - size.height / 2)
+    /// Centered in `frame`, but never sticking out of it.
+    static func placed(_ size: CGSize, centeredIn frame: CGRect) -> NSPoint {
+        let x = min(max(frame.midX - size.width / 2, frame.minX + 8), frame.maxX - size.width - 8)
+        let y = min(max(frame.midY - size.height / 2, frame.minY + 8), frame.maxY - size.height - 8)
+        return NSPoint(x: max(x, frame.minX), y: max(y, frame.minY))
     }
 }

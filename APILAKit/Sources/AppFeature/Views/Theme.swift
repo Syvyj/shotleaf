@@ -53,6 +53,18 @@ struct SparkMark: Shape {
     }
 }
 
+/// The app icon as a small logo for window headers — the same mark people see
+/// in the Dock and Finder.
+struct BrandLogo: View {
+    var size: CGFloat = 22
+    var body: some View {
+        Image(nsImage: NSApp.applicationIconImage)
+            .resizable()
+            .interpolation(.high)
+            .frame(width: size, height: size)
+    }
+}
+
 /// A key drawn as a small rounded cap: "↩", "esc", "⌘C".
 struct Keycap: View {
     let key: String

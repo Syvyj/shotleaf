@@ -122,6 +122,7 @@ final class RegionPicker {
         let keyWindow = windows.first { $0.frame.contains(mouse) } ?? windows.first
         keyWindow?.makeKeyAndOrderFront(nil)
         keyWindow?.makeFirstResponder(keyWindow?.contentView)
+        NSCursor.crosshair.set()
     }
 
     private func complete(_ outcome: SelectionView.Outcome, on item: Frozen, frozen: [Frozen]) {
@@ -141,6 +142,7 @@ final class RegionPicker {
         }
         windows.forEach { $0.orderOut(nil) }
         windows = []
+        NSCursor.arrow.set()
         let continuation = self.continuation
         self.continuation = nil
         continuation?.resume(with: result)

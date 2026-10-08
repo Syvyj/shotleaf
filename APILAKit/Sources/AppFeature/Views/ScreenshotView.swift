@@ -46,7 +46,7 @@ struct ScreenshotView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            SparkMark().fill(Leaf.markGradient).frame(width: 16, height: 16)
+            BrandLogo()
             Text("Screenshot").font(Leaf.font(16, .semibold))
             Text(verbatim: "\(Int(pixelSize.width)) × \(Int(pixelSize.height))") // no locale grouping
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
