@@ -17,6 +17,7 @@ struct ScreenshotActions {
 /// Shottr-style window after a capture: the shot on a canvas that grows with
 /// the window, annotation tools (0–9), and the actions, in the "Leaves" style.
 /// Click a mark to select it: drag to move, drag handles to resize, ⌫ deletes.
+/// In Select mode, dragging the shot itself drops the whole result into any app.
 /// Keyboard: ↩/⌘C copy, ⌘S save, P pin, T text, A ask, 0 select, 1–9 tools,
 /// ⌘Z undo, esc — deselect / drop the tool, then close.
 struct ScreenshotView: View {
@@ -87,28 +88,8 @@ struct ScreenshotView: View {
                     .foregroundStyle(Leaf.ink)
                     .transition(.opacity)
             }
-            dragOutChip
         }
         .overlay(WindowDragArea())
-    }
-
-    /// Drag this into any app to drop the screenshot (with its marks). Clicks
-    /// on the shot itself select marks, so dragging out lives here.
-    private var dragOutChip: some View {
-        HStack(spacing: 6) {
-            Image(nsImage: image)
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: 22, height: 16)
-                .clipShape(RoundedRectangle(cornerRadius: 3))
-            Text("Drag").font(Leaf.font(12, .semibold))
-        }
-        .padding(.horizontal, 8).padding(.vertical, 4)
-        .background(.primary.opacity(0.07), in: Capsule())
-        .overlay(Capsule().strokeBorder(.primary.opacity(0.10)))
-        .onDrag { NSItemProvider(contentsOf: actions.dragFile()) ?? NSItemProvider() }
-        .help("Drag into any app")
-        .zIndex(1)
     }
 
     private var toolRow: some View {
@@ -231,6 +212,16 @@ struct ScreenshotView: View {
                         if case .active(let at) = phase { updateCursor(CGPoint(x: at.x - origin.x, y: at.y - origin.y)) }
                         else { NSCursor.arrow.set() }
                     }
+                // Shottr-style: in Select mode, pressing on the shot (not on a
+                // mark) drags the whole result out — marks included.
+                DragOutView(
+                    wantsDrag: { p in doc.tool == nil && AnnotationEditing.hit(doc.items, at: p) == nil },
+                    onPress: { doc.selection = nil },
+                    file: actions.dragFile,
+                    thumbnail: image
+                )
+                .frame(width: displaySize.width, height: displaySize.height)
+                .offset(x: origin.x, y: origin.y)
                 if let draft = textDraft {
                     TextField("Type, then ↩", text: Binding(
                         get: { textDraft?.string ?? "" }, set: { textDraft?.string = $0 }
@@ -355,6 +346,8 @@ struct ScreenshotView: View {
             NSCursor.openHand.set()
         } else if doc.tool != nil {
             (doc.tool == .text ? NSCursor.iBeam : NSCursor.crosshair).set()
+        } else if CGRect(origin: .zero, size: displaySize).contains(p) {
+            NSCursor.openHand.set() // Select mode over the shot: drag it out
         } else {
             NSCursor.arrow.set()
         }

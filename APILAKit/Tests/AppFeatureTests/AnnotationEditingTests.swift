@@ -58,3 +58,23 @@ struct AnnotationEditingTests {
         #expect(AnnotationStyle.arrowHead(for: 7) > AnnotationStyle.arrowHead(for: 2.5))
     }
 }
+
+@Suite("Drag-out")
+@MainActor
+struct DragOutTests {
+    @Test("Select mode: the shot takes the press (drag out); over a mark or with a tool, it passes through")
+    func hitTest() {
+        let doc = AnnotationDocument()
+        doc.add(.rectangle(CGRect(x: 10, y: 10, width: 20, height: 20)))
+        doc.selection = nil
+        let parent = NSView(frame: NSRect(x: 0, y: 0, width: 200, height: 100))
+        let view = DragOutView.SourceView(frame: parent.bounds)
+        view.wantsDrag = { p in doc.tool == nil && AnnotationEditing.hit(doc.items, at: p) == nil }
+        parent.addSubview(view)
+
+        #expect(view.hitTest(NSPoint(x: 150, y: 50)) === view) // empty shot → drag out
+        #expect(view.hitTest(NSPoint(x: 20, y: 80)) == nil)     // y flips: (20, 20) is on the box
+        doc.tool = .arrow
+        #expect(view.hitTest(NSPoint(x: 150, y: 50)) == nil)    // a tool draws instead
+    }
+}
