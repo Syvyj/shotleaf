@@ -40,7 +40,7 @@ let package = Package(
         .target(
             name: "AppFeature",
             dependencies: [
-                "Core", "InferenceKit", "ContextKit",
+                "Core", "InferenceKit", "ContextKit", "CaptureKit",
                 "PerceptionKit", "ActionKit", "SettingsKit",
             ]
         ),
@@ -54,6 +54,7 @@ let package = Package(
         .testTarget(name: "CoreTests", dependencies: ["Core", "SettingsKit"]),
         .testTarget(name: "InferenceKitTests", dependencies: ["Core", "InferenceKit", "ActionKit"]),
         .testTarget(name: "ContextKitTests", dependencies: ["Core", "ContextKit"]),
-        .testTarget(name: "AppFeatureTests", dependencies: ["AppFeature"]),
+        .testTarget(name: "AppFeatureTests", dependencies: ["AppFeature", "PerceptionKit"]),
+        .testTarget(name: "PerceptionKitTests", dependencies: ["Core", "PerceptionKit", "CaptureKit"]),
     ]
 )

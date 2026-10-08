@@ -2,6 +2,7 @@ import Core
 import Foundation
 import InferenceKit
 import ContextKit
+import CaptureKit
 import PerceptionKit
 import ActionKit
 import SettingsKit
@@ -14,6 +15,7 @@ public final class AppContainer: Sendable {
     public let registry: InferenceProviderRegistry
     public let context: ContextAggregator
     public let recognizer: VisionTextRecognizer
+    public let capture = ScreenCaptureService()
     public let hotkeys: GlobalHotkeyService
     public let permissions: PermissionManager
     public let settings: SettingsStore
@@ -49,6 +51,7 @@ public final class AppContainer: Sendable {
         let executors: [ExecutorID: any ActionExecutor] = [
             .inference: InferenceExecutor(registry: registry, recognizer: recognizer, events: events),
             .clipboard: ClipboardExecutor(service: clipboard),
+            .ocr: OCRExecutor(recognizer: recognizer, events: events),
         ]
         self.actionRunner = ActionRunner(context: context, executors: executors, events: events)
     }
@@ -69,12 +72,16 @@ public final class AppContainer: Sendable {
     /// Pushes saved provider settings (kind, URL, Keychain key, model) into `primary`.
     public func applyProviderSettings() {
         let kind = providerKind
-        let config = kind.configuration(
+        var config = kind.configuration(
             baseURL: settings.baseURL.flatMap(URL.init(string:)),
             apiKey: settings.apiKey(for: kind.rawValue),
             model: settings.model ?? kind.defaultModel
         )
-        primary.reconfigure { $0 = config }
+        if let vision = settings.supportsVision {
+            let c = config.capabilities
+            config.capabilities = ProviderCapabilities(supportsVision: vision, supportsAudio: c.supportsAudio, maxContextTokens: c.maxContextTokens)
+        }
+        primary.reconfigure { [config] in $0 = config }
     }
 
     /// Lists models for not-yet-saved settings (the Settings form's draft).

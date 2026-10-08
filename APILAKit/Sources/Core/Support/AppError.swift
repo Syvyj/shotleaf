@@ -5,4 +5,8 @@ public enum AppError: Error, Sendable, Equatable {
     case notImplemented(String)
     case missingContext(String)
     case providerUnavailable
+    /// The user backed out (e.g. Esc during a screen-region selection).
+    case cancelled
+    /// A macOS privacy permission is missing (name of the permission).
+    case permissionDenied(String)
 }

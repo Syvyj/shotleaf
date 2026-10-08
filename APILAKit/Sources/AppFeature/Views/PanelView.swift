@@ -76,8 +76,8 @@ public struct PanelView: View {
 
     private var customPromptScreen: some View {
         VStack(alignment: .leading, spacing: 8) {
-            header(vm.isRefining ? "Refine Result" : "Custom Prompt")
-            TextField(vm.isRefining ? "How should the result change? (shorter, more formal…)" : "Describe what to do with the selection…", text: $vm.customPromptText)
+            header(promptTitle)
+            TextField(promptPlaceholder, text: $vm.customPromptText)
                 .textFieldStyle(.plain)
                 .padding(10)
                 .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
@@ -160,6 +160,22 @@ public struct PanelView: View {
         .frame(width: 0, height: 0)
         .opacity(0)
         .accessibilityHidden(true)
+    }
+
+    private var promptTitle: String {
+        switch vm.promptMode {
+        case .custom: "Custom Prompt"
+        case .refine: "Refine Result"
+        case .screenshot: "Ask about Screenshot"
+        }
+    }
+
+    private var promptPlaceholder: String {
+        switch vm.promptMode {
+        case .custom: "Describe what to do with the selection…"
+        case .refine: "How should the result change? (shorter, more formal…)"
+        case .screenshot: "What do you want to know about it?"
+        }
     }
 
     private func header(_ text: String) -> some View {

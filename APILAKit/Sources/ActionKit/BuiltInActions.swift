@@ -113,6 +113,41 @@ public struct CopyAction: Action {
     }
 }
 
+// MARK: - Screenshot actions (the image is captured before planning)
+
+/// OCR the captured region — on-device, no AI. The text lands on the result
+/// screen, so Copy / Replace / Insert all work.
+public struct ScreenshotTextAction: Action {
+    public let id = "screenshot-text"
+    public let title = "Text from Screenshot"
+    public let requirements = ContextRequirements(needsScreenImage: true)
+    public init() {}
+    public func plan(for snapshot: ContextSnapshot) throws -> ActionPlan {
+        guard let image = snapshot.screenImage else { throw AppError.missingContext("No screenshot") }
+        return ActionPlan(executor: .ocr, command: OCRCommand(image: image))
+    }
+}
+
+/// Ask the model about the captured region. Vision models get the image itself;
+/// text-only models get its OCR text (InferenceExecutor decides).
+public struct AskAboutScreenshotAction: Action {
+    public let id = "screenshot-ask"
+    public let title = "Ask about Screenshot"
+    public let requirements = ContextRequirements(needsScreenImage: true, needsScreenText: true)
+    private let prompt: String
+
+    public init(prompt: String) { self.prompt = prompt }
+
+    public func plan(for snapshot: ContextSnapshot) throws -> ActionPlan {
+        guard snapshot.screenImage != nil else { throw AppError.missingContext("No screenshot") }
+        let template = PromptTemplate(
+            system: "You are a helpful assistant. The user shares a screenshot. Reply in the user's language, concisely.",
+            instruction: prompt
+        )
+        return ActionPlan(executor: .inference, command: InferenceCommand(template: template, includeScreenText: true))
+    }
+}
+
 /// The default set of actions shipped with the app.
 public enum BuiltInActions {
     /// Inference actions shown in the Floating Panel picker.

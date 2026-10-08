@@ -50,8 +50,10 @@
 
 ## Етап 5 — Нові можливості (з ADR)
 
-- [ ] Скріншоти (Shottr-ідея): ScreenCaptureKit, вибір області → `CaptureKit`
-- [ ] OCR через Vision → `PerceptionKit`; дія «Copy text from image»
+- [x] Скріншоти: вибір області (системний `screencapture -i`) → `CaptureKit`; «Ask about Screenshot» (vision або OCR-текст)
+- [x] OCR через Vision (on-device, укр./англ. тощо) → `PerceptionKit`; «Text from Screenshot» у панелі та меню
+- [ ] Окремий глобальний хоткей для скріншота (зараз — через панель або меню)
+- [ ] Анотації на скріншоті / власний оверлей вибору області (коли знадобиться більше, ніж дає системний)
 - [ ] Embedded-модель на MLX Swift (Gemma, ADR-0006)
 - [ ] Дописування тексту inline (Cotypist-ідея) — найскладніше, останнім
 - [ ] Підпис Developer ID + нотаризація

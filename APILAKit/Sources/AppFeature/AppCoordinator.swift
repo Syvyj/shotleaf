@@ -45,7 +45,8 @@ public final class AppCoordinator {
             runner: container.actionRunner,
             inserter: inserter,
             actions: [],
-            accessibilityGranted: { permissions.status(.accessibility) == .granted }
+            accessibilityGranted: { permissions.status(.accessibility) == .granted },
+            captureScreen: { [capture = container.capture] in try await capture.captureRegion() }
         )
         applyTranslateSettings()
         panelVM.onResult = { [weak self] title, output in
@@ -75,6 +76,8 @@ public final class AppCoordinator {
         }
         self.panel = panel
         panelVM.onClose = { [weak self] in self?.panel?.hide() }
+        panelVM.onHide = { [weak self] in self?.panel?.hide() }
+        panelVM.onShow = { [weak self] in self?.panel?.show() }
 
         hotkeyRegistered = container.hotkeys.setShortcut(.with(id: container.settings.hotkey))
         hotkey = container.hotkeys.shortcut
@@ -121,6 +124,13 @@ public final class AppCoordinator {
 
     public func openFromMenu() { Task { await present() } }
 
+    /// Menu entry points for screenshots: no selection needed. The panel opens
+    /// straight into the region picker.
+    public func screenshotFromMenu(ask: Bool) {
+        panelVM.present(snapshot: ContextSnapshot(capturedAt: Date()), sourceApp: NSWorkspace.shared.frontmostApplication)
+        panelVM.startScreenshot(ask: ask, reopenOnCancel: false)
+    }
+
     // MARK: Settings
 
     /// The active shortcut (stored, so SwiftUI observes changes).
@@ -145,6 +155,8 @@ public final class AppCoordinator {
         public var baseURL: String
         public var apiKey: String
         public var model: String
+        /// Send screenshots as images (vision model) instead of their OCR text.
+        public var supportsVision: Bool
     }
 
     public func savedProviderSettings() -> ProviderSettings {
@@ -160,7 +172,8 @@ public final class AppCoordinator {
             kind: kind,
             baseURL: (isSaved ? settings.baseURL : nil) ?? kind.defaultBaseURL.absoluteString,
             apiKey: settings.apiKey(for: kind.rawValue) ?? "",
-            model: (isSaved ? settings.model : nil) ?? kind.defaultModel
+            model: (isSaved ? settings.model : nil) ?? kind.defaultModel,
+            supportsVision: (isSaved ? settings.supportsVision : nil) ?? kind.capabilities.supportsVision
         )
     }
 
@@ -170,6 +183,7 @@ public final class AppCoordinator {
         let url = draft.baseURL.trimmingCharacters(in: .whitespaces)
         settings.baseURL = url.isEmpty || url == draft.kind.defaultBaseURL.absoluteString ? nil : url
         settings.model = draft.model.trimmingCharacters(in: .whitespaces)
+        settings.supportsVision = draft.supportsVision == draft.kind.capabilities.supportsVision ? nil : draft.supportsVision
         settings.setAPIKey(draft.apiKey.trimmingCharacters(in: .whitespacesAndNewlines), for: draft.kind.rawValue)
         container.applyProviderSettings()
         await refreshProvider()

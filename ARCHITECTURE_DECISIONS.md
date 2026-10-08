@@ -5,7 +5,7 @@
 
 > Статуси: ✅ ПРИЙНЯТО · 🟡 ЗАПРОПОНОВАНО · ⏳ ОЧІКУЄ ПІДТВЕРДЖЕННЯ · ❌ ВІДХИЛЕНО · ⛔ СКАСОВАНО
 
-> **Поточний стан (2026-10-07).** Працює вертикальний зріз Kerlig-частини: ⌘⇧Space → плаваюча панель → Rewrite/Explain/Translate/Summarize/Custom → стрімінг → Copy/Replace/Insert. Провайдер обирається в Settings (LM Studio / Ollama / OpenAI / OpenRouter / custom; ключ у Keychain), Mock — запасний варіант. CaptureKit/PerceptionKit — заглушки; MLX, скріншоти, inline-дописування — ще не почато. Xcode 26 встановлено: `swift test` і `xcodebuild` працюють. Дорожня карта — `PLAN.md`.
+> **Поточний стан (2026-10-07).** Працює вертикальний зріз Kerlig-частини: ⌘⇧Space → плаваюча панель → Rewrite/Explain/Translate/Summarize/Custom → стрімінг → Copy/Replace/Insert. Провайдер обирається в Settings (LM Studio / Ollama / OpenAI / OpenRouter / custom; ключ у Keychain), Mock — запасний варіант. Скріншоти + OCR працюють (етап 5). MLX та inline-дописування — ще не почато. Xcode 26 встановлено: `swift test` і `xcodebuild` працюють. Дорожня карта — `PLAN.md`.
 
 ---
 
@@ -318,3 +318,17 @@
 
 ## ADR-0050 — Автозапуск через SMAppService ✅
 **Рішення.** `SMAppService.mainApp` register/unregister, перемикач у Settings → General. Працює для встановленого підписаного .app.
+
+---
+
+# Етап 5 — скріншоти та OCR ✅
+
+## ADR-0051 — Вибір області через системний `screencapture -i` (уточнює ADR-0011) ✅
+**Рішення.** `ScreenCaptureService.captureRegion()` запускає `/usr/sbin/screencapture -i -x <tmp.png>`: користувач тягне область (Space — вікно), Esc → `AppError.cancelled`. Перед цим `CGPreflightScreenCaptureAccess`, інакше `AppError.permissionDenied`.
+**Чому.** Рівно той UI, що й ⌘⇧4, нуль власного оверлею. ScreenCaptureKit-оверлей знадобиться лише для фіч усередині вибору (лупа, анотації) — тоді й замінимо реалізацію за тим самим протоколом `CaptureService`.
+**Альтернативи.** Власне прозоре вікно + ScreenCaptureKit (сотні рядків, мульти-монітор, Spaces).
+
+## ADR-0052 — OCR на Vision + OCRExecutor ✅
+**Рішення.** `VisionTextRecognizer` (VNRecognizeTextRequest, accurate, автодетект мови) поза актором; `OCRExecutor` (PerceptionKit) виконує `OCRCommand`. Дії `ScreenshotTextAction` (OCR → екран результату з Copy/Replace/Insert) і `AskAboutScreenshotAction` (InferenceCommand з `includeScreenText`: vision-модель отримує картинку, текстова — OCR, як і задумано в ADR-0007).
+**Перемикач** «Model can see images» у Settings перекриває дефолт провайдера (`supportsVision`).
+**Вхід.** Пункти «Text from Screenshot…» / «Ask about Screenshot…» у панелі та в меню (з меню — без виділеного тексту; Esc нічого не відкриває).

@@ -3,33 +3,48 @@ import ActionKit
 import AppKit
 import Observation
 
-/// State machine for the Floating Panel: actions → (custom prompt) → generating
-/// → result. Holds the snapshot captured at hotkey time and runs actions against
+/// State machine for the Floating Panel: actions → (prompt) → generating →
+/// result. Holds the snapshot captured at hotkey time and runs actions against
 /// it (no re-gathering). UI flow only; business logic stays in the Kits.
 @MainActor
 @Observable
 public final class PanelViewModel {
     public enum Screen: Equatable { case actions, customPrompt, generating, result }
 
+    /// What the prompt field is for.
+    public enum PromptMode: Equatable {
+        case custom      // instruction applied to the selection
+        case refine      // instruction applied to the current result
+        case screenshot  // question about a just-captured screenshot
+    }
+
     public enum Item: Identifiable {
         case action(any Action)
         case customPrompt
+        case screenshotText
+        case screenshotAsk
 
         public var id: String {
             switch self {
             case .action(let a): a.id
             case .customPrompt: "custom"
+            case .screenshotText: "screenshot-text"
+            case .screenshotAsk: "screenshot-ask"
             }
         }
         public var title: String {
             switch self {
             case .action(let a): a.title
             case .customPrompt: "Custom Prompt"
+            case .screenshotText: "Text from Screenshot…"
+            case .screenshotAsk: "Ask about Screenshot…"
             }
         }
     }
 
     public private(set) var screen: Screen = .actions
+    public private(set) var promptMode: PromptMode = .custom
+    public var isRefining: Bool { screen == .customPrompt && promptMode == .refine }
     public var selectedIndex = 0
     public var customPromptText = ""
     public private(set) var output = ""
@@ -42,30 +57,37 @@ public final class PanelViewModel {
     private let runner: ActionRunner
     private let inserter: ResultInserter
     private let accessibilityGranted: () -> Bool
+    private let captureScreen: () async throws -> ImagePayload
     private var snapshot: ContextSnapshot?
+    /// The selection snapshot + the captured image, while asking about it.
+    private var screenshotSnapshot: ContextSnapshot?
     private var sourceApp: NSRunningApplication?
     private var streamTask: Task<Void, Never>?
+    private var lastRun: (action: any Action, snapshot: ContextSnapshot)?
+
     public var onClose: () -> Void = {}
+    /// The panel must get out of the way while the user picks a screen region.
+    public var onHide: () -> Void = {}
+    public var onShow: () -> Void = {}
     /// Called with each successful result (for History).
     public var onResult: (_ title: String, _ output: String) -> Void = { _, _ in }
-    /// The custom-prompt screen is refining the current result, not the selection.
-    public private(set) var isRefining = false
-    private var lastRun: (action: any Action, snapshot: ContextSnapshot)?
 
     public init(
         runner: ActionRunner,
         inserter: ResultInserter,
         actions: [any Action],
-        accessibilityGranted: @escaping () -> Bool
+        accessibilityGranted: @escaping () -> Bool,
+        captureScreen: @escaping () async throws -> ImagePayload = { throw AppError.notImplemented("screen capture") }
     ) {
         self.runner = runner
         self.inserter = inserter
         self.accessibilityGranted = accessibilityGranted
+        self.captureScreen = captureScreen
         setActions(actions)
     }
 
     public func setActions(_ actions: [any Action]) {
-        items = actions.map { .action($0) } + [.customPrompt]
+        items = actions.map { .action($0) } + [.customPrompt, .screenshotText, .screenshotAsk]
         selectedIndex = min(selectedIndex, items.count - 1)
     }
 
@@ -87,12 +109,13 @@ public final class PanelViewModel {
         self.snapshot = snapshot
         self.sourceApp = sourceApp
         screen = .actions
+        promptMode = .custom
         selectedIndex = 0
         output = ""
         errorText = nil
         noticeText = nil
         customPromptText = ""
-        isRefining = false
+        screenshotSnapshot = nil
         lastRun = nil
     }
 
@@ -104,18 +127,67 @@ public final class PanelViewModel {
         case .actions:
             switch items[selectedIndex] {
             case .action(let action): if let snapshot { run(action, on: snapshot) }
-            case .customPrompt: screen = .customPrompt
+            case .customPrompt: openPrompt(.custom)
+            case .screenshotText: startScreenshot(ask: false)
+            case .screenshotAsk: startScreenshot(ask: true)
             }
         case .customPrompt:
             let text = customPromptText.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !text.isEmpty, let snapshot else { return }
-            // Refining works on the previous result instead of the original selection.
-            let source = isRefining ? ContextSnapshot(selectedText: output, capturedAt: Date()) : snapshot
-            run(CustomPromptAction(prompt: text), on: source)
+            switch promptMode {
+            case .custom:
+                run(CustomPromptAction(prompt: text), on: snapshot)
+            case .refine:
+                // Refining works on the previous result instead of the original selection.
+                run(CustomPromptAction(prompt: text), on: ContextSnapshot(selectedText: output, capturedAt: Date()))
+            case .screenshot:
+                if let shot = screenshotSnapshot { run(AskAboutScreenshotAction(prompt: text), on: shot) }
+            }
         case .generating:
             break
         case .result:
             Task { await copyResult() }
+        }
+    }
+
+    /// Capture a region, then OCR it (`ask == false`) or ask a question about it.
+    /// `reopenOnCancel`: after Esc, bring the action list back (panel flow) or
+    /// stay hidden (started from the menu, there was no panel).
+    public func startScreenshot(ask: Bool, reopenOnCancel: Bool = true) {
+        Task {
+            guard let shot = await captureRegion(reopenOnCancel: reopenOnCancel) else { return }
+            if ask {
+                screenshotSnapshot = shot
+                openPrompt(.screenshot)
+            } else {
+                run(ScreenshotTextAction(), on: shot)
+            }
+        }
+    }
+
+    private func openPrompt(_ mode: PromptMode) {
+        customPromptText = ""
+        promptMode = mode
+        screen = .customPrompt
+    }
+
+    /// Hides the panel, lets the user pick a region, brings the panel back.
+    /// Nil if they pressed Esc or it failed (then the error is shown).
+    private func captureRegion(reopenOnCancel: Bool) async -> ContextSnapshot? {
+        guard let snapshot else { return nil }
+        onHide()
+        do {
+            let shot = snapshot.withScreenImage(try await captureScreen())
+            onShow()
+            return shot
+        } catch AppError.cancelled {
+            if reopenOnCancel { onShow() }
+            return nil
+        } catch {
+            errorText = Self.friendlyMessage(for: error)
+            screen = .result
+            onShow()
+            return nil
         }
     }
 
@@ -128,9 +200,7 @@ public final class PanelViewModel {
     /// Opens the prompt field to adjust the result ("shorter", "more formal"…).
     public func refine() {
         guard screen == .result, errorText == nil, !output.isEmpty else { return }
-        customPromptText = ""
-        isRefining = true
-        screen = .customPrompt
+        openPrompt(.refine)
     }
 
     private func run(_ action: any Action, on snapshot: ContextSnapshot) {
@@ -162,12 +232,22 @@ public final class PanelViewModel {
         }
     }
 
-    private static func friendlyMessage(for error: Error) -> String {
-        if case AppError.missingContext = error {
-            return "No text found. Select some text (or copy it), then open APILA again."
-        }
-        if case AppError.providerUnavailable = error {
-            return "No AI provider is available. Start LM Studio (or an OpenAI-compatible server), or rely on Mock."
+    static func friendlyMessage(for error: Error) -> String {
+        if let error = error as? AppError {
+            switch error {
+            case .missingContext(let what) where what.contains("screenshot"):
+                return "\(what)."
+            case .missingContext:
+                return "No text found. Select some text (or copy it), then open APILA again."
+            case .providerUnavailable:
+                return "No AI provider is available. Start LM Studio (or an OpenAI-compatible server), or rely on Mock."
+            case .permissionDenied(let name):
+                return "APILA needs the \(name) permission. Allow it in System Settings → Privacy & Security, then restart APILA."
+            case .cancelled:
+                return "Cancelled."
+            case .notImplemented(let what):
+                return "Not available yet: \(what)."
+            }
         }
         guard let error = error as? InferenceError else { return error.localizedDescription }
         switch error {
@@ -214,8 +294,8 @@ public final class PanelViewModel {
 
     /// Esc: leaves Refine back to the result; otherwise closes the panel.
     public func cancel() {
-        if screen == .customPrompt, isRefining {
-            isRefining = false
+        if isRefining {
+            promptMode = .custom
             screen = .result
         } else {
             close()
@@ -225,7 +305,7 @@ public final class PanelViewModel {
     public func close() {
         streamTask?.cancel()
         screen = .actions
-        isRefining = false
+        promptMode = .custom
         onClose()
     }
 }

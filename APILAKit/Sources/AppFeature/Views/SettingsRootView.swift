@@ -19,9 +19,8 @@ public struct SettingsRootView: View {
         self.coordinator = coordinator
     }
 
-    /// Only the permission the current vertical slice needs. Screen Recording /
-    /// Input Monitoring arrive with CaptureKit — not required now.
-    private let required: [PermissionKind] = [.accessibility]
+    /// Accessibility: read the selection, paste results. Screen Recording: screenshots.
+    private let required: [PermissionKind] = [.accessibility, .screenRecording]
 
     public var body: some View {
         Form {
@@ -66,6 +65,7 @@ public struct SettingsRootView: View {
                     Button("Fetch models") { Task { await fetchModels() } }
                         .disabled(isBusy)
                 }
+                Toggle("Model can see images (screenshots)", isOn: binding.supportsVision)
                 if let modelsError {
                     Text(modelsError).font(.caption).foregroundStyle(.red)
                 }
@@ -79,7 +79,7 @@ public struct SettingsRootView: View {
             } header: {
                 Text("Model provider")
             } footer: {
-                Text("API keys are stored in the macOS Keychain. If the provider is unreachable, APILA falls back to Mock.")
+                Text("API keys are stored in the macOS Keychain. If the provider is unreachable, APILA falls back to Mock. Without image support, screenshots are sent as on-device OCR text.")
             }
         }
     }
@@ -218,7 +218,7 @@ public struct SettingsRootView: View {
         } header: {
             Text("Permissions")
         } footer: {
-            Text("Accessibility is required for reading the selection and pasting the result. After granting, fully restart APILA.")
+            Text("Accessibility is required for reading the selection and pasting the result; Screen Recording — for screenshots. After granting, fully restart APILA.")
         }
     }
 

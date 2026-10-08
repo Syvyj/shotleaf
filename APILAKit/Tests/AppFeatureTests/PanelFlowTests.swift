@@ -4,6 +4,7 @@ import Foundation
 @testable import InferenceKit
 @testable import ActionKit
 @testable import AppFeature
+@testable import PerceptionKit
 
 private struct NoContext: ContextProviding {
     func snapshot(requirements: ContextRequirements) async throws -> ContextSnapshot { ContextSnapshot(capturedAt: Date()) }
@@ -66,5 +67,61 @@ struct PanelFlowTests {
         try await waitForResult(vm)
 
         #expect(recorded == ["Rewrite", "Rewrite", "Custom Prompt"])
+    }
+}
+
+private struct FixedOCR: TextRecognizing {
+    func recognizeText(in image: ImagePayload) async throws -> String { "text on screen" }
+}
+
+@Suite("Screenshot flow")
+@MainActor
+struct ScreenshotFlowTests {
+    private func makePanel(capture: @escaping () async throws -> ImagePayload) -> PanelViewModel {
+        let runner = ActionRunner(
+            context: NoContext(),
+            executors: [.ocr: OCRExecutor(recognizer: FixedOCR())]
+        )
+        return PanelViewModel(
+            runner: runner,
+            inserter: ResultInserter(clipboard: NullClipboard()),
+            actions: [],
+            accessibilityGranted: { false },
+            captureScreen: capture
+        )
+    }
+
+    @Test("Text from Screenshot: hide → capture → show → OCR text as result")
+    func ocr() async throws {
+        let vm = makePanel { ImagePayload(data: Data([0]), width: 1, height: 1) }
+        var events: [String] = []
+        vm.onHide = { events.append("hide") }
+        vm.onShow = { events.append("show") }
+        vm.present(snapshot: ContextSnapshot(capturedAt: Date()), sourceApp: nil)
+        vm.startScreenshot(ask: false)
+        try await waitForResult(vm)
+        #expect(vm.output == "text on screen")
+        #expect(events == ["hide", "show"])
+    }
+
+    @Test("Esc in the region picker: from the menu, the panel stays hidden")
+    func cancelFromMenu() async throws {
+        let vm = makePanel { throw AppError.cancelled }
+        var shown = false
+        vm.onShow = { shown = true }
+        vm.present(snapshot: ContextSnapshot(capturedAt: Date()), sourceApp: nil)
+        vm.startScreenshot(ask: false, reopenOnCancel: false)
+        try await Task.sleep(for: .milliseconds(50))
+        #expect(!shown)
+        #expect(vm.screen == .actions)
+    }
+
+    @Test("Missing Screen Recording permission is explained")
+    func permission() async throws {
+        let vm = makePanel { throw AppError.permissionDenied("Screen Recording") }
+        vm.present(snapshot: ContextSnapshot(capturedAt: Date()), sourceApp: nil)
+        vm.startScreenshot(ask: true)
+        try await waitForResult(vm)
+        #expect(vm.errorText?.contains("Screen Recording") == true)
     }
 }

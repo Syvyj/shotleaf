@@ -32,6 +32,12 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "model") }
     }
 
+    /// Override of the provider kind's vision capability; nil = kind default.
+    public var supportsVision: Bool? {
+        get { defaults.object(forKey: "supportsVision") as? Bool }
+        set { defaults.set(newValue, forKey: "supportsVision") }
+    }
+
     // MARK: Behaviour
 
     /// Id of the chosen global shortcut preset.

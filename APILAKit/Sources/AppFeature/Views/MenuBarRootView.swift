@@ -11,6 +11,8 @@ public struct MenuBarRootView: View {
 
     public var body: some View {
         Button("Open APILA (\(coordinator.hotkey.title))") { coordinator.openFromMenu() }
+        Button("Text from Screenshot…") { coordinator.screenshotFromMenu(ask: false) }
+        Button("Ask about Screenshot…") { coordinator.screenshotFromMenu(ask: true) }
 
         if !coordinator.history.isEmpty {
             Menu("Recent Results") {

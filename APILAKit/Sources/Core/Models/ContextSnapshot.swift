@@ -46,6 +46,19 @@ public struct ContextSnapshot: Sendable, Equatable {
         )
     }
 
+    /// Returns a copy with a captured screen image attached.
+    public func withScreenImage(_ image: ImagePayload) -> ContextSnapshot {
+        ContextSnapshot(
+            selectedText: selectedText,
+            clipboardText: clipboardText,
+            activeApplication: activeApplication,
+            browserURL: browserURL,
+            screenImage: image,
+            recognizedScreenText: nil,
+            capturedAt: capturedAt
+        )
+    }
+
     /// The most relevant text the user is acting on: selection first, clipboard
     /// as fallback.
     public var primaryText: String? {
