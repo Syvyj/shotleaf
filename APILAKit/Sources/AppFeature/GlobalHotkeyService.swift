@@ -21,12 +21,17 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
     /// ⌥Space / ⌃Space are often taken by input-source switching, hence ⌘⇧Space.
     public static let `default` = all[0]
 
-    /// Defaults for the screenshot actions: next to the system's ⌘⇧3/4/5.
-    public static let captureDefault = HotkeyShortcut(
+    /// Defaults for the screenshot actions: ⌘⇧1 text, ⌘⇧2 screenshot, ⌘⇧3
+    /// scrolling. ⌘⇧3 is macOS's own full-screen shot until it's switched off
+    /// in System Settings → Keyboard → Keyboard Shortcuts → Screenshots.
+    public static let screenshotDefault = HotkeyShortcut( // text from screenshot
         id: "cmd-shift-1", title: "⌘⇧1", keyCode: UInt32(kVK_ANSI_1), modifiers: UInt32(cmdKey | shiftKey)
     )
-    public static let screenshotDefault = HotkeyShortcut(
+    public static let captureDefault = HotkeyShortcut(
         id: "cmd-shift-2", title: "⌘⇧2", keyCode: UInt32(kVK_ANSI_2), modifiers: UInt32(cmdKey | shiftKey)
+    )
+    public static let scrollingDefault = HotkeyShortcut(
+        id: "cmd-shift-3", title: "⌘⇧3", keyCode: UInt32(kVK_ANSI_3), modifiers: UInt32(cmdKey | shiftKey)
     )
 
     init(id: String, title: String, keyCode: UInt32, modifiers: UInt32) {
@@ -47,7 +52,7 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
                 return HotkeyShortcut(customKeyCode: code, modifiers: mods, title: String(parts[3]))
             }
         }
-        return (all + [captureDefault, screenshotDefault]).first { $0.id == id } ?? .default
+        return (all + [captureDefault, screenshotDefault, scrollingDefault]).first { $0.id == id } ?? .default
     }
 
     /// Builds a shortcut from a key press in the recorder. Nil when it has no
@@ -88,6 +93,7 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
 public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
     case capture                            // screenshot → preview window
     case screenshotText = "screenshot-text" // screenshot → OCR text
+    case scrolling                          // scrolling screenshot → preview window
 
     public var id: String { rawValue }
 
@@ -95,6 +101,7 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .capture: "Screenshot"
         case .screenshotText: "Text from Screenshot"
+        case .scrolling: "Scrolling Screenshot"
         }
     }
 
@@ -102,6 +109,7 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .capture: .captureDefault
         case .screenshotText: .screenshotDefault
+        case .scrolling: .scrollingDefault
         }
     }
 }

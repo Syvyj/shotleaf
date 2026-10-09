@@ -110,6 +110,7 @@ public final class AppCoordinator {
                 switch event.identifier {
                 case HotkeyAction.screenshotText.rawValue: self.screenshotFromMenu(ask: false)
                 case HotkeyAction.capture.rawValue: self.takeScreenshot()
+                case HotkeyAction.scrolling.rawValue: self.takeScrollingScreenshot()
                 default: await self.present()
                 }
             }
