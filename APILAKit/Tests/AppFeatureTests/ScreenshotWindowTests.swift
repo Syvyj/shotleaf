@@ -103,6 +103,8 @@ struct ScreenshotWindowTests {
         doc.add(.text(origin: CGPoint(x: 360, y: 240), string: "look here — a long note wraps onto the next line", tail: CGPoint(x: 330, y: 300)))
         doc.add(.blur(CGRect(x: 480, y: 280, width: 140, height: 60)))
         doc.add(.focus(CGRect(x: 20, y: 120, width: 340, height: 120)))
+        doc.color = .leaf
+        doc.add(.measure(from: CGPoint(x: 30, y: 330), to: CGPoint(x: 330, y: 330)))
         doc.color = .coral
         doc.lineWidth = 7
         let thick = doc.add(.arrow(from: CGPoint(x: 600, y: 330), to: CGPoint(x: 470, y: 230)))

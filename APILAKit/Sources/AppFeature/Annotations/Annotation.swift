@@ -25,6 +25,8 @@ struct Annotation: Identifiable, Equatable {
         case ellipse(CGRect)
         /// The part of the canvas to keep on export (at most one per shot).
         case crop(CGRect)
+        /// Ruler: a line labelled with its length in screenshot pixels.
+        case measure(from: CGPoint, to: CGPoint)
     }
 
     let id = UUID()
@@ -43,6 +45,8 @@ struct Annotation: Identifiable, Equatable {
             return r.insetBy(dx: -lineWidth, dy: -lineWidth)
         case .crop(let r):
             return r
+        case .measure(let a, let b):
+            return CaptureMath.rect(a, b).insetBy(dx: -40, dy: -24) // room for the label
         case .highlight(let r), .blur(let r):
             return r
         case .erase(let r, _), .focus(let r):
@@ -86,7 +90,7 @@ enum AnnotationColor: String, CaseIterable, Identifiable {
 }
 
 enum AnnotationTool: String, CaseIterable, Identifiable {
-    case arrow, rectangle, text, highlight, blur, step, erase, cut, focus, ellipse, crop
+    case arrow, rectangle, text, highlight, blur, step, erase, cut, focus, ellipse, crop, ruler
     var id: String { rawValue }
 
     var title: String {
@@ -102,6 +106,7 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
         case .focus: "Focus"
         case .ellipse: "Oval"
         case .crop: "Crop"
+        case .ruler: "Ruler"
         }
     }
 
@@ -114,6 +119,7 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
         switch self {
         case .ellipse: "o"
         case .crop: "c"
+        case .ruler: "m"
         default: Character(String((Self.allCases.firstIndex(of: self) ?? 0) + 1))
         }
     }

@@ -45,6 +45,8 @@ enum AnnotationRenderer {
             let color = item.color.nsColor.cgColor
             switch item.kind {
             case .arrow(let a, let b): arrow(from: a, to: b, width: item.lineWidth, color: color, in: ctx)
+            case .measure(let a, let b):
+                measure(from: a, to: b, pixelsPerPoint: CGFloat(image.width) / max(imageSize.width, 1), color: item.color.nsColor, in: ctx)
             case .rectangle(let r): box(r, width: item.lineWidth, color: color, in: ctx)
             case .focus, .crop: break // focus drawn above; crop is a guide / export bound
             case .ellipse(let r):
@@ -143,6 +145,39 @@ enum AnnotationRenderer {
         ])
         let size = label.size()
         drawText(label, at: CGPoint(x: c.x - size.width / 2, y: c.y - size.height / 2), in: ctx)
+    }
+
+    /// A thin line with end ticks and its length in pixels on a pill.
+    private static func measure(from a: CGPoint, to b: CGPoint, pixelsPerPoint: CGFloat, color: NSColor, in ctx: CGContext) {
+        let length = hypot(b.x - a.x, b.y - a.y)
+        guard length > 1 else { return }
+        let n = CGPoint(x: -(b.y - a.y) / length * 7, y: (b.x - a.x) / length * 7) // tick half-length, across the line
+        ctx.saveGState()
+        softShadow(ctx)
+        ctx.setStrokeColor(color.cgColor)
+        ctx.setLineWidth(2)
+        ctx.setLineCap(.round)
+        for p in [a, b] {
+            ctx.move(to: CGPoint(x: p.x - n.x, y: p.y - n.y))
+            ctx.addLine(to: CGPoint(x: p.x + n.x, y: p.y + n.y))
+        }
+        ctx.move(to: a)
+        ctx.addLine(to: b)
+        ctx.strokePath()
+        ctx.restoreGState()
+
+        let light = [AnnotationColor.white, .amber].map(\.nsColor).contains(color)
+        let label = NSAttributedString(string: "\(Int((length * pixelsPerPoint).rounded())) px", attributes: [
+            .font: NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .bold),
+            .foregroundColor: light ? NSColor.black : NSColor.white,
+        ])
+        let size = label.size()
+        let mid = CGPoint(x: (a.x + b.x) / 2, y: (a.y + b.y) / 2)
+        let pill = CGRect(x: mid.x - size.width / 2 - 7, y: mid.y - size.height / 2 - 3, width: size.width + 14, height: size.height + 6)
+        ctx.setFillColor(color.cgColor)
+        ctx.addPath(CGPath(roundedRect: pill, cornerWidth: pill.height / 2, cornerHeight: pill.height / 2, transform: nil))
+        ctx.fillPath()
+        drawText(label, at: CGPoint(x: pill.minX + 7, y: pill.minY + 3), in: ctx)
     }
 
     /// A bubble in the mark's color with the text on it, and a tapering tail

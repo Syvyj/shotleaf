@@ -88,6 +88,16 @@ struct AnnotationEditingTests {
         #expect(big.width > small.width * 1.6 && big.height > small.height * 1.6)
     }
 
+    @Test("Ruler: ends snap level/plumb; it selects, moves and re-ends like an arrow")
+    func ruler() {
+        #expect(E.snapped(.zero, CGPoint(x: 100, y: 4)) == CGPoint(x: 100, y: 0))
+        #expect(E.snapped(.zero, CGPoint(x: -3, y: 80)) == CGPoint(x: 0, y: 80))
+        #expect(E.snapped(.zero, CGPoint(x: 50, y: 40)) == CGPoint(x: 50, y: 40))
+        let ruler = Annotation(kind: .measure(from: .zero, to: CGPoint(x: 100, y: 0)), color: .coral)
+        #expect(E.hit([ruler], at: CGPoint(x: 50, y: 3)) == ruler.id)
+        #expect(E.resized(ruler.kind, .arrowEnd, to: CGPoint(x: 0, y: 60)) == .measure(from: .zero, to: CGPoint(x: 0, y: 60)))
+    }
+
     @Test("Thicker arrows get bigger heads")
     func arrowHead() {
         #expect(AnnotationStyle.arrowHead(for: 7) > AnnotationStyle.arrowHead(for: 2.5))

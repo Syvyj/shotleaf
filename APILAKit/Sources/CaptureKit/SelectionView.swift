@@ -103,6 +103,13 @@ final class SelectionView: NSView {
         case (53, _): finish(.cancel)                       // Esc
         case (36, _), (76, _), (_, "f"): finish(.region(bounds)) // Return / Enter / F
         case (_, "r") where canRepeat: finish(.repeatLast)
+        case (_, "c"):                                      // eyedropper: copy the HEX under the cursor
+            guard let cursor else { return }
+            let hex = pixelHex(x: Int((cursor.x * scale).rounded(.down)), y: Int((cursor.y * scale).rounded(.down)))
+            guard hex.hasPrefix("#") else { return }
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(hex, forType: .string)
+            finish(.cancel)
         default: super.keyDown(with: event)
         }
     }
@@ -267,6 +274,7 @@ final class SelectionView: NSView {
     private func drawHints() {
         var keys: [(String, String)] = [("drag", "область"), ("click", "вікно"), ("↩", "весь екран")]
         if canRepeat { keys.append(("R", "повторити")) }
+        keys.append(("C", "копіювати колір"))
         keys.append(("esc", "скасувати"))
 
         let keyFont = CaptureStyle.font(11, .semibold)

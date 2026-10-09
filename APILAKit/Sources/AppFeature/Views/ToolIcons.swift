@@ -73,6 +73,12 @@ struct ToolIcon: View {
                 path.move(to: p(5, 1.5)); path.addLine(to: p(5, 13)); path.addLine(to: p(16.5, 13))
                 path.move(to: p(1.5, 5)); path.addLine(to: p(13, 5)); path.addLine(to: p(13, 16.5))
                 ctx.stroke(path, with: ink, style: line)
+            case .ruler:
+                var path = Path(roundedRect: r(1.5, 6, 15, 6), cornerRadius: 1.2 * u)
+                for (i, x) in stride(from: 4.5, through: 13.5, by: 3).enumerated() {
+                    path.move(to: p(x, 6)); path.addLine(to: p(x, i.isMultiple(of: 2) ? 9.5 : 8.2))
+                }
+                ctx.stroke(path, with: ink, style: line)
             case .focus:
                 var dim = Path(roundedRect: r(1.5, 2.5, 15, 13), cornerRadius: 2.2 * u)
                 dim.addPath(Path(roundedRect: r(5.5, 6, 7, 6), cornerRadius: 1.5 * u))

@@ -27,7 +27,7 @@ enum AnnotationEditing {
             return r.insetBy(dx: -tolerance, dy: -tolerance).contains(p) && !r.insetBy(dx: tolerance, dy: tolerance).contains(p)
         }
         switch kind {
-        case .arrow(let a, let b): return distance(from: p, toSegment: a, b) <= tolerance
+        case .arrow(let a, let b), .measure(let a, let b): return distance(from: p, toSegment: a, b) <= tolerance
         case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r):
             return r.insetBy(dx: -tolerance / 2, dy: -tolerance / 2).contains(p)
         case .piece(let source, let offset, _):
@@ -42,7 +42,7 @@ enum AnnotationEditing {
     /// The box a selection outline is drawn around.
     static func frame(of kind: Annotation.Kind) -> CGRect {
         switch kind {
-        case .arrow(let a, let b): return CaptureMath.rect(a, b)
+        case .arrow(let a, let b), .measure(let a, let b): return CaptureMath.rect(a, b)
         case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r): return r
         case .piece(let source, let offset, _): return source.offsetBy(dx: offset.width, dy: offset.height)
         case .text(let o, let s, _, let w, let f): return AnnotationStyle.bubble(origin: o, string: s, width: w, size: f)
@@ -54,7 +54,7 @@ enum AnnotationEditing {
     /// A callout's tail. Steps and cut pieces only move.
     static func handles(of kind: Annotation.Kind) -> [(Handle, CGPoint)] {
         switch kind {
-        case .arrow(let a, let b):
+        case .arrow(let a, let b), .measure(let a, let b):
             return [(.arrowStart, a), (.arrowEnd, b)]
         case .text(let o, let s, let tail, let w, let f):
             let bubble = AnnotationStyle.bubble(origin: o, string: s, width: w, size: f)
@@ -79,6 +79,7 @@ enum AnnotationEditing {
         func m(_ r: CGRect) -> CGRect { r.offsetBy(dx: d.width, dy: d.height) }
         switch kind {
         case .arrow(let a, let b): return .arrow(from: m(a), to: m(b))
+        case .measure(let a, let b): return .measure(from: m(a), to: m(b))
         case .rectangle(let r): return .rectangle(m(r))
         case .highlight(let r): return .highlight(m(r))
         case .blur(let r): return .blur(m(r))
@@ -119,6 +120,8 @@ enum AnnotationEditing {
         switch (kind, handle) {
         case (.arrow(_, let b), .arrowStart): return .arrow(from: p, to: b)
         case (.arrow(let a, _), .arrowEnd): return .arrow(from: a, to: p)
+        case (.measure(_, let b), .arrowStart): return .measure(from: p, to: b)
+        case (.measure(let a, _), .arrowEnd): return .measure(from: a, to: p)
         case (.text(let o, let s, _, let w, let f), .tail):
             // Dropped back on the bubble: no tail.
             let inside = AnnotationStyle.bubble(origin: o, string: s, width: w, size: f).insetBy(dx: -4, dy: -4).contains(p)
@@ -134,6 +137,13 @@ enum AnnotationEditing {
         case (.erase(let r, let fill), _): return .erase(box(r), fill: fill)
         default: return kind
         }
+    }
+
+    /// A ruler end snaps to horizontal / vertical when it's nearly there.
+    static func snapped(_ a: CGPoint, _ b: CGPoint, within slack: CGFloat = 6) -> CGPoint {
+        if abs(b.y - a.y) <= slack { return CGPoint(x: b.x, y: a.y) }
+        if abs(b.x - a.x) <= slack { return CGPoint(x: a.x, y: b.y) }
+        return b
     }
 
     static func distance(from p: CGPoint, toSegment a: CGPoint, _ b: CGPoint) -> CGFloat {

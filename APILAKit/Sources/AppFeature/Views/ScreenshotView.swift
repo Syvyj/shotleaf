@@ -58,7 +58,7 @@ struct ScreenshotView: View {
     static let margin: CGFloat = 40
 
     /// Wide enough for the header (with the tools) and the action row.
-    static let minContentWidth: CGFloat = 780
+    static let minContentWidth: CGFloat = 800
 
     private var editingText: Bool { textDraft != nil }
 
@@ -566,6 +566,9 @@ struct ScreenshotView: View {
         case .focus: return big ? .focus(rect) : nil
         case .ellipse: return big ? .ellipse(rect) : nil
         case .crop: return big ? .crop(rect) : nil
+        case .ruler:
+            let end = AnnotationEditing.snapped(a, b)
+            return hypot(end.x - a.x, end.y - a.y) > 4 ? .measure(from: a, to: end) : nil
         case .erase: return big ? .erase(rect, fill: sampled()) : nil
         case .cut:
             guard big else { return nil }

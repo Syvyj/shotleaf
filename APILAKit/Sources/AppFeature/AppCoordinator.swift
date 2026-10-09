@@ -151,8 +151,11 @@ public final class AppCoordinator {
     private let screenshots = ScreenshotWindows()
 
     /// Shottr-style: pick a region → preview window (copy, save, pin, drag, OCR, ask).
-    public func takeScreenshot() {
+    /// `delay`: seconds to wait first (with a countdown), to open a menu or
+    /// tooltip that should be in the shot.
+    public func takeScreenshot(delay: Int = 0) {
         Task {
+            if delay > 0 { await screenshots.countdown(delay) }
             do {
                 screenshots.show(try await container.capture.captureRegion())
             } catch AppError.cancelled {

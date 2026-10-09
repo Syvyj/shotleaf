@@ -63,6 +63,24 @@ final class ScreenshotWindows {
         present(panel)
     }
 
+    /// A small "3… 2… 1" badge near the top of the screen. It never reaches
+    /// the shot: the picker leaves APILA's own windows out.
+    func countdown(_ seconds: Int) async {
+        let model = Countdown(left: seconds)
+        let panel = makePanel(CountdownBadge(model: model))
+        panel.ignoresMouseEvents = true
+        if let screen = NSScreen.screens.first(where: { $0.frame.contains(NSEvent.mouseLocation) }) ?? NSScreen.main {
+            panel.setFrameOrigin(NSPoint(x: screen.visibleFrame.midX - panel.frame.width / 2,
+                                         y: screen.visibleFrame.maxY - panel.frame.height - 24))
+        }
+        panel.orderFrontRegardless() // not key: the user is busy opening a menu
+        while model.left > 0 {
+            try? await Task.sleep(for: .seconds(1))
+            model.left -= 1
+        }
+        panel.orderOut(nil)
+    }
+
     static func payload(_ png: Data) -> ImagePayload {
         let rep = NSBitmapImageRep(data: png)
         return ImagePayload(data: png, width: rep?.pixelsWide ?? 0, height: rep?.pixelsHigh ?? 0)
@@ -173,5 +191,27 @@ final class ScreenshotWindows {
         let x = min(max(frame.midX - size.width / 2, frame.minX + 8), frame.maxX - size.width - 8)
         let y = min(max(frame.midY - size.height / 2, frame.minY + 8), frame.maxY - size.height - 8)
         return NSPoint(x: max(x, frame.minX), y: max(y, frame.minY))
+    }
+}
+
+@MainActor @Observable
+final class Countdown {
+    var left: Int
+    init(left: Int) { self.left = left }
+}
+
+private struct CountdownBadge: View {
+    let model: Countdown
+    var body: some View {
+        HStack(spacing: 8) {
+            BrandLogo(size: 18)
+            Text(verbatim: "\(model.left)")
+                .font(Leaf.font(22, .bold)).monospacedDigit()
+                .contentTransition(.numericText(countsDown: true))
+                .animation(.snappy, value: model.left)
+        }
+        .padding(.horizontal, 16).padding(.vertical, 8)
+        .background(.regularMaterial, in: Capsule())
+        .background(Leaf.surface, in: Capsule())
     }
 }
