@@ -79,6 +79,14 @@ enum CompletionText {
             .joined(separator: "\n")
     }
 
+    /// What follows the cursor on its line, or "" when nothing real does:
+    /// web editors keep invisible characters there (zero-width spaces,
+    /// object-replacement marks), and those mustn't make it "mid-text".
+    static func restOfLine(_ after: String) -> String {
+        let line = String(after.prefix { $0 != "\n" && $0 != "\r" && $0 != "\u{2028}" && $0 != "\u{2029}" }.prefix(200))
+        return line.contains(where: { $0.isLetter || $0.isNumber }) ? line : ""
+    }
+
     /// Worth asking the model: some real text, and the cursor isn't mid-word
     /// right after a single letter.
     static func shouldComplete(beforeCursor text: String) -> Bool {

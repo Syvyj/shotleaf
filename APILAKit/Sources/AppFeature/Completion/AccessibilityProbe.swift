@@ -99,10 +99,12 @@ public enum AccessibilityProbe {
                     let field = FocusedField.current(excluding: [], screenTop: top)
                     summary = "\(role as? String ?? "?") text \((value as? String)?.count ?? -1) chars, cursor \(range.location)+\(range.length), "
                         + "caret box \(Int(bounds.width))×\(Int(bounds.height)) → APILA: \(field == nil ? "NO" : "ok")"
+                    if field == nil, (value as? String).map({ $0.count <= 1 }) ?? true { summary += "  [markers: " + FocusedField.markerDiagnosis(element) + "]" }
                 }
                 let key = app.bundleIdentifier ?? "?"
                 // One line per app: only when "can APILA work here" changes, not per keystroke.
-                let state = summary.contains("APILA: ok") ? "ok" : summary.components(separatedBy: " text").first ?? summary
+                let state = summary.contains("APILA: ok") ? "ok"
+                    : summary.replacingOccurrences(of: "[0-9]+", with: "#", options: .regularExpression)
                 if seen[key] != state {
                     seen[key] = state
                     let stamp = Date().formatted(date: .omitted, time: .standard)

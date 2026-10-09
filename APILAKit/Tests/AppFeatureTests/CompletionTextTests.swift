@@ -56,6 +56,14 @@ struct CompletionTextTests {
         #expect(C.prompt(beforeCursor: "Hello there", context: C.Context()) == "Hello there")
     }
 
+    @Test("Invisible characters after the cursor don't make it mid-text")
+    func restOfLine() {
+        #expect(C.restOfLine("\u{200B}") == "")
+        #expect(C.restOfLine("\u{FFFC}\u{FEFF} ") == "")
+        #expect(C.restOfLine(" at ten.\nnext line") == " at ten.")
+        #expect(C.restOfLine("\nnext line") == "")
+    }
+
     @Test("Tab takes the next word with its spaces and punctuation")
     func nextWord() {
         #expect(C.nextWord(of: " world, how are you") == (" world,", " how are you"))
@@ -141,5 +149,16 @@ struct WritingHistoryTests {
         #expect(WritingHistory(url: url).examples(for: "tg", current: "").count == 2)    // saved to disk
         h.forget()
         #expect(h.isEmpty && WritingHistory(url: url).isEmpty)
+    }
+}
+
+@Suite("Context emoji")
+struct ContextEmojiTests {
+    @Test("Parses the model's emoji line; fitting ones first, then recents, no repeats")
+    func parse() {
+        #expect(ContextEmoji.parse(" 🎉🎂 🥳🎉\nMessage: x 😀") == ["🎉", "🎂", "🥳"])
+        #expect(ContextEmoji.parse(" ❤️ 1 # 👍🏽") == ["❤️", "👍🏽"])
+        #expect(ContextEmoji.merged(["🎉", "👍"], recents: ["👍", "😂", "❤️"], limit: 4) == ["🎉", "👍", "😂", "❤️"])
+        #expect(ContextEmoji.prompt(for: "Вітаю з днем народження").hasSuffix("Message: Вітаю з днем народження\nEmoji:"))
     }
 }

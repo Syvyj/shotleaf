@@ -68,6 +68,48 @@ enum EmojiShortcodes {
     }
 }
 
+/// Emoji that fit what's being written, guessed by the completion model from
+/// a few examples (unit-tested parsing; the guess itself is the model's).
+enum ContextEmoji {
+    /// Few-shot prompt: the model continues the last "Emoji:" line.
+    static func prompt(for text: String) -> String {
+        let message = String(text.suffix(240)).replacingOccurrences(of: "\n", with: " ").trimmingCharacters(in: .whitespaces)
+        return """
+            Message: Happy birthday, have an amazing day!
+            Emoji: 🎉🎂🥳🎁
+
+            Message: Дякую, дуже приємно це чути
+            Emoji: 🙏😊❤️🥰
+
+            Message: Ugh, the build failed again
+            Emoji: 😩😤💥🤦
+
+            Message: Поїхали на море на вихідних?
+            Emoji: 🌊☀️🏖️😎
+
+            Message: \(message)
+            Emoji:
+            """
+    }
+
+    /// The emoji in the model's answer, in order, without repeats.
+    static func parse(_ answer: String) -> [String] {
+        var seen = Set<String>()
+        return answer.prefix { $0 != "\n" }.compactMap { character -> String? in
+            guard let first = character.unicodeScalars.first, first.properties.isEmoji,
+                  first.properties.isEmojiPresentation || character.unicodeScalars.count > 1, // not "1", "#", "*"
+                  seen.insert(String(character)).inserted
+            else { return nil }
+            return String(character)
+        }
+    }
+
+    /// The picker's list: what fits first, then the recent ones.
+    static func merged(_ fitting: [String], recents: [String], limit: Int = 8) -> [String] {
+        Array((fitting + recents.filter { !fitting.contains($0) }).prefix(limit))
+    }
+}
+
 /// The emoji the user picked lately, newest first (first time: a common set).
 enum EmojiRecents {
     private static let key = "emojiRecents"

@@ -141,11 +141,30 @@ final class InlineCompletion {
     }
 
     private func showPicker(query: String, in field: FocusedField) {
+        let wasOpen = picker?.query == query
         let candidates = EmojiShortcodes.candidates(query, recents: EmojiRecents.list)
         guard !candidates.isEmpty else { closePicker(); return }
+        if !wasOpen { present(candidates, query: query, in: field) }
+        // Just ":" — ask the model which emoji fit the text, and put those first.
+        guard query.isEmpty, !wasOpen, EmbeddedModel.completion.isDownloaded else { return }
+        let text = String(field.beforeCursor.dropLast()) // without the ":"
+        guard text.trimmingCharacters(in: .whitespaces).count >= 3 else { return }
+        let id = generationID
+        Task {
+            guard let answer = try? await EmbeddedModel.completion.complete(ContextEmoji.prompt(for: text), maxTokens: 14, minProbability: 0),
+                  id == generationID, picker?.query == ""
+            else { return }
+            let emoji = ContextEmoji.merged(ContextEmoji.parse(answer.text), recents: EmojiRecents.list)
+            let candidates = emoji.map { e in EmojiShortcodes.Candidate(emoji: e, name: EmojiShortcodes.all.first { $0.emoji == e }?.name ?? "") }
+            present(candidates, query: "", in: field)
+        }
+    }
+
+    private func present(_ candidates: [EmojiShortcodes.Candidate], query: String, in field: FocusedField) {
         picker = (query, candidates)
         hide()
         let frame = pickerPanel.show(candidates, under: field.caret)
+        log.notice("emoji picker in \(field.bundleID, privacy: .public) via \(field.via, privacy: .public) at \("\(frame)", privacy: .public)")
         let top = NSScreen.screens.first?.frame.maxY ?? 0
         tapState.picker = CGRect(x: frame.minX, y: top - frame.maxY, width: frame.width, height: frame.height) // tap's top-left space
     }
@@ -251,6 +270,10 @@ final class InlineCompletion {
     }
 
     private func show(_ offer: Offer, in field: FocusedField) {
+        if self.offer == nil {
+            let screens = NSScreen.screens.map { "\($0.frame)" }.joined(separator: " ")
+            log.notice("show in \(field.bundleID, privacy: .public) via \(field.via, privacy: .public): ax caret \("\(field.axCaret)", privacy: .public) → \("\(field.caret)", privacy: .public), after cursor \(field.afterCursor.count) chars; screens \(screens, privacy: .public)")
+        }
         self.offer = offer
         self.field = field
         switch offer {
@@ -492,6 +515,10 @@ struct FocusedField: @unchecked Sendable {
     let windowTitle: String
     /// The rest of the line after the cursor ("" at the end of a line).
     let afterCursor: String
+    /// How it was read: "value" or "markers" (for the log).
+    let via: String
+    /// The raw caret box from Accessibility (top-left coordinates, for the log).
+    let axCaret: CGRect
 
     /// nil when there's no editable, non-secure field with an empty selection
     /// (or the app is excluded / APILA itself).
@@ -508,7 +535,8 @@ struct FocusedField: @unchecked Sendable {
         if let subrole: String = attribute(element, kAXSubroleAttribute), subrole == kAXSecureTextFieldSubrole { return nil }
         // Plain fields (Cocoa, Qt…) expose their text as a value; web editors
         // (Chromium, Electron — Claude, Slack, Notion) only through text markers.
-        guard let read = viaValue(element) ?? viaTextMarkers(element) else { return nil }
+        let byValue = viaValue(element)
+        guard let read = byValue ?? viaTextMarkers(element) else { return nil }
         let bounds = read.caret
         // AX uses top-left global coordinates; AppKit — bottom-left of the main screen.
         let caret = CGRect(x: bounds.minX, y: top - bounds.maxY, width: bounds.width, height: bounds.height)
@@ -523,7 +551,7 @@ struct FocusedField: @unchecked Sendable {
         if let window: AXUIElement = attribute(element, kAXWindowAttribute), let t: String = attribute(window, kAXTitleAttribute) { title = t }
         return FocusedField(element: element, beforeCursor: read.before, caret: caret, rightEdge: rightEdge,
                             pid: pid, bundleID: app.bundleIdentifier ?? "", appName: app.localizedName, windowTitle: title,
-                            afterCursor: read.after)
+                            afterCursor: read.after, via: byValue != nil ? "value" : "markers", axCaret: bounds)
     }
 
     /// Text before / after the cursor (rest of the line) and the box of the
@@ -546,7 +574,7 @@ struct FocusedField: @unchecked Sendable {
               let bounds = rect(parameterized(element, kAXBoundsForRangeParameterizedAttribute, query)), bounds.height > 2
         else { return nil }
         let rest = text.substring(from: range.location)
-        return (text.substring(to: range.location), String(rest.prefix { $0 != "\n" && $0 != "\r" }.prefix(200)), bounds)
+        return (text.substring(to: range.location), CompletionText.restOfLine(rest), bounds)
     }
 
     /// Web editors: the selection as a text-marker range, the text from the
@@ -571,7 +599,39 @@ struct FocusedField: @unchecked Sendable {
               bounds.height > 2
         else { return nil }
         let after = string(caretEnd, end) ?? ""
-        return (before, String(after.prefix { $0 != "\n" && $0 != "\r" }.prefix(200)), bounds)
+        return (before, CompletionText.restOfLine(after), bounds)
+    }
+
+    /// For the AX watch: each step of the text-marker read on `element` and
+    /// its editable ancestors / web area — where does it stop?
+    static func markerDiagnosis(_ element: AXUIElement) -> String {
+        var candidates: [(String, AXUIElement)] = [("focused", element)]
+        for name in ["AXEditableAncestor", "AXHighestEditableAncestor"] {
+            if let e: AXUIElement = attribute(element, name) { candidates.append((name, e)) }
+        }
+        var walker: AXUIElement? = element
+        for _ in 0..<30 {
+            guard let current = walker else { break }
+            if let role: String = attribute(current, kAXRoleAttribute), role == "AXWebArea" { candidates.append(("web area", current)); break }
+            walker = attribute(current, kAXParentAttribute)
+        }
+        return candidates.map { label, e in
+            let selection = marker(e, "AXSelectedTextMarkerRange", AXTextMarkerRangeGetTypeID())
+            let start = marker(e, "AXStartTextMarker", AXTextMarkerGetTypeID())
+            var parts = ["\(label): selection \(selection != nil), start \(start != nil)"]
+            if let selection, let start {
+                let caret = AXTextMarkerRangeCopyStartMarker(selection as! AXTextMarkerRange)
+                let before = parameterized(e, "AXStringForTextMarkerRange", AXTextMarkerRangeCreate(nil, start as! AXTextMarker, caret)) as? String
+                parts.append("before \(before?.count ?? -1) chars")
+                if let previous = parameterized(e, "AXPreviousTextMarkerForTextMarker", caret), CFGetTypeID(previous) == AXTextMarkerGetTypeID() {
+                    let bounds = rect(parameterized(e, "AXBoundsForTextMarkerRange", AXTextMarkerRangeCreate(nil, previous as! AXTextMarker, caret)))
+                    parts.append("caret box \(bounds.map { "\(Int($0.width))×\(Int($0.height))" } ?? "none")")
+                } else {
+                    parts.append("no previous marker")
+                }
+            }
+            return parts.joined(separator: ", ")
+        }.joined(separator: " | ")
     }
 
     private static func marker(_ element: AXUIElement, _ name: String, _ type: CFTypeID) -> CFTypeRef? {
