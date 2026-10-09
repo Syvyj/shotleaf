@@ -1,40 +1,32 @@
 import Core
-import CoreImage
 import Foundation
 import HuggingFace
 import MLX
 import MLXHuggingFace
 import MLXLLM
 import MLXLMCommon
-import MLXVLM
 import Tokenizers
 
-/// A built-in model run on this Mac with MLX (ADR-0006, ADR-0065). Downloaded
-/// once from Hugging Face when the user asks (Settings), loaded on first use
-/// and kept in memory.
-/// ponytail: stays loaded until quit (~2 GB each); unload after idle if memory matters.
+/// The built-in completion model, run on this Mac with MLX (ADR-0065).
+/// Downloaded once from Hugging Face when the user asks (Settings), loaded on
+/// first use and kept in memory.
+/// ponytail: stays loaded until quit (~2 GB); unload after idle if memory matters.
 public actor EmbeddedModel {
-    /// Gemma 4 E2B instruct, sees images: the panel's actions and screenshots.
-    public static let shared = EmbeddedModel(
-        configuration: VLMRegistry.gemma4_E2B_it_4bit, textOnly: false, displayName: "Gemma 4 E2B")
     /// Gemma 4 E2B *base*: a plain text continuer for inline completion —
     /// instruct models answer instead of continuing, and need a slow prompt.
     public static let completion = EmbeddedModel(
-        configuration: ModelConfiguration(id: "mlx-community/gemma-4-e2b-4bit"), textOnly: true, displayName: "Gemma 4 E2B base")
+        configuration: ModelConfiguration(id: "mlx-community/gemma-4-e2b-4bit"), displayName: "Gemma 4 E2B base")
 
     public nonisolated let configuration: ModelConfiguration
     public nonisolated let displayName: String
-    /// Load only the language part (no vision/audio towers) — less memory.
-    private let textOnly: Bool
 
     private var container: ModelContainer?
     private var loading: Task<ModelContainer, Error>?
     /// What the model already read for the last completion (see `complete`).
     private let promptCache = PromptCache()
 
-    init(configuration: ModelConfiguration, textOnly: Bool, displayName: String) {
+    init(configuration: ModelConfiguration, displayName: String) {
         self.configuration = configuration
-        self.textOnly = textOnly
         self.displayName = displayName
     }
 
@@ -66,17 +58,12 @@ public actor EmbeddedModel {
     public func load(progress: @Sendable @escaping (Double) -> Void = { _ in }) async throws -> ModelContainer {
         if let container { return container }
         if let loading { return try await loading.value }
-        let configuration = configuration, textOnly = textOnly
+        let configuration = configuration
         let task = Task {
-            if textOnly {
-                try await LLMModelFactory.shared.loadContainer(
-                    from: #hubDownloader(), using: #huggingFaceTokenizerLoader(), configuration: configuration
-                ) { progress($0.fractionCompleted) }
-            } else {
-                try await loadModelContainer(
-                    from: #hubDownloader(), using: #huggingFaceTokenizerLoader(), configuration: configuration
-                ) { progress($0.fractionCompleted) }
-            }
+            // Only the language part (no vision/audio towers) — less memory.
+            try await LLMModelFactory.shared.loadContainer(
+                from: #hubDownloader(), using: #huggingFaceTokenizerLoader(), configuration: configuration
+            ) { progress($0.fractionCompleted) }
         }
         loading = task
         defer { loading = nil }
@@ -147,71 +134,6 @@ public actor EmbeddedModel {
     }
 }
 
-/// The built-in model as an `InferenceProvider`, next to the API providers.
-public struct EmbeddedProvider: InferenceProvider {
-    public static let providerID = "embedded"
-    public let id = EmbeddedProvider.providerID
-
-    public init() {}
-
-    public var capabilities: ProviderCapabilities {
-        ProviderCapabilities(supportsVision: true, supportsAudio: false, maxContextTokens: 32_768)
-    }
-
-    public var selectedModel: String? { EmbeddedModel.shared.displayName }
-
-    public func availableModels() async throws -> [ModelInfo] {
-        [ModelInfo(id: EmbeddedModel.shared.displayName, displayName: EmbeddedModel.shared.displayName)]
-    }
-
-    public func healthCheck() async -> ProviderHealth {
-        EmbeddedModel.shared.isDownloaded ? .healthy : .unhealthy(reason: "the built-in model isn't downloaded yet (Settings → Download)")
-    }
-
-    public func stream(_ request: AIRequest) -> AsyncThrowingStream<TokenChunk, Error> {
-        AsyncThrowingStream { continuation in
-            let task = Task {
-                do {
-                    let container = try await EmbeddedModel.shared.load()
-                    var parameters = GenerateParameters()
-                    if let t = request.options?.temperature { parameters.temperature = Float(t) }
-                    if let n = request.options?.maxTokens { parameters.maxTokens = n }
-                    let session = ChatSession(container, instructions: request.system, generateParameters: parameters)
-                    let text = request.parts.compactMap { if case .text(let t) = $0 { t } else { nil } }.joined(separator: "\n\n")
-                    let images = request.parts.compactMap { part -> UserInput.Image? in
-                        guard case .image(let payload) = part, let image = CIImage(data: payload.data) else { return nil }
-                        return .ciImage(image)
-                    }
-                    for try await chunk in session.streamResponse(to: text, images: images) {
-                        continuation.yield(TokenChunk(text: chunk))
-                    }
-                    continuation.yield(TokenChunk(text: "", finishReason: "stop"))
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-            continuation.onTermination = { _ in task.cancel() }
-        }
-    }
-}
-
-/// Watches the logits and notes how likely the chosen (greedy = top) token
-/// was. Changes nothing.
-private struct ConfidenceProbe: LogitProcessor {
-    final class Box: @unchecked Sendable { var last: Float? } // one generation, one thread
-    let box = Box()
-
-    mutating func prompt(_ prompt: MLXArray) {}
-
-    func process(logits: MLXArray) -> MLXArray {
-        box.last = softmax(logits.asType(.float32), axis: -1).max().item(Float.self)
-        return logits
-    }
-
-    mutating func didSample(token: MLXArray) {}
-}
-
 /// The model's memory of the last prompt (its KV cache), reused by the next
 /// completion when the new prompt starts the same way — the usual case while
 /// typing. Rewound to the shared start; rebuilt when it can't be rewound
@@ -241,3 +163,20 @@ private final class PromptCache: @unchecked Sendable {
         return (fresh, 0)
     }
 }
+
+/// Watches the logits and notes how likely the chosen (greedy = top) token
+/// was. Changes nothing.
+private struct ConfidenceProbe: LogitProcessor {
+    final class Box: @unchecked Sendable { var last: Float? } // one generation, one thread
+    let box = Box()
+
+    mutating func prompt(_ prompt: MLXArray) {}
+
+    func process(logits: MLXArray) -> MLXArray {
+        box.last = softmax(logits.asType(.float32), axis: -1).max().item(Float.self)
+        return logits
+    }
+
+    mutating func didSample(token: MLXArray) {}
+}
+

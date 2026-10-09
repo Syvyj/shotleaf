@@ -1888,6 +1888,126 @@
           }
         }
       }
+    },
+    "%lld characters": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Символів: %lld"
+          }
+        }
+      }
+    },
+    "Copy all": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копіювати все"
+          }
+        }
+      }
+    },
+    "Couldn’t take the screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося зробити скріншот"
+          }
+        }
+      }
+    },
+    "APILA needs the Screen Recording permission. Allow it in System Settings → Privacy & Security, then restart APILA.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "APILA потрібен дозвіл на запис екрана. Увімкніть його в Системних параметрах → Конфіденційність і безпека, потім перезапустіть APILA."
+          }
+        }
+      }
+    },
+    "Completion": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дописування"
+          }
+        }
+      }
+    },
+    "Allow Screen Recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дозвольте запис екрана"
+          }
+        }
+      }
+    },
+    "For screenshots and text from screenshots.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для скріншотів і тексту зі скріншотів."
+          }
+        }
+      }
+    },
+    "For completing your text as you type: APILA reads the field you type in and types the words you accept.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для дописування: APILA читає поле, де ви пишете, і вставляє слова, які ви приймаєте."
+          }
+        }
+      }
+    },
+    "Download the completion model": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажте модель для дописування"
+          }
+        }
+      }
+    },
+    "Gemma 4 E2B base, about 3.6 GB. Runs only on this Mac — what you type never leaves it.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemma 4 E2B base, близько 3,6 ГБ. Працює лише на цьому Mac — те, що ви пишете, нікуди не йде."
+          }
+        }
+      }
+    },
+    "A few quick steps and APILA works in any app.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кілька коротких кроків — і APILA працює в будь-якій програмі."
+          }
+        }
+      }
+    },
+    "Take a screenshot with %@, or start typing anywhere and press Tab when a grey suggestion appears.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зробіть скріншот через %@ або почніть писати будь-де й натисніть Tab, коли з'явиться сіра підказка."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

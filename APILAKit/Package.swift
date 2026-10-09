@@ -12,13 +12,9 @@ let package = Package(
     name: "APILA",
     platforms: [.macOS(.v15)],
     products: [
-        .executable(name: "inference-demo", targets: ["InferenceDemo"]),
         .library(name: "Core", targets: ["Core"]),
-        .library(name: "InferenceKit", targets: ["InferenceKit"]),
-        .library(name: "ContextKit", targets: ["ContextKit"]),
         .library(name: "CaptureKit", targets: ["CaptureKit"]),
         .library(name: "PerceptionKit", targets: ["PerceptionKit"]),
-        .library(name: "ActionKit", targets: ["ActionKit"]),
         .library(name: "SettingsKit", targets: ["SettingsKit"]),
         .library(name: "AppFeature", targets: ["AppFeature"]),
     ],
@@ -35,18 +31,14 @@ let package = Package(
         .target(name: "Core"),
 
         // Feature modules — each depends ONLY on Core, never on each other.
-        .target(name: "InferenceKit", dependencies: ["Core"]),
-        .target(name: "ContextKit", dependencies: ["Core"]),
         .target(name: "CaptureKit", dependencies: ["Core"]),
         .target(name: "PerceptionKit", dependencies: ["Core"]),
-        .target(name: "ActionKit", dependencies: ["Core"]),
         .target(name: "SettingsKit", dependencies: ["Core"]),
-        // The built-in model: Gemma 4 E2B on MLX. Heavy dependencies stay here.
+        // The completion model: Gemma 4 E2B base on MLX. Heavy dependencies stay here.
         .target(
             name: "EmbeddedKit",
             dependencies: [
                 "Core",
-                .product(name: "MLXVLM", package: "mlx-swift-lm"),
                 .product(name: "MLXLLM", package: "mlx-swift-lm"),
                 .product(name: "MLXLMCommon", package: "mlx-swift-lm"),
                 .product(name: "MLX", package: "mlx-swift"),
@@ -62,20 +54,11 @@ let package = Package(
         .target(
             name: "AppFeature",
             dependencies: [
-                "Core", "InferenceKit", "ContextKit", "CaptureKit",
-                "PerceptionKit", "ActionKit", "SettingsKit", "EmbeddedKit",
+                "Core", "CaptureKit", "PerceptionKit", "SettingsKit", "EmbeddedKit",
             ]
         ),
 
-        // Network-free runnable proof of the InferenceKit path.
-        .executableTarget(
-            name: "InferenceDemo",
-            dependencies: ["Core", "InferenceKit", "ActionKit"]
-        ),
-
         .testTarget(name: "CoreTests", dependencies: ["Core", "SettingsKit"]),
-        .testTarget(name: "InferenceKitTests", dependencies: ["Core", "InferenceKit", "ActionKit"]),
-        .testTarget(name: "ContextKitTests", dependencies: ["Core", "ContextKit"]),
         .testTarget(name: "AppFeatureTests", dependencies: ["AppFeature", "PerceptionKit"]),
         .testTarget(name: "PerceptionKitTests", dependencies: ["Core", "PerceptionKit", "CaptureKit"]),
     ]

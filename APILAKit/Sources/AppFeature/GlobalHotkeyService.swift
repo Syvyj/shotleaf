@@ -2,7 +2,7 @@ import Core
 import AppKit
 import Carbon.HIToolbox
 
-/// A global shortcut: one of the presets, or one the user recorded. A recorded
+/// A global shortcut: an action's default, or one the user recorded. A recorded
 /// shortcut round-trips through its `id` ("custom:<keyCode>:<modifiers>:<title>"),
 /// so settings store just a string.
 public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
@@ -10,16 +10,6 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
     public let title: String
     let keyCode: UInt32
     let modifiers: UInt32
-
-    public static let all: [HotkeyShortcut] = [
-        HotkeyShortcut(id: "cmd-shift-space", title: "⌘⇧Space", keyCode: UInt32(kVK_Space), modifiers: UInt32(cmdKey | shiftKey)),
-        HotkeyShortcut(id: "ctrl-opt-space", title: "⌃⌥Space", keyCode: UInt32(kVK_Space), modifiers: UInt32(controlKey | optionKey)),
-        HotkeyShortcut(id: "opt-space", title: "⌥Space", keyCode: UInt32(kVK_Space), modifiers: UInt32(optionKey)),
-        HotkeyShortcut(id: "ctrl-space", title: "⌃Space", keyCode: UInt32(kVK_Space), modifiers: UInt32(controlKey)),
-        HotkeyShortcut(id: "cmd-shift-a", title: "⌘⇧A", keyCode: UInt32(kVK_ANSI_A), modifiers: UInt32(cmdKey | shiftKey)),
-    ]
-    /// ⌥Space / ⌃Space are often taken by input-source switching, hence ⌘⇧Space.
-    public static let `default` = all[0]
 
     /// Defaults for the screenshot actions: ⌘⇧1 text, ⌘⇧2 screenshot, ⌘⇧3
     /// scrolling. ⌘⇧3 is macOS's own full-screen shot until it's switched off
@@ -45,14 +35,15 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
         self.init(id: "custom:\(keyCode):\(modifiers):\(title)", title: title, keyCode: keyCode, modifiers: modifiers)
     }
 
-    public static func with(id: String?) -> HotkeyShortcut {
+    /// nil for an unknown id.
+    public static func with(id: String?) -> HotkeyShortcut? {
         if let id, id.hasPrefix("custom:") {
             let parts = id.split(separator: ":", maxSplits: 3, omittingEmptySubsequences: false)
             if parts.count == 4, let code = UInt32(parts[1]), let mods = UInt32(parts[2]) {
                 return HotkeyShortcut(customKeyCode: code, modifiers: mods, title: String(parts[3]))
             }
         }
-        return (all + [captureDefault, screenshotDefault, scrollingDefault]).first { $0.id == id } ?? .default
+        return [captureDefault, screenshotDefault, scrollingDefault].first { $0.id == id }
     }
 
     /// Builds a shortcut from a key press in the recorder. Nil when it has no
@@ -89,7 +80,7 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
     ]
 }
 
-/// Actions with their own (optional) global shortcut, besides opening the panel.
+/// Actions with their own (optional) global shortcut.
 public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
     case capture                            // screenshot → preview window
     case screenshotText = "screenshot-text" // screenshot → OCR text

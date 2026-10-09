@@ -31,12 +31,9 @@ struct OCRTests {
         #expect(text.lowercased().contains("привіт"))
     }
 
-    @Test("OCR executor fails clearly on an image without text")
+    @Test("An image without text gives empty text")
     func emptyImage() async throws {
         let payload = try ScreenCaptureService.payload(png: pngWithText(""))
-        let executor = OCRExecutor(recognizer: VisionTextRecognizer())
-        await #expect(throws: AppError.missingContext("No text found in the screenshot")) {
-            for try await _ in executor.execute(OCRCommand(image: payload), context: ContextSnapshot(capturedAt: Date())) {}
-        }
+        #expect(try await VisionTextRecognizer().recognizeText(in: payload).isEmpty)
     }
 }

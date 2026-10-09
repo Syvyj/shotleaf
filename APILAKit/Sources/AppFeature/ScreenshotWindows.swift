@@ -6,10 +6,6 @@ import SwiftUI
 /// its own window, so several can be open (and pinned) at once.
 @MainActor
 final class ScreenshotWindows {
-    /// OCR / ask-AI hand-off to the panel.
-    var onText: (ImagePayload) -> Void = { _ in }
-    var onAsk: (ImagePayload) -> Void = { _ in }
-
     private(set) var open: [ObjectIdentifier: FloatingPanel] = [:] // internal for tests
 
     func show(_ payload: ImagePayload) {
@@ -47,12 +43,6 @@ final class ScreenshotWindows {
                 close()
                 self?.pin(pinned, size: CGSize(width: CGFloat(rep.pixelsWide) / scale, height: CGFloat(rep.pixelsHigh) / scale), data: png)
             },
-            text: { [weak self] in                                                // OCR the clean picture (cropped, if applied)
-                close()
-                let picture = doc.base.flatMap { NSBitmapImageRep(cgImage: $0.image).representation(using: .png, properties: [:]) }
-                self?.onText(picture.map(Self.payload) ?? payload)
-            },
-            ask: { [weak self] in close(); self?.onAsk(Self.payload(result())) },  // marks help the model
             close: close,
             dragFile: { Self.writeTempPNG(result()) }
         )
@@ -61,6 +51,31 @@ final class ScreenshotWindows {
                           proposedWidth: width, resizable: true)
         panel.setFrameOrigin(Self.placed(panel.frame.size, centeredIn: visible))
         present(panel)
+    }
+
+    /// Text read off a screenshot, in a small window to select, fix and copy.
+    func showText(_ text: String, title: LocalizedStringKey = "Text from Screenshot") {
+        var panel: FloatingPanel!
+        let view = TextResultView(text: text, title: title, copy: Self.copyText) { [weak self] in self?.close(panel) }
+        panel = makePanel(view, proposedWidth: 520, resizable: true)
+        let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
+        panel.setFrameOrigin(Self.placed(panel.frame.size, centeredIn: screen?.visibleFrame ?? .zero))
+        present(panel)
+    }
+
+    /// A capture that didn't work (no permission…), said in the same window.
+    func showProblem(_ error: Error) {
+        let message: String = switch error {
+        case AppError.permissionDenied:
+            String(localized: "APILA needs the Screen Recording permission. Allow it in System Settings → Privacy & Security, then restart APILA.")
+        default: error.localizedDescription
+        }
+        showText(message, title: "Couldn’t take the screenshot")
+    }
+
+    static func copyText(_ text: String) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
     }
 
     /// A small "3… 2… 1" badge near the top of the screen. It never reaches

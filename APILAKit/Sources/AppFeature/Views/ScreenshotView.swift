@@ -8,8 +8,6 @@ struct ScreenshotActions {
     var copy: () -> Void
     var save: () -> URL?
     var pin: () -> Void
-    var text: () -> Void
-    var ask: () -> Void
     var close: () -> Void
     /// A PNG file of the current result, for drag-and-drop into other apps.
     var dragFile: () -> URL?
@@ -19,7 +17,7 @@ struct ScreenshotActions {
 /// the window, annotation tools (0–9), and the actions, in the "Leaves" style.
 /// Click a mark to select it: drag to move, drag handles to resize, ⌫ deletes.
 /// In Select mode, dragging the shot itself drops the whole result into any app.
-/// Keyboard: ↩/⌘C copy, ⌘S save, P pin, T text, A ask, 0 select, 1–9 tools,
+/// Keyboard: ↩/⌘C copy, ⌘S save, P pin, T select text (Live Text), 0 select, 1–9 tools,
 /// ⌘Z undo, esc — deselect / drop the tool, then close.
 struct ScreenshotView: View {
     let image: NSImage
@@ -617,9 +615,6 @@ struct ScreenshotView: View {
                 .buttonStyle(LeafButtonStyle(prominent: liveText != nil))
                 .keyboardShortcut("t", modifiers: [])
                 .instantTip(liveText == nil ? "Select text on the shot" : "Back to marks", above: true)
-            Button { actions.ask() } label: { keyed("Ask AI", "A") }
-                .buttonStyle(LeafButtonStyle())
-                .keyboardShortcut("a", modifiers: [])
             Spacer(minLength: 6)
             if doc.crop != nil {
                 Button("Apply crop") { doc.applyCrop(original: cgImage, size: displaySize) }

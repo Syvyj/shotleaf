@@ -27,11 +27,11 @@ struct HotkeyShortcutTests {
         #expect(HotkeyShortcut.with(id: s.id) == s)
     }
 
-    @Test("Unknown or missing id falls back to the default")
-    func fallback() {
-        #expect(HotkeyShortcut.with(id: nil) == .default)
-        #expect(HotkeyShortcut.with(id: "custom:garbage") == .default)
-        #expect(HotkeyShortcut.with(id: "ctrl-space").title == "⌃Space")
+    @Test("Unknown or missing id is no shortcut; the defaults resolve by id")
+    func lookup() {
+        #expect(HotkeyShortcut.with(id: nil) == nil)
+        #expect(HotkeyShortcut.with(id: "custom:garbage") == nil)
+        #expect(HotkeyShortcut.with(id: "cmd-shift-2") == .captureDefault)
     }
 }
 

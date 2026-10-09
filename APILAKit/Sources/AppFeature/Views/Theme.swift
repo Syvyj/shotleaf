@@ -25,7 +25,7 @@ enum Leaf {
             ? NSColor(white: 0, alpha: 0)
             : NSColor(white: 1, alpha: 0.62)
     })
-    /// Cards inside the panel (context, result).
+    /// Cards inside a window (e.g. the text from a screenshot).
     static let card = Color(nsColor: NSColor(name: nil) { appearance in
         appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
             ? NSColor(white: 1, alpha: 0.05)
@@ -90,21 +90,6 @@ struct Keycap: View {
     }
 }
 
-/// Bottom hint line: keycap + what it does.
-struct HintBar: View {
-    let items: [(key: String, label: String)]
-    var body: some View {
-        HStack(spacing: 12) {
-            ForEach(items, id: \.key) { item in
-                HStack(spacing: 4) {
-                    Keycap(key: item.key)
-                    Text(LocalizedStringKey(item.label)).font(Leaf.font(12))
-                }
-            }
-        }
-    }
-}
-
 /// Primary: green gradient. Secondary: quiet tinted fill. Both brighten on hover.
 struct LeafButtonStyle: ButtonStyle {
     var prominent = false
@@ -164,48 +149,6 @@ struct WindowDragArea: NSViewRepresentable {
     }
     func makeNSView(context: Context) -> NSView { DragView() }
     func updateNSView(_ nsView: NSView, context: Context) {}
-}
-
-/// Capsule showing which model answers; amber when it's the Mock.
-struct ProviderChip: View {
-    let name: String
-    let isMock: Bool
-    var body: some View {
-        HStack(spacing: 5) {
-            Circle().fill(isMock ? Leaf.amber : Leaf.ink).frame(width: 6, height: 6)
-            Text(isMock ? String(localized: "Mock — no model") : name)
-                .font(Leaf.font(11, .medium))
-                .lineLimit(1)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .background(.primary.opacity(0.06), in: Capsule())
-    }
-}
-
-/// Text that takes only the height it needs, scrolling beyond `maxHeight`.
-struct FittingScrollText: View {
-    let text: String
-    var color: Color = .primary
-    var maxHeight: CGFloat = 260
-
-    var body: some View {
-        // Ideal height = the text's height, capped at maxHeight; scrolls beyond.
-        ScrollView { label }
-            .scrollBounceBehavior(.basedOnSize)
-            .frame(maxHeight: maxHeight)
-            .fixedSize(horizontal: false, vertical: true)
-    }
-
-    private var label: some View {
-        Text(text.isEmpty ? " " : text)
-            .font(Leaf.font(15))
-            .lineSpacing(2)
-            .foregroundStyle(color)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .fixedSize(horizontal: false, vertical: true)
-            .textSelection(.enabled)
-    }
 }
 
 /// Bottom-right grip that resizes the window by hand (like WindowDragArea —

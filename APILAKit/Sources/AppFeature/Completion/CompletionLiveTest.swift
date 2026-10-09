@@ -11,6 +11,9 @@ import ScreenCaptureKit
 public enum CompletionLiveTest {
     public static func run(_ coordinator: AppCoordinator, text: String, out: URL) async {
         let completion = coordinator.inlineCompletion
+        // The test's emoji picks mustn't replace the user's recent emoji.
+        let recents = UserDefaults.standard.object(forKey: "emojiRecents")
+        defer { UserDefaults.standard.set(recents, forKey: "emojiRecents") }
         _ = try? await EmbeddedModel.completion.load() // measure typing, not the first load
         // "chrome:" — a web editor (contenteditable, like Claude's or Slack's
         // input) in a new Chrome tab; otherwise a scratch TextEdit document.

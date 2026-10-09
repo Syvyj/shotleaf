@@ -4,15 +4,16 @@ import Foundation
 
 @Suite("SettingsStore")
 struct SettingsStoreTests {
-    @Test("Translate languages default to English ⇄ Ukrainian and persist")
-    func translateDefaults() throws {
+    @Test("Completion settings default on / middle and persist")
+    func completionDefaults() throws {
         let suite = "apila.test.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         let store = SettingsStore(defaults: defaults)
-        #expect(store.translateTarget == "English")
-        #expect(store.translateFallback == "Ukrainian")
-        store.translateTarget = "German"
-        #expect(SettingsStore(defaults: defaults).translateTarget == "German")
+        #expect(store.completionEnabled && store.completionBoldness == 0.5)
+        store.completionBoldness = 0.8
+        store.setHotkeyID("off", for: "scrolling")
+        let reread = SettingsStore(defaults: defaults)
+        #expect(reread.completionBoldness == 0.8 && reread.hotkeyID(for: "scrolling") == "off")
     }
 }

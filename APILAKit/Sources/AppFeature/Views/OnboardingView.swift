@@ -2,12 +2,14 @@ import SwiftUI
 import AppKit
 import Core
 
-/// First-run setup guide: permission → model → try it. Each step shows live
+/// First-run setup guide: permissions → completion model → try it. Each step shows live
 /// status, so the user sees when it turns green.
 struct OnboardingView: View {
     @Bindable var coordinator: AppCoordinator
 
     private var accessibilityGranted: Bool { coordinator.permissions[.accessibility] == .granted }
+    private var screenGranted: Bool { coordinator.permissions[.screenRecording] == .granted }
+    private var modelReady: Bool { if case .ready = coordinator.modelState { true } else { false } }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -17,40 +19,37 @@ struct OnboardingView: View {
                     .frame(width: 56, height: 56)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Welcome to APILA").font(Leaf.font(20, .bold))
-                    Text("Three quick steps and APILA works in any app.")
+                    Text("A few quick steps and APILA works in any app.")
                         .font(Leaf.font(13))
                         .foregroundStyle(.secondary)
                 }
             }
 
-            step(1, "Allow Accessibility", done: accessibilityGranted) {
-                Text("Needed to read your selection and paste results back.")
-                HStack {
-                    Button("Request") { Task { await coordinator.request(.accessibility) } }
-                        .buttonStyle(LeafButtonStyle(prominent: !accessibilityGranted))
-                    Button("Open System Settings") { coordinator.openSettings(for: .accessibility) }
-                        .buttonStyle(LeafButtonStyle())
-                }
-                if !accessibilityGranted {
-                    Text("After enabling APILA in the list, quit and reopen APILA.")
-                        .font(.caption).foregroundStyle(.secondary)
+            step(1, "Allow Screen Recording", done: screenGranted) {
+                Text("For screenshots and text from screenshots.")
+                permissionButtons(.screenRecording, granted: screenGranted)
+            }
+
+            step(2, "Allow Accessibility", done: accessibilityGranted) {
+                Text("For completing your text as you type: APILA reads the field you type in and types the words you accept.")
+                permissionButtons(.accessibility, granted: accessibilityGranted)
+            }
+
+            step(3, "Download the completion model", done: modelReady) {
+                Text("Gemma 4 E2B base, about 3.6 GB. Runs only on this Mac — what you type never leaves it.")
+                switch coordinator.modelState {
+                case .notDownloaded, .failed:
+                    Button("Download") { coordinator.downloadModel() }
+                        .buttonStyle(LeafButtonStyle(prominent: true))
+                case .downloading(let fraction):
+                    ProgressView(value: fraction).frame(maxWidth: 260)
+                case .ready:
+                    EmptyView()
                 }
             }
 
-            step(2, "Connect a model", done: coordinator.providerProblem == nil) {
-                Text(coordinator.providerProblem == nil
-                     ? String(localized: "Using \(coordinator.currentProviderName).")
-                     : String(localized: "Start LM Studio (or Ollama) with a model loaded, or add an OpenAI / OpenRouter key in Settings."))
-                HStack {
-                    SettingsLink { Text("Open Settings…") }
-                        .buttonStyle(LeafButtonStyle())
-                    Button("Check again") { Task { await coordinator.refreshProvider() } }
-                        .buttonStyle(LeafButtonStyle())
-                }
-            }
-
-            step(3, "Try it", done: !coordinator.history.isEmpty) {
-                Text("Select some text in any app and press \(coordinator.hotkey.title).")
+            step(4, "Try it", done: false) {
+                Text("Take a screenshot with \(coordinator.actionHotkeys[.capture]?.title ?? "⌘⇧2"), or start typing anywhere and press Tab when a grey suggestion appears.")
             }
 
             HStack {
@@ -68,6 +67,20 @@ struct OnboardingView: View {
                 coordinator.refreshPermissions()
                 try? await Task.sleep(for: .seconds(1))
             }
+        }
+    }
+
+    @ViewBuilder
+    private func permissionButtons(_ kind: PermissionKind, granted: Bool) -> some View {
+        HStack {
+            Button("Request") { Task { await coordinator.request(kind) } }
+                .buttonStyle(LeafButtonStyle(prominent: !granted))
+            Button("Open System Settings") { coordinator.openSettings(for: kind) }
+                .buttonStyle(LeafButtonStyle())
+        }
+        if !granted {
+            Text("After enabling APILA in the list, quit and reopen APILA.")
+                .font(.caption).foregroundStyle(.secondary)
         }
     }
 

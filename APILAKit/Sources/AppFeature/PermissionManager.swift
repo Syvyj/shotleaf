@@ -8,11 +8,7 @@ import IOKit.hid
 /// rest of the system uses Core's `PermissionService`. NOTE: these return
 /// meaningful values only from a signed `.app` bundle — TCC is identity-bound.
 public final class PermissionManager: PermissionService, @unchecked Sendable {
-    private let events: (any EventPublishing)?
-
-    public init(events: (any EventPublishing)? = nil) {
-        self.events = events
-    }
+    public init() {}
 
     public func status(_ kind: PermissionKind) -> PermissionStatus {
         switch kind {
@@ -40,9 +36,6 @@ public final class PermissionManager: PermissionService, @unchecked Sendable {
             _ = CGRequestScreenCaptureAccess()
         case .inputMonitoring:
             _ = IOHIDRequestAccess(kIOHIDRequestTypeListenEvent)
-        }
-        if status(kind) == .granted {
-            events?.publish(.permissionGranted(name: kind.rawValue))
         }
     }
 

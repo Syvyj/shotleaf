@@ -1,7 +1,6 @@
 import Testing
 import SwiftUI
 @testable import Core
-@testable import ActionKit
 @testable import PerceptionKit
 @testable import AppFeature
 
@@ -30,7 +29,7 @@ struct ScreenshotWindowTests {
     @Test("chromeHeight really covers header + toolbar + hints")
     func chrome() {
         let display = CGSize(width: 340, height: 780)
-        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, text: {}, ask: {}, close: {}, dragFile: { nil })
+        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, close: {}, dragFile: { nil })
         let host = NSHostingView(rootView: ScreenshotView(
             image: NSImage(size: display), cgImage: Self.blankImage, pixelSize: CGSize(width: 680, height: 1560),
             displaySize: display, actions: noop, doc: AnnotationDocument()))
@@ -43,7 +42,7 @@ struct ScreenshotWindowTests {
         let display = CGSize(width: 260, height: 160)
         let doc = AnnotationDocument()
         doc.add(.crop(CGRect(x: 10, y: 10, width: 100, height: 60)))
-        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, text: {}, ask: {}, close: {}, dragFile: { nil })
+        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, close: {}, dragFile: { nil })
         let view = ScreenshotView(image: NSImage(size: display), cgImage: Self.blankImage, pixelSize: CGSize(width: 520, height: 320),
                                   displaySize: display, actions: noop, doc: doc)
         let fit = NSHostingView(rootView: view).fittingSize
@@ -70,18 +69,13 @@ struct ScreenshotWindowTests {
         #expect(try Data(contentsOf: url) == Data([1, 2, 3]))
     }
 
-    @Test("Text from the screenshot window runs OCR in the panel")
-    func textHandOff() async throws {
-        let vm = PanelViewModel(
-            runner: ActionRunner(context: ShotContext(), executors: [.ocr: OCRExecutor(recognizer: ShotOCR())]),
-            inserter: ResultInserter(clipboard: ShotClipboard()),
-            actions: [],
-            accessibilityGranted: { false }
-        )
-        vm.present(snapshot: ContextSnapshot(capturedAt: Date()), sourceApp: nil)
-        vm.useScreenshot(ImagePayload(data: Data([0]), width: 1, height: 1), ask: false)
-        for _ in 0..<200 where vm.screen != .result { try await Task.sleep(for: .milliseconds(5)) }
-        #expect(vm.output == "hello from the shot")
+    @Test("Text from a screenshot: an editable window, sized to its content")
+    func textWindow() throws {
+        let view = TextResultView(text: "Зустріч о 15:00 біля офісу\nAgenda: Q3 report, budget", title: "Text from Screenshot",
+                                  copy: { _ in }, close: {})
+        let size = NSHostingView(rootView: view).fittingSize
+        #expect(size.width >= 460 && size.height >= 280)
+        try renderPreview(view, "text-window.png")
     }
 
     @Test("Renders (design preview when APILA_PREVIEW_DIR is set)")
@@ -91,7 +85,7 @@ struct ScreenshotWindowTests {
             ("Shottr-level APILA" as NSString).draw(at: NSPoint(x: 40, y: 160), withAttributes: [.font: NSFont.boldSystemFont(ofSize: 40), .foregroundColor: NSColor.white])
             return true
         }
-        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, text: {}, ask: {}, close: {}, dragFile: { nil })
+        let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, close: {}, dragFile: { nil })
         var rect = CGRect(x: 0, y: 0, width: 1280, height: 720)
         let cg = try #require(image.cgImage(forProposedRect: &rect, context: nil, hints: nil))
         let doc = AnnotationDocument()
@@ -121,15 +115,4 @@ struct ScreenshotWindowTests {
         try renderPreview(view, "screenshot-cropped.png")
         try renderPreview(view, "screenshot-window-dark.png", dark: true)
     }
-}
-
-private struct ShotContext: ContextProviding {
-    func snapshot(requirements: ContextRequirements) async throws -> ContextSnapshot { ContextSnapshot(capturedAt: Date()) }
-}
-private struct ShotOCR: TextRecognizing {
-    func recognizeText(in image: ImagePayload) async throws -> String { "hello from the shot" }
-}
-private struct ShotClipboard: ClipboardService {
-    func writeText(_ text: String) async throws {}
-    func readText() async throws -> String? { nil }
 }

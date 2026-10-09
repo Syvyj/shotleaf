@@ -1,25 +1,18 @@
 import SwiftUI
 import Core
-import InferenceKit
 
-/// Settings window: provider & model (key in Keychain), shortcut, translate
-/// languages, permissions.
+/// Settings window: shortcuts, inline completion (and its model), general,
+/// permissions.
 public struct SettingsRootView: View {
     @Bindable private var coordinator: AppCoordinator
 
-    @State private var draft: AppCoordinator.ProviderSettings?
-    @State private var models: [String] = []
-    @State private var modelsError: String?
-    @State private var isBusy = false
     @State private var hotkeyError: String?
-    @State private var translateTarget = ""
-    @State private var translateFallback = ""
 
     public init(coordinator: AppCoordinator) {
         self.coordinator = coordinator
     }
 
-    /// Accessibility: read the selection, paste results. Screen Recording: screenshots.
+    /// Accessibility: read the field you type in, type suggestions. Screen Recording: screenshots.
     private let required: [PermissionKind] = [.accessibility, .screenRecording]
 
     public var body: some View {
@@ -32,12 +25,10 @@ public struct SettingsRootView: View {
                         Text(Self.version).font(Leaf.font(11)).foregroundStyle(.secondary)
                     }
                     Spacer()
-                    ProviderChip(name: coordinator.currentProviderName, isMock: coordinator.providerProblem != nil)
                 }
             }
-            providerSection
             shortcutSection
-            translateSection
+            completionSection
             generalSection
             permissionsSection
         }
@@ -45,8 +36,6 @@ public struct SettingsRootView: View {
         .frame(width: 520)
         .onAppear {
             coordinator.refreshPermissions()
-            draft = coordinator.savedProviderSettings()
-            (translateTarget, translateFallback) = coordinator.translateLanguages
         }
     }
 
@@ -56,64 +45,17 @@ public struct SettingsRootView: View {
         return String(localized: "Version \(short)")
     }
 
-    // MARK: Provider
+    // MARK: Completion model
 
+    /// Download / progress / delete for the completion model.
     @ViewBuilder
-    private var providerSection: some View {
-        if let binding = Binding($draft) {
-            Section {
-                Picker("Provider", selection: kindBinding(binding)) {
-                    ForEach(ProviderKind.allCases) { Text($0.displayName).tag($0) }
-                }
-                if binding.wrappedValue.kind == .embedded {
-                    modelRow(.chat, about: "Gemma 4 E2B · about 3.6 GB download, runs offline, sees screenshots")
-                } else {
-                TextField("Base URL", text: binding.baseURL)
-                if binding.wrappedValue.kind.needsAPIKey {
-                    SecureField("API key", text: binding.apiKey)
-                }
-                HStack {
-                    TextField("Model", text: binding.model)
-                    if !models.isEmpty {
-                        Menu("Choose") {
-                            ForEach(models, id: \.self) { model in
-                                Button(model) { binding.wrappedValue.model = model }
-                            }
-                        }
-                        .fixedSize()
-                    }
-                    Button("Fetch models") { Task { await fetchModels() } }
-                        .disabled(isBusy)
-                }
-                Toggle("Model can see images (screenshots)", isOn: binding.supportsVision)
-                if let modelsError {
-                    Text(modelsError).font(.caption).foregroundStyle(.red)
-                }
-                }
-                HStack {
-                    statusLine
-                    Spacer()
-                    Button("Save") { Task { await save() } }
-                        .keyboardShortcut(.defaultAction)
-                        .disabled(isBusy || draft == coordinator.savedProviderSettings())
-                }
-            } header: {
-                Text("Model provider")
-            } footer: {
-                Text("API keys are stored in the macOS Keychain. If the provider is unreachable, APILA falls back to Mock. Without image support, screenshots are sent as on-device OCR text.")
-            }
-        }
-    }
-
-    /// Download / progress / delete for a built-in model.
-    @ViewBuilder
-    private func modelRow(_ which: AppCoordinator.BuiltInModel, about: LocalizedStringKey) -> some View {
-        switch coordinator.state(of: which) {
+    private func modelRow(about: LocalizedStringKey) -> some View {
+        switch coordinator.modelState {
         case .notDownloaded:
             HStack {
                 Text(about).font(.callout).foregroundStyle(.secondary)
                 Spacer()
-                Button("Download") { coordinator.download(which) }
+                Button("Download") { coordinator.downloadModel() }
             }
         case .downloading(let fraction):
             VStack(alignment: .leading, spacing: 4) {
@@ -126,78 +68,21 @@ public struct SettingsRootView: View {
                 Label("Downloaded · \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))", systemImage: "checkmark.circle")
                     .foregroundStyle(.green)
                 Spacer()
-                Button("Delete", role: .destructive) { coordinator.delete(which) }
+                Button("Delete", role: .destructive) { coordinator.deleteModel() }
             }
         case .failed(let message):
             HStack {
                 Text("Download failed: \(message)").font(.caption).foregroundStyle(.red).lineLimit(3)
                 Spacer()
-                Button("Try again") { coordinator.download(which) }
+                Button("Try again") { coordinator.downloadModel() }
             }
         }
-    }
-
-    private var statusLine: some View {
-        Group {
-            if let problem = coordinator.providerProblem {
-                Label("\(coordinator.currentProviderName): \(problem)", systemImage: "xmark.circle")
-                    .foregroundStyle(.red)
-            } else {
-                Label(coordinator.currentProviderName, systemImage: "checkmark.circle")
-                    .foregroundStyle(.green)
-            }
-        }
-        .font(.caption)
-        .lineLimit(2)
-    }
-
-    /// Switching kind loads that kind's key and defaults.
-    private func kindBinding(_ draft: Binding<AppCoordinator.ProviderSettings>) -> Binding<ProviderKind> {
-        Binding {
-            draft.wrappedValue.kind
-        } set: { kind in
-            draft.wrappedValue = coordinator.providerSettings(for: kind, keepSavedURLAndModel: true)
-            models = []
-            modelsError = nil
-        }
-    }
-
-    private func fetchModels() async {
-        guard let draft else { return }
-        isBusy = true
-        defer { isBusy = false }
-        do {
-            models = try await coordinator.availableModels(for: draft)
-            modelsError = models.isEmpty ? String(localized: "The server returned no models.") : nil
-        } catch {
-            models = []
-            modelsError = String(localized: "Couldn’t list models: \(error.localizedDescription)")
-        }
-    }
-
-    private func save() async {
-        guard let draft else { return }
-        isBusy = true
-        defer { isBusy = false }
-        await coordinator.saveProvider(draft)
     }
 
     // MARK: Shortcut
 
     private var shortcutSection: some View {
         Section {
-            Picker("Open APILA", selection: Binding(
-                get: { coordinator.hotkey.id },
-                set: { applyPanel(HotkeyShortcut.with(id: $0)) }
-            )) {
-                ForEach(panelOptions) { Text($0.title).tag($0.id) }
-            }
-            HotkeyRecorder(
-                onStart: { hotkeyError = nil; coordinator.pauseHotkey() },
-                onRecord: { applyPanel($0) },
-                onCancel: { coordinator.resumeHotkey() }
-            )
-
             ForEach(HotkeyAction.allCases) { action in
                 Picker(action.title, selection: Binding(
                     get: { coordinator.actionHotkeys[action]?.id ?? "off" },
@@ -221,19 +106,10 @@ public struct SettingsRootView: View {
         }
     }
 
-    /// Presets plus the current recorded shortcut, if any.
-    private var panelOptions: [HotkeyShortcut] {
-        HotkeyShortcut.all.contains(coordinator.hotkey) ? HotkeyShortcut.all : HotkeyShortcut.all + [coordinator.hotkey]
-    }
-
     private func actionOptions(_ action: HotkeyAction) -> [HotkeyShortcut] {
         let base = [action.defaultShortcut]
         guard let current = coordinator.actionHotkeys[action], !base.contains(current) else { return base }
         return base + [current]
-    }
-
-    private func applyPanel(_ shortcut: HotkeyShortcut) {
-        report(coordinator.setHotkey(shortcut), shortcut, kept: coordinator.hotkey.title)
     }
 
     private func applyAction(_ shortcut: HotkeyShortcut?, _ action: HotkeyAction) {
@@ -244,27 +120,6 @@ public struct SettingsRootView: View {
         hotkeyError = ok || shortcut == nil
             ? nil
             : String(localized: "\(shortcut!.title) is taken (by another app or another APILA shortcut) — kept \(kept).")
-    }
-
-    // MARK: Translate
-
-    private var translateSection: some View {
-        Section {
-            TextField("Translate into", text: $translateTarget)
-            TextField("If already in that language, into", text: $translateFallback)
-        } header: {
-            Text("Translate")
-        }
-        .onSubmit(saveTranslate)
-        .onChange(of: translateTarget) { saveTranslate() }
-        .onChange(of: translateFallback) { saveTranslate() }
-    }
-
-    private func saveTranslate() {
-        let target = translateTarget.trimmingCharacters(in: .whitespaces)
-        let fallback = translateFallback.trimmingCharacters(in: .whitespaces)
-        guard !target.isEmpty, !fallback.isEmpty else { return }
-        coordinator.saveTranslate(target: target, fallback: fallback)
     }
 
     // MARK: General
@@ -282,12 +137,21 @@ public struct SettingsRootView: View {
             if let error = coordinator.launchAtLoginError {
                 Text(error).font(.caption).foregroundStyle(.red)
             }
+        } header: {
+            Text("General")
+        }
+    }
+
+    // MARK: Completion
+
+    private var completionSection: some View {
+        Section {
             Toggle(isOn: Binding(get: { coordinator.completionEnabled }, set: { coordinator.setCompletion($0) })) {
                 Text("Complete my text as I type")
                 Text("Grey suggestion after the cursor in any app · Tab — next word, ⌥Tab — all, esc — hide. Uses only the built-in model, on this Mac.")
             }
             if coordinator.completionEnabled {
-                modelRow(.completion, about: "Completion model: Gemma 4 E2B base · about 3.6 GB, runs offline")
+                modelRow(about: "Completion model: Gemma 4 E2B base · about 3.6 GB, runs offline")
                 Toggle(isOn: Binding(get: { coordinator.completionUsesScreen }, set: { coordinator.setCompletionContext(screen: $0) })) {
                     Text("Use text on screen")
                     Text("Reads the window you type in (the chat, the page) so suggestions fit. On this Mac only; needs Screen Recording.")
@@ -317,7 +181,7 @@ public struct SettingsRootView: View {
                 Button("Forget what I wrote") { coordinator.forgetWritingStyle() }
             }
         } header: {
-            Text("General")
+            Text("Completion")
         }
     }
 

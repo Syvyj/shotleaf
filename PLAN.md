@@ -88,3 +88,8 @@ swift build --package-path APILAKit
 swift test --package-path APILAKit
 xcodebuild -project APILA.xcodeproj -scheme APILA -configuration Debug CODE_SIGNING_ALLOWED=NO build
 ```
+
+## Фокус (2026-10-10)
+
+- [x] Прибрано ШІ-панель, чат-модель і провайдерів — APILA зосереджена на скріншотах, тексті зі скріншотів і дописуванні (ADR-0067)
+- [x] ⌘⇧1: текст зі скріншоту у віконці (редагувати, ⌘↩ копіювати все)

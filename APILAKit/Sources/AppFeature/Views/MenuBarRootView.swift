@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-/// The menu bar menu: Open APILA · Permissions · Current Provider · Quit.
+/// The menu bar menu: screenshots, text from a screenshot, settings, quit.
 public struct MenuBarRootView: View {
     @Bindable private var coordinator: AppCoordinator
 
@@ -10,42 +10,28 @@ public struct MenuBarRootView: View {
     }
 
     public var body: some View {
-        Button("Open APILA (\(coordinator.hotkey.title))") { coordinator.openFromMenu() }
         Button(Self.label(String(localized: "Screenshot…"), coordinator.actionHotkeys[.capture])) {
             coordinator.takeScreenshot()
         }
-        Button(Self.label(String(localized: "Scrolling Screenshot…"), coordinator.actionHotkeys[.scrolling])) { coordinator.takeScrollingScreenshot() }
+        Button(Self.label(String(localized: "Scrolling Screenshot…"), coordinator.actionHotkeys[.scrolling])) {
+            coordinator.takeScrollingScreenshot()
+        }
         Menu("Screenshot with Delay") {
             Button("In 3 Seconds") { coordinator.takeScreenshot(delay: 3) }
             Button("In 5 Seconds") { coordinator.takeScreenshot(delay: 5) }
             Button("In 10 Seconds") { coordinator.takeScreenshot(delay: 10) }
         }
         Button(Self.label(String(localized: "Text from Screenshot…"), coordinator.actionHotkeys[.screenshotText])) {
-            coordinator.screenshotFromMenu(ask: false)
+            coordinator.textFromScreenshot()
         }
-        Button("Ask about Screenshot…") { coordinator.screenshotFromMenu(ask: true) }
-
-        if !coordinator.history.isEmpty {
-            Menu("Recent Results") {
-                ForEach(coordinator.history) { entry in
-                    Button("\(entry.title): \(Self.preview(entry.output))") {
-                        coordinator.copyFromHistory(entry)
-                    }
-                }
-                Divider()
-                Button("Clear") { coordinator.clearHistory() }
-            }
-        }
-
-        SettingsLink { Text("Settings…") }
-        Button("Setup Guide…") { coordinator.showOnboarding() }
 
         Divider()
 
-        Text("Provider: \(coordinator.currentProviderName)")
-        if !coordinator.hotkeyRegistered {
-            Text("⚠︎ \(coordinator.hotkey.title) is taken by another app")
-        }
+        Toggle("Complete my text as I type", isOn: Binding(
+            get: { coordinator.completionEnabled }, set: { coordinator.setCompletion($0) }
+        ))
+        SettingsLink { Text("Settings…") }
+        Button("Setup Guide…") { coordinator.showOnboarding() }
 
         Divider()
 
@@ -55,10 +41,5 @@ public struct MenuBarRootView: View {
 
     private static func label(_ title: String, _ shortcut: HotkeyShortcut?) -> String {
         shortcut.map { "\(title) (\($0.title))" } ?? title
-    }
-
-    private static func preview(_ text: String) -> String {
-        let flat = text.split(whereSeparator: \.isNewline).joined(separator: " ")
-        return flat.count > 50 ? String(flat.prefix(50)) + "…" : flat
     }
 }
