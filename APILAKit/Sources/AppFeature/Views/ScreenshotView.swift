@@ -111,7 +111,7 @@ struct ScreenshotView: View {
                 .frame(maxWidth: .infinity, maxHeight: 36)
                 .overlay(alignment: .trailing) {
                     if let toast {
-                        Text(toast)
+                        Text(LocalizedStringKey(toast))
                             .font(Leaf.font(12, .semibold))
                             .foregroundStyle(Leaf.ink)
                             .fixedSize()
@@ -128,7 +128,7 @@ struct ScreenshotView: View {
 
     private var toolRow: some View {
         HStack(spacing: 4) {
-            toolButton(nil, title: "Select · drag the shot out", key: "0")
+            toolButton(nil, title: String(localized: "Select · drag the shot out"), key: "0")
             shapesButton
             ForEach(Self.singleTools) { tool in
                 toolButton(tool, title: tool.title, key: tool.key)
@@ -253,7 +253,7 @@ struct ScreenshotView: View {
                             Button { setWidth(width) } label: {
                                 HStack(spacing: 4) {
                                     WidthIcon(width: width)
-                                    Text(["Thin", "Medium", "Thick"][i]).font(Leaf.font(12, .medium))
+                                    Text([String(localized: "Thin"), String(localized: "Medium"), String(localized: "Thick")][i]).font(Leaf.font(12, .medium))
                                 }
                                 .padding(.horizontal, 6).frame(height: 28)
                                 .background(tile(on).opacity(on ? 1 : 0))
@@ -606,7 +606,7 @@ struct ScreenshotView: View {
                 .buttonStyle(LeafButtonStyle(prominent: true))
                 .keyboardShortcut("c", modifiers: .command)
             Button {
-                if let url = actions.save() { flash("Saved to \(url.deletingLastPathComponent().lastPathComponent)") }
+                if let url = actions.save() { flash(String(localized: "Saved to \(url.deletingLastPathComponent().lastPathComponent)")) }
             } label: { keyed("Save", "⌘S") }
             .buttonStyle(LeafButtonStyle())
             .keyboardShortcut("s", modifiers: .command)
@@ -644,7 +644,7 @@ struct ScreenshotView: View {
 
     private func keyed(_ title: String, _ key: String) -> some View {
         HStack(spacing: 5) {
-            Text(title)
+            Text(LocalizedStringKey(title))
             Text(key)
                 .font(Leaf.font(10.5, .semibold))
                 .opacity(0.5)

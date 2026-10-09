@@ -14,7 +14,7 @@ struct HotkeyRecorder: View {
 
     var body: some View {
         HStack {
-            Button(monitor == nil ? "Record shortcut…" : "Press keys… (esc cancels)") {
+            Button(monitor == nil ? String(localized: "Record shortcut…") : String(localized: "Press keys… (esc cancels)")) {
                 monitor == nil ? start() : finish(nil)
             }
             if let hint {
@@ -36,7 +36,7 @@ struct HotkeyRecorder: View {
                 } else if let shortcut = HotkeyShortcut.recorded(keyCode: keyCode, flags: flags, characters: characters) {
                     finish(shortcut)
                 } else {
-                    hint = "Add ⌘, ⌥ or ⌃ (or use an F-key)."
+                    hint = String(localized: "Add ⌘, ⌥ or ⌃ (or use an F-key).")
                 }
             }
             return nil // swallow: the key press belongs to the recorder

@@ -1,0 +1,1734 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ is taken (by another app or another APILA shortcut) — kept %@.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ уже зайнято (іншою програмою або іншою дією APILA) — лишаю %@."
+          }
+        }
+      }
+    },
+    "%@: %@": {
+      "shouldTranslate": false
+    },
+    "%lld": {
+      "shouldTranslate": false
+    },
+    "API key": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ API"
+          }
+        }
+      }
+    },
+    "API keys are stored in the macOS Keychain. If the provider is unreachable, APILA falls back to Mock. Without image support, screenshots are sent as on-device OCR text.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключі API зберігаються у Зв’язці ключів macOS. Якщо провайдер недоступний, APILA перемикається на Mock. Якщо модель не бачить зображень, скріншоти надсилаються як розпізнаний на Mac текст."
+          }
+        }
+      }
+    },
+    "APILA": {
+      "shouldTranslate": false
+    },
+    "APILA needs the %@ permission. Allow it in System Settings → Privacy & Security, then restart APILA.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "APILA потрібен дозвіл «%@». Увімкніть його в Системних параметрах → Конфіденційність і безпека, потім перезапустіть APILA."
+          }
+        }
+      }
+    },
+    "Aa": {
+      "shouldTranslate": false
+    },
+    "Accessibility": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Універсальний доступ"
+          }
+        }
+      }
+    },
+    "Accessibility is off — result copied to clipboard. Paste with ⌘V, or enable Accessibility in Settings to auto-paste.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Універсальний доступ вимкнено — результат скопійовано. Вставте через ⌘V або увімкніть доступ у налаштуваннях, щоб APILA вставляла сама."
+          }
+        }
+      }
+    },
+    "Accessibility is required for reading the selection and pasting the result; Screen Recording — for screenshots. After granting, fully restart APILA.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Універсальний доступ потрібен, щоб читати виділення і вставляти результат; запис екрана — для скріншотів. Після дозволу повністю перезапустіть APILA."
+          }
+        }
+      }
+    },
+    "Add ⌘, ⌥ or ⌃ (or use an F-key).": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додайте ⌘, ⌥ або ⌃ (або візьміть F-клавішу)."
+          }
+        }
+      }
+    },
+    "After enabling APILA in the list, quit and reopen APILA.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Після того як увімкнете APILA у списку, закрийте й знову відкрийте APILA."
+          }
+        }
+      }
+    },
+    "Allow Accessibility": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дозвольте Універсальний доступ"
+          }
+        }
+      }
+    },
+    "Apply crop": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обрізати"
+          }
+        }
+      }
+    },
+    "Arrow": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стрілка"
+          }
+        }
+      }
+    },
+    "Ask AI": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запитати ШІ"
+          }
+        }
+      }
+    },
+    "Ask about Screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запитати про скріншот"
+          }
+        }
+      }
+    },
+    "Ask about Screenshot…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запитати про скріншот…"
+          }
+        }
+      }
+    },
+    "Back to marks": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Назад до позначок"
+          }
+        }
+      }
+    },
+    "Base URL": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Адреса сервера"
+          }
+        }
+      }
+    },
+    "Blur": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розмиття"
+          }
+        }
+      }
+    },
+    "Box": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Рамка"
+          }
+        }
+      }
+    },
+    "Built-in (Gemma 4 E2B, on this Mac)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вбудована (Gemma 4 E2B, на цьому Mac)"
+          }
+        }
+      }
+    },
+    "Can't reach the model server. Is LM Studio running with a model loaded?": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер моделі не відповідає. LM Studio запущено і модель завантажено?"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасувати"
+          }
+        }
+      }
+    },
+    "Cancelled.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасовано."
+          }
+        }
+      }
+    },
+    "Check again": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевірити ще раз"
+          }
+        }
+      }
+    },
+    "Choose": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрати"
+          }
+        }
+      }
+    },
+    "Clear": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистити"
+          }
+        }
+      }
+    },
+    "Clipboard": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Буфер обміну"
+          }
+        }
+      }
+    },
+    "Close": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрити"
+          }
+        }
+      }
+    },
+    "Color & thickness": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Колір і товщина"
+          }
+        }
+      }
+    },
+    "Connect a model": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підключіть модель"
+          }
+        }
+      }
+    },
+    "Copied": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопійовано"
+          }
+        }
+      }
+    },
+    "Copied all text": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопійовано весь текст"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копіювати"
+          }
+        }
+      }
+    },
+    "Copy text": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копіювати текст"
+          }
+        }
+      }
+    },
+    "Couldn't list models: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося отримати список моделей: %@"
+          }
+        }
+      }
+    },
+    "Crop": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кадрування"
+          }
+        }
+      }
+    },
+    "Custom (OpenAI-compatible)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Інший (OpenAI-сумісний)"
+          }
+        }
+      }
+    },
+    "Custom Prompt": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Свій запит"
+          }
+        }
+      }
+    },
+    "Cut": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вирізати"
+          }
+        }
+      }
+    },
+    "Delete": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити"
+          }
+        }
+      }
+    },
+    "Describe what to do with the selection…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Опишіть, що зробити з виділеним…"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово"
+          }
+        }
+      }
+    },
+    "Download": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажити"
+          }
+        }
+      }
+    },
+    "Download failed: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося завантажити: %@"
+          }
+        }
+      }
+    },
+    "Downloaded · %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажено · %@"
+          }
+        }
+      }
+    },
+    "Downloading… %lld%%": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантаження… %lld%%"
+          }
+        }
+      }
+    },
+    "Erase": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Гумка"
+          }
+        }
+      }
+    },
+    "Explain": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пояснити"
+          }
+        }
+      }
+    },
+    "Fetch models": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отримати моделі"
+          }
+        }
+      }
+    },
+    "Focus": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фокус"
+          }
+        }
+      }
+    },
+    "Gemma 4 E2B · about 3.6 GB download, runs offline, sees screenshots": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemma 4 E2B · близько 3,6 ГБ, працює без інтернету, бачить скріншоти"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загальні"
+          }
+        }
+      }
+    },
+    "How should the result change? (shorter, more formal…)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Як змінити результат? (коротше, офіційніше…)"
+          }
+        }
+      }
+    },
+    "If already in that language, into": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Якщо текст уже цією мовою — на"
+          }
+        }
+      }
+    },
+    "In 10 Seconds": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Через 10 секунд"
+          }
+        }
+      }
+    },
+    "In 3 Seconds": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Через 3 секунди"
+          }
+        }
+      }
+    },
+    "In 5 Seconds": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Через 5 секунд"
+          }
+        }
+      }
+    },
+    "Input Monitoring": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Контроль вводу"
+          }
+        }
+      }
+    },
+    "Insert Below": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставити нижче"
+          }
+        }
+      }
+    },
+    "Keep only the cropped area — ⌘Z brings the rest back": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Залишити тільки вибрану область — ⌘Z поверне решту"
+          }
+        }
+      }
+    },
+    "Loading the model…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажую модель у пам'ять…"
+          }
+        }
+      }
+    },
+    "Marker": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Маркер"
+          }
+        }
+      }
+    },
+    "Maximum length reached — press Done": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Досягнуто максимальної довжини — натисніть «Готово»"
+          }
+        }
+      }
+    },
+    "Medium": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Середня"
+          }
+        }
+      }
+    },
+    "Mock (%@ unavailable)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mock (%@ недоступний)"
+          }
+        }
+      }
+    },
+    "Mock — no model": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mock — моделі немає"
+          }
+        }
+      }
+    },
+    "Model": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модель"
+          }
+        }
+      }
+    },
+    "Model can see images (screenshots)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модель бачить зображення (скріншоти)"
+          }
+        }
+      }
+    },
+    "Model provider": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Провайдер моделі"
+          }
+        }
+      }
+    },
+    "Model server error (HTTP %lld): %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Помилка сервера моделі (HTTP %lld): %@"
+          }
+        }
+      }
+    },
+    "Model server error: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Помилка сервера моделі: %@"
+          }
+        }
+      }
+    },
+    "Needed to read your selection and paste results back.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Потрібно, щоб читати виділений текст і вставляти результат."
+          }
+        }
+      }
+    },
+    "No AI provider is available. Start LM Studio (or an OpenAI-compatible server), or rely on Mock.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Немає доступного провайдера ШІ. Запустіть LM Studio (або OpenAI-сумісний сервер) чи завантажте вбудовану модель."
+          }
+        }
+      }
+    },
+    "No model selected. Load a model in LM Studio.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модель не вибрано. Завантажте модель у LM Studio."
+          }
+        }
+      }
+    },
+    "No text captured — select text or copy it first. Screenshots work anyway.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст не отримано — спершу виділіть або скопіюйте його. Скріншоти працюють і так."
+          }
+        }
+      }
+    },
+    "No text found": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст не знайдено"
+          }
+        }
+      }
+    },
+    "No text found. Select some text (or copy it), then open APILA again.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст не знайдено. Виділіть (або скопіюйте) текст і відкрийте APILA ще раз."
+          }
+        }
+      }
+    },
+    "Not available yet: %@.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поки недоступно: %@."
+          }
+        }
+      }
+    },
+    "Off": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вимк."
+          }
+        }
+      }
+    },
+    "Open APILA": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити APILA"
+          }
+        }
+      }
+    },
+    "Open APILA (%@)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити APILA (%@)"
+          }
+        }
+      }
+    },
+    "Open APILA at login": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкривати APILA під час входу"
+          }
+        }
+      }
+    },
+    "Open Settings": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити налаштування"
+          }
+        }
+      }
+    },
+    "Open Settings…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити налаштування…"
+          }
+        }
+      }
+    },
+    "Open System Settings": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити Системні параметри"
+          }
+        }
+      }
+    },
+    "Oval": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Овал"
+          }
+        }
+      }
+    },
+    "Permissions": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дозволи"
+          }
+        }
+      }
+    },
+    "Pin": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закріпити"
+          }
+        }
+      }
+    },
+    "Press keys… (esc cancels)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Натисніть клавіші… (esc — скасувати)"
+          }
+        }
+      }
+    },
+    "Provider": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Провайдер"
+          }
+        }
+      }
+    },
+    "Provider: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Провайдер: %@"
+          }
+        }
+      }
+    },
+    "Quit APILA": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вийти з APILA"
+          }
+        }
+      }
+    },
+    "Recent Results": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Останні результати"
+          }
+        }
+      }
+    },
+    "Record shortcut…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Записати комбінацію…"
+          }
+        }
+      }
+    },
+    "Refine": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уточнити"
+          }
+        }
+      }
+    },
+    "Refine Result": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уточнити результат"
+          }
+        }
+      }
+    },
+    "Replace": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Замінити"
+          }
+        }
+      }
+    },
+    "Request": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запитати"
+          }
+        }
+      }
+    },
+    "Result": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Результат"
+          }
+        }
+      }
+    },
+    "Retry": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ще раз"
+          }
+        }
+      }
+    },
+    "Rewrite": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Переписати"
+          }
+        }
+      }
+    },
+    "Ruler": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лінійка"
+          }
+        }
+      }
+    },
+    "Save": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти"
+          }
+        }
+      }
+    },
+    "Saved to %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережено в %@"
+          }
+        }
+      }
+    },
+    "Screen Recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запис екрана"
+          }
+        }
+      }
+    },
+    "Screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скріншот"
+          }
+        }
+      }
+    },
+    "Screenshot with Delay": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скріншот із затримкою"
+          }
+        }
+      }
+    },
+    "Screenshot…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скріншот…"
+          }
+        }
+      }
+    },
+    "Scroll down slowly": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повільно прокручуйте вниз"
+          }
+        }
+      }
+    },
+    "Scroll down slowly · %lld px": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повільно прокручуйте вниз · %lld px"
+          }
+        }
+      }
+    },
+    "Scrolling Screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скролінговий скріншот"
+          }
+        }
+      }
+    },
+    "Scrolling Screenshot…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скролінговий скріншот…"
+          }
+        }
+      }
+    },
+    "Scrolling screenshot — pick an area, then scroll": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скролінговий знімок — виберіть область, потім прокручуйте"
+          }
+        }
+      }
+    },
+    "Select some text in any app and press %@.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виділіть текст у будь-якій програмі й натисніть %@."
+          }
+        }
+      }
+    },
+    "Select text on the shot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виділити текст на знімку"
+          }
+        }
+      }
+    },
+    "Select text · ↩ copies it": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виділіть текст · ↩ копіює"
+          }
+        }
+      }
+    },
+    "Select · drag the shot out": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибір · перетягніть знімок назовні"
+          }
+        }
+      }
+    },
+    "Selection": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виділення"
+          }
+        }
+      }
+    },
+    "Settings…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Налаштування…"
+          }
+        }
+      }
+    },
+    "Setup Guide…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Як налаштувати…"
+          }
+        }
+      }
+    },
+    "Shortcuts": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Гарячі клавіші"
+          }
+        }
+      }
+    },
+    "Show in Dock": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показувати в Dock"
+          }
+        }
+      }
+    },
+    "Something went wrong": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Щось пішло не так"
+          }
+        }
+      }
+    },
+    "Start LM Studio (or Ollama) with a model loaded, or add an OpenAI / OpenRouter key in Settings.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажте вбудовану модель у налаштуваннях, запустіть LM Studio (чи Ollama) або додайте ключ OpenAI / OpenRouter."
+          }
+        }
+      }
+    },
+    "Steps": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кроки"
+          }
+        }
+      }
+    },
+    "Summarize": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підсумувати"
+          }
+        }
+      }
+    },
+    "Text": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст"
+          }
+        }
+      }
+    },
+    "Text from Screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст зі скріншоту"
+          }
+        }
+      }
+    },
+    "Text from Screenshot…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст зі скріншоту…"
+          }
+        }
+      }
+    },
+    "Text size": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розмір тексту"
+          }
+        }
+      }
+    },
+    "The server returned no models.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер не повернув жодної моделі."
+          }
+        }
+      }
+    },
+    "Thick": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Товста"
+          }
+        }
+      }
+    },
+    "Thin": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тонка"
+          }
+        }
+      }
+    },
+    "Thinking…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Думаю…"
+          }
+        }
+      }
+    },
+    "Three quick steps and APILA works in any app.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Три короткі кроки — і APILA працює в будь-якій програмі."
+          }
+        }
+      }
+    },
+    "Too fast — scroll back up a little": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Занадто швидко — прокрутіть трохи назад"
+          }
+        }
+      }
+    },
+    "Translate": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перекласти"
+          }
+        }
+      }
+    },
+    "Translate into": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перекладати на"
+          }
+        }
+      }
+    },
+    "Try again": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спробувати ще"
+          }
+        }
+      }
+    },
+    "Try it": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спробуйте"
+          }
+        }
+      }
+    },
+    "Type, then ↩": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пишіть, потім ↩"
+          }
+        }
+      }
+    },
+    "Undo": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасувати дію"
+          }
+        }
+      }
+    },
+    "Unexpected response from the model server.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неочікувана відповідь від сервера моделі."
+          }
+        }
+      }
+    },
+    "Using %@.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Використовую %@."
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Версія %@"
+          }
+        }
+      }
+    },
+    "Welcome to APILA": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ласкаво просимо до APILA"
+          }
+        }
+      }
+    },
+    "What do you want to know about it?": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Що ви хочете про це дізнатися?"
+          }
+        }
+      }
+    },
+    "area": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "область"
+          }
+        }
+      }
+    },
+    "back": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "назад"
+          }
+        }
+      }
+    },
+    "cancel": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "скасувати"
+          }
+        }
+      }
+    },
+    "click": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "клік"
+          }
+        }
+      }
+    },
+    "close": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "закрити"
+          }
+        }
+      }
+    },
+    "copy": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "копіювати"
+          }
+        }
+      }
+    },
+    "copy color": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "копіювати колір"
+          }
+        }
+      }
+    },
+    "denied": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "заборонено"
+          }
+        }
+      }
+    },
+    "drag": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "тягніть"
+          }
+        }
+      }
+    },
+    "esc": {
+      "shouldTranslate": false
+    },
+    "full screen": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "весь екран"
+          }
+        }
+      }
+    },
+    "granted": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "дозволено"
+          }
+        }
+      }
+    },
+    "navigate": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "вибір"
+          }
+        }
+      }
+    },
+    "not determined": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "не визначено"
+          }
+        }
+      }
+    },
+    "refine": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "уточнити"
+          }
+        }
+      }
+    },
+    "repeat": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "повторити"
+          }
+        }
+      }
+    },
+    "replace": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "замінити"
+          }
+        }
+      }
+    },
+    "retry": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ще раз"
+          }
+        }
+      }
+    },
+    "run": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "виконати"
+          }
+        }
+      }
+    },
+    "scrolling": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "скролінг"
+          }
+        }
+      }
+    },
+    "scrolling: on": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "скролінг: увімк."
+          }
+        }
+      }
+    },
+    "select": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "вибрати"
+          }
+        }
+      }
+    },
+    "stop": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "зупинити"
+          }
+        }
+      }
+    },
+    "window": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "вікно"
+          }
+        }
+      }
+    },
+    "×": {
+      "shouldTranslate": false
+    },
+    "⚠︎ %@ is taken by another app": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠︎ %@ зайнято іншою програмою"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

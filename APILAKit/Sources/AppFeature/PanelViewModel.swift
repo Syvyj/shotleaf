@@ -35,9 +35,9 @@ public final class PanelViewModel {
         public var title: String {
             switch self {
             case .action(let a): a.title
-            case .customPrompt: "Custom Prompt"
-            case .screenshotText: "Text from Screenshot…"
-            case .screenshotAsk: "Ask about Screenshot…"
+            case .customPrompt: String(localized: "Custom Prompt")
+            case .screenshotText: String(localized: "Text from Screenshot…")
+            case .screenshotAsk: String(localized: "Ask about Screenshot…")
             }
         }
     }
@@ -96,8 +96,8 @@ public final class PanelViewModel {
     /// What the actions will run on, so the user sees it before anything is sent:
     /// the selection, or — when nothing is selected — the clipboard.
     public var contextPreview: (source: String, text: String)? {
-        if let text = snapshot?.selectedText, !text.isEmpty { return ("Selection", Self.preview(text)) }
-        if let text = snapshot?.clipboardText, !text.isEmpty { return ("Clipboard", Self.preview(text)) }
+        if let text = snapshot?.selectedText, !text.isEmpty { return (String(localized: "Selection"), Self.preview(text)) }
+        if let text = snapshot?.clipboardText, !text.isEmpty { return (String(localized: "Clipboard"), Self.preview(text)) }
         return nil
     }
 
@@ -257,31 +257,31 @@ public final class PanelViewModel {
             case .missingContext(let what) where what.contains("screenshot"):
                 return "\(what)."
             case .missingContext:
-                return "No text found. Select some text (or copy it), then open APILA again."
+                return String(localized: "No text found. Select some text (or copy it), then open APILA again.")
             case .providerUnavailable:
-                return "No AI provider is available. Start LM Studio (or an OpenAI-compatible server), or rely on Mock."
+                return String(localized: "No AI provider is available. Start LM Studio (or an OpenAI-compatible server), or rely on Mock.")
             case .permissionDenied(let name):
-                return "APILA needs the \(name) permission. Allow it in System Settings → Privacy & Security, then restart APILA."
+                return String(localized: "APILA needs the \(name) permission. Allow it in System Settings → Privacy & Security, then restart APILA.")
             case .cancelled:
-                return "Cancelled."
+                return String(localized: "Cancelled.")
             case .notImplemented(let what):
-                return "Not available yet: \(what)."
+                return String(localized: "Not available yet: \(what).")
             }
         }
         guard let error = error as? InferenceError else { return error.localizedDescription }
         switch error {
         case .network, .timedOut, .unhealthy, .invalidURL:
-            return "Can't reach the model server. Is LM Studio running with a model loaded?"
+            return String(localized: "Can't reach the model server. Is LM Studio running with a model loaded?")
         case .noModelSelected:
-            return "No model selected. Load a model in LM Studio."
+            return String(localized: "No model selected. Load a model in LM Studio.")
         case .api(let message, _, _):
-            return "Model server error: \(message)"
+            return String(localized: "Model server error: \(message)")
         case .http(let status, let body):
-            return "Model server error (HTTP \(status)): \(body ?? "")"
+            return String(localized: "Model server error (HTTP \(status)): \(body ?? "")")
         case .decoding:
-            return "Unexpected response from the model server."
+            return String(localized: "Unexpected response from the model server.")
         case .cancelled:
-            return "Cancelled."
+            return String(localized: "Cancelled.")
         }
     }
 
@@ -300,7 +300,7 @@ public final class PanelViewModel {
         let text = output
         guard accessibilityGranted() else {
             await inserter.copy(text)
-            noticeText = "Accessibility is off — result copied to clipboard. Paste with ⌘V, or enable Accessibility in Settings to auto-paste."
+            noticeText = String(localized: "Accessibility is off — result copied to clipboard. Paste with ⌘V, or enable Accessibility in Settings to auto-paste.")
             return
         }
         close()

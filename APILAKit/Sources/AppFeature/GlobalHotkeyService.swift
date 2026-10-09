@@ -99,9 +99,9 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
 
     public var title: String {
         switch self {
-        case .capture: "Screenshot"
-        case .screenshotText: "Text from Screenshot"
-        case .scrolling: "Scrolling Screenshot"
+        case .capture: String(localized: "Screenshot")
+        case .screenshotText: String(localized: "Text from Screenshot")
+        case .scrolling: String(localized: "Scrolling Screenshot")
         }
     }
 

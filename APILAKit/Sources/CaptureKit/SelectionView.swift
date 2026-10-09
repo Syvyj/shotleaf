@@ -139,7 +139,7 @@ final class SelectionView: NSView {
 
     /// Top banner while S is on, so the mode is hard to miss.
     private func drawScrollingBanner() {
-        let text = NSAttributedString(string: "Скролінговий знімок — виберіть область, потім прокручуйте",
+        let text = NSAttributedString(string: String(localized: "Scrolling screenshot — pick an area, then scroll"),
                                       attributes: CaptureStyle.label(CaptureStyle.font(13, .semibold)))
         let size = text.size()
         let box = CGRect(x: bounds.midX - size.width / 2 - 18, y: 28, width: size.width + 36, height: 34)
@@ -289,11 +289,11 @@ final class SelectionView: NSView {
     }
 
     private func drawHints() {
-        var keys: [(String, String)] = [("drag", "область"), ("click", "вікно"), ("↩", "весь екран")]
-        if canRepeat { keys.append(("R", "повторити")) }
-        keys.append(("C", "копіювати колір"))
-        keys.append(("S", scrolling ? "скролінг: увімк." : "скролінг"))
-        keys.append(("esc", "скасувати"))
+        var keys: [(String, String)] = [(String(localized: "drag"), String(localized: "area")), (String(localized: "click"), String(localized: "window")), ("↩", String(localized: "full screen"))]
+        if canRepeat { keys.append(("R", String(localized: "repeat"))) }
+        keys.append(("C", String(localized: "copy color")))
+        keys.append(("S", scrolling ? String(localized: "scrolling: on") : String(localized: "scrolling")))
+        keys.append(("esc", String(localized: "cancel")))
 
         let keyFont = CaptureStyle.font(11, .semibold)
         let textFont = CaptureStyle.font(12)

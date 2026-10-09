@@ -98,7 +98,7 @@ struct HintBar: View {
             ForEach(items, id: \.key) { item in
                 HStack(spacing: 4) {
                     Keycap(key: item.key)
-                    Text(item.label).font(Leaf.font(12))
+                    Text(LocalizedStringKey(item.label)).font(Leaf.font(12))
                 }
             }
         }
@@ -173,7 +173,7 @@ struct ProviderChip: View {
     var body: some View {
         HStack(spacing: 5) {
             Circle().fill(isMock ? Leaf.amber : Leaf.ink).frame(width: 6, height: 6)
-            Text(isMock ? "Mock — no model" : name)
+            Text(isMock ? String(localized: "Mock — no model") : name)
                 .font(Leaf.font(11, .medium))
                 .lineLimit(1)
         }
@@ -391,7 +391,7 @@ struct InstantTip: ViewModifier {
             .onHover { hovered = $0 }
             .overlay(alignment: above ? .top : .bottom) {
                 if hovered && !hidden {
-                    Text(text)
+                    Text(LocalizedStringKey(text))
                         .font(Leaf.font(12, .semibold))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 8).padding(.vertical, 4)

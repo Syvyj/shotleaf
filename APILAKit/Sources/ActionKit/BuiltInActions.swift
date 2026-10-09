@@ -15,7 +15,7 @@ private let lowTemp = GenerationOptions(temperature: 0.2)
 
 public struct RewriteAction: Action {
     public let id = "rewrite"
-    public let title = "Rewrite"
+    public let title = String(localized: "Rewrite")
     public let requirements = ContextRequirements(needsSelectedText: true, needsClipboard: true)
     public init() {}
     public func plan(for snapshot: ContextSnapshot) throws -> ActionPlan {
@@ -30,7 +30,7 @@ public struct RewriteAction: Action {
 
 public struct ExplainAction: Action {
     public let id = "explain"
-    public let title = "Explain"
+    public let title = String(localized: "Explain")
     public let requirements = ContextRequirements(needsSelectedText: true, needsClipboard: true)
     public init() {}
     public func plan(for snapshot: ContextSnapshot) throws -> ActionPlan {
@@ -45,7 +45,7 @@ public struct ExplainAction: Action {
 
 public struct TranslateAction: Action {
     public let id = "translate"
-    public let title = "Translate"
+    public let title = String(localized: "Translate")
     public let requirements = ContextRequirements(needsSelectedText: true, needsClipboard: true)
     private let target: String
     private let fallback: String
@@ -68,7 +68,7 @@ public struct TranslateAction: Action {
 
 public struct SummarizeAction: Action {
     public let id = "summarize"
-    public let title = "Summarize"
+    public let title = String(localized: "Summarize")
     public let requirements = ContextRequirements(needsSelectedText: true, needsClipboard: true)
     public init() {}
     public func plan(for snapshot: ContextSnapshot) throws -> ActionPlan {
@@ -85,7 +85,7 @@ public struct SummarizeAction: Action {
 /// the typed prompt (the panel's "Custom Prompt" entry).
 public struct CustomPromptAction: Action {
     public let id = "custom"
-    public let title = "Custom Prompt"
+    public let title = String(localized: "Custom Prompt")
     public let requirements = ContextRequirements(needsSelectedText: true, needsClipboard: true)
     private let prompt: String
 
@@ -104,7 +104,7 @@ public struct CustomPromptAction: Action {
 
 public struct CopyAction: Action {
     public let id = "copy"
-    public let title = "Copy"
+    public let title = String(localized: "Copy")
     public let requirements = ContextRequirements(needsSelectedText: true, needsClipboard: true)
     public init() {}
     public func plan(for snapshot: ContextSnapshot) throws -> ActionPlan {
@@ -119,7 +119,7 @@ public struct CopyAction: Action {
 /// screen, so Copy / Replace / Insert all work.
 public struct ScreenshotTextAction: Action {
     public let id = "screenshot-text"
-    public let title = "Text from Screenshot"
+    public let title = String(localized: "Text from Screenshot")
     public let requirements = ContextRequirements(needsScreenImage: true)
     public init() {}
     public func plan(for snapshot: ContextSnapshot) throws -> ActionPlan {
@@ -132,7 +132,7 @@ public struct ScreenshotTextAction: Action {
 /// text-only models get its OCR text (InferenceExecutor decides).
 public struct AskAboutScreenshotAction: Action {
     public let id = "screenshot-ask"
-    public let title = "Ask about Screenshot"
+    public let title = String(localized: "Ask about Screenshot")
     public let requirements = ContextRequirements(needsScreenImage: true, needsScreenText: true)
     private let prompt: String
 

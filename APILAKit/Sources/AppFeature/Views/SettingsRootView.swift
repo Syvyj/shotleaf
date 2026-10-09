@@ -53,7 +53,7 @@ public struct SettingsRootView: View {
     private static var version: String {
         let info = Bundle.main.infoDictionary
         let short = info?["CFBundleShortVersionString"] as? String ?? "dev"
-        return "Version \(short)"
+        return String(localized: "Version \(short)")
     }
 
     // MARK: Provider
@@ -111,7 +111,7 @@ public struct SettingsRootView: View {
         switch coordinator.embeddedState {
         case .notDownloaded:
             HStack {
-                Text("Gemma 4 E2B · about 3.5 GB download, runs offline, sees screenshots")
+                Text("Gemma 4 E2B · about 3.6 GB download, runs offline, sees screenshots")
                     .font(.callout).foregroundStyle(.secondary)
                 Spacer()
                 Button("Download") { coordinator.downloadEmbedded() }
@@ -119,7 +119,7 @@ public struct SettingsRootView: View {
         case .downloading(let fraction):
             VStack(alignment: .leading, spacing: 4) {
                 ProgressView(value: fraction)
-                Text(fraction < 1 ? "Downloading… \(Int(fraction * 100))%" : "Loading the model…")
+                Text(fraction < 1 ? String(localized: "Downloading… \(Int(fraction * 100))%") : String(localized: "Loading the model…"))
                     .font(.caption).foregroundStyle(.secondary)
             }
         case .ready(let bytes):
@@ -169,10 +169,10 @@ public struct SettingsRootView: View {
         defer { isBusy = false }
         do {
             models = try await coordinator.availableModels(for: draft)
-            modelsError = models.isEmpty ? "The server returned no models." : nil
+            modelsError = models.isEmpty ? String(localized: "The server returned no models.") : nil
         } catch {
             models = []
-            modelsError = "Couldn't list models: \(error)"
+            modelsError = String(localized: "Couldn't list models: \(error)")
         }
     }
 
@@ -238,13 +238,13 @@ public struct SettingsRootView: View {
     }
 
     private func applyAction(_ shortcut: HotkeyShortcut?, _ action: HotkeyAction) {
-        report(coordinator.setHotkey(shortcut, for: action), shortcut, kept: coordinator.actionHotkeys[action]?.title ?? "Off")
+        report(coordinator.setHotkey(shortcut, for: action), shortcut, kept: coordinator.actionHotkeys[action]?.title ?? String(localized: "Off"))
     }
 
     private func report(_ ok: Bool, _ shortcut: HotkeyShortcut?, kept: String) {
         hotkeyError = ok || shortcut == nil
             ? nil
-            : "\(shortcut!.title) is taken (by another app or another APILA shortcut) — kept \(kept)."
+            : String(localized: "\(shortcut!.title) is taken (by another app or another APILA shortcut) — kept \(kept).")
     }
 
     // MARK: Translate
@@ -312,17 +312,17 @@ public struct SettingsRootView: View {
 
     private func title(for kind: PermissionKind) -> String {
         switch kind {
-        case .accessibility: "Accessibility"
-        case .screenRecording: "Screen Recording"
-        case .inputMonitoring: "Input Monitoring"
+        case .accessibility: String(localized: "Accessibility")
+        case .screenRecording: String(localized: "Screen Recording")
+        case .inputMonitoring: String(localized: "Input Monitoring")
         }
     }
 
     private func statusText(_ status: PermissionStatus?) -> String {
         switch status {
-        case .granted: "granted"
-        case .denied: "denied"
-        case .notDetermined: "not determined"
+        case .granted: String(localized: "granted")
+        case .denied: String(localized: "denied")
+        case .notDetermined: String(localized: "not determined")
         case nil: "—"
         }
     }

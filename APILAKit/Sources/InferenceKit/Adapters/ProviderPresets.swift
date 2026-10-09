@@ -13,12 +13,12 @@ public enum ProviderKind: String, CaseIterable, Sendable, Identifiable {
 
     public var displayName: String {
         switch self {
-        case .embedded: "Built-in (Gemma 4 E2B, on this Mac)"
+        case .embedded: String(localized: "Built-in (Gemma 4 E2B, on this Mac)")
         case .lmStudio: "LM Studio"
         case .ollama: "Ollama"
         case .openAI: "OpenAI"
         case .openRouter: "OpenRouter"
-        case .custom: "Custom (OpenAI-compatible)"
+        case .custom: String(localized: "Custom (OpenAI-compatible)")
         }
     }
 

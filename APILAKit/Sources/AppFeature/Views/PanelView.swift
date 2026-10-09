@@ -42,7 +42,7 @@ public struct PanelView: View {
             } else {
                 BrandLogo()
             }
-            Text(title).font(Leaf.font(16, .semibold))
+            Text(LocalizedStringKey(title)).font(Leaf.font(16, .semibold))
             Spacer()
             ProviderChip(name: vm.providerName, isMock: vm.isMockProvider)
         }
@@ -74,7 +74,7 @@ public struct PanelView: View {
     private var contextCard: some View {
         HStack(alignment: .top, spacing: 8) {
             if let preview = vm.contextPreview {
-                let fromClipboard = preview.source == "Clipboard"
+                let fromClipboard = preview.source == String(localized: "Clipboard")
                 Text(preview.source)
                     .font(Leaf.font(11, .semibold))
                     .foregroundStyle(fromClipboard ? Leaf.amber : Leaf.ink)
@@ -95,7 +95,7 @@ public struct PanelView: View {
     }
 
     private func sectionLabel(_ text: String) -> some View {
-        Text(text.uppercased())
+        Text(LocalizedStringKey(text)).textCase(.uppercase)
             .font(Leaf.font(10, .bold))
             .tracking(0.8)
             .padding(.horizontal, 12)
@@ -125,7 +125,7 @@ public struct PanelView: View {
     private var customPromptScreen: some View {
         VStack(alignment: .leading, spacing: 12) {
             header(promptTitle)
-            TextField(promptPlaceholder, text: $vm.customPromptText)
+            TextField(LocalizedStringKey(promptPlaceholder), text: $vm.customPromptText)
                 .textFieldStyle(.plain)
                 .font(Leaf.font(15))
                 .padding(11)
@@ -213,17 +213,17 @@ public struct PanelView: View {
 
     private var promptTitle: String {
         switch vm.promptMode {
-        case .custom: "Custom Prompt"
-        case .refine: "Refine Result"
-        case .screenshot: "Ask about Screenshot"
+        case .custom: String(localized: "Custom Prompt")
+        case .refine: String(localized: "Refine Result")
+        case .screenshot: String(localized: "Ask about Screenshot")
         }
     }
 
     private var promptPlaceholder: String {
         switch vm.promptMode {
-        case .custom: "Describe what to do with the selection…"
-        case .refine: "How should the result change? (shorter, more formal…)"
-        case .screenshot: "What do you want to know about it?"
+        case .custom: String(localized: "Describe what to do with the selection…")
+        case .refine: String(localized: "How should the result change? (shorter, more formal…)")
+        case .screenshot: String(localized: "What do you want to know about it?")
         }
     }
 }

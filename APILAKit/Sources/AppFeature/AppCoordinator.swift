@@ -139,7 +139,7 @@ public final class AppCoordinator {
             currentProviderName = model.isEmpty ? kind : "\(kind) · \(model)"
             providerProblem = nil
         case .unhealthy(let reason):
-            currentProviderName = "Mock (\(kind) unavailable)"
+            currentProviderName = String(localized: "Mock (\(kind) unavailable)")
             providerProblem = reason
         }
         panelVM.isMockProvider = health != .healthy

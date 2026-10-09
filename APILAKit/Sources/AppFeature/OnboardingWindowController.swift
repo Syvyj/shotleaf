@@ -30,7 +30,7 @@ final class OnboardingWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "Welcome to APILA"
+        window.title = String(localized: "Welcome to APILA")
         window.isReleasedWhenClosed = false
         let hosting = NSHostingView(rootView: content())
         hosting.sizingOptions = [.preferredContentSize]

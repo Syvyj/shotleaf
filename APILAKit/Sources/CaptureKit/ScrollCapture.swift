@@ -48,9 +48,9 @@ final class ScrollCapture {
             let shot = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)
             guard bar.outcome == nil, let frame = Self.rgba(shot, width: config.width, height: config.height) else { break }
             switch stitcher.add(frame) {
-            case .first, .still, .added: bar.status = "Scroll down slowly · \(stitcher.stitchedHeight) px"
-            case .lost: bar.status = "Too fast — scroll back up a little"
-            case .full: bar.status = "Maximum length reached — press Done"
+            case .first, .still, .added: bar.status = String(localized: "Scroll down slowly · \(stitcher.stitchedHeight) px")
+            case .lost: bar.status = String(localized: "Too fast — scroll back up a little")
+            case .full: bar.status = String(localized: "Maximum length reached — press Done")
             }
             try? await Task.sleep(for: .milliseconds(60))
         }
@@ -85,7 +85,7 @@ private final class ScrollControlBar {
 
     private let frameWindow: NSPanel
     private let barWindow: KeyPanel
-    private let label = NSTextField(labelWithString: "Scroll down slowly")
+    private let label = NSTextField(labelWithString: String(localized: "Scroll down slowly"))
 
     init(around area: CGRect, on screen: NSScreen) {
         frameWindow = NSPanel(contentRect: area.insetBy(dx: -3, dy: -3), styleMask: [.borderless, .nonactivatingPanel],
@@ -124,10 +124,10 @@ private final class ScrollControlBar {
 
         label.font = .systemFont(ofSize: 13, weight: .medium)
         label.lineBreakMode = .byTruncatingTail
-        let done = NSButton(title: "Done  ↩", target: self, action: #selector(doneTapped))
+        let done = NSButton(title: String(localized: "Done") + "  ↩", target: self, action: #selector(doneTapped))
         done.keyEquivalent = "\r"
         done.bezelStyle = .rounded
-        let cancel = NSButton(title: "Cancel  esc", target: self, action: #selector(cancelTapped))
+        let cancel = NSButton(title: String(localized: "Cancel") + "  esc", target: self, action: #selector(cancelTapped))
         cancel.keyEquivalent = "\u{1b}"
         cancel.bezelStyle = .rounded
         let row = NSStackView(views: [label, cancel, done])

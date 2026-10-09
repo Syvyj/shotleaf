@@ -95,18 +95,18 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .arrow: "Arrow"
-        case .rectangle: "Box"
-        case .text: "Text"
-        case .highlight: "Marker"
-        case .blur: "Blur"
-        case .step: "Steps"
-        case .erase: "Erase"
-        case .cut: "Cut"
-        case .focus: "Focus"
-        case .ellipse: "Oval"
-        case .crop: "Crop"
-        case .ruler: "Ruler"
+        case .arrow: String(localized: "Arrow")
+        case .rectangle: String(localized: "Box")
+        case .text: String(localized: "Text")
+        case .highlight: String(localized: "Marker")
+        case .blur: String(localized: "Blur")
+        case .step: String(localized: "Steps")
+        case .erase: String(localized: "Erase")
+        case .cut: String(localized: "Cut")
+        case .focus: String(localized: "Focus")
+        case .ellipse: String(localized: "Oval")
+        case .crop: String(localized: "Crop")
+        case .ruler: String(localized: "Ruler")
         }
     }
 

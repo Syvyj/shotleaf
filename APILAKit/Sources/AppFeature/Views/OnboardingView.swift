@@ -39,8 +39,8 @@ struct OnboardingView: View {
 
             step(2, "Connect a model", done: coordinator.providerProblem == nil) {
                 Text(coordinator.providerProblem == nil
-                     ? "Using \(coordinator.currentProviderName)."
-                     : "Start LM Studio (or Ollama) with a model loaded, or add an OpenAI / OpenRouter key in Settings.")
+                     ? String(localized: "Using \(coordinator.currentProviderName).")
+                     : String(localized: "Start LM Studio (or Ollama) with a model loaded, or add an OpenAI / OpenRouter key in Settings."))
                 HStack {
                     SettingsLink { Text("Open Settings…") }
                         .buttonStyle(LeafButtonStyle())
@@ -86,7 +86,7 @@ struct OnboardingView: View {
                 }
             }
             VStack(alignment: .leading, spacing: 6) {
-                Text(title).font(Leaf.font(14, .semibold))
+                Text(LocalizedStringKey(title)).font(Leaf.font(14, .semibold))
                 content().font(Leaf.font(12))
             }
         }

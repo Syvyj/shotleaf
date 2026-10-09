@@ -11,16 +11,16 @@ public struct MenuBarRootView: View {
 
     public var body: some View {
         Button("Open APILA (\(coordinator.hotkey.title))") { coordinator.openFromMenu() }
-        Button(Self.label("Screenshot…", coordinator.actionHotkeys[.capture])) {
+        Button(Self.label(String(localized: "Screenshot…"), coordinator.actionHotkeys[.capture])) {
             coordinator.takeScreenshot()
         }
-        Button(Self.label("Scrolling Screenshot…", coordinator.actionHotkeys[.scrolling])) { coordinator.takeScrollingScreenshot() }
+        Button(Self.label(String(localized: "Scrolling Screenshot…"), coordinator.actionHotkeys[.scrolling])) { coordinator.takeScrollingScreenshot() }
         Menu("Screenshot with Delay") {
             Button("In 3 Seconds") { coordinator.takeScreenshot(delay: 3) }
             Button("In 5 Seconds") { coordinator.takeScreenshot(delay: 5) }
             Button("In 10 Seconds") { coordinator.takeScreenshot(delay: 10) }
         }
-        Button(Self.label("Text from Screenshot…", coordinator.actionHotkeys[.screenshotText])) {
+        Button(Self.label(String(localized: "Text from Screenshot…"), coordinator.actionHotkeys[.screenshotText])) {
             coordinator.screenshotFromMenu(ask: false)
         }
         Button("Ask about Screenshot…") { coordinator.screenshotFromMenu(ask: true) }
