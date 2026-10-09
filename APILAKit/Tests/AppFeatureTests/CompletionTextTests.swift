@@ -17,7 +17,7 @@ struct CompletionTextTests {
         #expect(C.clean(" world", beforeCursor: "Hello ") == "world")
         #expect(C.clean("   \n", beforeCursor: "Hello") == nil)
         let long = C.clean(" one two three four five six seven eight nine ten", beforeCursor: "x")
-        #expect(long == " one two three four five six seven eight")
+        #expect(long == " one two three four five six")
         #expect(C.clean(" привіт, як справи", beforeCursor: "Ну") == " привіт, як справи")
     }
 
@@ -27,6 +27,15 @@ struct CompletionTextTests {
         #expect(C.suggestion(fromContinuation: " повною перевіркою\nдалі", beforeCursor: "Тепер текст з") == " повною перевіркою")
         #expect(C.suggestion(fromContinuation: " how are you", beforeCursor: "Hello there ") == "how are you")
         #expect(C.suggestion(fromContinuation: "\nmore", beforeCursor: "Hello") == nil)
+    }
+
+    @Test("Unsure or unfinished: whole words only, one sentence at most")
+    func cutOff() {
+        #expect(C.suggestion(fromContinuation: " повною перевір", finished: false, beforeCursor: "текст з") == " повною")
+        #expect(C.suggestion(fromContinuation: " пов", finished: false, beforeCursor: "текст з") == nil)
+        #expect(C.suggestion(fromContinuation: "ручніс", finished: false, beforeCursor: "Програма з") == "ручніс")
+        #expect(C.suggestion(fromContinuation: " is done. Then we", finished: false, beforeCursor: "It") == " is done.")
+        #expect(C.suggestion(fromContinuation: " see you", finished: true, beforeCursor: "Ok,") == " see you")
     }
 
     @Test("Going round in circles is cut off")

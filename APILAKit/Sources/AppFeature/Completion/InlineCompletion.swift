@@ -151,11 +151,11 @@ final class InlineCompletion {
             do {
                 // Shown word by word as the model writes; any key press bumps
                 // `generationID` and the rest of this answer is ignored.
-                let raw = try await EmbeddedModel.completion.complete(prompt) { partial in
-                    Task { @MainActor in self.update(partial, id: id, in: field, started: started) }
+                let result = try await EmbeddedModel.completion.complete(prompt) { partial in
+                    Task { @MainActor in self.update(partial, finished: false, id: id, in: field, started: started) }
                 }
                 guard !Task.isCancelled else { return }
-                update(raw, id: id, in: field, started: started)
+                update(result.text, finished: result.finished, id: id, in: field, started: started)
                 log.notice("suggestion done in \(ContinuousClock.now - started, privacy: .public)")
             } catch {
                 log.error("completion failed: \(error.localizedDescription, privacy: .public)")
@@ -163,9 +163,9 @@ final class InlineCompletion {
         }
     }
 
-    private func update(_ raw: String, id: Int, in field: FocusedField, started: ContinuousClock.Instant) {
+    private func update(_ raw: String, finished: Bool, id: Int, in field: FocusedField, started: ContinuousClock.Instant) {
         guard id == generationID,
-              let text = CompletionText.suggestion(fromContinuation: raw, beforeCursor: field.beforeCursor),
+              let text = CompletionText.suggestion(fromContinuation: raw, finished: finished, beforeCursor: field.beforeCursor),
               let visible = GhostPanel.fitting(text, caret: field.caret, rightEdge: field.rightEdge) // stop at the field's edge
         else { return }
         if suggestion == nil { log.notice("first words in \(ContinuousClock.now - started, privacy: .public)") }

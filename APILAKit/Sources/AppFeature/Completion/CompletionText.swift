@@ -7,7 +7,7 @@ enum CompletionText {
     /// How much text before the cursor the model sees.
     static let contextLimit = 1500
     /// Longest suggestion shown, in words.
-    static let maxWords = 8
+    static let maxWords = 6
 
     /// The prompt: the end of the text before the cursor, without trailing
     /// spaces — the model's next token then brings its own leading space.
@@ -25,10 +25,25 @@ enum CompletionText {
     }
 
     /// A base model's raw continuation → the text to show after the cursor:
-    /// one line, no loops, no doubled space.
-    static func suggestion(fromContinuation raw: String, beforeCursor text: String) -> String? {
-        let line = String(raw.prefix { $0 != "\n" && $0 != "\r" })
+    /// one line, one sentence at most, no loops, no doubled space. When the
+    /// model was cut off (`finished` false — unsure, or still writing) a
+    /// half-written last word is dropped.
+    static func suggestion(fromContinuation raw: String, finished: Bool = true, beforeCursor text: String) -> String? {
+        var line = String(raw.prefix { $0 != "\n" && $0 != "\r" })
+        if let end = line.firstIndex(where: { ".!?…".contains($0) }) {
+            line = String(line[...end]) // the sentence ends here; a full stop counts as finished
+        } else if !finished {
+            line = withoutPartialWord(line)
+        }
         return clean(withoutRepeats(line, after: text), beforeCursor: text)
+    }
+
+    /// Drops a word the model hadn't finished. A suggestion that only
+    /// finishes the user's current word (no space in it) stays as it is.
+    static func withoutPartialWord(_ line: String) -> String {
+        guard let lastSpace = line.lastIndex(where: \.isWhitespace) else { return line }
+        let hasWordBefore = line[..<lastSpace].contains { !$0.isWhitespace }
+        return hasWordBefore ? String(line[..<lastSpace]) : "" // " повн" alone: nothing sure yet
     }
 
     /// Cuts the suggestion where it starts going round in circles: a word

@@ -83,27 +83,41 @@ public actor EmbeddedModel {
         return loaded
     }
 
-    /// How `prefix` goes on, from a base model: the raw continuation, greedy,
-    /// short, up to the end of the line. `onPartial` gets the text so far
-    /// after every token, so it can be shown as it's written.
+    /// The continuation keeps going only while the model is this sure of it
+    /// (product of its tokens' probabilities): a guess is worse than nothing.
+    public static let minConfidence: Float = 0.25
+
+    /// How `prefix` goes on, from a base model: greedy, short, one line, and
+    /// cut where the model starts guessing (see `minConfidence`). `onPartial`
+    /// gets the confident text so far after every token, to show as it's
+    /// written. `finished` — the model ended the line itself (not cut).
     public func complete(
         _ prefix: String, maxTokens: Int = 14, onPartial: @Sendable @escaping (String) -> Void = { _ in }
-    ) async throws -> String {
+    ) async throws -> (text: String, finished: Bool) {
         let container = try await load()
         return try await container.perform { context in
             let tokens = context.tokenizer.encode(text: prefix, addSpecialTokens: true)
             var parameters = GenerateParameters()
             parameters.temperature = 0
             parameters.repetitionPenalty = 1.15
-            var produced: [Int] = []
-            _ = try generate(input: LMInput(tokens: MLXArray(tokens)), parameters: parameters, context: context) { ids in
-                produced = ids
-                if Task.isCancelled || ids.count >= maxTokens { return .stop }
+            let probe = ConfidenceProbe()
+            let iterator = try TokenIterator(
+                input: LMInput(tokens: MLXArray(tokens)), model: context.model, parameters: parameters,
+                components: GenerationComponents(logitProcessorFactory: { probe })
+            )
+            var kept: [Int] = []
+            var confidence: Float = 1
+            var finished = true
+            _ = generate(input: LMInput(tokens: MLXArray(tokens)), context: context, iterator: iterator) { ids in
+                if Task.isCancelled { finished = false; return .stop }
+                confidence *= probe.box.last ?? 1
+                if confidence < Self.minConfidence || ids.count > maxTokens { finished = false; return .stop }
+                kept = ids
                 let text = context.tokenizer.decode(tokenIds: ids, skipSpecialTokens: true)
                 onPartial(text)
                 return text.contains("\n") ? .stop : .more
             }
-            return context.tokenizer.decode(tokenIds: produced, skipSpecialTokens: true)
+            return (context.tokenizer.decode(tokenIds: kept, skipSpecialTokens: true), finished)
         }
     }
 
@@ -163,4 +177,20 @@ public struct EmbeddedProvider: InferenceProvider {
             continuation.onTermination = { _ in task.cancel() }
         }
     }
+}
+
+/// Watches the logits and notes how likely the chosen (greedy = top) token
+/// was. Changes nothing.
+private struct ConfidenceProbe: LogitProcessor {
+    final class Box: @unchecked Sendable { var last: Float? } // one generation, one thread
+    let box = Box()
+
+    mutating func prompt(_ prompt: MLXArray) {}
+
+    func process(logits: MLXArray) -> MLXArray {
+        box.last = softmax(logits.asType(.float32), axis: -1).max().item(Float.self)
+        return logits
+    }
+
+    mutating func didSample(token: MLXArray) {}
 }
