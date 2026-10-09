@@ -24,13 +24,17 @@ final class RegionPicker {
         let displayID: CGDirectDisplayID
         /// Points, top-left origin of that screen.
         let rect: CGRect
+        /// The user asked for a scrolling screenshot of it (S in the picker).
+        let scrolling: Bool
         fileprivate let frozen: Frozen
+
+        /// The region from the frozen screen.
+        func image() throws -> CGImage { try RegionPicker.crop(frozen, rect).get() }
     }
 
     /// The chosen region as a picture.
     func pick() async throws -> CGImage {
-        let picked = try await pickArea()
-        return try Self.crop(picked.frozen, picked.rect).get()
+        try await pickArea().image()
     }
 
     /// Just where the user pointed (scrolling capture films it live).
@@ -147,12 +151,12 @@ final class RegionPicker {
         switch outcome {
         case .cancel:
             result = .failure(AppError.cancelled)
-        case .region(let rect):
+        case .region(let rect, let scrolling):
             last = (item.displayID, rect)
-            result = .success(Picked(screen: item.screen, displayID: item.displayID, rect: rect, frozen: item))
+            result = .success(Picked(screen: item.screen, displayID: item.displayID, rect: rect, scrolling: scrolling, frozen: item))
         case .repeatLast:
             if let last, let target = frozen.first(where: { $0.displayID == last.displayID }) {
-                result = .success(Picked(screen: target.screen, displayID: target.displayID, rect: last.rect, frozen: target))
+                result = .success(Picked(screen: target.screen, displayID: target.displayID, rect: last.rect, scrolling: false, frozen: target))
             } else {
                 result = .failure(AppError.cancelled)
             }
@@ -165,7 +169,7 @@ final class RegionPicker {
         continuation?.resume(with: result)
     }
 
-    fileprivate static func crop(_ item: Frozen, _ rect: CGRect) -> Result<CGImage, Error> {
+    nonisolated fileprivate static func crop(_ item: Frozen, _ rect: CGRect) -> Result<CGImage, Error> {
         let pixels = CaptureGeometry.pixelRect(
             fromView: rect,
             scale: item.screen.backingScaleFactor,

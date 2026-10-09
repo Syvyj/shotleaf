@@ -15,7 +15,8 @@ public struct ScreenCaptureService: CaptureService {
             CGRequestScreenCaptureAccess()
             throw AppError.permissionDenied("Screen Recording")
         }
-        let image = try await RegionPicker.shared.pick()
+        let area = try await RegionPicker.shared.pickArea()
+        let image = area.scrolling ? try await ScrollCapture.shared.film(area) : try area.image()
         return try Self.payload(png: Self.png(image))
     }
 

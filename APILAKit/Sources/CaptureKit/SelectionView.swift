@@ -5,7 +5,8 @@ import AppKit
 /// (flipped) so view points map straight onto image pixels.
 final class SelectionView: NSView {
     enum Outcome {
-        case region(CGRect)  // view points
+        /// View points; `scrolling`: film it while the user scrolls.
+        case region(CGRect, scrolling: Bool)
         case cancel
         case repeatLast
     }
@@ -22,6 +23,8 @@ final class SelectionView: NSView {
     var selection: CGRect?
     var cursor: CGPoint?
     var hoveredWindow: CGRect?
+    /// S toggles: the next region becomes a scrolling screenshot.
+    var scrolling = false
 
     init(frame: CGRect, image: CGImage, scale: CGFloat, windows: [CGRect], canRepeat: Bool, finish: @escaping (Outcome) -> Void) {
         self.image = image
@@ -87,10 +90,10 @@ final class SelectionView: NSView {
     override func mouseUp(with event: NSEvent) {
         defer { dragStart = nil }
         if let selection, selection.width >= 4, selection.height >= 4 {
-            finish(.region(selection))
+            finish(.region(selection, scrolling: scrolling))
         } else {
             // A click (no real drag): the window under the cursor, or the whole screen.
-            finish(.region(hoveredWindow?.intersection(bounds) ?? bounds))
+            finish(.region(hoveredWindow?.intersection(bounds) ?? bounds, scrolling: scrolling))
         }
     }
 
@@ -101,8 +104,11 @@ final class SelectionView: NSView {
     override func keyDown(with event: NSEvent) {
         switch (event.keyCode, event.charactersIgnoringModifiers?.lowercased()) {
         case (53, _): finish(.cancel)                       // Esc
-        case (36, _), (76, _), (_, "f"): finish(.region(bounds)) // Return / Enter / F
+        case (36, _), (76, _), (_, "f"): finish(.region(bounds, scrolling: scrolling)) // Return / Enter / F
         case (_, "r") where canRepeat: finish(.repeatLast)
+        case (_, "s"):
+            scrolling.toggle()
+            needsDisplay = true
         case (_, "c"):                                      // eyedropper: copy the HEX under the cursor
             guard let cursor else { return }
             let hex = pixelHex(x: Int((cursor.x * scale).rounded(.down)), y: Int((cursor.y * scale).rounded(.down)))
@@ -128,6 +134,17 @@ final class SelectionView: NSView {
             drawLoupe(at: cursor)
         }
         drawHints()
+        if scrolling { drawScrollingBanner() }
+    }
+
+    /// Top banner while S is on, so the mode is hard to miss.
+    private func drawScrollingBanner() {
+        let text = NSAttributedString(string: "Скролінговий знімок — виберіть область, потім прокручуйте",
+                                      attributes: CaptureStyle.label(CaptureStyle.font(13, .semibold)))
+        let size = text.size()
+        let box = CGRect(x: bounds.midX - size.width / 2 - 18, y: 28, width: size.width + 36, height: 34)
+        drawCapsule(box)
+        text.draw(at: CGPoint(x: box.minX + 18, y: box.midY - size.height / 2))
     }
 
     private func drawDim(except hole: CGRect?) {
@@ -275,6 +292,7 @@ final class SelectionView: NSView {
         var keys: [(String, String)] = [("drag", "область"), ("click", "вікно"), ("↩", "весь екран")]
         if canRepeat { keys.append(("R", "повторити")) }
         keys.append(("C", "копіювати колір"))
+        keys.append(("S", scrolling ? "скролінг: увімк." : "скролінг"))
         keys.append(("esc", "скасувати"))
 
         let keyFont = CaptureStyle.font(11, .semibold)

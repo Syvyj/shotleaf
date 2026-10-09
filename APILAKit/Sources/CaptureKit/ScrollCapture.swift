@@ -11,11 +11,14 @@ final class ScrollCapture {
     private var running = false
 
     func run() async throws -> CGImage {
+        try await film(RegionPicker.shared.pickArea())
+    }
+
+    /// Films an already picked area until Done / Esc.
+    func film(_ area: RegionPicker.Picked) async throws -> CGImage {
         guard !running else { throw AppError.cancelled }
         running = true
         defer { running = false }
-
-        let area = try await RegionPicker.shared.pickArea()
         let content: SCShareableContent
         do {
             content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
