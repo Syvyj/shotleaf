@@ -96,6 +96,24 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "completionUsesClipboard") }
     }
 
+    /// Inline completion: 0 cautious … 1 bold.
+    public var completionBoldness: Double {
+        get { defaults.object(forKey: "completionBoldness") as? Double ?? 0.5 }
+        set { defaults.set(newValue, forKey: "completionBoldness") }
+    }
+
+    /// Emoji for :shortcodes and one-key spelling fixes.
+    public var completionQuickFixes: Bool {
+        get { defaults.object(forKey: "completionQuickFixes") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "completionQuickFixes") }
+    }
+
+    /// Learn the user's style from their own texts (kept on this Mac).
+    public var completionLearnsStyle: Bool {
+        get { defaults.object(forKey: "completionLearnsStyle") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "completionLearnsStyle") }
+    }
+
     /// The first-run setup guide was finished (or dismissed).
     public var onboardingCompleted: Bool {
         get { defaults.bool(forKey: "onboardingCompleted") }

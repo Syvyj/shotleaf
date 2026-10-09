@@ -296,6 +296,25 @@ public struct SettingsRootView: View {
                     Text("Use what I just copied")
                     Text("Text copied in the last 5 minutes.")
                 }
+                LabeledContent {
+                    HStack {
+                        Text("Cautious").font(.caption).foregroundStyle(.secondary)
+                        Slider(value: Binding(get: { coordinator.completionBoldness }, set: { coordinator.setCompletionBoldness($0) }), in: 0...1)
+                        Text("Bold").font(.caption).foregroundStyle(.secondary)
+                    }
+                } label: {
+                    Text("Suggestions")
+                    Text("Cautious: only sure, short ones. Bold: more often and longer.")
+                }
+                Toggle(isOn: Binding(get: { coordinator.completionQuickFixes }, set: { coordinator.setCompletionQuickFixes($0) })) {
+                    Text("Emoji and spelling fixes")
+                    Text(":rocket → 🚀, and a one-key fix for a misspelled word — both with Tab.")
+                }
+                Toggle(isOn: Binding(get: { coordinator.completionLearnsStyle }, set: { coordinator.setCompletionLearnsStyle($0) })) {
+                    Text("Learn my style")
+                    Text("Remembers a few of your own texts per app, only on this Mac, so suggestions sound like you.")
+                }
+                Button("Forget what I wrote") { coordinator.forgetWritingStyle() }
             }
         } header: {
             Text("General")

@@ -14,7 +14,10 @@ import OSLog
 /// the Accessibility API off the main thread (slow apps answer slowly);
 /// accepted text is typed as synthetic key events.
 /// Runs only on the built-in model — your text never leaves the Mac.
-/// ponytail: suggests only at the end of a line, no app-specific fixes yet.
+/// Besides continuations it offers an emoji for a `:shortcode` and a spelling
+/// fix for the word just typed; mid-line, offers show as a badge under the
+/// cursor instead of grey text (which would cover the words after it).
+/// ponytail: no app-specific fixes yet.
 @MainActor
 final class InlineCompletion {
     private let log = Logger(subsystem: "app.apila.APILA", category: "completion")
@@ -44,9 +47,28 @@ final class InlineCompletion {
     private let ghost = GhostPanel()
     /// Screen text, clipboard, app — what the model knows besides the field.
     let context = CompletionContext()
-    /// What's on screen now, and where it belongs.
-    private(set) var suggestion: String? { didSet { tapState.hasSuggestion = suggestion != nil } }
+    /// What's offered now: a continuation, or a quick fix (emoji, typo).
+    enum Offer: Equatable {
+        case completion(String)
+        case fix(QuickFix)
+    }
+    private var offer: Offer? { didSet { tapState.hasSuggestion = offer != nil } }
+    /// The text Tab would type (the live test reads it).
+    var suggestion: String? {
+        switch offer {
+        case .completion(let text): text
+        case .fix(let fix): fix.insert
+        case nil: nil
+        }
+    }
     private var field: FocusedField?
+
+    /// Settings: how bold suggestions are, quick fixes on/off, the user's style.
+    var boldness = CompletionText.Boldness(0.5)
+    var quickFixes = true
+    let history = WritingHistory()
+    /// The field last read, to remember its text when the user moves on.
+    private var lastSeen: (key: String, app: String, text: String)?
     private var activationObserver: NSObjectProtocol?
 
     var isRunning: Bool { tapThread != nil }
@@ -88,8 +110,15 @@ final class InlineCompletion {
 
     /// Tab was swallowed because a suggestion was up.
     fileprivate func tab(all: Bool) {
-        guard let suggestion else { Self.postTab(); return } // it was taken a moment ago: give Tab back
-        accept(all ? suggestion : CompletionText.nextWord(of: suggestion).word)
+        switch offer {
+        case .completion(let text): accept(all ? text : CompletionText.nextWord(of: text).word)
+        case .fix(let fix):
+            Self.deleteBackward(fix.replacing)
+            Self.type(fix.insert)
+            hide()
+            schedule() // then a continuation after the fixed word
+        case nil: Self.postTab() // it was taken a moment ago: give Tab back
+        }
     }
 
     /// Esc was swallowed.
@@ -101,8 +130,9 @@ final class InlineCompletion {
     fileprivate func typed(_ typed: String, shortcut: Bool) {
         if shortcut { dismiss(); return }
         // Typing the suggested letters keeps the rest of the suggestion.
-        if let suggestion, let rest = CompletionText.advance(suggestion, typed: typed) {
-            self.suggestion = rest
+        if case .completion(let text) = offer, field?.afterCursor.isEmpty == true,
+           let rest = CompletionText.advance(text, typed: typed) {
+            offer = .completion(rest)
             ghost.update(text: rest)
             reposition(after: .milliseconds(30))
         } else {
@@ -139,16 +169,27 @@ final class InlineCompletion {
     }
 
     private func suggest(in field: FocusedField) {
-        guard EmbeddedModel.completion.isDownloaded, CompletionText.shouldComplete(beforeCursor: field.beforeCursor) else { return }
+        rememberIfLeft(field)
+        if quickFixes, let fix = EmojiShortcodes.match(beforeCursor: field.beforeCursor) ?? TypoFixer.fix(beforeCursor: field.beforeCursor) {
+            show(.fix(fix), in: field)
+            return
+        }
+        guard EmbeddedModel.completion.isDownloaded, CompletionText.shouldComplete(beforeCursor: field.beforeCursor),
+              field.afterCursor.first?.isLetter != true // not in the middle of a word
+        else { return }
         generation?.cancel()
-        let prompt = CompletionText.prompt(beforeCursor: field.beforeCursor, context: context.current(for: field))
+        var promptContext = context.current(for: field)
+        promptContext.afterCursor = field.afterCursor
+        promptContext.examples = history.examples(for: field.bundleID, current: field.beforeCursor)
+        let prompt = CompletionText.prompt(beforeCursor: field.beforeCursor, context: promptContext)
+        let minProbability = boldness.minTokenProbability
         let id = generationID
         let started = ContinuousClock.now
         generation = Task { // the controller lives as long as the app
             do {
                 // Shown word by word as the model writes; any key press bumps
                 // `generationID` and the rest of this answer is ignored.
-                let result = try await EmbeddedModel.completion.complete(prompt, onPartial: { partial in
+                let result = try await EmbeddedModel.completion.complete(prompt, minProbability: minProbability, onPartial: { partial in
                     Task { @MainActor in self.update(partial, finished: false, id: id, in: field, started: started) }
                 })
                 guard !Task.isCancelled else { return }
@@ -162,23 +203,37 @@ final class InlineCompletion {
 
     private func update(_ raw: String, finished: Bool, id: Int, in field: FocusedField, started: ContinuousClock.Instant) {
         guard id == generationID,
-              let text = CompletionText.suggestion(fromContinuation: raw, finished: finished, beforeCursor: field.beforeCursor),
-              let visible = GhostPanel.fitting(text, caret: field.caret, rightEdge: field.rightEdge) // stop at the field's edge
+              let text = CompletionText.suggestion(fromContinuation: raw, finished: finished, beforeCursor: field.beforeCursor,
+                                                   afterCursor: field.afterCursor, maxWords: boldness.maxWords)
         else { return }
-        if suggestion == nil { log.notice("first words in \(ContinuousClock.now - started, privacy: .public)") }
-        show(visible, in: field)
+        // At the end of a line: what fits before the field's edge. Mid-line it's a badge.
+        let visible = field.afterCursor.isEmpty ? GhostPanel.fitting(text, caret: field.caret, rightEdge: field.rightEdge) : text
+        guard let visible else { return }
+        if offer == nil { log.notice("first words in \(ContinuousClock.now - started, privacy: .public)") }
+        show(.completion(visible), in: field)
     }
 
-    private func show(_ text: String, in field: FocusedField) {
-        suggestion = text
+    private func show(_ offer: Offer, in field: FocusedField) {
+        self.offer = offer
         self.field = field
-        ghost.show(text: text, caret: field.caret)
+        switch offer {
+        case .completion(let text) where field.afterCursor.isEmpty: ghost.show(text: text, caret: field.caret)
+        case .completion(let text): ghost.showBadge(text.trimmingCharacters(in: .whitespaces), caret: field.caret)
+        case .fix(let fix): ghost.showBadge(fix.label, caret: field.caret)
+        }
+    }
+
+    /// The user moved to another field: what they wrote there joins their style.
+    private func rememberIfLeft(_ field: FocusedField) {
+        let key = "\(field.pid)|\(CFHash(field.element))"
+        if let lastSeen, lastSeen.key != key { history.remember(lastSeen.text, app: lastSeen.app) }
+        lastSeen = (key, field.bundleID, field.beforeCursor + field.afterCursor)
     }
 
     private func reposition(after delay: Duration) {
         Task { [weak self] in
             try? await Task.sleep(for: delay)
-            guard let self, self.suggestion != nil, let field = await Self.readField(), self.suggestion != nil else { return }
+            guard let self, self.offer != nil, let field = await Self.readField(), self.offer != nil else { return }
             self.field = field
             self.ghost.move(caret: field.caret)
         }
@@ -187,13 +242,18 @@ final class InlineCompletion {
     // MARK: Accept / dismiss
 
     private func accept(_ text: String) {
+        // Mid-line the badge's text goes in after a space if the model meant one.
         Self.type(text)
         let rest = suggestion.map { String($0.dropFirst(text.count)) } ?? ""
         if rest.trimmingCharacters(in: .whitespaces).isEmpty {
             hide()
         } else {
-            suggestion = rest
-            ghost.update(text: rest)
+            offer = .completion(rest)
+            if field?.afterCursor.isEmpty == false {
+                ghost.showBadge(rest.trimmingCharacters(in: .whitespaces), caret: field?.caret ?? .zero)
+            } else {
+                ghost.update(text: rest)
+            }
             reposition(after: .milliseconds(60))
         }
     }
@@ -207,7 +267,7 @@ final class InlineCompletion {
     }
 
     private func hide() {
-        suggestion = nil
+        offer = nil
         field = nil
         ghost.orderOut(nil)
     }
@@ -226,6 +286,17 @@ final class InlineCompletion {
                 event.post(tap: .cgSessionEventTap)
             }
             start += 16
+        }
+    }
+
+    /// Deletes `count` characters before the cursor (Backspace × count).
+    private static func deleteBackward(_ count: Int) {
+        for _ in 0..<count {
+            for down in [true, false] {
+                guard let event = CGEvent(keyboardEventSource: nil, virtualKey: 51, keyDown: down) else { continue }
+                event.setIntegerValueField(.eventSourceUserData, value: marker)
+                event.post(tap: .cgSessionEventTap)
+            }
         }
     }
 
@@ -360,11 +431,14 @@ struct FocusedField: @unchecked Sendable {
     /// The field's right edge (screen x): suggestions stop there.
     let rightEdge: CGFloat
     let pid: pid_t
+    let bundleID: String
     let appName: String?
     let windowTitle: String
+    /// The rest of the line after the cursor ("" at the end of a line).
+    let afterCursor: String
 
     /// nil when there's no editable, non-secure field with an empty selection
-    /// at the end of a line (or the app is excluded / APILA itself).
+    /// (or the app is excluded / APILA itself).
     /// Safe off the main thread; `screenTop` is the main screen's top (AppKit).
     static func current(excluding excluded: Set<String>, screenTop top: CGFloat) -> FocusedField? {
         let system = AXUIElementCreateSystemWide()
@@ -385,11 +459,9 @@ struct FocusedField: @unchecked Sendable {
         guard AXValueGetValue(rangeValue, .cfRange, &range), range.length == 0, range.location > 0 else { return nil }
         let text = value as NSString
         guard range.location <= text.length else { return nil }
-        // Only at the end of a line: mid-sentence suggestions would overlap the text after.
-        if range.location < text.length {
-            let next = text.character(at: range.location)
-            guard next == 10 || next == 13 else { return nil }
-        }
+        // The rest of this line (mid-text suggestions must fit in before it).
+        let rest = text.substring(from: range.location)
+        let afterCursor = String(rest.prefix { $0 != "\n" && $0 != "\r" }.prefix(200))
         var charRange = CFRange(location: range.location - 1, length: 1)
         guard let query = AXValueCreate(.cfRange, &charRange) else { return nil }
         var boundsRef: CFTypeRef?
@@ -410,7 +482,8 @@ struct FocusedField: @unchecked Sendable {
         var title = ""
         if let window: AXUIElement = attribute(element, kAXWindowAttribute), let t: String = attribute(window, kAXTitleAttribute) { title = t }
         return FocusedField(element: element, beforeCursor: text.substring(to: range.location), caret: caret, rightEdge: rightEdge,
-                            pid: pid, appName: app.localizedName, windowTitle: title)
+                            pid: pid, bundleID: app.bundleIdentifier ?? "", appName: app.localizedName, windowTitle: title,
+                            afterCursor: afterCursor)
     }
 
     private static func attribute<T>(_ element: AXUIElement, _ name: String) -> T? {
@@ -435,6 +508,9 @@ final class GhostPanel: NSPanel {
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
         label.textColor = NSColor.tertiaryLabelColor
         label.lineBreakMode = .byClipping
+        label.wantsLayer = true
+        label.layer?.cornerRadius = 5
+        label.layer?.masksToBounds = true
         contentView = label
     }
 
@@ -445,6 +521,8 @@ final class GhostPanel: NSPanel {
 
     func show(text: String, caret: CGRect) {
         self.caret = caret
+        label.textColor = NSColor.tertiaryLabelColor
+        label.drawsBackground = false
         // Roughly the field's font: a line is ~1.2× the font size.
         label.font = Self.font(for: caret)
         update(text: text)
@@ -469,9 +547,25 @@ final class GhostPanel: NSPanel {
     }
 
     func update(text: String) {
+        badge = false
         label.stringValue = text
         layoutAtCaret()
     }
+
+    /// Mid-line or a quick fix: a small "⇥ text" badge just under the caret.
+    func showBadge(_ text: String, caret: CGRect) {
+        self.caret = caret
+        badge = true
+        label.font = .systemFont(ofSize: 12, weight: .medium)
+        label.stringValue = "⇥  " + text
+        label.textColor = .labelColor
+        label.drawsBackground = true
+        label.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.95)
+        layoutAtCaret()
+        orderFrontRegardless()
+    }
+
+    private var badge = false
 
     func move(caret: CGRect) {
         self.caret = caret
@@ -480,6 +574,10 @@ final class GhostPanel: NSPanel {
 
     private func layoutAtCaret() {
         let size = label.intrinsicContentSize
+        if badge { // under the caret, slightly left so the ⇥ sits below it
+            setFrame(CGRect(x: caret.maxX - 6, y: caret.minY - size.height - 4, width: size.width + 8, height: size.height + 2), display: true)
+            return
+        }
         let y = caret.minY + (caret.height - size.height) / 2
         setFrame(CGRect(x: caret.maxX, y: y, width: size.width + 4, height: size.height), display: true)
     }

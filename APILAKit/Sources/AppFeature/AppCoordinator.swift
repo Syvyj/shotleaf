@@ -74,6 +74,9 @@ public final class AppCoordinator {
         refreshPermissions()
         inlineCompletion.context.useScreen = container.settings.completionUsesScreen
         inlineCompletion.context.useClipboard = container.settings.completionUsesClipboard
+        inlineCompletion.boldness = .init(container.settings.completionBoldness)
+        inlineCompletion.quickFixes = container.settings.completionQuickFixes
+        inlineCompletion.history.enabled = container.settings.completionLearnsStyle
         if container.settings.completionEnabled { inlineCompletion.start() }
         Self.log.notice("startup permissions: \(String(describing: self.permissions), privacy: .public) bundle: \(Bundle.main.bundlePath, privacy: .public)")
 
@@ -375,6 +378,27 @@ public final class AppCoordinator {
         if let screen { container.settings.completionUsesScreen = screen; inlineCompletion.context.useScreen = screen }
         if let clipboard { container.settings.completionUsesClipboard = clipboard; inlineCompletion.context.useClipboard = clipboard }
     }
+
+    public var completionBoldness: Double { container.settings.completionBoldness }
+    public var completionQuickFixes: Bool { container.settings.completionQuickFixes }
+    public var completionLearnsStyle: Bool { container.settings.completionLearnsStyle }
+
+    public func setCompletionBoldness(_ value: Double) {
+        container.settings.completionBoldness = value
+        inlineCompletion.boldness = .init(value)
+    }
+
+    public func setCompletionQuickFixes(_ on: Bool) {
+        container.settings.completionQuickFixes = on
+        inlineCompletion.quickFixes = on
+    }
+
+    public func setCompletionLearnsStyle(_ on: Bool) {
+        container.settings.completionLearnsStyle = on
+        inlineCompletion.history.enabled = on
+    }
+
+    public func forgetWritingStyle() { inlineCompletion.history.forget() }
 
     public func setCompletion(_ on: Bool) {
         container.settings.completionEnabled = on

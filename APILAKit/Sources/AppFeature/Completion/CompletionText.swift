@@ -6,8 +6,19 @@ import Foundation
 enum CompletionText {
     /// How much text before the cursor the model sees.
     static let contextLimit = 600
-    /// Longest suggestion shown, in words.
+    /// Longest suggestion shown, in words (at the middle of the boldness scale).
     static let maxWords = 6
+
+    /// The "cautious ↔ bold" setting (0…1): how sure the model must be of
+    /// each token, and how many words a suggestion may run.
+    struct Boldness: Equatable {
+        let value: Double
+        init(_ value: Double) { self.value = min(max(value, 0), 1) }
+        /// 0.12 when cautious … 0.01 when bold.
+        var minTokenProbability: Float { Float(0.12 - 0.11 * value) }
+        /// 3 words when cautious … 9 when bold.
+        var maxWords: Int { 3 + Int((6 * value).rounded()) }
+    }
 
     /// The prompt: the end of the text before the cursor, without trailing
     /// spaces — the model's next token then brings its own leading space.
@@ -25,6 +36,10 @@ enum CompletionText {
         var screen: String?
         /// Something the user copied a moment ago.
         var clipboard: String?
+        /// The rest of the line after the cursor (suggesting mid-text).
+        var afterCursor: String?
+        /// A couple of the user's own earlier texts in this app (their style).
+        var examples: [String] = []
     }
 
     static let screenLimit = 400
@@ -35,6 +50,11 @@ enum CompletionText {
     static func prompt(beforeCursor text: String, context: Context) -> String {
         let body = prompt(beforeCursor: text)
         var notes: [String] = []
+        let examples = context.examples.map { String($0.suffix(300)).trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        if !examples.isEmpty {
+            notes.append("Earlier by the same writer:\n" + examples.map { "- " + $0.replacingOccurrences(of: "\n", with: " ") }.joined(separator: "\n"))
+        }
         let where_ = [context.app, context.window].compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
         if !where_.isEmpty { notes.append("App: " + where_.joined(separator: " — ")) }
@@ -43,6 +63,9 @@ enum CompletionText {
         }
         if let clip = context.clipboard?.trimmingCharacters(in: .whitespacesAndNewlines), !clip.isEmpty {
             notes.append("Just copied:\n" + String(clip.prefix(clipboardLimit)))
+        }
+        if let after = context.afterCursor?.trimmingCharacters(in: .whitespaces), !after.isEmpty {
+            notes.append("Text right after the cursor:\n" + String(after.prefix(200)))
         }
         return notes.isEmpty ? body : notes.joined(separator: "\n\n") + "\n\n---\n\n" + body
     }
@@ -67,14 +90,29 @@ enum CompletionText {
     /// one line, one sentence at most, no loops, no doubled space. When the
     /// model was cut off (`finished` false — unsure, or still writing) a
     /// half-written last word is dropped.
-    static func suggestion(fromContinuation raw: String, finished: Bool = true, beforeCursor text: String) -> String? {
+    static func suggestion(
+        fromContinuation raw: String, finished: Bool = true, beforeCursor text: String,
+        afterCursor: String = "", maxWords: Int = CompletionText.maxWords
+    ) -> String? {
         var line = String(raw.prefix { $0 != "\n" && $0 != "\r" })
         if let end = line.firstIndex(where: { ".!?…".contains($0) }) {
             line = String(line[...end]) // the sentence ends here; a full stop counts as finished
         } else if !finished {
             line = withoutPartialWord(line)
         }
-        return clean(withoutRepeats(line, after: text), beforeCursor: text)
+        guard var shown = clean(withoutRepeats(line, after: text), beforeCursor: text, maxWords: maxWords) else { return nil }
+        // Mid-text: stop before the words that already follow the cursor.
+        let next = afterCursor.trimmingCharacters(in: .whitespaces)
+        if !next.isEmpty {
+            guard shown.contains(where: \.isLetter) else { return nil } // a lone "!" mid-text isn't worth a badge
+            let firstNext = next.split(whereSeparator: \.isWhitespace).first.map { $0.lowercased() } ?? ""
+            let words = shown.split(whereSeparator: \.isWhitespace)
+            if let i = words.firstIndex(where: { $0.lowercased() == firstNext }) {
+                guard i > 0 else { return nil }
+                shown = (shown.first == " " ? " " : "") + words[..<i].joined(separator: " ")
+            }
+        }
+        return shown
     }
 
     /// Drops a word the model hadn't finished. A suggestion that only
@@ -115,7 +153,7 @@ enum CompletionText {
 
     /// Tidy text to show: one line, at most `maxWords` words, no doubled
     /// space when the user already typed one.
-    static func clean(_ raw: String, beforeCursor text: String) -> String? {
+    static func clean(_ raw: String, beforeCursor text: String, maxWords: Int = CompletionText.maxWords) -> String? {
         var line = String(raw.prefix { $0 != "\n" && $0 != "\r" })
         if text.last?.isWhitespace == true {
             while line.first == " " { line.removeFirst() }

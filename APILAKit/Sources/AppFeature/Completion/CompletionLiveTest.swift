@@ -19,12 +19,35 @@ public enum CompletionLiveTest {
         configuration.activates = true
         _ = try? await NSWorkspace.shared.open([file], withApplicationAt: textEdit, configuration: configuration)
         try? await Task.sleep(for: .seconds(1.5))
+        // Safety: every key below goes to whatever has focus. Type only while
+        // the scratch document itself is focused — never into another app.
+        let documentName = file.lastPathComponent
+        NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.TextEdit").first?.activate()
+        try? await Task.sleep(for: .milliseconds(500))
+        guard isScratchFocused(documentName) else {
+            let message = "aborted: the scratch TextEdit document isn't focused — nothing was typed"
+            try? message.write(to: out.appendingPathComponent("live-report.txt"), atomically: true, encoding: .utf8)
+            print(message)
+            return
+        }
 
+        // "|" marks where the cursor goes back to (mid-text): typed whole, then ← × the rest.
+        let parts = text.split(separator: "|", maxSplits: 1, omittingEmptySubsequences: false)
+        let full = parts.joined()
         var report = ["text: \(text)"]
+        releaseCommand() // a ⌘ left "down" would turn every letter into a shortcut
         let started = ContinuousClock.now
-        for character in text {
+        for character in full {
+            guard isScratchFocused(documentName) else { return abort(out) }
             type(String(character))
             try? await Task.sleep(for: .milliseconds(70)) // a quick typist
+        }
+        if parts.count == 2 {
+            for _ in parts[1] {
+                guard isScratchFocused(documentName) else { return abort(out) }
+                key(123) // ←
+                try? await Task.sleep(for: .milliseconds(40))
+            }
         }
         let typedAt = ContinuousClock.now
         // Watch the suggestion appear after the last key.
@@ -37,33 +60,72 @@ public enum CompletionLiveTest {
         report.append("suggestion after last key: \(firstSeen.map { "\($0)" } ?? "none") — \((completion.suggestion ?? "nil").debugDescription)")
         await snapshot(to: out.appendingPathComponent("live-before-tab.png"))
 
+        guard isScratchFocused(documentName) else { return abort(out) }
         key(48) // Tab
         try? await Task.sleep(for: .milliseconds(400))
         report.append("after Tab: \((completion.suggestion ?? "nil").debugDescription)")
+        let top = NSScreen.screens.first?.frame.maxY ?? 0
+        if let field = FocusedField.current(excluding: [], screenTop: top) {
+            report.append("field now: \((field.beforeCursor + "‸" + field.afterCursor).debugDescription)")
+        }
         await snapshot(to: out.appendingPathComponent("live-after-tab.png"))
 
-        // Close the scratch document (⌘W; TextEdit saves the temp file itself).
-        key(13, flags: .maskCommand)
+        // Close the scratch document (⌘W; TextEdit saves the temp file itself) —
+        // only if it's still the one in front.
+        if isScratchFocused(documentName) { commandW() }
         try? await Task.sleep(for: .milliseconds(300))
         try? report.joined(separator: "\n").write(to: out.appendingPathComponent("live-report.txt"), atomically: true, encoding: .utf8)
         print(report.joined(separator: "\n"))
+    }
+
+    /// TextEdit is the frontmost app and its focused window is our scratch file.
+    private static func isScratchFocused(_ documentName: String) -> Bool {
+        guard let front = NSWorkspace.shared.frontmostApplication, front.bundleIdentifier == "com.apple.TextEdit" else { return false }
+        let app = AXUIElementCreateApplication(front.processIdentifier)
+        var window: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(app, kAXFocusedWindowAttribute as CFString, &window) == .success, let window else { return false }
+        var title: CFTypeRef?
+        AXUIElementCopyAttributeValue(window as! AXUIElement, kAXTitleAttribute as CFString, &title)
+        return (title as? String)?.hasPrefix(documentName.replacingOccurrences(of: ".txt", with: "")) == true
+    }
+
+    private static func abort(_ out: URL) {
+        let message = "aborted mid-way: focus left the scratch document — stopped typing"
+        try? message.write(to: out.appendingPathComponent("live-report.txt"), atomically: true, encoding: .utf8)
+        print(message)
     }
 
     private static func type(_ s: String) {
         let units = Array(s.utf16)
         for down in [true, false] {
             let event = CGEvent(keyboardEventSource: nil, virtualKey: 0, keyDown: down)
+            event?.flags = [] // plain letters, whatever the modifier state
             event?.keyboardSetUnicodeString(stringLength: units.count, unicodeString: units)
             event?.post(tap: .cghidEventTap)
         }
     }
 
-    private static func key(_ code: CGKeyCode, flags: CGEventFlags = []) {
+    private static func key(_ code: CGKeyCode) {
         for down in [true, false] {
             let event = CGEvent(keyboardEventSource: nil, virtualKey: code, keyDown: down)
-            event?.flags = flags
+            event?.flags = []
             event?.post(tap: .cghidEventTap)
         }
+    }
+
+    /// ⌘W as a person presses it: ⌘ down, W, ⌘ up — so ⌘ never stays "held".
+    private static func commandW() {
+        CGEvent(keyboardEventSource: nil, virtualKey: 55, keyDown: true).map { $0.flags = .maskCommand; $0.post(tap: .cghidEventTap) }
+        for down in [true, false] {
+            let event = CGEvent(keyboardEventSource: nil, virtualKey: 13, keyDown: down)
+            event?.flags = .maskCommand
+            event?.post(tap: .cghidEventTap)
+        }
+        releaseCommand()
+    }
+
+    private static func releaseCommand() {
+        CGEvent(keyboardEventSource: nil, virtualKey: 55, keyDown: false).map { $0.flags = []; $0.post(tap: .cghidEventTap) }
     }
 
     private static func snapshot(to url: URL) async {

@@ -1798,6 +1798,96 @@
           }
         }
       }
+    },
+    "Cautious": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обережно"
+          }
+        }
+      }
+    },
+    "Bold": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сміливо"
+          }
+        }
+      }
+    },
+    "Suggestions": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підказки"
+          }
+        }
+      }
+    },
+    "Cautious: only sure, short ones. Bold: more often and longer.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обережно — лише впевнені й короткі. Сміливо — частіше й довші."
+          }
+        }
+      }
+    },
+    "Emoji and spelling fixes": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Емодзі та виправлення одруківок"
+          }
+        }
+      }
+    },
+    ":rocket → 🚀, and a one-key fix for a misspelled word — both with Tab.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": ":rocket → 🚀 і виправлення слова з помилкою — обидва по Tab."
+          }
+        }
+      }
+    },
+    "Learn my style": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вчитися мого стилю"
+          }
+        }
+      }
+    },
+    "Remembers a few of your own texts per app, only on this Mac, so suggestions sound like you.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запам'ятовує кілька ваших текстів для кожної програми, лише на цьому Mac, щоб підказки звучали як ви."
+          }
+        }
+      }
+    },
+    "Forget what I wrote": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Забути мої тексти"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

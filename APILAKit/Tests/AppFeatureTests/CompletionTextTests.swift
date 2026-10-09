@@ -1,4 +1,5 @@
 import Testing
+import Foundation
 @testable import AppFeature
 
 @Suite("Inline completion text")
@@ -74,5 +75,65 @@ struct CompletionTextTests {
         #expect(!C.shouldComplete(beforeCursor: "Hi"))
         #expect(!C.shouldComplete(beforeCursor: "Hello\n"))
         #expect(C.shouldComplete(beforeCursor: "Hello wor"))
+    }
+}
+
+@Suite("Quick fixes & boldness")
+@MainActor
+struct QuickFixTests {
+    @Test("Emoji shortcodes from Unicode names: prefix first, then a word inside")
+    func emoji() {
+        #expect(EmojiShortcodes.match(beforeCursor: "We launched :rock")?.insert == "🪨") // an exact name wins
+        #expect(EmojiShortcodes.match(beforeCursor: "We launched :rocke") == .emoji("🚀", name: "rocket", replacing: 6))
+        #expect(EmojiShortcodes.match(beforeCursor: "so :fire")?.insert == "🔥")
+        #expect(EmojiShortcodes.match(beforeCursor: "nice :up")?.insert != nil) // thumbs_up… via a word inside
+        #expect(EmojiShortcodes.match(beforeCursor: "time 10:30") == nil)        // not after a space
+        #expect(EmojiShortcodes.match(beforeCursor: "hi :r") == nil)             // too short
+    }
+
+    @Test("A misspelled word just finished gets a fix that replaces it and the space")
+    func typo() {
+        let fix = TypoFixer.fix(beforeCursor: "I think we shoud ")
+        #expect(fix == .typo("should ", replacing: 6))
+        #expect(TypoFixer.fix(beforeCursor: "I think we should ") == nil)
+        #expect(TypoFixer.fix(beforeCursor: "I think we shoud") == nil) // still typing it
+    }
+
+    @Test("Boldness: cautious asks more of the model and stops sooner")
+    func boldness() {
+        let cautious = CompletionText.Boldness(0), bold = CompletionText.Boldness(1)
+        #expect(cautious.minTokenProbability > bold.minTokenProbability)
+        #expect(cautious.maxWords == 3 && bold.maxWords == 9 && CompletionText.Boldness(0.5).maxWords == 6)
+    }
+
+    @Test("Mid-text: the suggestion stops before the words already after the cursor; style examples go first")
+    func midText() {
+        #expect(CompletionText.suggestion(fromContinuation: " on Friday morning at ten", beforeCursor: "See you", afterCursor: "at ten.")
+                == " on Friday morning")
+        #expect(CompletionText.suggestion(fromContinuation: " at ten", beforeCursor: "See you", afterCursor: "at ten.") == nil)
+        #expect(CompletionText.suggestion(fromContinuation: "!", beforeCursor: "See you on Friday", afterCursor: " at ten.") == nil)
+        let p = CompletionText.prompt(beforeCursor: "Hey", context: .init(examples: ["Cheers, talk soon!"]))
+        #expect(p.hasPrefix("Earlier by the same writer:\n- Cheers, talk soon!"))
+    }
+}
+
+@Suite("Writing history")
+@MainActor
+struct WritingHistoryTests {
+    @Test("Remembers finished texts per app, offers the newest two, survives a restart, forgets")
+    func history() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("apila-history-\(UUID()).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let h = WritingHistory(url: url)
+        h.remember("short", app: "tg")                                         // too short
+        h.remember("Привіт! Так, давай о третій біля офісу, я буду трохи раніше.", app: "tg")
+        h.remember("Дякую, отримав. Подивлюсь сьогодні ввечері й відпишу тобі.", app: "tg")
+        h.remember("Hi Mark, thanks — I'll send the report by Friday.", app: "mail")
+        #expect(h.examples(for: "tg", current: "Ок").first?.hasPrefix("Дякую") == true)
+        #expect(h.examples(for: "tg", current: "Ок").count == 2)
+        #expect(h.examples(for: "mail", current: "Hi Mark, thanks — I'll send").isEmpty) // the one being written
+        #expect(WritingHistory(url: url).examples(for: "tg", current: "").count == 2)    // saved to disk
+        h.forget()
+        #expect(h.isEmpty && WritingHistory(url: url).isEmpty)
     }
 }
