@@ -30,18 +30,15 @@ final class CompletionContext {
     /// The context for a request now. Kicks off a screen refresh when the
     /// cached text is old or belongs to another window — that one is used
     /// from the next request on.
-    func current(for element: AXUIElement) -> CompletionText.Context {
-        var pid: pid_t = 0
-        AXUIElementGetPid(element, &pid)
-        let app = NSRunningApplication(processIdentifier: pid)
-        let window = Self.windowTitle(of: element) ?? ""
-        var context = CompletionText.Context(app: app?.localizedName, window: window)
+    func current(for field: FocusedField) -> CompletionText.Context {
+        let pid = field.pid, window = field.windowTitle
+        var context = CompletionText.Context(app: field.appName, window: window)
 
         if useScreen {
             if let screen, screen.pid == pid, screen.window == window { context.screen = screen.text }
             if screen == nil || screen?.pid != pid || screen?.window != window
                 || Date().timeIntervalSince(screen?.at ?? .distantPast) > Self.screenMaxAge {
-                refreshScreen(pid: pid, window: window, element: element)
+                refreshScreen(pid: pid, window: window)
             }
         }
         if useClipboard {
@@ -57,17 +54,8 @@ final class CompletionContext {
         return context
     }
 
-    private static func windowTitle(of element: AXUIElement) -> String? {
-        var window: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, kAXWindowAttribute as CFString, &window) == .success, let window
-        else { return nil }
-        var title: CFTypeRef?
-        AXUIElementCopyAttributeValue(window as! AXUIElement, kAXTitleAttribute as CFString, &title)
-        return title as? String
-    }
-
     /// Screen-records the app's front window and reads its text.
-    private func refreshScreen(pid: pid_t, window: String, element: AXUIElement) {
+    private func refreshScreen(pid: pid_t, window: String) {
         guard !reading, CGPreflightScreenCaptureAccess() else { return }
         reading = true
         Task {

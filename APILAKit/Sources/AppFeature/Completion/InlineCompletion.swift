@@ -8,20 +8,23 @@ import OSLog
 /// text right after the cursor. Tab accepts the next word (⌥Tab — all of it),
 /// typing the same letters keeps it, anything else or Esc drops it.
 ///
-/// How: a keyboard event tap (needs Accessibility) watches keys and catches
-/// Tab while a suggestion is up; the focused field's text and caret come from
-/// the Accessibility API; accepted text is typed as synthetic key events.
+/// How: a keyboard event tap (needs Accessibility) on its own thread watches
+/// keys and catches Tab while a suggestion is up — it never waits for anything,
+/// so typing can't lag. The focused field's text and caret are read through
+/// the Accessibility API off the main thread (slow apps answer slowly);
+/// accepted text is typed as synthetic key events.
 /// Runs only on the built-in model — your text never leaves the Mac.
 /// ponytail: suggests only at the end of a line, no app-specific fixes yet.
 @MainActor
 final class InlineCompletion {
     private let log = Logger(subsystem: "app.apila.APILA", category: "completion")
     /// Marks APILA's own synthetic key events so the tap lets them through.
-    private static let marker: Int64 = 0x4150_494C // "APIL"
-    private static let debounce: Duration = .milliseconds(150)
+    nonisolated fileprivate static let marker: Int64 = 0x4150_494C // "APIL"
+    /// The model answers in ~50 ms now; waiting longer only feels slow.
+    private static let debounce: Duration = .milliseconds(60)
 
     /// Apps where completion only gets in the way.
-    private static let excluded: Set<String> = [
+    nonisolated private static let excluded: Set<String> = [
         "com.apple.Terminal", "com.googlecode.iterm2", "dev.warp.Warp-Stable", "net.kovidgoyal.kitty",
         "com.mitchellh.ghostty", "io.alacritty", "com.apple.keychainaccess", "com.1password.1password",
     ]
@@ -31,7 +34,9 @@ final class InlineCompletion {
         "com.vivaldi.Vivaldi", "com.operasoftware.Opera",
     ]
 
-    private var tap: CFMachPort?
+    private var tapThread: EventTapThread?
+    /// Shared with the tap thread: is a suggestion up (so Tab is ours)?
+    fileprivate let tapState = TapState()
     private var debounceTask: Task<Void, Never>?
     private var generation: Task<Void, Never>?
     /// Bumped by every key press: partial results of an older request are dropped.
@@ -40,30 +45,23 @@ final class InlineCompletion {
     /// Screen text, clipboard, app — what the model knows besides the field.
     let context = CompletionContext()
     /// What's on screen now, and where it belongs.
-    private var suggestion: String?
+    private var suggestion: String? { didSet { tapState.hasSuggestion = suggestion != nil } }
     private var field: FocusedField?
     private var activationObserver: NSObjectProtocol?
 
-    var isRunning: Bool { tap != nil }
+    var isRunning: Bool { tapThread != nil }
 
     /// Starts watching. False when macOS refuses the event tap (no Accessibility).
     @discardableResult
     func start() -> Bool {
-        guard tap == nil else { return true }
-        let mask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.leftMouseDown.rawValue)
-            | (1 << CGEventType.rightMouseDown.rawValue)
-        guard let port = CGEvent.tapCreate(
-            tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
-            eventsOfInterest: CGEventMask(mask), callback: inlineCompletionTapCallback,
-            userInfo: Unmanaged.passUnretained(self).toOpaque()
-        ) else {
+        guard tapThread == nil else { return true }
+        tapState.controller = self
+        let thread = EventTapThread(state: tapState)
+        guard thread.startAndWait() else {
             log.error("event tap refused — Accessibility off?")
             return false
         }
-        let source = CFMachPortCreateRunLoopSource(nil, port, 0)
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
-        CGEvent.tapEnable(tap: port, enable: true)
-        tap = port
+        tapThread = thread
         activationObserver = NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
         ) { [weak self] note in
@@ -80,38 +78,29 @@ final class InlineCompletion {
 
     func stop() {
         dismiss()
-        if let tap { CGEvent.tapEnable(tap: tap, enable: false) }
-        tap = nil
+        tapThread?.stop()
+        tapThread = nil
         if let activationObserver { NSWorkspace.shared.notificationCenter.removeObserver(activationObserver) }
         activationObserver = nil
     }
 
-    // MARK: Keys
+    // MARK: Keys (from the tap thread, in order, on main)
 
-    /// Returns true to swallow the event.
-    fileprivate func handle(_ type: CGEventType, _ event: CGEvent) -> Bool {
-        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-            if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
-            return false
-        }
-        guard type == .keyDown else { dismiss(); return false } // a click moves the caret
-        if event.getIntegerValueField(.eventSourceUserData) == Self.marker { return false }
+    /// Tab was swallowed because a suggestion was up.
+    fileprivate func tab(all: Bool) {
+        guard let suggestion else { Self.postTab(); return } // it was taken a moment ago: give Tab back
+        accept(all ? suggestion : CompletionText.nextWord(of: suggestion).word)
+    }
 
-        let key = event.getIntegerValueField(.keyboardEventKeycode)
-        let flags = event.flags
-        if let suggestion {
-            if key == 48, flags.isDisjoint(with: [.maskCommand, .maskControl, .maskShift]) { // Tab
-                accept(flags.contains(.maskAlternate) ? suggestion : CompletionText.nextWord(of: suggestion).word)
-                return true
-            }
-            if key == 53 { dismiss(); return true } // Esc
-        }
-        if !flags.isDisjoint(with: [.maskCommand, .maskControl]) {
-            dismiss()
-            return false
-        }
+    /// Esc was swallowed.
+    fileprivate func escape() { dismiss() }
+
+    fileprivate func clicked() { dismiss() } // a click moves the caret
+
+    /// Any other key went through to the app.
+    fileprivate func typed(_ typed: String, shortcut: Bool) {
+        if shortcut { dismiss(); return }
         // Typing the suggested letters keeps the rest of the suggestion.
-        let typed = Self.characters(of: event)
         if let suggestion, let rest = CompletionText.advance(suggestion, typed: typed) {
             self.suggestion = rest
             ghost.update(text: rest)
@@ -120,10 +109,9 @@ final class InlineCompletion {
             hide()
         }
         schedule()
-        return false
     }
 
-    private static func characters(of event: CGEvent) -> String {
+    nonisolated fileprivate static func characters(of event: CGEvent) -> String {
         var length = 0
         var chars = [UniChar](repeating: 0, count: 8)
         event.keyboardGetUnicodeString(maxStringLength: 8, actualStringLength: &length, unicodeString: &chars)
@@ -137,16 +125,23 @@ final class InlineCompletion {
         debounceTask?.cancel()
         debounceTask = Task { [weak self] in
             try? await Task.sleep(for: Self.debounce)
+            guard !Task.isCancelled, let field = await Self.readField() else { return }
             guard !Task.isCancelled else { return }
-            self?.suggest()
+            self?.suggest(in: field)
         }
     }
 
-    private func suggest() {
-        guard EmbeddedModel.completion.isDownloaded, let field = FocusedField.current(excluding: Self.excluded) else { return }
-        guard CompletionText.shouldComplete(beforeCursor: field.beforeCursor) else { return }
+    /// The focused field, read off the main thread: some apps take a while
+    /// to answer Accessibility queries.
+    private static func readField() async -> FocusedField? {
+        let top = NSScreen.screens.first?.frame.maxY ?? 0
+        return await Task.detached { FocusedField.current(excluding: excluded, screenTop: top) }.value
+    }
+
+    private func suggest(in field: FocusedField) {
+        guard EmbeddedModel.completion.isDownloaded, CompletionText.shouldComplete(beforeCursor: field.beforeCursor) else { return }
         generation?.cancel()
-        let prompt = CompletionText.prompt(beforeCursor: field.beforeCursor, context: context.current(for: field.element))
+        let prompt = CompletionText.prompt(beforeCursor: field.beforeCursor, context: context.current(for: field))
         let id = generationID
         let started = ContinuousClock.now
         generation = Task { // the controller lives as long as the app
@@ -183,7 +178,7 @@ final class InlineCompletion {
     private func reposition(after delay: Duration) {
         Task { [weak self] in
             try? await Task.sleep(for: delay)
-            guard let self, self.suggestion != nil, let field = FocusedField.current(excluding: Self.excluded) else { return }
+            guard let self, self.suggestion != nil, let field = await Self.readField(), self.suggestion != nil else { return }
             self.field = field
             self.ghost.move(caret: field.caret)
         }
@@ -234,6 +229,15 @@ final class InlineCompletion {
         }
     }
 
+    /// Gives a swallowed Tab back to the app.
+    private static func postTab() {
+        for down in [true, false] {
+            guard let event = CGEvent(keyboardEventSource: nil, virtualKey: 48, keyDown: down) else { continue }
+            event.setIntegerValueField(.eventSourceUserData, value: marker)
+            event.post(tap: .cgSessionEventTap)
+        }
+    }
+
     /// Chromium and Electron apps build their accessibility tree only when
     /// asked; without it there's no text or caret to read.
     private static func exposeAccessibility(of app: NSRunningApplication) {
@@ -245,15 +249,105 @@ final class InlineCompletion {
     }
 }
 
-/// C callback → the controller (the tap runs on the main run loop).
+/// What the tap thread needs to decide on its own, at once.
+private final class TapState: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _hasSuggestion = false
+    var hasSuggestion: Bool {
+        get { lock.withLock { _hasSuggestion } }
+        set { lock.withLock { _hasSuggestion = newValue } }
+    }
+    weak var controller: InlineCompletion?
+    var port: CFMachPort?
+
+    /// On the tap thread: swallow? Everything else is handed to main.
+    func handle(_ type: CGEventType, _ event: CGEvent) -> Bool {
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            if let port { CGEvent.tapEnable(tap: port, enable: true) }
+            return false
+        }
+        let controller = self.controller
+        guard type == .keyDown else {
+            DispatchQueue.main.async { MainActor.assumeIsolated { controller?.clicked() } }
+            return false
+        }
+        if event.getIntegerValueField(.eventSourceUserData) == InlineCompletion.marker { return false }
+        let key = event.getIntegerValueField(.keyboardEventKeycode)
+        let flags = event.flags
+        if hasSuggestion {
+            if key == 48, flags.isDisjoint(with: [.maskCommand, .maskControl, .maskShift]) { // Tab
+                let all = flags.contains(.maskAlternate)
+                DispatchQueue.main.async { MainActor.assumeIsolated { controller?.tab(all: all) } }
+                return true
+            }
+            if key == 53 { // Esc
+                DispatchQueue.main.async { MainActor.assumeIsolated { controller?.escape() } }
+                return true
+            }
+        }
+        let typed = InlineCompletion.characters(of: event)
+        let shortcut = !flags.isDisjoint(with: [.maskCommand, .maskControl])
+        DispatchQueue.main.async { MainActor.assumeIsolated { controller?.typed(typed, shortcut: shortcut) } }
+        return false
+    }
+}
+
+/// Runs the keyboard event tap on its own run loop, so a busy main thread
+/// never holds up the user's typing.
+private final class EventTapThread: Thread, @unchecked Sendable {
+    private let state: TapState
+    private let ready = DispatchSemaphore(value: 0)
+    private var ok = false
+    private var runLoop: CFRunLoop?
+
+    init(state: TapState) {
+        self.state = state
+        super.init()
+        name = "APILA completion keys"
+        qualityOfService = .userInteractive
+    }
+
+    /// Starts the thread; false when macOS refuses the tap.
+    func startAndWait() -> Bool {
+        start()
+        ready.wait()
+        return ok
+    }
+
+    override func main() {
+        let mask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.leftMouseDown.rawValue)
+            | (1 << CGEventType.rightMouseDown.rawValue)
+        guard let port = CGEvent.tapCreate(
+            tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
+            eventsOfInterest: CGEventMask(mask), callback: inlineCompletionTapCallback,
+            userInfo: Unmanaged.passUnretained(state).toOpaque()
+        ) else {
+            ready.signal()
+            return
+        }
+        state.port = port
+        runLoop = CFRunLoopGetCurrent()
+        CFRunLoopAddSource(runLoop, CFMachPortCreateRunLoopSource(nil, port, 0), .commonModes)
+        CGEvent.tapEnable(tap: port, enable: true)
+        ok = true
+        ready.signal()
+        CFRunLoopRun()
+    }
+
+    func stop() {
+        if let port = state.port { CGEvent.tapEnable(tap: port, enable: false) }
+        state.port = nil
+        if let runLoop { CFRunLoopStop(runLoop) }
+    }
+}
+
+/// C callback → `TapState.handle`, on the tap thread.
 private func inlineCompletionTapCallback(
     proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, refcon: UnsafeMutableRawPointer?
 ) -> Unmanaged<CGEvent>? {
     guard let refcon else { return Unmanaged.passUnretained(event) }
-    let controller = Unmanaged<InlineCompletion>.fromOpaque(refcon).takeUnretainedValue()
-    nonisolated(unsafe) let shared = event // used on the main thread only, synchronously
-    let swallow = MainActor.assumeIsolated { controller.handle(type, shared) }
-    return swallow ? nil : Unmanaged.passUnretained(event)
+    let state = Unmanaged<TapState>.fromOpaque(refcon).takeUnretainedValue()
+    return state.handle(type, event) ? nil : Unmanaged.passUnretained(event)
 }
 
 /// The text field that has the keyboard, read through Accessibility.
@@ -265,10 +359,14 @@ struct FocusedField: @unchecked Sendable {
     let caret: CGRect
     /// The field's right edge (screen x): suggestions stop there.
     let rightEdge: CGFloat
+    let pid: pid_t
+    let appName: String?
+    let windowTitle: String
 
     /// nil when there's no editable, non-secure field with an empty selection
     /// at the end of a line (or the app is excluded / APILA itself).
-    static func current(excluding excluded: Set<String>) -> FocusedField? {
+    /// Safe off the main thread; `screenTop` is the main screen's top (AppKit).
+    static func current(excluding excluded: Set<String>, screenTop top: CGFloat) -> FocusedField? {
         let system = AXUIElementCreateSystemWide()
         AXUIElementSetMessagingTimeout(system, 0.2) // a hung app must not freeze typing
         guard let element: AXUIElement = attribute(system, kAXFocusedUIElementAttribute) else { return nil }
@@ -301,7 +399,6 @@ struct FocusedField: @unchecked Sendable {
         var bounds = CGRect.zero
         guard AXValueGetValue(boundsRef as! AXValue, .cgRect, &bounds), bounds.height > 2 else { return nil }
         // AX uses top-left global coordinates; AppKit — bottom-left of the main screen.
-        let top = NSScreen.screens.first?.frame.maxY ?? 0
         let caret = CGRect(x: bounds.minX, y: top - bounds.maxY, width: bounds.width, height: bounds.height)
         var rightEdge = caret.maxX + 600
         if let position: AXValue = attribute(element, kAXPositionAttribute), let size: AXValue = attribute(element, kAXSizeAttribute) {
@@ -310,7 +407,10 @@ struct FocusedField: @unchecked Sendable {
                 rightEdge = origin.x + extent.width
             }
         }
-        return FocusedField(element: element, beforeCursor: text.substring(to: range.location), caret: caret, rightEdge: rightEdge)
+        var title = ""
+        if let window: AXUIElement = attribute(element, kAXWindowAttribute), let t: String = attribute(window, kAXTitleAttribute) { title = t }
+        return FocusedField(element: element, beforeCursor: text.substring(to: range.location), caret: caret, rightEdge: rightEdge,
+                            pid: pid, appName: app.localizedName, windowTitle: title)
     }
 
     private static func attribute<T>(_ element: AXUIElement, _ name: String) -> T? {
