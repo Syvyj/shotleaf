@@ -59,12 +59,26 @@ struct AnnotationEditingTests {
         let text = Annotation.Kind.text(origin: o, string: "hi", tail: CGPoint(x: 50, y: 200))
         #expect(E.handle(of: text, at: CGPoint(x: 52, y: 198)) == .tail)
         #expect(E.resized(text, .tail, to: CGPoint(x: 300, y: 20)) == .text(origin: o, string: "hi", tail: CGPoint(x: 300, y: 20)))
-        let bubble = AnnotationStyle.bubble(origin: o, string: "hi")
+        let bubble = AnnotationStyle.bubble(origin: o, string: "hi", width: nil)
         let tailless = E.resized(text, .tail, to: CGPoint(x: bubble.midX, y: bubble.midY))
         #expect(tailless == .text(origin: o, string: "hi", tail: nil))
         // Without a tail there's still a handle on the bubble's edge to pull one out.
-        #expect(E.handles(of: tailless).count == 1)
+        #expect(E.handles(of: tailless).count == 2) // + the width handle
         #expect(E.moved(text, by: CGSize(width: 10, height: 0)) == .text(origin: CGPoint(x: 110, y: 100), string: "hi", tail: CGPoint(x: 50, y: 200)))
+    }
+
+    @Test("Callout width: long text wraps by default; the right-edge handle re-wraps it")
+    func calloutWidth() {
+        let long = String(repeating: "word ", count: 30)
+        let o = CGPoint.zero
+        let wrapped = AnnotationStyle.bubble(origin: o, string: long, width: nil)
+        #expect(wrapped.width <= AnnotationStyle.textWrap + 20 + 1 && wrapped.height > 60)
+        let text = Annotation.Kind.text(origin: o, string: long)
+        #expect(E.handle(of: text, at: CGPoint(x: wrapped.maxX, y: wrapped.midY)) == .textWidth)
+        let narrow = E.resized(text, .textWidth, to: CGPoint(x: 150, y: 0))
+        let b = E.frame(of: narrow)
+        #expect(b.width <= 150 + 10 + 1 && b.height > wrapped.height)
+        #expect(E.resized(text, .textWidth, to: CGPoint(x: -500, y: 0)) == .text(origin: o, string: long, width: AnnotationStyle.minTextWidth))
     }
 
     @Test("Thicker arrows get bigger heads")

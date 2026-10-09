@@ -55,7 +55,7 @@ enum AnnotationRenderer {
             case .highlight(let r): highlight(r, color: color, in: ctx)
             case .blur(let r): pixelate(r, image: image, imageSize: imageSize, in: ctx)
             case .step(let c, let n): step(c, number: n, color: item.color.nsColor, in: ctx)
-            case .text(let o, let s, let tail): callout(s, at: o, tail: tail, color: item.color.nsColor, in: ctx)
+            case .text(let o, let s, let tail, let w): callout(s, at: o, tail: tail, width: w, color: item.color.nsColor, in: ctx)
             case .erase(let r, let fill): erase(r, fill: fill, imageSize: imageSize, in: ctx)
             case .piece(let source, let offset, let fill):
                 erase(source, fill: fill, imageSize: imageSize, in: ctx)
@@ -147,8 +147,8 @@ enum AnnotationRenderer {
 
     /// A bubble in the mark's color with the text on it, and a tapering tail
     /// from the bubble's middle to `tail` (the bubble hides its root).
-    private static func callout(_ s: String, at o: CGPoint, tail: CGPoint?, color: NSColor, in ctx: CGContext) {
-        let bubble = AnnotationStyle.bubble(origin: o, string: s)
+    private static func callout(_ s: String, at o: CGPoint, tail: CGPoint?, width: CGFloat?, color: NSColor, in ctx: CGContext) {
+        let bubble = AnnotationStyle.bubble(origin: o, string: s, width: width)
         ctx.saveGState()
         softShadow(ctx)
         ctx.setFillColor(color.cgColor)
@@ -170,7 +170,11 @@ enum AnnotationRenderer {
         let light = [AnnotationColor.white, .amber].map(\.nsColor).contains(color)
         var attributes = AnnotationStyle.textAttributes(color: light ? .black : .white)
         attributes[.shadow] = nil
-        drawText(NSAttributedString(string: s, attributes: attributes), at: o, in: ctx)
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: true)
+        NSAttributedString(string: s, attributes: attributes)
+            .draw(with: bubble.insetBy(dx: 10, dy: 5), options: [.usesLineFragmentOrigin, .usesFontLeading])
+        NSGraphicsContext.restoreGraphicsState()
     }
 
     /// Dims the image outside the focus areas, and rims them with a soft light.

@@ -100,7 +100,7 @@ struct ScreenshotWindowTests {
         doc.add(.rectangle(CGRect(x: 30, y: 140, width: 300, height: 70)))
         doc.add(.step(center: CGPoint(x: 30, y: 140), number: 1))
         doc.color = .white
-        doc.add(.text(origin: CGPoint(x: 360, y: 240), string: "look here", tail: CGPoint(x: 330, y: 300)))
+        doc.add(.text(origin: CGPoint(x: 360, y: 240), string: "look here — a long note wraps onto the next line", tail: CGPoint(x: 330, y: 300)))
         doc.add(.blur(CGRect(x: 480, y: 280, width: 140, height: 60)))
         doc.add(.focus(CGRect(x: 20, y: 120, width: 340, height: 120)))
         doc.color = .coral

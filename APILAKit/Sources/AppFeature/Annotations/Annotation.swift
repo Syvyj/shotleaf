@@ -12,7 +12,8 @@ struct Annotation: Identifiable, Equatable {
         case blur(CGRect)
         case step(center: CGPoint, number: Int)
         /// A callout: text on a bubble, with an optional tail pointing at `tail`.
-        case text(origin: CGPoint, string: String, tail: CGPoint? = nil)
+        /// Lines wrap at `width` (nil = the default wrap).
+        case text(origin: CGPoint, string: String, tail: CGPoint? = nil, width: CGFloat? = nil)
         /// "Smart eraser": paints the area with the color around it (wipes text
         /// off a plain background).
         case erase(CGRect, fill: NSColor)
@@ -51,8 +52,8 @@ struct Annotation: Identifiable, Equatable {
         case .step(let c, _):
             let r = AnnotationStyle.stepRadius
             return CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)
-        case .text(let o, let s, let tail):
-            let bubble = AnnotationStyle.bubble(origin: o, string: s)
+        case .text(let o, let s, let tail, let w):
+            let bubble = AnnotationStyle.bubble(origin: o, string: s, width: w)
             return tail.map { bubble.union(CGRect(origin: $0, size: .zero)).insetBy(dx: -2, dy: -2) } ?? bubble
         }
     }
@@ -266,15 +267,26 @@ enum AnnotationStyle {
     static let stepRadius: CGFloat = 15
     static let blurBlock: CGFloat = 10 // pixelation cell, in image points
 
+    /// Callout text wraps here unless its width was dragged.
+    static let textWrap: CGFloat = 320
+    static let minTextWidth: CGFloat = 40
+
+    /// The wrapped text's size (`width` nil = `textWrap`).
+    static func textSize(_ string: String, width: CGFloat?) -> CGSize {
+        let r = NSAttributedString(string: string, attributes: textAttributes(color: .black))
+            .boundingRect(with: CGSize(width: width ?? textWrap, height: .greatestFiniteMagnitude),
+                          options: [.usesLineFragmentOrigin, .usesFontLeading])
+        return CGSize(width: ceil(r.width), height: ceil(r.height))
+    }
+
     /// The callout bubble around a text mark (text starts at `origin`).
-    static func bubble(origin: CGPoint, string: String) -> CGRect {
-        let size = NSAttributedString(string: string, attributes: textAttributes(color: .black)).size()
-        return CGRect(origin: origin, size: size).insetBy(dx: -10, dy: -5)
+    static func bubble(origin: CGPoint, string: String, width: CGFloat?) -> CGRect {
+        CGRect(origin: origin, size: textSize(string, width: width)).insetBy(dx: -10, dy: -5)
     }
 
     /// Where a new callout's tail points: down-left of the bubble.
     static func defaultTail(origin: CGPoint, string: String) -> CGPoint {
-        let b = bubble(origin: origin, string: string)
+        let b = bubble(origin: origin, string: string, width: nil)
         return CGPoint(x: b.minX - 28, y: b.maxY + 40)
     }
 

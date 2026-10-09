@@ -41,7 +41,7 @@ struct ScreenshotView: View {
     @State private var dragStart: CGPoint?
     @State private var dragNow: CGPoint?
     @State private var drag: Drag?
-    @State private var textDraft: (origin: CGPoint, string: String)?
+    @State private var textDraft: (origin: CGPoint, string: String, width: CGFloat?)?
     /// The text mark being re-edited (double-click), hidden while its field is open.
     @State private var editingTextID: Annotation.ID?
     /// For double-click detection on marks.
@@ -330,7 +330,10 @@ struct ScreenshotView: View {
                 // Shottr-style: in Select mode, pressing on the shot (not on a
                 // mark) drags the whole result out — marks included.
                 DragOutView(
-                    wantsDrag: { p in flyout == nil && liveText == nil && doc.tool == nil && AnnotationEditing.hit(doc.items, at: p) == nil },
+                    wantsDrag: { p in
+                        flyout == nil && liveText == nil && doc.tool == nil && AnnotationEditing.hit(doc.items, at: p) == nil
+                            && doc.selected.flatMap { AnnotationEditing.handle(of: $0.kind, at: p) } == nil
+                    },
                     onPress: { doc.selection = nil },
                     file: actions.dragFile,
                     thumbnail: image
@@ -340,11 +343,11 @@ struct ScreenshotView: View {
                 if let draft = textDraft {
                     TextField("Type, then ↩", text: Binding(
                         get: { textDraft?.string ?? "" }, set: { textDraft?.string = $0 }
-                    ))
+                    ), axis: .vertical)
                     .textFieldStyle(.plain)
                     .font(.system(size: 22, weight: .bold, design: .rounded))
                     .foregroundStyle(Color(nsColor: doc.color.nsColor))
-                    .frame(width: 320, alignment: .leading)
+                    .frame(width: draft.width ?? AnnotationStyle.textWrap, alignment: .leading)
                     .padding(4)
                     .background(.background.opacity(0.7), in: RoundedRectangle(cornerRadius: 6))
                     .offset(x: origin.x + draft.origin.x - 4, y: origin.y + draft.origin.y - 4)
@@ -451,11 +454,11 @@ struct ScreenshotView: View {
         case .move(let id, let original):
             if moved, let live = liveEdit { doc.update(live.id, to: live.kind); break }
             // A double-click on a text mark opens it for editing.
-            if case .text(let origin, let string, _) = original,
+            if case .text(let origin, let string, _, let width) = original,
                let last = lastClick, last.id == id, Date().timeIntervalSince(last.at) < 0.4 {
                 if let item = doc.items.first(where: { $0.id == id }) { doc.color = item.color }
                 editingTextID = id
-                textDraft = (origin, string)
+                textDraft = (origin, string, width)
                 textFocused = true
                 lastClick = nil
             } else {
@@ -468,7 +471,7 @@ struct ScreenshotView: View {
         case .tap:
             switch doc.tool {
             case .text:
-                textDraft = (now, "")
+                textDraft = (now, "", nil)
                 textFocused = true
             case .step:
                 doc.add(.step(center: now, number: doc.nextStep))
@@ -481,8 +484,8 @@ struct ScreenshotView: View {
     }
 
     private func updateCursor(_ p: CGPoint) {
-        if let selected = doc.selected, AnnotationEditing.handle(of: selected.kind, at: p) != nil {
-            NSCursor.crosshair.set()
+        if let selected = doc.selected, let handle = AnnotationEditing.handle(of: selected.kind, at: p) {
+            (handle == .textWidth ? NSCursor.resizeLeftRight : .crosshair).set()
         } else if AnnotationEditing.hit(doc.items, at: p) != nil {
             NSCursor.openHand.set()
         } else if doc.tool != nil {
@@ -525,8 +528,8 @@ struct ScreenshotView: View {
             if let id = editingTextID {
                 // Editing: an emptied text removes the mark.
                 if string.isEmpty { doc.remove(id) } else {
-                    let tail: CGPoint? = if case .text(_, _, let t) = doc.items.first(where: { $0.id == id })?.kind { t } else { nil }
-                    doc.update(id, to: .text(origin: draft.origin, string: draft.string, tail: tail))
+                    let tail: CGPoint? = if case .text(_, _, let t, _) = doc.items.first(where: { $0.id == id })?.kind { t } else { nil }
+                    doc.update(id, to: .text(origin: draft.origin, string: draft.string, tail: tail, width: draft.width))
                 }
             } else if !string.isEmpty {
                 doc.add(.text(origin: draft.origin, string: draft.string,
