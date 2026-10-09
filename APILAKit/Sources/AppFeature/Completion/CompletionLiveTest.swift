@@ -31,6 +31,13 @@ public enum CompletionLiveTest {
             return
         }
 
+        // "#N" at the end: press digit N instead of Tab (the emoji picker).
+        var text = text
+        var acceptDigit: String?
+        if let hash = text.lastIndex(of: "#"), text[text.index(after: hash)...].allSatisfy(\.isNumber), text.index(after: hash) < text.endIndex {
+            acceptDigit = String(text[text.index(after: hash)...])
+            text = String(text[..<hash])
+        }
         // "|" marks where the cursor goes back to (mid-text): typed whole, then ← × the rest.
         let parts = text.split(separator: "|", maxSplits: 1, omittingEmptySubsequences: false)
         let full = parts.joined()
@@ -53,17 +60,18 @@ public enum CompletionLiveTest {
         // Watch the suggestion appear after the last key.
         var firstSeen: Duration?
         for _ in 0..<40 {
-            if completion.suggestion != nil, firstSeen == nil { firstSeen = ContinuousClock.now - typedAt }
+            if completion.suggestion != nil || completion.pickerEmoji != nil, firstSeen == nil { firstSeen = ContinuousClock.now - typedAt }
             try? await Task.sleep(for: .milliseconds(25))
         }
         report.append("typing took \(typedAt - started)")
         report.append("suggestion after last key: \(firstSeen.map { "\($0)" } ?? "none") — \((completion.suggestion ?? "nil").debugDescription)")
+        if let emoji = completion.pickerEmoji { report.append("emoji picker: \(emoji.joined(separator: " "))") }
         await snapshot(to: out.appendingPathComponent("live-before-tab.png"))
 
         guard isScratchFocused(documentName) else { return abort(out) }
-        key(48) // Tab
+        if let acceptDigit { type(acceptDigit) } else { key(48) } // the digit / Tab
         try? await Task.sleep(for: .milliseconds(400))
-        report.append("after Tab: \((completion.suggestion ?? "nil").debugDescription)")
+        report.append("after accept: \((completion.suggestion ?? "nil").debugDescription)")
         let top = NSScreen.screens.first?.frame.maxY ?? 0
         if let field = FocusedField.current(excluding: [], screenTop: top) {
             report.append("field now: \((field.beforeCursor + "‸" + field.afterCursor).debugDescription)")

@@ -14,8 +14,8 @@ import OSLog
 /// the Accessibility API off the main thread (slow apps answer slowly);
 /// accepted text is typed as synthetic key events.
 /// Runs only on the built-in model — your text never leaves the Mac.
-/// Besides continuations it offers an emoji for a `:shortcode` and a spelling
-/// fix for the word just typed; mid-line, offers show as a badge under the
+/// Besides continuations: `:` or `;` opens an emoji picker (1–9 or a click
+/// picks, letters filter), and a just-typed misspelled word gets a fix; mid-line, offers show as a badge under the
 /// cursor instead of grey text (which would cover the words after it).
 /// ponytail: no app-specific fixes yet.
 @MainActor
@@ -62,6 +62,11 @@ final class InlineCompletion {
         }
     }
     private var field: FocusedField?
+    /// The open emoji picker: what was typed after `:` and what it offers.
+    private var picker: (query: String, candidates: [EmojiShortcodes.Candidate])?
+    /// The picker's emoji (the live test reads it).
+    var pickerEmoji: [String]? { picker?.candidates.map(\.emoji) }
+    private lazy var pickerPanel = EmojiPickerPanel { [weak self] index in self?.pickEmoji(index) }
 
     /// Settings: how bold suggestions are, quick fixes on/off, the user's style.
     var boldness = CompletionText.Boldness(0.5)
@@ -124,6 +129,32 @@ final class InlineCompletion {
     /// Esc was swallowed.
     fileprivate func escape() { dismiss() }
 
+    /// 1–9 (or Tab → 0, or a click) in the emoji picker.
+    fileprivate func pickEmoji(_ index: Int) {
+        guard let picker, picker.candidates.indices.contains(index) else { return }
+        let emoji = picker.candidates[index].emoji
+        Self.deleteBackward(picker.query.count + 1) // ":" + the letters
+        Self.type(emoji)
+        EmojiRecents.used(emoji)
+        dismiss()
+    }
+
+    private func showPicker(query: String, in field: FocusedField) {
+        let candidates = EmojiShortcodes.candidates(query, recents: EmojiRecents.list)
+        guard !candidates.isEmpty else { closePicker(); return }
+        picker = (query, candidates)
+        hide()
+        let frame = pickerPanel.show(candidates, under: field.caret)
+        let top = NSScreen.screens.first?.frame.maxY ?? 0
+        tapState.picker = CGRect(x: frame.minX, y: top - frame.maxY, width: frame.width, height: frame.height) // tap's top-left space
+    }
+
+    private func closePicker() {
+        picker = nil
+        tapState.picker = nil
+        pickerPanel.orderOut(nil)
+    }
+
     fileprivate func clicked() { dismiss() } // a click moves the caret
 
     /// Any other key went through to the app.
@@ -170,7 +201,12 @@ final class InlineCompletion {
 
     private func suggest(in field: FocusedField) {
         rememberIfLeft(field)
-        if quickFixes, let fix = EmojiShortcodes.match(beforeCursor: field.beforeCursor) ?? TypoFixer.fix(beforeCursor: field.beforeCursor) {
+        if quickFixes, let query = EmojiShortcodes.query(beforeCursor: field.beforeCursor) {
+            showPicker(query: query, in: field)
+            return
+        }
+        closePicker()
+        if quickFixes, let fix = TypoFixer.fix(beforeCursor: field.beforeCursor) {
             show(.fix(fix), in: field)
             return
         }
@@ -258,12 +294,13 @@ final class InlineCompletion {
         }
     }
 
-    /// Hides the suggestion and forgets pending work.
+    /// Hides the suggestion (and picker) and forgets pending work.
     private func dismiss() {
         generationID += 1
         debounceTask?.cancel()
         generation?.cancel()
         hide()
+        closePicker()
     }
 
     private func hide() {
@@ -328,6 +365,12 @@ private final class TapState: @unchecked Sendable {
         get { lock.withLock { _hasSuggestion } }
         set { lock.withLock { _hasSuggestion = newValue } }
     }
+    private var _picker: CGRect?
+    /// The emoji picker's frame (global, top-left origin) while it's open.
+    var picker: CGRect? {
+        get { lock.withLock { _picker } }
+        set { lock.withLock { _picker = newValue } }
+    }
     weak var controller: InlineCompletion?
     var port: CFMachPort?
 
@@ -339,12 +382,24 @@ private final class TapState: @unchecked Sendable {
         }
         let controller = self.controller
         guard type == .keyDown else {
+            if let picker, picker.contains(event.location) { return false } // a click on the picker picks
             DispatchQueue.main.async { MainActor.assumeIsolated { controller?.clicked() } }
             return false
         }
         if event.getIntegerValueField(.eventSourceUserData) == InlineCompletion.marker { return false }
         let key = event.getIntegerValueField(.keyboardEventKeycode)
         let flags = event.flags
+        if picker != nil, flags.isDisjoint(with: [.maskCommand, .maskControl]) {
+            let digit = Int(InlineCompletion.characters(of: event)).flatMap { (1...9).contains($0) ? $0 - 1 : nil }
+            if let index = digit ?? (key == 48 ? 0 : nil) { // 1–9, or Tab for the first
+                DispatchQueue.main.async { MainActor.assumeIsolated { controller?.pickEmoji(index) } }
+                return true
+            }
+            if key == 53 { // Esc
+                DispatchQueue.main.async { MainActor.assumeIsolated { controller?.escape() } }
+                return true
+            }
+        }
         if hasSuggestion {
             if key == 48, flags.isDisjoint(with: [.maskCommand, .maskControl, .maskShift]) { // Tab
                 let all = flags.contains(.maskAlternate)
@@ -581,4 +636,66 @@ final class GhostPanel: NSPanel {
         let y = caret.minY + (caret.height - size.height) / 2
         setFrame(CGRect(x: caret.maxX, y: y, width: size.width + 4, height: size.height), display: true)
     }
+}
+
+/// The emoji picker under the cursor: "1 👍  2 😂 …"; a click picks too.
+/// Never takes the keyboard — the user keeps typing in their app.
+@MainActor
+final class EmojiPickerPanel: NSPanel {
+    private let onPick: (Int) -> Void
+    private let row = NSStackView()
+
+    init(onPick: @escaping (Int) -> Void) {
+        self.onPick = onPick
+        super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
+        isOpaque = false
+        backgroundColor = .clear
+        hasShadow = true
+        level = .popUpMenu
+        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
+        let background = NSVisualEffectView()
+        background.material = .popover
+        background.state = .active
+        background.wantsLayer = true
+        background.layer?.cornerRadius = 9
+        row.spacing = 2
+        row.edgeInsets = NSEdgeInsets(top: 4, left: 6, bottom: 4, right: 6)
+        row.translatesAutoresizingMaskIntoConstraints = false
+        background.addSubview(row)
+        NSLayoutConstraint.activate([
+            row.leadingAnchor.constraint(equalTo: background.leadingAnchor),
+            row.trailingAnchor.constraint(equalTo: background.trailingAnchor),
+            row.topAnchor.constraint(equalTo: background.topAnchor),
+            row.bottomAnchor.constraint(equalTo: background.bottomAnchor),
+        ])
+        contentView = background
+    }
+
+    override var canBecomeKey: Bool { false }
+    override var canBecomeMain: Bool { false }
+
+    /// Shows the candidates under `caret` (AppKit screen coordinates) and
+    /// returns the panel's frame.
+    func show(_ candidates: [EmojiShortcodes.Candidate], under caret: CGRect) -> CGRect {
+        row.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        for (i, candidate) in candidates.enumerated() {
+            let title = NSMutableAttributedString(string: "\(i + 1) ", attributes: [
+                .font: NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .semibold), .foregroundColor: NSColor.secondaryLabelColor,
+            ])
+            title.append(NSAttributedString(string: candidate.emoji, attributes: [.font: NSFont.systemFont(ofSize: 19)]))
+            let button = NSButton(title: "", target: self, action: #selector(picked(_:)))
+            button.attributedTitle = title
+            button.isBordered = false
+            button.tag = i
+            button.toolTip = candidate.name.replacingOccurrences(of: "_", with: " ")
+            row.addArrangedSubview(button)
+        }
+        let size = row.fittingSize
+        let frame = CGRect(x: caret.minX - 6, y: caret.minY - size.height - 6, width: size.width, height: size.height)
+        setFrame(frame, display: true)
+        orderFrontRegardless()
+        return frame
+    }
+
+    @objc private func picked(_ sender: NSButton) { onPick(sender.tag) }
 }

@@ -81,14 +81,20 @@ struct CompletionTextTests {
 @Suite("Quick fixes & boldness")
 @MainActor
 struct QuickFixTests {
-    @Test("Emoji shortcodes from Unicode names: prefix first, then a word inside")
+    @Test("Emoji picker: : or ; opens it, letters filter by Unicode names, recents when empty")
     func emoji() {
-        #expect(EmojiShortcodes.match(beforeCursor: "We launched :rock")?.insert == "🪨") // an exact name wins
-        #expect(EmojiShortcodes.match(beforeCursor: "We launched :rocke") == .emoji("🚀", name: "rocket", replacing: 6))
-        #expect(EmojiShortcodes.match(beforeCursor: "so :fire")?.insert == "🔥")
-        #expect(EmojiShortcodes.match(beforeCursor: "nice :up")?.insert != nil) // thumbs_up… via a word inside
-        #expect(EmojiShortcodes.match(beforeCursor: "time 10:30") == nil)        // not after a space
-        #expect(EmojiShortcodes.match(beforeCursor: "hi :r") == nil)             // too short
+        #expect(EmojiShortcodes.query(beforeCursor: "We shipped it :") == "")
+        #expect(EmojiShortcodes.query(beforeCursor: "We shipped it ;Roc") == "roc")
+        #expect(EmojiShortcodes.query(beforeCursor: ":") == "")
+        #expect(EmojiShortcodes.query(beforeCursor: "time 10:30") == nil)   // not after a space
+        #expect(EmojiShortcodes.query(beforeCursor: "smile :-)") == nil)
+        #expect(EmojiShortcodes.query(beforeCursor: "so :fire ") == nil)    // finished with a space
+        #expect(EmojiShortcodes.candidates("rocke", recents: []).first?.emoji == "🚀")
+        #expect(EmojiShortcodes.candidates("rock", recents: []).first?.emoji == "🪨") // the exact name first
+        #expect(EmojiShortcodes.candidates("fire", recents: []).first?.emoji == "🔥")
+        #expect(EmojiShortcodes.candidates("up", recents: []).contains { $0.name.contains("thumbs_up") }) // a word inside
+        #expect(EmojiShortcodes.candidates("", recents: ["🚀", "👍"]).map(\.emoji) == ["🚀", "👍"])
+        #expect(EmojiShortcodes.candidates("e", recents: []).count == 8)
     }
 
     @Test("A misspelled word just finished gets a fix that replaces it and the space")

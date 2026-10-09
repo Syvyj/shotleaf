@@ -1849,16 +1849,6 @@
         }
       }
     },
-    ":rocket → 🚀, and a one-key fix for a misspelled word — both with Tab.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": ":rocket → 🚀 і виправлення слова з помилкою — обидва по Tab."
-          }
-        }
-      }
-    },
     "Learn my style": {
       "localizations": {
         "uk": {
@@ -1885,6 +1875,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Забути мої тексти"
+          }
+        }
+      }
+    },
+    "Type : or ; for an emoji picker (1–9 or a click; letters filter, :fire → 🔥). A misspelled word gets a fix with Tab.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наберіть : або ; — з'явиться панель емодзі (1–9 або клік; літери фільтрують, :fire → 🔥). Слово з одруківкою виправляється по Tab."
           }
         }
       }

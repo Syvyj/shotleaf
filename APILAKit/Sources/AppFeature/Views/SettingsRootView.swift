@@ -308,7 +308,7 @@ public struct SettingsRootView: View {
                 }
                 Toggle(isOn: Binding(get: { coordinator.completionQuickFixes }, set: { coordinator.setCompletionQuickFixes($0) })) {
                     Text("Emoji and spelling fixes")
-                    Text(":rocket → 🚀, and a one-key fix for a misspelled word — both with Tab.")
+                    Text("Type : or ; for an emoji picker (1–9 or a click; letters filter, :fire → 🔥). A misspelled word gets a fix with Tab.")
                 }
                 Toggle(isOn: Binding(get: { coordinator.completionLearnsStyle }, set: { coordinator.setCompletionLearnsStyle($0) })) {
                     Text("Learn my style")
