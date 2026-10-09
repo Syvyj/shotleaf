@@ -1153,12 +1153,12 @@
         }
       }
     },
-    "Select text · ↩ copies it": {
+    "Select text · ⌘C copies it": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Виділіть текст · ↩ копіює"
+            "value": "Виділіть текст · ⌘C копіює"
           }
         }
       }

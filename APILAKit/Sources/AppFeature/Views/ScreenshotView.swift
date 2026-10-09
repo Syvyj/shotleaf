@@ -17,7 +17,7 @@ struct ScreenshotActions {
 /// the window, annotation tools (0–9), and the actions, in the "Leaves" style.
 /// Click a mark to select it: drag to move, drag handles to resize, ⌫ deletes.
 /// In Select mode, dragging the shot itself drops the whole result into any app.
-/// Keyboard: ↩/⌘C copy, ⌘S save, P pin, T select text (Live Text), 0 select, 1–9 tools,
+/// Keyboard: ⌘C (or ↩) copy, ⌘S save, P pin, T select text (Live Text), 0 select, 1–9 tools,
 /// ⌘Z undo, esc — deselect / drop the tool, then close.
 struct ScreenshotView: View {
     let image: NSImage
@@ -608,7 +608,7 @@ struct ScreenshotView: View {
 
     private func actionRow(keys: Bool) -> some View {
         HStack(spacing: 6) {
-            Button { copy() } label: { keyed(liveText == nil ? "Copy" : "Copy text", "↩", show: keys) }
+            Button { copy() } label: { keyed(liveText == nil ? "Copy" : "Copy text", "⌘C", show: keys) }
                 .buttonStyle(LeafButtonStyle(prominent: true))
                 .keyboardShortcut("c", modifiers: .command)
             Button {
@@ -703,7 +703,7 @@ struct ScreenshotView: View {
         doc.tool = nil
         doc.selection = nil
         liveText = ImageAnalysisOverlayView()
-        flash("Select text · ↩ copies it")
+        flash("Select text · ⌘C copies it")
     }
 
     private func flash(_ text: String) {
