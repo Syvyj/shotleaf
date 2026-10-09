@@ -21,7 +21,7 @@ final class CompletionContext {
     }
     private var screen: ScreenCache?
     private var reading = false
-    private static let screenMaxAge: TimeInterval = 4
+    private static let screenMaxAge: TimeInterval = 8 // OCR shares the GPU with the model
 
     private var clipboardChange = NSPasteboard.general.changeCount
     private var clipboard: (text: String, at: Date)?

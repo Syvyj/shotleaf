@@ -5,7 +5,7 @@ import Foundation
 /// the user types the same letters.
 enum CompletionText {
     /// How much text before the cursor the model sees.
-    static let contextLimit = 1500
+    static let contextLimit = 600
     /// Longest suggestion shown, in words.
     static let maxWords = 6
 
@@ -27,7 +27,7 @@ enum CompletionText {
         var clipboard: String?
     }
 
-    static let screenLimit = 600
+    static let screenLimit = 400
     static let clipboardLimit = 400
 
     /// Base-model prompt with context: short labelled notes first, then a

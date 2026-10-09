@@ -7,9 +7,11 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 BUILD_DIR=build/DerivedData
+# Release by default: MLX (the built-in models) is several times slower unoptimised.
+CONFIG="${CONFIG:-Release}"
 DEST="$HOME/Applications/APILA.app"
 
-xcodebuild -project APILA.xcodeproj -scheme APILA -configuration Debug \
+xcodebuild -project APILA.xcodeproj -scheme APILA -configuration "$CONFIG" \
   -derivedDataPath "$BUILD_DIR" -quiet -skipMacroValidation ENABLE_DEBUG_DYLIB=NO build
 
 pkill -x APILA || true
@@ -18,7 +20,7 @@ pkill -x APILA || true
 for _ in $(seq 50); do pgrep -x APILA >/dev/null || break; sleep 0.1; done
 mkdir -p "$HOME/Applications"
 rm -rf "$DEST"
-cp -R "$BUILD_DIR/Build/Products/Debug/APILA.app" "$DEST"
+cp -R "$BUILD_DIR/Build/Products/$CONFIG/APILA.app" "$DEST"
 if security find-identity -p codesigning | grep -q "APILA Local Signing"; then
   codesign --force --options runtime --entitlements App/APILA.entitlements \
     -s "APILA Local Signing" "$DEST"

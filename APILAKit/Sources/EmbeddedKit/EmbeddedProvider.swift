@@ -29,6 +29,8 @@ public actor EmbeddedModel {
 
     private var container: ModelContainer?
     private var loading: Task<ModelContainer, Error>?
+    /// What the model already read for the last completion (see `complete`).
+    private let promptCache = PromptCache()
 
     init(configuration: ModelConfiguration, textOnly: Bool, displayName: String) {
         self.configuration = configuration
@@ -92,6 +94,9 @@ public actor EmbeddedModel {
     /// cut where the model starts guessing (see `minConfidence`). `onPartial`
     /// gets the confident text so far after every token, to show as it's
     /// written. `finished` — the model ended the line itself (not cut).
+    /// Prompt tokens the last completion didn't have to read again.
+    public var lastReusedTokens: Int { promptCache.reused }
+
     /// `minProbability` / `trace` are for the evaluation run: see every token
     /// and how sure the model was of it.
     public func complete(
@@ -100,19 +105,25 @@ public actor EmbeddedModel {
         onPartial: @Sendable @escaping (String) -> Void = { _ in }
     ) async throws -> (text: String, finished: Bool) {
         let container = try await load()
+        let promptCache = promptCache
         return try await container.perform { context in
             let tokens = context.tokenizer.encode(text: prefix, addSpecialTokens: true)
             var parameters = GenerateParameters()
             parameters.temperature = 0
-            parameters.repetitionPenalty = 1.15
+            parameters.repetitionPenalty = ProcessInfo.processInfo.environment["APILA_NO_PENALTY"] == nil ? 1.15 : nil
+            // Between key presses the text barely changes: keep what the model
+            // already read and feed it only the new tokens.
+            let (cache, reused) = try promptCache.prepare(for: tokens, model: context.model, parameters: parameters)
+            let input = LMInput(tokens: MLXArray(Array(tokens[reused...])))
             let probe = ConfidenceProbe()
             let iterator = try TokenIterator(
-                input: LMInput(tokens: MLXArray(tokens)), model: context.model, parameters: parameters,
+                input: input, model: context.model, cache: cache, parameters: parameters,
                 components: GenerationComponents(logitProcessorFactory: { probe })
             )
+            promptCache.reused = reused
             var kept: [Int] = []
             var finished = true
-            _ = generate(input: LMInput(tokens: MLXArray(tokens)), context: context, iterator: iterator) { ids in
+            _ = generate(input: input, context: context, iterator: iterator) { ids in
                 if Task.isCancelled { finished = false; return .stop }
                 let p = probe.box.last ?? 1
                 trace?(context.tokenizer.decode(tokenIds: [ids.last ?? 0], skipSpecialTokens: false), p)
@@ -199,4 +210,34 @@ private struct ConfidenceProbe: LogitProcessor {
     }
 
     mutating func didSample(token: MLXArray) {}
+}
+
+/// The model's memory of the last prompt (its KV cache), reused by the next
+/// completion when the new prompt starts the same way — the usual case while
+/// typing. Rewound to the shared start; rebuilt when it can't be rewound
+/// exactly (past the sliding window) or nothing is shared.
+/// Used only inside `ModelContainer.perform`, which runs one at a time.
+private final class PromptCache: @unchecked Sendable {
+    private var cache: [KVCache]?
+    private var tokens: [Int] = []
+    /// Tokens skipped last time (for the eval run).
+    var reused = 0
+
+    func prepare(for tokens: [Int], model: any LanguageModel, parameters: GenerateParameters) throws -> ([KVCache], Int) {
+        defer { self.tokens = tokens }
+        let enabled = ProcessInfo.processInfo.environment["APILA_NO_PROMPT_CACHE"] == nil // eval: compare against no reuse
+        if enabled, let cache, canTrimPromptCache(cache), let offset = cache.first?.offset {
+            let shared = zip(self.tokens, tokens).prefix { $0 == $1 }.count
+            let keep = min(shared, tokens.count - 1) // the model must read at least one token
+            // Only worth it — and only checked — for a real shared start (typing on);
+            // rewinding to almost nothing gave different answers in the eval.
+            if keep >= max(16, tokens.count / 2), offset >= keep {
+                trimPromptCache(cache, numTokens: offset - keep)
+                if cache.allSatisfy({ $0.offset == keep }) { return (cache, keep) }
+            }
+        }
+        let fresh = try model.newCache(parameters: parameters)
+        cache = fresh
+        return (fresh, 0)
+    }
 }
