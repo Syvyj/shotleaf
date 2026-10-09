@@ -40,6 +40,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.terminate(nil)
             return
         }
+        if let i = CommandLine.arguments.firstIndex(of: "--completion-live-test") { // developer run
+            let args = CommandLine.arguments
+            let text = args.count > i + 1 ? args[i + 1] : "Hi Anna, thanks for the update. I think we should"
+            let out = URL(fileURLWithPath: args.count > i + 2 ? args[i + 2] : NSTemporaryDirectory())
+            Task {
+                await coordinator.start()
+                await CompletionLiveTest.run(coordinator, text: text, out: out)
+                exit(0)
+            }
+            return
+        }
         Task { await coordinator.start() }
     }
 

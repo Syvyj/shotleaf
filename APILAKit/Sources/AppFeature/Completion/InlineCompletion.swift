@@ -45,7 +45,7 @@ final class InlineCompletion {
     /// Screen text, clipboard, app — what the model knows besides the field.
     let context = CompletionContext()
     /// What's on screen now, and where it belongs.
-    private var suggestion: String? { didSet { tapState.hasSuggestion = suggestion != nil } }
+    private(set) var suggestion: String? { didSet { tapState.hasSuggestion = suggestion != nil } }
     private var field: FocusedField?
     private var activationObserver: NSObjectProtocol?
 

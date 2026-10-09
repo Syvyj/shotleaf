@@ -364,7 +364,7 @@ public final class AppCoordinator {
 
     // MARK: Inline completion
 
-    private let inlineCompletion = InlineCompletion()
+    let inlineCompletion = InlineCompletion() // internal: the live test drives it
 
     public var completionEnabled: Bool { container.settings.completionEnabled }
 
