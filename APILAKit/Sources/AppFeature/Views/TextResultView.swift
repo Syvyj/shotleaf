@@ -67,7 +67,7 @@ struct TextResultView: View {
         .padding(14)
         .frame(minWidth: 460, maxWidth: .infinity, minHeight: 280, maxHeight: .infinity, alignment: .topLeading)
         .leafPanelChrome()
-        .overlay(alignment: .bottomTrailing) { WindowResizeGrip().frame(width: 18, height: 18).padding(4) }
+        .overlay(alignment: .bottomTrailing) { WindowResizeGrip().frame(width: 12, height: 12).padding(2) }
         .overlay(WindowEdgeResizer())
     }
 }

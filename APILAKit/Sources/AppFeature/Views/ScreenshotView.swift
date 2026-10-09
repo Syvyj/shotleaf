@@ -81,7 +81,7 @@ struct ScreenshotView: View {
         .padding(14)
         .leafPanelChrome()
         .overlay(alignment: .bottomTrailing) {
-            WindowResizeGrip().frame(width: 18, height: 18).padding(4)
+            WindowResizeGrip().frame(width: 12, height: 12).padding(2) // stays inside the 14pt margin
         }
         .overlay(WindowEdgeResizer()) // grab any edge or corner
         .background { keyboard }
@@ -598,20 +598,28 @@ struct ScreenshotView: View {
     // MARK: Toolbar
 
     /// Actions with their keys on them — one row instead of buttons + hints.
+    /// The action row; drops the key hints when the window is too narrow for them.
     private var toolbar: some View {
+        ViewThatFits(in: .horizontal) {
+            actionRow(keys: true)
+            actionRow(keys: false)
+        }
+    }
+
+    private func actionRow(keys: Bool) -> some View {
         HStack(spacing: 6) {
-            Button { copy() } label: { keyed(liveText == nil ? "Copy" : "Copy text", "↩") }
+            Button { copy() } label: { keyed(liveText == nil ? "Copy" : "Copy text", "↩", show: keys) }
                 .buttonStyle(LeafButtonStyle(prominent: true))
                 .keyboardShortcut("c", modifiers: .command)
             Button {
                 if let url = actions.save() { flash(String(localized: "Saved to \(url.deletingLastPathComponent().lastPathComponent)")) }
-            } label: { keyed("Save", "⌘S") }
+            } label: { keyed("Save", "⌘S", show: keys) }
             .buttonStyle(LeafButtonStyle())
             .keyboardShortcut("s", modifiers: .command)
-            Button { actions.pin() } label: { keyed("Pin", "P") }
+            Button { actions.pin() } label: { keyed("Pin", "P", show: keys) }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("p", modifiers: [])
-            Button { toggleLiveText() } label: { keyed("Text", "T") }
+            Button { toggleLiveText() } label: { keyed("Text", "T", show: keys) }
                 .buttonStyle(LeafButtonStyle(prominent: liveText != nil))
                 .keyboardShortcut("t", modifiers: [])
                 .instantTip(liveText == nil ? "Select text on the shot" : "Back to marks", above: true)
@@ -622,29 +630,29 @@ struct ScreenshotView: View {
                     .instantTip("Keep only the cropped area — ⌘Z brings the rest back", above: true)
             }
             if doc.selection != nil {
-                Button { if let id = doc.selection { doc.remove(id) } } label: { keyed("Delete", "⌫") }
+                Button { if let id = doc.selection { doc.remove(id) } } label: { keyed("Delete", "⌫", show: keys) }
                     .buttonStyle(LeafButtonStyle())
             }
-            Button { doc.undo() } label: { keyed("Undo", "⌘Z") }
+            Button { doc.undo() } label: { keyed("Undo", "⌘Z", show: keys) }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("z", modifiers: .command)
                 .disabled(!doc.canUndo)
                 .opacity(doc.canUndo ? 1 : 0.4)
-            Button { actions.close() } label: { keyed("Close", "esc") }
+            Button { actions.close() } label: { keyed("Close", "esc", show: keys) }
                 .buttonStyle(LeafButtonStyle())
         }
         .disabled(editingText)
         .fixedSize(horizontal: false, vertical: true)
     }
 
-    private func keyed(_ title: String, _ key: String) -> some View {
+    private func keyed(_ title: String, _ key: String, show: Bool) -> some View {
         HStack(spacing: 5) {
             Text(LocalizedStringKey(title))
-            Text(key)
+            if show { Text(key)
                 .font(Leaf.font(10.5, .semibold))
                 .opacity(0.5)
                 .padding(.horizontal, 3).padding(.vertical, 1)
-                .background(.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 4))
+                .background(.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 4)) }
         }
     }
 
