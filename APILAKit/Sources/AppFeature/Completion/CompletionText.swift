@@ -17,6 +17,45 @@ enum CompletionText {
         return tail
     }
 
+    /// What else the model may know besides the text before the cursor.
+    struct Context: Equatable {
+        var app: String?
+        var window: String?
+        /// Text read off the window (OCR) — the conversation, the page.
+        var screen: String?
+        /// Something the user copied a moment ago.
+        var clipboard: String?
+    }
+
+    static let screenLimit = 1200
+    static let clipboardLimit = 400
+
+    /// Base-model prompt with context: short labelled notes first, then a
+    /// rule, then the user's text — so the next token continues *their* text.
+    static func prompt(beforeCursor text: String, context: Context) -> String {
+        let body = prompt(beforeCursor: text)
+        var notes: [String] = []
+        let where_ = [context.app, context.window].compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        if !where_.isEmpty { notes.append("App: " + where_.joined(separator: " — ")) }
+        if let screen = context.screen.map({ screenLines($0, without: body) }), !screen.isEmpty {
+            notes.append("On screen:\n" + String(screen.suffix(screenLimit)))
+        }
+        if let clip = context.clipboard?.trimmingCharacters(in: .whitespacesAndNewlines), !clip.isEmpty {
+            notes.append("Just copied:\n" + String(clip.prefix(clipboardLimit)))
+        }
+        return notes.isEmpty ? body : notes.joined(separator: "\n\n") + "\n\n---\n\n" + body
+    }
+
+    /// Screen text minus the lines the user is typing anyway (OCR sees the
+    /// field too).
+    static func screenLines(_ screen: String, without typed: String) -> String {
+        screen.split(whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty && !($0.count >= 8 && typed.contains($0)) }
+            .joined(separator: "\n")
+    }
+
     /// Worth asking the model: some real text, and the cursor isn't mid-word
     /// right after a single letter.
     static func shouldComplete(beforeCursor text: String) -> Bool {

@@ -83,9 +83,10 @@ public actor EmbeddedModel {
         return loaded
     }
 
-    /// The continuation keeps going only while the model is this sure of it
-    /// (product of its tokens' probabilities): a guess is worse than nothing.
-    public static let minConfidence: Float = 0.25
+    /// The continuation stops at the first token the model is less sure of
+    /// than this — there it's guessing. (A product over all tokens was far too
+    /// strict: 70% of requests showed nothing.)
+    public static let minTokenProbability: Float = 0.12
 
     /// How `prefix` goes on, from a base model: greedy, short, one line, and
     /// cut where the model starts guessing (see `minConfidence`). `onPartial`
@@ -106,12 +107,10 @@ public actor EmbeddedModel {
                 components: GenerationComponents(logitProcessorFactory: { probe })
             )
             var kept: [Int] = []
-            var confidence: Float = 1
             var finished = true
             _ = generate(input: LMInput(tokens: MLXArray(tokens)), context: context, iterator: iterator) { ids in
                 if Task.isCancelled { finished = false; return .stop }
-                confidence *= probe.box.last ?? 1
-                if confidence < Self.minConfidence || ids.count > maxTokens { finished = false; return .stop }
+                if (probe.box.last ?? 1) < Self.minTokenProbability || ids.count > maxTokens { finished = false; return .stop }
                 kept = ids
                 let text = context.tokenizer.decode(tokenIds: ids, skipSpecialTokens: true)
                 onPartial(text)

@@ -45,6 +45,16 @@ struct CompletionTextTests {
         #expect(C.withoutRepeats(" ввід тексту далі", after: "перевіряю ввід тексту") == "")
     }
 
+    @Test("Context: labelled notes, then a rule, then the user's text last")
+    func contextPrompt() {
+        let context = C.Context(app: "Telegram", window: "Олег", screen: "Олег: їдемо завтра?\nНу то що, я думаю", clipboard: "вул. Хрещатик, 1")
+        let p = C.prompt(beforeCursor: "Ну то що, я думаю ", context: context)
+        #expect(p.hasPrefix("App: Telegram — Олег\n\nOn screen:\nОлег: їдемо завтра?\n\nJust copied:\nвул. Хрещатик, 1"))
+        #expect(p.hasSuffix("\n\n---\n\nНу то що, я думаю"))
+        #expect(!p.contains("On screen:\nОлег: їдемо завтра?\nНу то що")) // the field's own line is left out
+        #expect(C.prompt(beforeCursor: "Hello there", context: C.Context()) == "Hello there")
+    }
+
     @Test("Tab takes the next word with its spaces and punctuation")
     func nextWord() {
         #expect(C.nextWord(of: " world, how are you") == (" world,", " how are you"))
