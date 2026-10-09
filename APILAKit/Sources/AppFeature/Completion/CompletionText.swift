@@ -24,8 +24,55 @@ enum CompletionText {
         return trimmed.count >= 3 && text.last != "\n"
     }
 
-    /// The model's raw continuation → what to show: one line, at most
-    /// `maxWords` words, no doubled space when the user already typed one.
+    /// The model's answer (the user's last word echoed, then the next words)
+    /// → the text to insert after the cursor. Finishes a half-typed word, adds
+    /// the space before a new one, drops repeats.
+    static func fromEcho(_ raw: String, beforeCursor text: String) -> String? {
+        var answer = String(raw.prefix { $0 != "\n" && $0 != "\r" })
+        answer = answer.trimmingCharacters(in: CharacterSet(charactersIn: "\"'«»“”`").union(.whitespaces))
+        let typed = text.split(whereSeparator: \.isWhitespace).last.map(String.init) ?? ""
+        var rest: String
+        if !typed.isEmpty, answer.lowercased().hasPrefix(typed.lowercased()) {
+            rest = String(answer.dropFirst(typed.count)) // "" + "ручністю" or " next words"
+        } else {
+            rest = " " + answer // no echo: treat it as the next words
+        }
+        if text.last?.isWhitespace == true {
+            while rest.first == " " { rest.removeFirst() }
+        }
+        return clean(withoutRepeats(rest, after: text), beforeCursor: text)
+    }
+
+    /// Cuts the suggestion where it starts going round in circles: a word
+    /// pair it already said, or the pair the user just typed.
+    static func withoutRepeats(_ suggestion: String, after text: String) -> String {
+        func words(_ s: String) -> [String] { s.lowercased().split(whereSeparator: \.isWhitespace).map(String.init) }
+        let mine = words(suggestion)
+        var seen = Set<String>()
+        let typed = words(String(text.suffix(200)))
+        if typed.count >= 2 { seen.insert(typed.suffix(2).joined(separator: " ")) }
+        for i in mine.indices.dropLast() {
+            let pair = mine[i] + " " + mine[i + 1]
+            if seen.contains(pair) {
+                // Keep the words before the repeat (by position in the original text).
+                var count = 0, end = suggestion.startIndex, inWord = false
+                for j in suggestion.indices {
+                    let space = suggestion[j].isWhitespace
+                    if !space && !inWord { if count == i { break }; count += 1 }
+                    inWord = !space
+                    end = suggestion.index(after: j)
+                }
+                var kept = String(suggestion[..<end])
+                while kept.last?.isWhitespace == true { kept.removeLast() }
+                return kept
+            }
+            seen.insert(pair)
+        }
+        return suggestion
+    }
+
+    /// Tidy text to show: one line, at most `maxWords` words, no doubled
+    /// space when the user already typed one.
     static func clean(_ raw: String, beforeCursor text: String) -> String? {
         var line = String(raw.prefix { $0 != "\n" && $0 != "\r" })
         if text.last?.isWhitespace == true {

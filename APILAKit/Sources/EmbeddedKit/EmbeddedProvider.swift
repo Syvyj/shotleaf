@@ -61,17 +61,26 @@ public actor EmbeddedModel {
         return loaded
     }
 
-    /// Plain continuation of `prefix` (no chat template) for inline completion:
-    /// greedy, at most `maxTokens`, stops at the end of the line. Returns the
-    /// raw text the model would type next.
-    public func complete(_ prefix: String, maxTokens: Int = 12) async throws -> String {
+    /// What the autocomplete model is told. Echoing the last word shows
+    /// whether it finishes that word or starts a new one.
+    static let completionInstructions = """
+        You are an autocomplete engine inside a text field. The user's text so far is below; the cursor is at its very end. \
+        Reply with the user's last word exactly as typed, then the few words (at most 8) they will most likely type next — \
+        same language, tone and style. Only that, on one line: no quotes, no explanations, never repeat earlier text.
+        """
+
+    /// The model's guess of how `prefix` goes on, starting with an echo of
+    /// its last word (see `completionInstructions`). Greedy, short, one line.
+    public func complete(_ prefix: String, maxTokens: Int = 20) async throws -> String {
         let container = try await load()
+        let instructions = Self.completionInstructions
         return try await container.perform { context in
-            let tokens = context.tokenizer.encode(text: prefix, addSpecialTokens: true)
+            let input = try await context.processor.prepare(input: UserInput(chat: [.system(instructions), .user(prefix)]))
             var parameters = GenerateParameters()
             parameters.temperature = 0
+            parameters.repetitionPenalty = 1.25
             var produced: [Int] = []
-            _ = try generate(input: LMInput(tokens: MLXArray(tokens)), parameters: parameters, context: context) { ids in
+            _ = try generate(input: input, parameters: parameters, context: context) { ids in
                 produced = ids
                 if Task.isCancelled || ids.count >= maxTokens { return .stop }
                 return context.tokenizer.decode(tokenIds: ids, skipSpecialTokens: true).contains("\n") ? .stop : .more

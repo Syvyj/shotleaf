@@ -149,10 +149,12 @@ final class InlineCompletion {
                 guard !Task.isCancelled, let self else { return }
                 // Still the same field and text? Otherwise the user moved on.
                 guard let now = FocusedField.current(excluding: Self.excluded), now.beforeCursor == field.beforeCursor,
-                      let text = CompletionText.clean(raw, beforeCursor: field.beforeCursor)
+                      let text = CompletionText.fromEcho(raw, beforeCursor: field.beforeCursor)
                 else { return }
-                self.log.debug("suggestion in \(ContinuousClock.now - started, privacy: .public)")
-                self.show(text, in: now)
+                self.log.debug("suggestion in \(ContinuousClock.now - started, privacy: .public): \(raw, privacy: .private)")
+                // Only what fits before the field's right edge.
+                guard let visible = GhostPanel.fitting(text, caret: now.caret, rightEdge: now.rightEdge) else { return }
+                self.show(visible, in: now)
             } catch {
                 self?.log.error("completion failed: \(error.localizedDescription, privacy: .public)")
             }
@@ -246,6 +248,8 @@ struct FocusedField {
     let beforeCursor: String
     /// The character before the caret, in AppKit screen coordinates.
     let caret: CGRect
+    /// The field's right edge (screen x): suggestions stop there.
+    let rightEdge: CGFloat
 
     /// nil when there's no editable, non-secure field with an empty selection
     /// at the end of a line (or the app is excluded / APILA itself).
@@ -284,7 +288,14 @@ struct FocusedField {
         // AX uses top-left global coordinates; AppKit — bottom-left of the main screen.
         let top = NSScreen.screens.first?.frame.maxY ?? 0
         let caret = CGRect(x: bounds.minX, y: top - bounds.maxY, width: bounds.width, height: bounds.height)
-        return FocusedField(element: element, beforeCursor: text.substring(to: range.location), caret: caret)
+        var rightEdge = caret.maxX + 600
+        if let position: AXValue = attribute(element, kAXPositionAttribute), let size: AXValue = attribute(element, kAXSizeAttribute) {
+            var origin = CGPoint.zero, extent = CGSize.zero
+            if AXValueGetValue(position, .cgPoint, &origin), AXValueGetValue(size, .cgSize, &extent), extent.width > 0 {
+                rightEdge = origin.x + extent.width
+            }
+        }
+        return FocusedField(element: element, beforeCursor: text.substring(to: range.location), caret: caret, rightEdge: rightEdge)
     }
 
     private static func attribute<T>(_ element: AXUIElement, _ name: String) -> T? {
@@ -296,7 +307,7 @@ struct FocusedField {
 
 /// The grey suggestion right after the caret: a click-through, never-key panel.
 @MainActor
-private final class GhostPanel: NSPanel {
+final class GhostPanel: NSPanel {
     private let label = NSTextField(labelWithString: "")
 
     init() {
@@ -307,7 +318,7 @@ private final class GhostPanel: NSPanel {
         ignoresMouseEvents = true
         level = .popUpMenu
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
-        label.textColor = NSColor.secondaryLabelColor.withAlphaComponent(0.75)
+        label.textColor = NSColor.tertiaryLabelColor
         label.lineBreakMode = .byClipping
         contentView = label
     }
@@ -320,9 +331,26 @@ private final class GhostPanel: NSPanel {
     func show(text: String, caret: CGRect) {
         self.caret = caret
         // Roughly the field's font: a line is ~1.2× the font size.
-        label.font = .systemFont(ofSize: min(max(caret.height / 1.22, 11), 30))
+        label.font = Self.font(for: caret)
         update(text: text)
         orderFrontRegardless()
+    }
+
+    /// Roughly the field's font: a line is ~1.2× the font size.
+    static func font(for caret: CGRect) -> NSFont { .systemFont(ofSize: min(max(caret.height / 1.22, 11), 30)) }
+
+    /// The words of `text` that fit between the caret and `rightEdge`; nil if
+    /// not even the first one does.
+    static func fitting(_ text: String, caret: CGRect, rightEdge: CGFloat) -> String? {
+        let room = rightEdge - caret.maxX - 8
+        let attributes: [NSAttributedString.Key: Any] = [.font: font(for: caret)]
+        var candidate = text
+        while !candidate.trimmingCharacters(in: .whitespaces).isEmpty {
+            if NSAttributedString(string: candidate, attributes: attributes).size().width <= room { return candidate }
+            guard let cut = candidate.lastIndex(where: \.isWhitespace), cut > candidate.startIndex else { return nil }
+            candidate = String(candidate[..<cut])
+        }
+        return nil
     }
 
     func update(text: String) {
