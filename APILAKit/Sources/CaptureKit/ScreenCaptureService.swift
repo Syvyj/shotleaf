@@ -19,6 +19,15 @@ public struct ScreenCaptureService: CaptureService {
         return try Self.payload(png: Self.png(image))
     }
 
+    public func captureScrolling() async throws -> ImagePayload {
+        guard CGPreflightScreenCaptureAccess() else {
+            CGRequestScreenCaptureAccess()
+            throw AppError.permissionDenied("Screen Recording")
+        }
+        let image = try await ScrollCapture.shared.run()
+        return try Self.payload(png: Self.png(image))
+    }
+
     static func png(_ image: CGImage) throws -> Data {
         let data = NSMutableData()
         guard let dest = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, nil) else {

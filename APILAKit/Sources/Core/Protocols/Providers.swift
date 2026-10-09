@@ -36,6 +36,12 @@ public protocol ContextProviding: Sendable {
 /// Captures a region of the screen as an image.
 public protocol CaptureService: Sendable {
     func captureRegion() async throws -> ImagePayload
+    /// A long screenshot of an area the user scrolls.
+    func captureScrolling() async throws -> ImagePayload
+}
+
+extension CaptureService {
+    public func captureScrolling() async throws -> ImagePayload { throw AppError.cancelled }
 }
 
 /// Recognizes text in an image (Vision). Part of the broader PerceptionKit.

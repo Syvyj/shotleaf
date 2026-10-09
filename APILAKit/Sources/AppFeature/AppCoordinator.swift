@@ -167,6 +167,19 @@ public final class AppCoordinator {
         }
     }
 
+    /// Scrolling screenshot: pick an area, scroll it, press Done.
+    public func takeScrollingScreenshot() {
+        Task {
+            do {
+                screenshots.show(try await container.capture.captureScrolling())
+            } catch AppError.cancelled {
+            } catch {
+                openPanelForScreenshot()
+                panelVM.showError(error)
+            }
+        }
+    }
+
     /// The panel, opened fresh for working on a screenshot (no text selection).
     private func openPanelForScreenshot() {
         panelVM.present(snapshot: ContextSnapshot(capturedAt: Date()), sourceApp: NSWorkspace.shared.frontmostApplication)

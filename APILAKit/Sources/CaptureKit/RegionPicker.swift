@@ -15,9 +15,26 @@ final class RegionPicker {
     private var last: (displayID: CGDirectDisplayID, rect: CGRect)?
 
     private var windows: [NSPanel] = []
-    private var continuation: CheckedContinuation<CGImage, Error>?
+    private var continuation: CheckedContinuation<Picked, Error>?
 
+    /// What the user chose: a region of one display (from its frozen image).
+    /// Made and used on the main actor; only passes through the continuation.
+    struct Picked: @unchecked Sendable {
+        let screen: NSScreen
+        let displayID: CGDirectDisplayID
+        /// Points, top-left origin of that screen.
+        let rect: CGRect
+        fileprivate let frozen: Frozen
+    }
+
+    /// The chosen region as a picture.
     func pick() async throws -> CGImage {
+        let picked = try await pickArea()
+        return try Self.crop(picked.frozen, picked.rect).get()
+    }
+
+    /// Just where the user pointed (scrolling capture films it live).
+    func pickArea() async throws -> Picked {
         guard continuation == nil else { throw AppError.cancelled } // already picking
         let frozen = try await freezeScreens()
         guard !frozen.isEmpty else { throw AppError.missingContext("No screen to capture") }
@@ -31,7 +48,7 @@ final class RegionPicker {
 
     // MARK: Freeze
 
-    private struct Frozen {
+    fileprivate struct Frozen {
         let screen: NSScreen
         let displayID: CGDirectDisplayID
         let image: CGImage
@@ -126,16 +143,16 @@ final class RegionPicker {
     }
 
     private func complete(_ outcome: SelectionView.Outcome, on item: Frozen, frozen: [Frozen]) {
-        let result: Result<CGImage, Error>
+        let result: Result<Picked, Error>
         switch outcome {
         case .cancel:
             result = .failure(AppError.cancelled)
         case .region(let rect):
             last = (item.displayID, rect)
-            result = Self.crop(item, rect)
+            result = .success(Picked(screen: item.screen, displayID: item.displayID, rect: rect, frozen: item))
         case .repeatLast:
             if let last, let target = frozen.first(where: { $0.displayID == last.displayID }) {
-                result = Self.crop(target, last.rect)
+                result = .success(Picked(screen: target.screen, displayID: target.displayID, rect: last.rect, frozen: target))
             } else {
                 result = .failure(AppError.cancelled)
             }
@@ -148,7 +165,7 @@ final class RegionPicker {
         continuation?.resume(with: result)
     }
 
-    private static func crop(_ item: Frozen, _ rect: CGRect) -> Result<CGImage, Error> {
+    fileprivate static func crop(_ item: Frozen, _ rect: CGRect) -> Result<CGImage, Error> {
         let pixels = CaptureGeometry.pixelRect(
             fromView: rect,
             scale: item.screen.backingScaleFactor,
