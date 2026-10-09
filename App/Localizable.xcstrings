@@ -1748,6 +1748,16 @@
           }
         }
       }
+    },
+    "Completion model: Gemma 4 E2B base · about 3.6 GB, runs offline": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модель для дописування: Gemma 4 E2B base · близько 3,6 ГБ, працює без інтернету"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

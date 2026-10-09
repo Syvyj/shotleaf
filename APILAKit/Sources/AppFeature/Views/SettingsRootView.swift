@@ -66,7 +66,7 @@ public struct SettingsRootView: View {
                     ForEach(ProviderKind.allCases) { Text($0.displayName).tag($0) }
                 }
                 if binding.wrappedValue.kind == .embedded {
-                    embeddedRow
+                    modelRow(.chat, about: "Gemma 4 E2B · about 3.6 GB download, runs offline, sees screenshots")
                 } else {
                 TextField("Base URL", text: binding.baseURL)
                 if binding.wrappedValue.kind.needsAPIKey {
@@ -105,16 +105,15 @@ public struct SettingsRootView: View {
         }
     }
 
-    /// Download / progress / delete for the built-in model.
+    /// Download / progress / delete for a built-in model.
     @ViewBuilder
-    private var embeddedRow: some View {
-        switch coordinator.embeddedState {
+    private func modelRow(_ which: AppCoordinator.BuiltInModel, about: LocalizedStringKey) -> some View {
+        switch coordinator.state(of: which) {
         case .notDownloaded:
             HStack {
-                Text("Gemma 4 E2B · about 3.6 GB download, runs offline, sees screenshots")
-                    .font(.callout).foregroundStyle(.secondary)
+                Text(about).font(.callout).foregroundStyle(.secondary)
                 Spacer()
-                Button("Download") { coordinator.downloadEmbedded() }
+                Button("Download") { coordinator.download(which) }
             }
         case .downloading(let fraction):
             VStack(alignment: .leading, spacing: 4) {
@@ -127,13 +126,13 @@ public struct SettingsRootView: View {
                 Label("Downloaded · \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))", systemImage: "checkmark.circle")
                     .foregroundStyle(.green)
                 Spacer()
-                Button("Delete", role: .destructive) { coordinator.deleteEmbedded() }
+                Button("Delete", role: .destructive) { coordinator.delete(which) }
             }
         case .failed(let message):
             HStack {
                 Text("Download failed: \(message)").font(.caption).foregroundStyle(.red).lineLimit(3)
                 Spacer()
-                Button("Try again") { coordinator.downloadEmbedded() }
+                Button("Try again") { coordinator.download(which) }
             }
         }
     }
@@ -286,6 +285,9 @@ public struct SettingsRootView: View {
             Toggle(isOn: Binding(get: { coordinator.completionEnabled }, set: { coordinator.setCompletion($0) })) {
                 Text("Complete my text as I type")
                 Text("Grey suggestion after the cursor in any app · Tab — next word, ⌥Tab — all, esc — hide. Uses only the built-in model, on this Mac.")
+            }
+            if coordinator.completionEnabled {
+                modelRow(.completion, about: "Completion model: Gemma 4 E2B base · about 3.6 GB, runs offline")
             }
         } header: {
             Text("General")

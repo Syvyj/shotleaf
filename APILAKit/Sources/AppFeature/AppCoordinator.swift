@@ -288,35 +288,48 @@ public final class AppCoordinator {
         case failed(String)
     }
 
-    public private(set) var embeddedState: EmbeddedState =
-        EmbeddedModel.isDownloaded ? .ready(bytes: EmbeddedModel.sizeOnDisk) : .notDownloaded
+    /// The two built-in models: chat (actions, screenshots) and completion.
+    public enum BuiltInModel: Hashable, Sendable {
+        case chat, completion
+        var model: EmbeddedModel { self == .chat ? .shared : .completion }
+    }
 
-    /// Downloads (and loads) Gemma 4 E2B, reporting progress to Settings.
-    public func downloadEmbedded() {
-        guard embeddedState != .downloading(0) else { return }
-        embeddedState = .downloading(0)
+    public private(set) var modelStates: [BuiltInModel: EmbeddedState] = [
+        .chat: AppCoordinator.initialState(.chat), .completion: AppCoordinator.initialState(.completion),
+    ]
+
+    private static func initialState(_ which: BuiltInModel) -> EmbeddedState {
+        which.model.isDownloaded ? .ready(bytes: which.model.sizeOnDisk) : .notDownloaded
+    }
+
+    public func state(of which: BuiltInModel) -> EmbeddedState { modelStates[which] ?? .notDownloaded }
+
+    /// Downloads (and loads) a built-in model, reporting progress to Settings.
+    public func download(_ which: BuiltInModel) {
+        if case .downloading = state(of: which) { return }
+        modelStates[which] = .downloading(0)
         Task {
             do {
-                _ = try await EmbeddedModel.shared.load { fraction in
+                _ = try await which.model.load { fraction in
                     Task { @MainActor [weak self] in
-                        if case .downloading = self?.embeddedState { self?.embeddedState = .downloading(fraction) }
+                        if case .downloading = self?.state(of: which) { self?.modelStates[which] = .downloading(fraction) }
                     }
                 }
-                embeddedState = .ready(bytes: EmbeddedModel.sizeOnDisk)
+                modelStates[which] = .ready(bytes: which.model.sizeOnDisk)
             } catch {
-                embeddedState = .failed(error.localizedDescription)
+                modelStates[which] = .failed(error.localizedDescription)
             }
             await refreshProvider()
         }
     }
 
-    public func deleteEmbedded() {
+    public func delete(_ which: BuiltInModel) {
         Task {
             do {
-                try await EmbeddedModel.shared.delete()
-                embeddedState = .notDownloaded
+                try await which.model.delete()
+                modelStates[which] = .notDownloaded
             } catch {
-                embeddedState = .failed(error.localizedDescription)
+                modelStates[which] = .failed(error.localizedDescription)
             }
             await refreshProvider()
         }

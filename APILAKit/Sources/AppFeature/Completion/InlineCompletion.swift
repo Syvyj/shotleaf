@@ -18,7 +18,7 @@ final class InlineCompletion {
     private let log = Logger(subsystem: "app.apila.APILA", category: "completion")
     /// Marks APILA's own synthetic key events so the tap lets them through.
     private static let marker: Int64 = 0x4150_494C // "APIL"
-    private static let debounce: Duration = .milliseconds(320)
+    private static let debounce: Duration = .milliseconds(150)
 
     /// Apps where completion only gets in the way.
     private static let excluded: Set<String> = [
@@ -138,20 +138,20 @@ final class InlineCompletion {
     }
 
     private func suggest() {
-        guard EmbeddedModel.isDownloaded, let field = FocusedField.current(excluding: Self.excluded) else { return }
+        guard EmbeddedModel.completion.isDownloaded, let field = FocusedField.current(excluding: Self.excluded) else { return }
         guard CompletionText.shouldComplete(beforeCursor: field.beforeCursor) else { return }
         generation?.cancel()
         let prompt = CompletionText.prompt(beforeCursor: field.beforeCursor)
         generation = Task { [weak self] in
             do {
                 let started = ContinuousClock.now
-                let raw = try await EmbeddedModel.shared.complete(prompt)
+                let raw = try await EmbeddedModel.completion.complete(prompt)
                 guard !Task.isCancelled, let self else { return }
                 // Still the same field and text? Otherwise the user moved on.
                 guard let now = FocusedField.current(excluding: Self.excluded), now.beforeCursor == field.beforeCursor,
-                      let text = CompletionText.fromEcho(raw, beforeCursor: field.beforeCursor)
+                      let text = CompletionText.suggestion(fromContinuation: raw, beforeCursor: field.beforeCursor)
                 else { return }
-                self.log.debug("suggestion in \(ContinuousClock.now - started, privacy: .public): \(raw, privacy: .private)")
+                self.log.notice("suggestion in \(ContinuousClock.now - started, privacy: .public)")
                 // Only what fits before the field's right edge.
                 guard let visible = GhostPanel.fitting(text, caret: now.caret, rightEdge: now.rightEdge) else { return }
                 self.show(visible, in: now)

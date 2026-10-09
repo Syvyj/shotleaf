@@ -24,23 +24,11 @@ enum CompletionText {
         return trimmed.count >= 3 && text.last != "\n"
     }
 
-    /// The model's answer (the user's last word echoed, then the next words)
-    /// → the text to insert after the cursor. Finishes a half-typed word, adds
-    /// the space before a new one, drops repeats.
-    static func fromEcho(_ raw: String, beforeCursor text: String) -> String? {
-        var answer = String(raw.prefix { $0 != "\n" && $0 != "\r" })
-        answer = answer.trimmingCharacters(in: CharacterSet(charactersIn: "\"'«»“”`").union(.whitespaces))
-        let typed = text.split(whereSeparator: \.isWhitespace).last.map(String.init) ?? ""
-        var rest: String
-        if !typed.isEmpty, answer.lowercased().hasPrefix(typed.lowercased()) {
-            rest = String(answer.dropFirst(typed.count)) // "" + "ручністю" or " next words"
-        } else {
-            rest = " " + answer // no echo: treat it as the next words
-        }
-        if text.last?.isWhitespace == true {
-            while rest.first == " " { rest.removeFirst() }
-        }
-        return clean(withoutRepeats(rest, after: text), beforeCursor: text)
+    /// A base model's raw continuation → the text to show after the cursor:
+    /// one line, no loops, no doubled space.
+    static func suggestion(fromContinuation raw: String, beforeCursor text: String) -> String? {
+        let line = String(raw.prefix { $0 != "\n" && $0 != "\r" })
+        return clean(withoutRepeats(line, after: text), beforeCursor: text)
     }
 
     /// Cuts the suggestion where it starts going round in circles: a word

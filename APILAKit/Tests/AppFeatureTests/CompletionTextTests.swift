@@ -21,19 +21,17 @@ struct CompletionTextTests {
         #expect(C.clean(" привіт, як справи", beforeCursor: "Ну") == " привіт, як справи")
     }
 
-    @Test("Echoed last word: finishes a half word, or starts a new one with a space")
-    func echo() {
-        #expect(C.fromEcho("зручністю користування", beforeCursor: "Програма з") == "ручністю користування")
-        #expect(C.fromEcho("з повною перевіркою", beforeCursor: "Тепер текст з") == " повною перевіркою")
-        #expect(C.fromEcho("there, how are you?", beforeCursor: "Hello there") == ", how are you?")
-        #expect(C.fromEcho("there how are you", beforeCursor: "Hello there ") == "how are you")
-        #expect(C.fromEcho("«how are you»", beforeCursor: "Hello there") == " how are you")
-        #expect(C.fromEcho("there\nmore", beforeCursor: "Hello there") == nil)
+    @Test("Continuation: finishes a half word, starts a new one, one line")
+    func continuation() {
+        #expect(C.suggestion(fromContinuation: "ручністю користування", beforeCursor: "Програма з") == "ручністю користування")
+        #expect(C.suggestion(fromContinuation: " повною перевіркою\nдалі", beforeCursor: "Тепер текст з") == " повною перевіркою")
+        #expect(C.suggestion(fromContinuation: " how are you", beforeCursor: "Hello there ") == "how are you")
+        #expect(C.suggestion(fromContinuation: "\nmore", beforeCursor: "Hello") == nil)
     }
 
     @Test("Going round in circles is cut off")
     func repeats() {
-        #expect(C.fromEcho("з від тексту з від тексту з від тексту", beforeCursor: "перевіряю ввід тексту з") == " від")
+        #expect(C.suggestion(fromContinuation: " від тексту з від тексту з", beforeCursor: "перевіряю ввід тексту з") == " від")
         #expect(C.withoutRepeats(" a b c a b c", after: "x") == " a b c")
         #expect(C.withoutRepeats(" ввід тексту далі", after: "перевіряю ввід тексту") == "")
     }

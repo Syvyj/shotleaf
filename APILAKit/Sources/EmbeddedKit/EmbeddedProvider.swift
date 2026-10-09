@@ -4,37 +4,53 @@ import Foundation
 import HuggingFace
 import MLX
 import MLXHuggingFace
+import MLXLLM
 import MLXLMCommon
 import MLXVLM
 import Tokenizers
 
-/// APILA's built-in model (ADR-0006): Gemma 4 E2B, 4-bit, sees images — run
-/// on this Mac with MLX. Downloaded once from Hugging Face when the user asks
-/// (Settings), loaded on first use and kept in memory.
-/// ponytail: stays loaded until quit (~2 GB); unload after idle if memory matters.
+/// A built-in model run on this Mac with MLX (ADR-0006, ADR-0065). Downloaded
+/// once from Hugging Face when the user asks (Settings), loaded on first use
+/// and kept in memory.
+/// ponytail: stays loaded until quit (~2 GB each); unload after idle if memory matters.
 public actor EmbeddedModel {
-    public static let shared = EmbeddedModel()
-    public static let configuration = VLMRegistry.gemma4_E2B_it_4bit
-    public static let displayName = "Gemma 4 E2B"
+    /// Gemma 4 E2B instruct, sees images: the panel's actions and screenshots.
+    public static let shared = EmbeddedModel(
+        configuration: VLMRegistry.gemma4_E2B_it_4bit, textOnly: false, displayName: "Gemma 4 E2B")
+    /// Gemma 4 E2B *base*: a plain text continuer for inline completion —
+    /// instruct models answer instead of continuing, and need a slow prompt.
+    public static let completion = EmbeddedModel(
+        configuration: ModelConfiguration(id: "mlx-community/gemma-4-e2b-4bit"), textOnly: true, displayName: "Gemma 4 E2B base")
+
+    public nonisolated let configuration: ModelConfiguration
+    public nonisolated let displayName: String
+    /// Load only the language part (no vision/audio towers) — less memory.
+    private let textOnly: Bool
 
     private var container: ModelContainer?
     private var loading: Task<ModelContainer, Error>?
 
+    init(configuration: ModelConfiguration, textOnly: Bool, displayName: String) {
+        self.configuration = configuration
+        self.textOnly = textOnly
+        self.displayName = displayName
+    }
+
     /// Where Hugging Face keeps this model (`~/.cache/huggingface/hub/models--…`).
-    public nonisolated static var directory: URL? {
+    public nonisolated var directory: URL? {
         guard case .id(let id, _) = configuration.id, let repo = Repo.ID(rawValue: id) else { return nil }
         return HubCache.default.repoDirectory(repo: repo, kind: .model)
     }
 
     /// Weights are on disk (a finished download).
-    public nonisolated static var isDownloaded: Bool {
+    public nonisolated var isDownloaded: Bool {
         guard let directory, let files = FileManager.default.enumerator(at: directory, includingPropertiesForKeys: nil)
         else { return false }
         return files.contains { ($0 as? URL)?.pathExtension == "safetensors" }
     }
 
     /// Bytes on disk.
-    public nonisolated static var sizeOnDisk: Int64 {
+    public nonisolated var sizeOnDisk: Int64 {
         guard let directory, let files = FileManager.default.enumerator(at: directory, includingPropertiesForKeys: [.totalFileAllocatedSizeKey])
         else { return 0 }
         return files.reduce(Int64(0)) { sum, item in
@@ -48,11 +64,17 @@ public actor EmbeddedModel {
     public func load(progress: @Sendable @escaping (Double) -> Void = { _ in }) async throws -> ModelContainer {
         if let container { return container }
         if let loading { return try await loading.value }
+        let configuration = configuration, textOnly = textOnly
         let task = Task {
-            try await loadModelContainer(
-                from: #hubDownloader(), using: #huggingFaceTokenizerLoader(),
-                configuration: Self.configuration
-            ) { progress($0.fractionCompleted) }
+            if textOnly {
+                try await LLMModelFactory.shared.loadContainer(
+                    from: #hubDownloader(), using: #huggingFaceTokenizerLoader(), configuration: configuration
+                ) { progress($0.fractionCompleted) }
+            } else {
+                try await loadModelContainer(
+                    from: #hubDownloader(), using: #huggingFaceTokenizerLoader(), configuration: configuration
+                ) { progress($0.fractionCompleted) }
+            }
         }
         loading = task
         defer { loading = nil }
@@ -61,26 +83,17 @@ public actor EmbeddedModel {
         return loaded
     }
 
-    /// What the autocomplete model is told. Echoing the last word shows
-    /// whether it finishes that word or starts a new one.
-    static let completionInstructions = """
-        You are an autocomplete engine inside a text field. The user's text so far is below; the cursor is at its very end. \
-        Reply with the user's last word exactly as typed, then the few words (at most 8) they will most likely type next — \
-        same language, tone and style. Only that, on one line: no quotes, no explanations, never repeat earlier text.
-        """
-
-    /// The model's guess of how `prefix` goes on, starting with an echo of
-    /// its last word (see `completionInstructions`). Greedy, short, one line.
-    public func complete(_ prefix: String, maxTokens: Int = 20) async throws -> String {
+    /// How `prefix` goes on, from a base model: the raw continuation, greedy,
+    /// short, up to the end of the line.
+    public func complete(_ prefix: String, maxTokens: Int = 14) async throws -> String {
         let container = try await load()
-        let instructions = Self.completionInstructions
         return try await container.perform { context in
-            let input = try await context.processor.prepare(input: UserInput(chat: [.system(instructions), .user(prefix)]))
+            let tokens = context.tokenizer.encode(text: prefix, addSpecialTokens: true)
             var parameters = GenerateParameters()
             parameters.temperature = 0
-            parameters.repetitionPenalty = 1.25
+            parameters.repetitionPenalty = 1.15
             var produced: [Int] = []
-            _ = try generate(input: input, parameters: parameters, context: context) { ids in
+            _ = try generate(input: LMInput(tokens: MLXArray(tokens)), parameters: parameters, context: context) { ids in
                 produced = ids
                 if Task.isCancelled || ids.count >= maxTokens { return .stop }
                 return context.tokenizer.decode(tokenIds: ids, skipSpecialTokens: true).contains("\n") ? .stop : .more
@@ -92,7 +105,7 @@ public actor EmbeddedModel {
     /// Frees memory and disk.
     public func delete() throws {
         container = nil
-        if let directory = Self.directory, FileManager.default.fileExists(atPath: directory.path) {
+        if let directory, FileManager.default.fileExists(atPath: directory.path) {
             try FileManager.default.removeItem(at: directory)
         }
     }
@@ -109,14 +122,14 @@ public struct EmbeddedProvider: InferenceProvider {
         ProviderCapabilities(supportsVision: true, supportsAudio: false, maxContextTokens: 32_768)
     }
 
-    public var selectedModel: String? { EmbeddedModel.displayName }
+    public var selectedModel: String? { EmbeddedModel.shared.displayName }
 
     public func availableModels() async throws -> [ModelInfo] {
-        [ModelInfo(id: EmbeddedModel.displayName, displayName: EmbeddedModel.displayName)]
+        [ModelInfo(id: EmbeddedModel.shared.displayName, displayName: EmbeddedModel.shared.displayName)]
     }
 
     public func healthCheck() async -> ProviderHealth {
-        EmbeddedModel.isDownloaded ? .healthy : .unhealthy(reason: "the built-in model isn't downloaded yet (Settings → Download)")
+        EmbeddedModel.shared.isDownloaded ? .healthy : .unhealthy(reason: "the built-in model isn't downloaded yet (Settings → Download)")
     }
 
     public func stream(_ request: AIRequest) -> AsyncThrowingStream<TokenChunk, Error> {
