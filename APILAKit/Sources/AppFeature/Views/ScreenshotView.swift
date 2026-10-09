@@ -72,7 +72,7 @@ struct ScreenshotView: View {
         VStack(alignment: .leading, spacing: 12) {
             header.zIndex(1) // tips and menus draw over the canvas
             canvas
-            toolbar
+            toolbar.zIndex(1) // its tips show above, over the canvas
         }
         .onChange(of: doc.tool) { _, tool in
             if let tool, Self.shapeTools.contains(tool) { lastShape = tool }
@@ -613,7 +613,7 @@ struct ScreenshotView: View {
             Button { toggleLiveText() } label: { keyed("Text", "T") }
                 .buttonStyle(LeafButtonStyle(prominent: liveText != nil))
                 .keyboardShortcut("t", modifiers: [])
-                .instantTip(liveText == nil ? "Select text on the shot" : "Back to marks")
+                .instantTip(liveText == nil ? "Select text on the shot" : "Back to marks", above: true)
             Button { actions.ask() } label: { keyed("Ask AI", "A") }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("a", modifiers: [])
@@ -621,7 +621,7 @@ struct ScreenshotView: View {
             if doc.crop != nil {
                 Button("Apply crop") { doc.applyCrop(original: cgImage, size: displaySize) }
                     .buttonStyle(LeafButtonStyle(prominent: true))
-                    .instantTip("Keep only the cropped area — ⌘Z brings the rest back")
+                    .instantTip("Keep only the cropped area — ⌘Z brings the rest back", above: true)
             }
             if doc.selection != nil {
                 Button { if let id = doc.selection { doc.remove(id) } } label: { keyed("Delete", "⌫") }
