@@ -27,7 +27,7 @@ enum CompletionText {
         var clipboard: String?
     }
 
-    static let screenLimit = 1200
+    static let screenLimit = 600
     static let clipboardLimit = 400
 
     /// Base-model prompt with context: short labelled notes first, then a

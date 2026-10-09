@@ -153,9 +153,9 @@ final class InlineCompletion {
             do {
                 // Shown word by word as the model writes; any key press bumps
                 // `generationID` and the rest of this answer is ignored.
-                let result = try await EmbeddedModel.completion.complete(prompt) { partial in
+                let result = try await EmbeddedModel.completion.complete(prompt, onPartial: { partial in
                     Task { @MainActor in self.update(partial, finished: false, id: id, in: field, started: started) }
-                }
+                })
                 guard !Task.isCancelled else { return }
                 update(result.text, finished: result.finished, id: id, in: field, started: started)
                 log.notice("suggestion done in \(ContinuousClock.now - started, privacy: .public)")

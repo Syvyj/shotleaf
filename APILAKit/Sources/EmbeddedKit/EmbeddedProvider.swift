@@ -83,17 +83,21 @@ public actor EmbeddedModel {
         return loaded
     }
 
-    /// The continuation stops at the first token the model is less sure of
-    /// than this — there it's guessing. (A product over all tokens was far too
-    /// strict: 70% of requests showed nothing.)
-    public static let minTokenProbability: Float = 0.12
+    /// The continuation stops at a token the model is less sure of than this:
+    /// pure noise. Good first words often score 5–10% (the eval run showed
+    /// " на"@0.10 → "надіюся", " a"@0.07 → "a look"), so it stays low.
+    public static let minTokenProbability: Float = 0.03
 
     /// How `prefix` goes on, from a base model: greedy, short, one line, and
     /// cut where the model starts guessing (see `minConfidence`). `onPartial`
     /// gets the confident text so far after every token, to show as it's
     /// written. `finished` — the model ended the line itself (not cut).
+    /// `minProbability` / `trace` are for the evaluation run: see every token
+    /// and how sure the model was of it.
     public func complete(
-        _ prefix: String, maxTokens: Int = 14, onPartial: @Sendable @escaping (String) -> Void = { _ in }
+        _ prefix: String, maxTokens: Int = 10, minProbability: Float = EmbeddedModel.minTokenProbability,
+        trace: (@Sendable (String, Float) -> Void)? = nil,
+        onPartial: @Sendable @escaping (String) -> Void = { _ in }
     ) async throws -> (text: String, finished: Bool) {
         let container = try await load()
         return try await container.perform { context in
@@ -110,11 +114,14 @@ public actor EmbeddedModel {
             var finished = true
             _ = generate(input: LMInput(tokens: MLXArray(tokens)), context: context, iterator: iterator) { ids in
                 if Task.isCancelled { finished = false; return .stop }
-                if (probe.box.last ?? 1) < Self.minTokenProbability || ids.count > maxTokens { finished = false; return .stop }
+                let p = probe.box.last ?? 1
+                trace?(context.tokenizer.decode(tokenIds: [ids.last ?? 0], skipSpecialTokens: false), p)
+                if p < minProbability || ids.count > maxTokens { finished = false; return .stop }
                 kept = ids
                 let text = context.tokenizer.decode(tokenIds: ids, skipSpecialTokens: true)
                 onPartial(text)
-                return text.contains("\n") ? .stop : .more
+                // A suggestion never goes past the line or the sentence: no need to write on.
+                return text.contains(where: { "\n.!?…".contains($0) }) ? .stop : .more
             }
             return (context.tokenizer.decode(tokenIds: kept, skipSpecialTokens: true), finished)
         }

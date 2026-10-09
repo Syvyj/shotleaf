@@ -28,6 +28,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let coordinator = AppCoordinator()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if CommandLine.arguments.contains("--completion-eval") { // developer run, see CompletionEval
+            Task { await CompletionEval.run(); exit(0) }
+            return
+        }
         // One APILA at a time: two copies fight over the global hotkeys.
         let me = NSRunningApplication.current
         let others = NSRunningApplication.runningApplications(withBundleIdentifier: Bundle.main.bundleIdentifier ?? "")
