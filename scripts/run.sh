@@ -10,7 +10,7 @@ BUILD_DIR=build/DerivedData
 DEST="$HOME/Applications/APILA.app"
 
 xcodebuild -project APILA.xcodeproj -scheme APILA -configuration Debug \
-  -derivedDataPath "$BUILD_DIR" -quiet ENABLE_DEBUG_DYLIB=NO build
+  -derivedDataPath "$BUILD_DIR" -quiet -skipMacroValidation ENABLE_DEBUG_DYLIB=NO build
 
 pkill -x APILA || true
 # Wait until the old copy is really gone: a new one that still sees it running

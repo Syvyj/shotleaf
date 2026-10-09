@@ -6,6 +6,7 @@ import Observation
 import SwiftUI
 import ServiceManagement
 import OSLog
+import EmbeddedKit
 
 /// Orchestrates the full vertical slice — Hotkey → ContextKit → ActionRunner →
 /// InferenceKit → Floating Panel → Clipboard/Replace. Pure wiring: it owns no
@@ -275,6 +276,49 @@ public final class AppCoordinator {
         settings.setAPIKey(draft.apiKey.trimmingCharacters(in: .whitespacesAndNewlines), for: draft.kind.rawValue)
         container.applyProviderSettings()
         await refreshProvider()
+    }
+
+    // MARK: Built-in model
+
+    public enum EmbeddedState: Equatable {
+        case notDownloaded
+        case downloading(Double)
+        case ready(bytes: Int64)
+        case failed(String)
+    }
+
+    public private(set) var embeddedState: EmbeddedState =
+        EmbeddedModel.isDownloaded ? .ready(bytes: EmbeddedModel.sizeOnDisk) : .notDownloaded
+
+    /// Downloads (and loads) Gemma 4 E2B, reporting progress to Settings.
+    public func downloadEmbedded() {
+        guard embeddedState != .downloading(0) else { return }
+        embeddedState = .downloading(0)
+        Task {
+            do {
+                _ = try await EmbeddedModel.shared.load { fraction in
+                    Task { @MainActor [weak self] in
+                        if case .downloading = self?.embeddedState { self?.embeddedState = .downloading(fraction) }
+                    }
+                }
+                embeddedState = .ready(bytes: EmbeddedModel.sizeOnDisk)
+            } catch {
+                embeddedState = .failed(error.localizedDescription)
+            }
+            await refreshProvider()
+        }
+    }
+
+    public func deleteEmbedded() {
+        Task {
+            do {
+                try await EmbeddedModel.shared.delete()
+                embeddedState = .notDownloaded
+            } catch {
+                embeddedState = .failed(error.localizedDescription)
+            }
+            await refreshProvider()
+        }
     }
 
     public func availableModels(for draft: ProviderSettings) async throws -> [String] {

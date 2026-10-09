@@ -6,6 +6,7 @@ import CaptureKit
 import PerceptionKit
 import ActionKit
 import SettingsKit
+import EmbeddedKit
 
 /// The Composition Root: the ONE place that knows every module and wires
 /// concrete implementations to the protocols defined in Core. Holds only the
@@ -26,6 +27,8 @@ public final class AppContainer: Sendable {
         id: "primary",
         configuration: ProviderKind.lmStudio.configuration(model: ProviderKind.lmStudio.defaultModel)
     )
+    /// The built-in model; current when the user picks "Built-in".
+    private let embedded = EmbeddedProvider()
     private let mock = MockStreamingProvider(
         id: AppContainer.mockProviderID,
         reply: "This is a mock response from APILA. Connect LM Studio, Ollama, or an OpenAI-compatible endpoint to get real results."
@@ -60,6 +63,7 @@ public final class AppContainer: Sendable {
     public func bootstrap() async {
         applyProviderSettings()
         await registry.register(primary)
+        await registry.register(embedded)
         await registry.register(mock)
     }
 
@@ -67,7 +71,7 @@ public final class AppContainer: Sendable {
         ProviderKind(rawValue: settings.providerKind ?? "") ?? .lmStudio
     }
 
-    public var providerModel: String { primary.selectedModel ?? "" }
+    public var providerModel: String { providerKind == .embedded ? "" : primary.selectedModel ?? "" }
 
     /// Pushes saved provider settings (kind, URL, Keychain key, model) into `primary`.
     public func applyProviderSettings() {
@@ -97,8 +101,9 @@ public final class AppContainer: Sendable {
     /// the UI always works. Called on every panel show, so a server started later
     /// is picked up without restarting APILA.
     public func refreshProvider() async -> ProviderHealth {
-        let health = await primary.healthCheck()
-        await registry.setCurrent(id: health == .healthy ? primary.id : mock.id)
+        let chosen: any InferenceProvider = providerKind == .embedded ? embedded : primary
+        let health = await chosen.healthCheck()
+        await registry.setCurrent(id: health == .healthy ? chosen.id : mock.id)
         return health
     }
 

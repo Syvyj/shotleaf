@@ -65,6 +65,9 @@ public struct SettingsRootView: View {
                 Picker("Provider", selection: kindBinding(binding)) {
                     ForEach(ProviderKind.allCases) { Text($0.displayName).tag($0) }
                 }
+                if binding.wrappedValue.kind == .embedded {
+                    embeddedRow
+                } else {
                 TextField("Base URL", text: binding.baseURL)
                 if binding.wrappedValue.kind.needsAPIKey {
                     SecureField("API key", text: binding.apiKey)
@@ -86,6 +89,7 @@ public struct SettingsRootView: View {
                 if let modelsError {
                     Text(modelsError).font(.caption).foregroundStyle(.red)
                 }
+                }
                 HStack {
                     statusLine
                     Spacer()
@@ -97,6 +101,39 @@ public struct SettingsRootView: View {
                 Text("Model provider")
             } footer: {
                 Text("API keys are stored in the macOS Keychain. If the provider is unreachable, APILA falls back to Mock. Without image support, screenshots are sent as on-device OCR text.")
+            }
+        }
+    }
+
+    /// Download / progress / delete for the built-in model.
+    @ViewBuilder
+    private var embeddedRow: some View {
+        switch coordinator.embeddedState {
+        case .notDownloaded:
+            HStack {
+                Text("Gemma 4 E2B · about 3.5 GB download, runs offline, sees screenshots")
+                    .font(.callout).foregroundStyle(.secondary)
+                Spacer()
+                Button("Download") { coordinator.downloadEmbedded() }
+            }
+        case .downloading(let fraction):
+            VStack(alignment: .leading, spacing: 4) {
+                ProgressView(value: fraction)
+                Text(fraction < 1 ? "Downloading… \(Int(fraction * 100))%" : "Loading the model…")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        case .ready(let bytes):
+            HStack {
+                Label("Downloaded · \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))", systemImage: "checkmark.circle")
+                    .foregroundStyle(.green)
+                Spacer()
+                Button("Delete", role: .destructive) { coordinator.deleteEmbedded() }
+            }
+        case .failed(let message):
+            HStack {
+                Text("Download failed: \(message)").font(.caption).foregroundStyle(.red).lineLimit(3)
+                Spacer()
+                Button("Try again") { coordinator.downloadEmbedded() }
             }
         }
     }

@@ -64,7 +64,7 @@
 - [x] OCR через Vision (on-device, укр./англ. тощо) → `PerceptionKit`; «Text from Screenshot» у панелі та меню
 - [x] Окремий глобальний хоткей «Text from Screenshot» (за замовчуванням ⌘⇧1; ⌘⇧2 — скріншот, ⌘⇧3 — скролінговий; можна вимкнути або записати свій)
 - [x] Анотації на скріншоті / власний оверлей вибору області (етап 6: інструменти, виноски, Live Text, кроп)
-- [ ] Embedded-модель на MLX Swift (Gemma, ADR-0006)
+- [x] Embedded-модель на MLX Swift: Gemma 4 E2B 4-bit (VLM), провайдер «Built-in», завантаження в Settings (ADR-0006, ADR-0064)
 - [ ] Дописування тексту inline (Cotypist-ідея) — найскладніше, останнім
 - [ ] Підпис Developer ID + нотаризація
 

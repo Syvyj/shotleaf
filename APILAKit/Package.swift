@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.1
 import PackageDescription
 
 // APILA — macOS AI Productivity Suite.
@@ -22,6 +22,13 @@ let package = Package(
         .library(name: "SettingsKit", targets: ["SettingsKit"]),
         .library(name: "AppFeature", targets: ["AppFeature"]),
     ],
+    dependencies: [
+        // On-device model (ADR-0006). The FoundationModels bridge needs the
+        // macOS 27 SDK, so that trait is off.
+        .package(url: "https://github.com/ml-explore/mlx-swift-lm", .upToNextMinor(from: "3.32.3"), traits: []),
+        .package(url: "https://github.com/huggingface/swift-huggingface", from: "0.9.0"),
+        .package(url: "https://github.com/huggingface/swift-transformers", from: "1.3.0"),
+    ],
     targets: [
         // Foundation-only contracts and domain types. Depends on nothing.
         .target(name: "Core"),
@@ -33,6 +40,18 @@ let package = Package(
         .target(name: "PerceptionKit", dependencies: ["Core"]),
         .target(name: "ActionKit", dependencies: ["Core"]),
         .target(name: "SettingsKit", dependencies: ["Core"]),
+        // The built-in model: Gemma 4 E2B on MLX. Heavy dependencies stay here.
+        .target(
+            name: "EmbeddedKit",
+            dependencies: [
+                "Core",
+                .product(name: "MLXVLM", package: "mlx-swift-lm"),
+                .product(name: "MLXLMCommon", package: "mlx-swift-lm"),
+                .product(name: "MLXHuggingFace", package: "mlx-swift-lm"),
+                .product(name: "HuggingFace", package: "swift-huggingface"),
+                .product(name: "Tokenizers", package: "swift-transformers"),
+            ]
+        ),
 
         // App composition layer (the only module that knows everything). The
         // .xcodeproj app target links this; `swift build` also compiles it so
@@ -41,7 +60,7 @@ let package = Package(
             name: "AppFeature",
             dependencies: [
                 "Core", "InferenceKit", "ContextKit", "CaptureKit",
-                "PerceptionKit", "ActionKit", "SettingsKit",
+                "PerceptionKit", "ActionKit", "SettingsKit", "EmbeddedKit",
             ]
         ),
 

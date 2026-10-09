@@ -5,12 +5,15 @@ import Foundation
 /// API, so a kind is only defaults (URL / auth / headers / capabilities) for the
 /// ONE `OpenAICompatibleProvider` — never different logic.
 public enum ProviderKind: String, CaseIterable, Sendable, Identifiable {
+    /// The built-in model (EmbeddedKit) — no URL, key or server.
+    case embedded
     case lmStudio, ollama, openAI, openRouter, custom
 
     public var id: String { rawValue }
 
     public var displayName: String {
         switch self {
+        case .embedded: "Built-in (Gemma 4 E2B, on this Mac)"
         case .lmStudio: "LM Studio"
         case .ollama: "Ollama"
         case .openAI: "OpenAI"
@@ -21,6 +24,7 @@ public enum ProviderKind: String, CaseIterable, Sendable, Identifiable {
 
     public var defaultBaseURL: URL {
         switch self {
+        case .embedded: URL(string: "apila://embedded")!
         case .lmStudio: LMStudioAdapter.defaultBaseURL
         case .ollama: URL(string: "http://localhost:11434/v1")!
         case .openAI: URL(string: "https://api.openai.com/v1")!
@@ -37,6 +41,7 @@ public enum ProviderKind: String, CaseIterable, Sendable, Identifiable {
     public var capabilities: ProviderCapabilities {
         switch self {
         case .openAI, .openRouter: ProviderCapabilities(supportsVision: true, supportsAudio: false, maxContextTokens: 128_000)
+        case .embedded: ProviderCapabilities(supportsVision: true, supportsAudio: false, maxContextTokens: 32_768)
         case .lmStudio: ProviderCapabilities(supportsVision: true, supportsAudio: false, maxContextTokens: 32_768)
         case .ollama, .custom: ProviderCapabilities(supportsVision: false, supportsAudio: false, maxContextTokens: 32_768)
         }
