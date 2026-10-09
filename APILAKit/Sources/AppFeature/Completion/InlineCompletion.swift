@@ -34,6 +34,8 @@ final class InlineCompletion {
     private var tap: CFMachPort?
     private var debounceTask: Task<Void, Never>?
     private var generation: Task<Void, Never>?
+    /// Bumped by every key press: partial results of an older request are dropped.
+    private var generationID = 0
     private let ghost = GhostPanel()
     /// What's on screen now, and where it belongs.
     private var suggestion: String?
@@ -129,6 +131,7 @@ final class InlineCompletion {
     // MARK: Suggest
 
     private func schedule() {
+        generationID += 1
         debounceTask?.cancel()
         debounceTask = Task { [weak self] in
             try? await Task.sleep(for: Self.debounce)
@@ -142,23 +145,31 @@ final class InlineCompletion {
         guard CompletionText.shouldComplete(beforeCursor: field.beforeCursor) else { return }
         generation?.cancel()
         let prompt = CompletionText.prompt(beforeCursor: field.beforeCursor)
-        generation = Task { [weak self] in
+        let id = generationID
+        let started = ContinuousClock.now
+        generation = Task { // the controller lives as long as the app
             do {
-                let started = ContinuousClock.now
-                let raw = try await EmbeddedModel.completion.complete(prompt)
-                guard !Task.isCancelled, let self else { return }
-                // Still the same field and text? Otherwise the user moved on.
-                guard let now = FocusedField.current(excluding: Self.excluded), now.beforeCursor == field.beforeCursor,
-                      let text = CompletionText.suggestion(fromContinuation: raw, beforeCursor: field.beforeCursor)
-                else { return }
-                self.log.notice("suggestion in \(ContinuousClock.now - started, privacy: .public)")
-                // Only what fits before the field's right edge.
-                guard let visible = GhostPanel.fitting(text, caret: now.caret, rightEdge: now.rightEdge) else { return }
-                self.show(visible, in: now)
+                // Shown word by word as the model writes; any key press bumps
+                // `generationID` and the rest of this answer is ignored.
+                let raw = try await EmbeddedModel.completion.complete(prompt) { partial in
+                    Task { @MainActor in self.update(partial, id: id, in: field, started: started) }
+                }
+                guard !Task.isCancelled else { return }
+                update(raw, id: id, in: field, started: started)
+                log.notice("suggestion done in \(ContinuousClock.now - started, privacy: .public)")
             } catch {
-                self?.log.error("completion failed: \(error.localizedDescription, privacy: .public)")
+                log.error("completion failed: \(error.localizedDescription, privacy: .public)")
             }
         }
+    }
+
+    private func update(_ raw: String, id: Int, in field: FocusedField, started: ContinuousClock.Instant) {
+        guard id == generationID,
+              let text = CompletionText.suggestion(fromContinuation: raw, beforeCursor: field.beforeCursor),
+              let visible = GhostPanel.fitting(text, caret: field.caret, rightEdge: field.rightEdge) // stop at the field's edge
+        else { return }
+        if suggestion == nil { log.notice("first words in \(ContinuousClock.now - started, privacy: .public)") }
+        show(visible, in: field)
     }
 
     private func show(_ text: String, in field: FocusedField) {
@@ -192,6 +203,7 @@ final class InlineCompletion {
 
     /// Hides the suggestion and forgets pending work.
     private func dismiss() {
+        generationID += 1
         debounceTask?.cancel()
         generation?.cancel()
         hide()
@@ -243,7 +255,8 @@ private func inlineCompletionTapCallback(
 }
 
 /// The text field that has the keyboard, read through Accessibility.
-struct FocusedField {
+/// Immutable; the AX element is a CF reference, safe to pass between threads.
+struct FocusedField: @unchecked Sendable {
     let element: AXUIElement
     let beforeCursor: String
     /// The character before the caret, in AppKit screen coordinates.

@@ -84,8 +84,11 @@ public actor EmbeddedModel {
     }
 
     /// How `prefix` goes on, from a base model: the raw continuation, greedy,
-    /// short, up to the end of the line.
-    public func complete(_ prefix: String, maxTokens: Int = 14) async throws -> String {
+    /// short, up to the end of the line. `onPartial` gets the text so far
+    /// after every token, so it can be shown as it's written.
+    public func complete(
+        _ prefix: String, maxTokens: Int = 14, onPartial: @Sendable @escaping (String) -> Void = { _ in }
+    ) async throws -> String {
         let container = try await load()
         return try await container.perform { context in
             let tokens = context.tokenizer.encode(text: prefix, addSpecialTokens: true)
@@ -96,7 +99,9 @@ public actor EmbeddedModel {
             _ = try generate(input: LMInput(tokens: MLXArray(tokens)), parameters: parameters, context: context) { ids in
                 produced = ids
                 if Task.isCancelled || ids.count >= maxTokens { return .stop }
-                return context.tokenizer.decode(tokenIds: ids, skipSpecialTokens: true).contains("\n") ? .stop : .more
+                let text = context.tokenizer.decode(tokenIds: ids, skipSpecialTokens: true)
+                onPartial(text)
+                return text.contains("\n") ? .stop : .more
             }
             return context.tokenizer.decode(tokenIds: produced, skipSpecialTokens: true)
         }
