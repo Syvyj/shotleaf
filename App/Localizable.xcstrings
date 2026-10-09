@@ -1758,6 +1758,46 @@
           }
         }
       }
+    },
+    "Use text on screen": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Враховувати текст на екрані"
+          }
+        }
+      }
+    },
+    "Reads the window you type in (the chat, the page) so suggestions fit. On this Mac only; needs Screen Recording.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Читає вікно, де ви пишете (переписку, сторінку), щоб підказки були в тему. Тільки на цьому Mac; потрібен дозвіл на запис екрана."
+          }
+        }
+      }
+    },
+    "Use what I just copied": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Враховувати щойно скопійоване"
+          }
+        }
+      }
+    },
+    "Text copied in the last 5 minutes.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст, скопійований за останні 5 хвилин."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

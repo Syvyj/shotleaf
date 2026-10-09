@@ -72,6 +72,8 @@ public final class AppCoordinator {
         await container.bootstrap()
         await refreshProvider()
         refreshPermissions()
+        inlineCompletion.context.useScreen = container.settings.completionUsesScreen
+        inlineCompletion.context.useClipboard = container.settings.completionUsesClipboard
         if container.settings.completionEnabled { inlineCompletion.start() }
         Self.log.notice("startup permissions: \(String(describing: self.permissions), privacy: .public) bundle: \(Bundle.main.bundlePath, privacy: .public)")
 
@@ -365,6 +367,14 @@ public final class AppCoordinator {
     private let inlineCompletion = InlineCompletion()
 
     public var completionEnabled: Bool { container.settings.completionEnabled }
+
+    public var completionUsesScreen: Bool { container.settings.completionUsesScreen }
+    public var completionUsesClipboard: Bool { container.settings.completionUsesClipboard }
+
+    public func setCompletionContext(screen: Bool? = nil, clipboard: Bool? = nil) {
+        if let screen { container.settings.completionUsesScreen = screen; inlineCompletion.context.useScreen = screen }
+        if let clipboard { container.settings.completionUsesClipboard = clipboard; inlineCompletion.context.useClipboard = clipboard }
+    }
 
     public func setCompletion(_ on: Bool) {
         container.settings.completionEnabled = on

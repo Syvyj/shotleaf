@@ -84,6 +84,18 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "completionEnabled") }
     }
 
+    /// Inline completion may read the text on screen (OCR) for context.
+    public var completionUsesScreen: Bool {
+        get { defaults.object(forKey: "completionUsesScreen") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "completionUsesScreen") }
+    }
+
+    /// Inline completion may use what was just copied.
+    public var completionUsesClipboard: Bool {
+        get { defaults.object(forKey: "completionUsesClipboard") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "completionUsesClipboard") }
+    }
+
     /// The first-run setup guide was finished (or dismissed).
     public var onboardingCompleted: Bool {
         get { defaults.bool(forKey: "onboardingCompleted") }

@@ -288,6 +288,14 @@ public struct SettingsRootView: View {
             }
             if coordinator.completionEnabled {
                 modelRow(.completion, about: "Completion model: Gemma 4 E2B base · about 3.6 GB, runs offline")
+                Toggle(isOn: Binding(get: { coordinator.completionUsesScreen }, set: { coordinator.setCompletionContext(screen: $0) })) {
+                    Text("Use text on screen")
+                    Text("Reads the window you type in (the chat, the page) so suggestions fit. On this Mac only; needs Screen Recording.")
+                }
+                Toggle(isOn: Binding(get: { coordinator.completionUsesClipboard }, set: { coordinator.setCompletionContext(clipboard: $0) })) {
+                    Text("Use what I just copied")
+                    Text("Text copied in the last 5 minutes.")
+                }
             }
         } header: {
             Text("General")

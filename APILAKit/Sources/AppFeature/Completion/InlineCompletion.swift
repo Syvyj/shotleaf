@@ -37,6 +37,8 @@ final class InlineCompletion {
     /// Bumped by every key press: partial results of an older request are dropped.
     private var generationID = 0
     private let ghost = GhostPanel()
+    /// Screen text, clipboard, app — what the model knows besides the field.
+    let context = CompletionContext()
     /// What's on screen now, and where it belongs.
     private var suggestion: String?
     private var field: FocusedField?
@@ -144,7 +146,7 @@ final class InlineCompletion {
         guard EmbeddedModel.completion.isDownloaded, let field = FocusedField.current(excluding: Self.excluded) else { return }
         guard CompletionText.shouldComplete(beforeCursor: field.beforeCursor) else { return }
         generation?.cancel()
-        let prompt = CompletionText.prompt(beforeCursor: field.beforeCursor)
+        let prompt = CompletionText.prompt(beforeCursor: field.beforeCursor, context: context.current(for: field.element))
         let id = generationID
         let started = ContinuousClock.now
         generation = Task { // the controller lives as long as the app
