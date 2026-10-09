@@ -55,7 +55,7 @@ enum AnnotationRenderer {
             case .highlight(let r): highlight(r, color: color, in: ctx)
             case .blur(let r): pixelate(r, image: image, imageSize: imageSize, in: ctx)
             case .step(let c, let n): step(c, number: n, color: item.color.nsColor, in: ctx)
-            case .text(let o, let s, let tail, let w): callout(s, at: o, tail: tail, width: w, color: item.color.nsColor, in: ctx)
+            case .text(let o, let s, let tail, let w, let f): callout(s, at: o, tail: tail, width: w, size: f, color: item.color.nsColor, in: ctx)
             case .erase(let r, let fill): erase(r, fill: fill, imageSize: imageSize, in: ctx)
             case .piece(let source, let offset, let fill):
                 erase(source, fill: fill, imageSize: imageSize, in: ctx)
@@ -147,8 +147,9 @@ enum AnnotationRenderer {
 
     /// A bubble in the mark's color with the text on it, and a tapering tail
     /// from the bubble's middle to `tail` (the bubble hides its root).
-    private static func callout(_ s: String, at o: CGPoint, tail: CGPoint?, width: CGFloat?, color: NSColor, in ctx: CGContext) {
-        let bubble = AnnotationStyle.bubble(origin: o, string: s, width: width)
+    private static func callout(_ s: String, at o: CGPoint, tail: CGPoint?, width: CGFloat?, size: CGFloat,
+                                color: NSColor, in ctx: CGContext) {
+        let bubble = AnnotationStyle.bubble(origin: o, string: s, width: width, size: size)
         ctx.saveGState()
         softShadow(ctx)
         ctx.setFillColor(color.cgColor)
@@ -168,7 +169,7 @@ enum AnnotationRenderer {
         ctx.endTransparencyLayer()
         ctx.restoreGState()
         let light = [AnnotationColor.white, .amber].map(\.nsColor).contains(color)
-        var attributes = AnnotationStyle.textAttributes(color: light ? .black : .white)
+        var attributes = AnnotationStyle.textAttributes(color: light ? .black : .white, size: size)
         attributes[.shadow] = nil
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: true)

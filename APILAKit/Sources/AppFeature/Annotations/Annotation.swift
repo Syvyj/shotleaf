@@ -13,7 +13,7 @@ struct Annotation: Identifiable, Equatable {
         case step(center: CGPoint, number: Int)
         /// A callout: text on a bubble, with an optional tail pointing at `tail`.
         /// Lines wrap at `width` (nil = the default wrap).
-        case text(origin: CGPoint, string: String, tail: CGPoint? = nil, width: CGFloat? = nil)
+        case text(origin: CGPoint, string: String, tail: CGPoint? = nil, width: CGFloat? = nil, size: CGFloat = AnnotationStyle.fontSize)
         /// "Smart eraser": paints the area with the color around it (wipes text
         /// off a plain background).
         case erase(CGRect, fill: NSColor)
@@ -52,8 +52,8 @@ struct Annotation: Identifiable, Equatable {
         case .step(let c, _):
             let r = AnnotationStyle.stepRadius
             return CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)
-        case .text(let o, let s, let tail, let w):
-            let bubble = AnnotationStyle.bubble(origin: o, string: s, width: w)
+        case .text(let o, let s, let tail, let w, let f):
+            let bubble = AnnotationStyle.bubble(origin: o, string: s, width: w, size: f)
             return tail.map { bubble.union(CGRect(origin: $0, size: .zero)).insetBy(dx: -2, dy: -2) } ?? bubble
         }
     }
@@ -145,6 +145,8 @@ final class AnnotationDocument {
     var tool: AnnotationTool?
     var color: AnnotationColor = .coral
     var lineWidth: CGFloat = AnnotationStyle.stroke
+    /// Font size for new callouts.
+    var fontSize: CGFloat = AnnotationStyle.fontSize
     /// The mark showing handles (newly drawn marks are selected too).
     var selection: Annotation.ID?
 
@@ -272,31 +274,35 @@ enum AnnotationStyle {
     static let minTextWidth: CGFloat = 40
 
     /// The wrapped text's size (`width` nil = `textWrap`).
-    static func textSize(_ string: String, width: CGFloat?) -> CGSize {
-        let r = NSAttributedString(string: string, attributes: textAttributes(color: .black))
+    /// Callout font sizes on offer, and the default.
+    static let fontSizes: [CGFloat] = [14, 18, 22, 28, 36, 48]
+    static let fontSize: CGFloat = 22
+
+    static func textSize(_ string: String, width: CGFloat?, size: CGFloat) -> CGSize {
+        let r = NSAttributedString(string: string, attributes: textAttributes(color: .black, size: size))
             .boundingRect(with: CGSize(width: width ?? textWrap, height: .greatestFiniteMagnitude),
                           options: [.usesLineFragmentOrigin, .usesFontLeading])
         return CGSize(width: ceil(r.width), height: ceil(r.height))
     }
 
     /// The callout bubble around a text mark (text starts at `origin`).
-    static func bubble(origin: CGPoint, string: String, width: CGFloat?) -> CGRect {
-        CGRect(origin: origin, size: textSize(string, width: width)).insetBy(dx: -10, dy: -5)
+    static func bubble(origin: CGPoint, string: String, width: CGFloat?, size: CGFloat) -> CGRect {
+        CGRect(origin: origin, size: textSize(string, width: width, size: size)).insetBy(dx: -10, dy: -5)
     }
 
     /// Where a new callout's tail points: down-left of the bubble.
-    static func defaultTail(origin: CGPoint, string: String) -> CGPoint {
-        let b = bubble(origin: origin, string: string, width: nil)
+    static func defaultTail(origin: CGPoint, string: String, size: CGFloat) -> CGPoint {
+        let b = bubble(origin: origin, string: string, width: nil, size: size)
         return CGPoint(x: b.minX - 28, y: b.maxY + 40)
     }
 
-    static func textAttributes(color: NSColor) -> [NSAttributedString.Key: Any] {
+    static func textAttributes(color: NSColor, size: CGFloat = fontSize) -> [NSAttributedString.Key: Any] {
         let shadow = NSShadow()
         shadow.shadowColor = NSColor.black.withAlphaComponent(0.35)
         shadow.shadowBlurRadius = 3
         shadow.shadowOffset = NSSize(width: 0, height: -1)
-        let font = NSFont.systemFont(ofSize: 22, weight: .bold)
-        let rounded = font.fontDescriptor.withDesign(.rounded).flatMap { NSFont(descriptor: $0, size: 22) } ?? font
+        let font = NSFont.systemFont(ofSize: size, weight: .bold)
+        let rounded = font.fontDescriptor.withDesign(.rounded).flatMap { NSFont(descriptor: $0, size: size) } ?? font
         return [.font: rounded, .foregroundColor: color, .shadow: shadow]
     }
 }

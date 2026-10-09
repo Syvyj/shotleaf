@@ -41,13 +41,13 @@ struct ScreenshotView: View {
     @State private var dragStart: CGPoint?
     @State private var dragNow: CGPoint?
     @State private var drag: Drag?
-    @State private var textDraft: (origin: CGPoint, string: String, width: CGFloat?)?
+    @State private var textDraft: (origin: CGPoint, string: String, width: CGFloat?, size: CGFloat)?
     /// The text mark being re-edited (double-click), hidden while its field is open.
     @State private var editingTextID: Annotation.ID?
     /// For double-click detection on marks.
     @State private var lastClick: (id: Annotation.ID, at: Date)?
     @FocusState private var textFocused: Bool
-    private enum Flyout { case shapes, style }
+    private enum Flyout { case shapes, style, fontSize }
     @State private var flyout: Flyout?
     /// The shape the shapes button shows when another tool is in use.
     @State private var lastShape: AnnotationTool = .arrow
@@ -135,6 +135,7 @@ struct ScreenshotView: View {
             }
             divider
             styleButton
+            fontSizeButton
         }
         .fixedSize(horizontal: false, vertical: true)
         .disabled(editingText)
@@ -266,6 +267,57 @@ struct ScreenshotView: View {
         }
     }
 
+    /// Callout text size: for new text, and the selected callout.
+    private var fontSizeButton: some View {
+        Button { flyout = flyout == .fontSize ? nil : .fontSize } label: {
+            HStack(spacing: 5) {
+                Text("Aa").font(Leaf.font(15, .bold))
+                Text(verbatim: "\(Int(currentFontSize))").font(Leaf.font(12, .semibold)).monospacedDigit().opacity(0.6)
+                chevron
+            }
+            .fixedSize()
+            .padding(.horizontal, 8)
+            .frame(height: 36)
+            .background(tile(flyout == .fontSize))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .instantTip("Text size", hidden: flyout == .fontSize)
+        .overlay(alignment: .topLeading) {
+            if flyout == .fontSize {
+                flyoutCard {
+                    ForEach(AnnotationStyle.fontSizes, id: \.self) { size in
+                        let on = abs(currentFontSize - size) < 0.1
+                        Button { setFontSize(size) } label: {
+                            HStack {
+                                Text("Aa").font(Leaf.font(min(size, 30), .bold))
+                                Spacer(minLength: 16)
+                                Text(verbatim: "\(Int(size))").font(Leaf.font(12, .semibold)).monospacedDigit().opacity(0.6)
+                            }
+                            .padding(.horizontal, 8).padding(.vertical, 2)
+                            .frame(width: 110)
+                            .background(tile(on).opacity(on ? 1 : 0))
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
+    private var currentFontSize: CGFloat {
+        if case .text(_, _, _, _, let size)? = doc.selected?.kind { size } else { doc.fontSize }
+    }
+
+    private func setFontSize(_ size: CGFloat) {
+        doc.fontSize = size
+        flyout = nil
+        if let selected = doc.selected, case .text(let o, let s, let tail, let w, _) = selected.kind {
+            doc.update(selected.id, to: .text(origin: o, string: s, tail: tail, width: w, size: size))
+        }
+    }
+
     private var chevron: some View {
         Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold)).opacity(0.6)
     }
@@ -345,7 +397,7 @@ struct ScreenshotView: View {
                         get: { textDraft?.string ?? "" }, set: { textDraft?.string = $0 }
                     ), axis: .vertical)
                     .textFieldStyle(.plain)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .font(.system(size: draft.size, weight: .bold, design: .rounded))
                     .foregroundStyle(Color(nsColor: doc.color.nsColor))
                     .frame(width: draft.width ?? AnnotationStyle.textWrap, alignment: .leading)
                     .padding(4)
@@ -454,11 +506,11 @@ struct ScreenshotView: View {
         case .move(let id, let original):
             if moved, let live = liveEdit { doc.update(live.id, to: live.kind); break }
             // A double-click on a text mark opens it for editing.
-            if case .text(let origin, let string, _, let width) = original,
+            if case .text(let origin, let string, _, let width, let size) = original,
                let last = lastClick, last.id == id, Date().timeIntervalSince(last.at) < 0.4 {
                 if let item = doc.items.first(where: { $0.id == id }) { doc.color = item.color }
                 editingTextID = id
-                textDraft = (origin, string, width)
+                textDraft = (origin, string, width, size)
                 textFocused = true
                 lastClick = nil
             } else {
@@ -471,7 +523,7 @@ struct ScreenshotView: View {
         case .tap:
             switch doc.tool {
             case .text:
-                textDraft = (now, "", nil)
+                textDraft = (now, "", nil, doc.fontSize)
                 textFocused = true
             case .step:
                 doc.add(.step(center: now, number: doc.nextStep))
@@ -528,12 +580,13 @@ struct ScreenshotView: View {
             if let id = editingTextID {
                 // Editing: an emptied text removes the mark.
                 if string.isEmpty { doc.remove(id) } else {
-                    let tail: CGPoint? = if case .text(_, _, let t, _) = doc.items.first(where: { $0.id == id })?.kind { t } else { nil }
-                    doc.update(id, to: .text(origin: draft.origin, string: draft.string, tail: tail, width: draft.width))
+                    let tail: CGPoint? = if case .text(_, _, let t, _, _) = doc.items.first(where: { $0.id == id })?.kind { t } else { nil }
+                    doc.update(id, to: .text(origin: draft.origin, string: draft.string, tail: tail, width: draft.width, size: draft.size))
                 }
             } else if !string.isEmpty {
                 doc.add(.text(origin: draft.origin, string: draft.string,
-                              tail: AnnotationStyle.defaultTail(origin: draft.origin, string: draft.string)))
+                              tail: AnnotationStyle.defaultTail(origin: draft.origin, string: draft.string, size: draft.size),
+                              size: draft.size))
             }
         }
         textDraft = nil
