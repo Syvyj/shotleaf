@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import SwiftUI
 import EmbeddedKit
 import OSLog
 
@@ -638,12 +639,12 @@ final class GhostPanel: NSPanel {
     }
 }
 
-/// The emoji picker under the cursor: "1 👍  2 😂 …"; a click picks too.
-/// Never takes the keyboard — the user keeps typing in their app.
+/// The emoji picker under the cursor, in the Leaves style: "1 👍  2 😂 …";
+/// the first one (what Tab takes) is highlighted, a click picks too. Never
+/// takes the keyboard — the user keeps typing in their app.
 @MainActor
 final class EmojiPickerPanel: NSPanel {
     private let onPick: (Int) -> Void
-    private let row = NSStackView()
 
     init(onPick: @escaping (Int) -> Void) {
         self.onPick = onPick
@@ -653,22 +654,6 @@ final class EmojiPickerPanel: NSPanel {
         hasShadow = true
         level = .popUpMenu
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
-        let background = NSVisualEffectView()
-        background.material = .popover
-        background.state = .active
-        background.wantsLayer = true
-        background.layer?.cornerRadius = 9
-        row.spacing = 2
-        row.edgeInsets = NSEdgeInsets(top: 4, left: 6, bottom: 4, right: 6)
-        row.translatesAutoresizingMaskIntoConstraints = false
-        background.addSubview(row)
-        NSLayoutConstraint.activate([
-            row.leadingAnchor.constraint(equalTo: background.leadingAnchor),
-            row.trailingAnchor.constraint(equalTo: background.trailingAnchor),
-            row.topAnchor.constraint(equalTo: background.topAnchor),
-            row.bottomAnchor.constraint(equalTo: background.bottomAnchor),
-        ])
-        contentView = background
     }
 
     override var canBecomeKey: Bool { false }
@@ -677,25 +662,60 @@ final class EmojiPickerPanel: NSPanel {
     /// Shows the candidates under `caret` (AppKit screen coordinates) and
     /// returns the panel's frame.
     func show(_ candidates: [EmojiShortcodes.Candidate], under caret: CGRect) -> CGRect {
-        row.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        for (i, candidate) in candidates.enumerated() {
-            let title = NSMutableAttributedString(string: "\(i + 1) ", attributes: [
-                .font: NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .semibold), .foregroundColor: NSColor.secondaryLabelColor,
-            ])
-            title.append(NSAttributedString(string: candidate.emoji, attributes: [.font: NSFont.systemFont(ofSize: 19)]))
-            let button = NSButton(title: "", target: self, action: #selector(picked(_:)))
-            button.attributedTitle = title
-            button.isBordered = false
-            button.tag = i
-            button.toolTip = candidate.name.replacingOccurrences(of: "_", with: " ")
-            row.addArrangedSubview(button)
-        }
-        let size = row.fittingSize
-        let frame = CGRect(x: caret.minX - 6, y: caret.minY - size.height - 6, width: size.width, height: size.height)
+        let host = FirstClickHostingView(rootView: EmojiPickerRow(candidates: candidates, onPick: onPick))
+        contentView = host
+        let size = host.fittingSize
+        let frame = CGRect(x: caret.minX - 8, y: caret.minY - size.height - 6, width: size.width, height: size.height)
         setFrame(frame, display: true)
         orderFrontRegardless()
         return frame
     }
+}
 
-    @objc private func picked(_ sender: NSButton) { onPick(sender.tag) }
+/// A click on the picker counts even though its window never becomes key.
+private final class FirstClickHostingView<Content: View>: NSHostingView<Content> {
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+}
+
+private struct EmojiPickerRow: View {
+    let candidates: [EmojiShortcodes.Candidate]
+    let onPick: (Int) -> Void
+    @State private var hovered: Int?
+    private let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(Array(candidates.enumerated()), id: \.offset) { i, candidate in
+                Button { onPick(i) } label: {
+                    HStack(spacing: 3) {
+                        Text(verbatim: "\(i + 1)")
+                            .font(Leaf.font(10, .bold))
+                            .foregroundStyle(Leaf.ink)
+                        Text(verbatim: candidate.emoji).font(.system(size: 19))
+                    }
+                    .padding(.horizontal, 6).padding(.vertical, 3)
+                    .background {
+                        let on = hovered.map { $0 == i } ?? (i == 0) // Tab takes the first
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.clear))
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .onHover { hovered = $0 ? i : (hovered == i ? nil : hovered) }
+                .help(candidate.name.replacingOccurrences(of: "_", with: " "))
+            }
+        }
+        .padding(5)
+        .background {
+            ZStack {
+                shape.fill(.ultraThinMaterial)
+                shape.fill(Leaf.surface)
+                shape.fill(LinearGradient(colors: [Leaf.fresh.opacity(0.12), .clear], startPoint: .top, endPoint: .bottom))
+            }
+        }
+        .overlay(shape.strokeBorder(Leaf.markGradient, lineWidth: 1).opacity(0.55))
+        .clipShape(shape)
+        .fixedSize()
+    }
 }
