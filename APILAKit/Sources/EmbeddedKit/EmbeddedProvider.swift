@@ -2,6 +2,7 @@ import Core
 import CoreImage
 import Foundation
 import HuggingFace
+import MLX
 import MLXHuggingFace
 import MLXLMCommon
 import MLXVLM
@@ -58,6 +59,25 @@ public actor EmbeddedModel {
         let loaded = try await task.value
         container = loaded
         return loaded
+    }
+
+    /// Plain continuation of `prefix` (no chat template) for inline completion:
+    /// greedy, at most `maxTokens`, stops at the end of the line. Returns the
+    /// raw text the model would type next.
+    public func complete(_ prefix: String, maxTokens: Int = 12) async throws -> String {
+        let container = try await load()
+        return try await container.perform { context in
+            let tokens = context.tokenizer.encode(text: prefix, addSpecialTokens: true)
+            var parameters = GenerateParameters()
+            parameters.temperature = 0
+            var produced: [Int] = []
+            _ = try generate(input: LMInput(tokens: MLXArray(tokens)), parameters: parameters, context: context) { ids in
+                produced = ids
+                if Task.isCancelled || ids.count >= maxTokens { return .stop }
+                return context.tokenizer.decode(tokenIds: ids, skipSpecialTokens: true).contains("\n") ? .stop : .more
+            }
+            return context.tokenizer.decode(tokenIds: produced, skipSpecialTokens: true)
+        }
     }
 
     /// Frees memory and disk.

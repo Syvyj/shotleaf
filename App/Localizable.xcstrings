@@ -353,16 +353,6 @@
         }
       }
     },
-    "Couldn't list models: %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не вдалося отримати список моделей: %@"
-          }
-        }
-      }
-    },
     "Crop": {
       "localizations": {
         "uk": {
@@ -1725,6 +1715,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "⚠︎ %@ зайнято іншою програмою"
+          }
+        }
+      }
+    },
+    "Complete my text as I type": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дописувати текст, поки я друкую"
+          }
+        }
+      }
+    },
+    "Grey suggestion after the cursor in any app · Tab — next word, ⌥Tab — all, esc — hide. Uses only the built-in model, on this Mac.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сіра підказка після курсора в будь-якій програмі · Tab — наступне слово, ⌥Tab — усе, esc — сховати. Працює лише на вбудованій моделі, на цьому Mac."
+          }
+        }
+      }
+    },
+    "Couldn’t list models: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося отримати список моделей: %@"
           }
         }
       }

@@ -72,6 +72,7 @@ public final class AppCoordinator {
         await container.bootstrap()
         await refreshProvider()
         refreshPermissions()
+        if container.settings.completionEnabled { inlineCompletion.start() }
         Self.log.notice("startup permissions: \(String(describing: self.permissions), privacy: .public) bundle: \(Bundle.main.bundlePath, privacy: .public)")
 
         let panel = FloatingPanelController { [weak self] in
@@ -344,6 +345,17 @@ public final class AppCoordinator {
             translateTo: container.settings.translateTarget,
             otherwise: container.settings.translateFallback
         ))
+    }
+
+    // MARK: Inline completion
+
+    private let inlineCompletion = InlineCompletion()
+
+    public var completionEnabled: Bool { container.settings.completionEnabled }
+
+    public func setCompletion(_ on: Bool) {
+        container.settings.completionEnabled = on
+        if on { inlineCompletion.start() } else { inlineCompletion.stop() }
     }
 
     // MARK: Dock

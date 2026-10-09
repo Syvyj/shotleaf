@@ -172,7 +172,7 @@ public struct SettingsRootView: View {
             modelsError = models.isEmpty ? String(localized: "The server returned no models.") : nil
         } catch {
             models = []
-            modelsError = String(localized: "Couldn't list models: \(error)")
+            modelsError = String(localized: "Couldn’t list models: \(error.localizedDescription)")
         }
     }
 
@@ -282,6 +282,10 @@ public struct SettingsRootView: View {
             ))
             if let error = coordinator.launchAtLoginError {
                 Text(error).font(.caption).foregroundStyle(.red)
+            }
+            Toggle(isOn: Binding(get: { coordinator.completionEnabled }, set: { coordinator.setCompletion($0) })) {
+                Text("Complete my text as I type")
+                Text("Grey suggestion after the cursor in any app · Tab — next word, ⌥Tab — all, esc — hide. Uses only the built-in model, on this Mac.")
             }
         } header: {
             Text("General")

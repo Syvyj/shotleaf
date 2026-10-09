@@ -78,6 +78,12 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "showInDock") }
     }
 
+    /// Inline completion as you type (needs the built-in model).
+    public var completionEnabled: Bool {
+        get { defaults.object(forKey: "completionEnabled") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "completionEnabled") }
+    }
+
     /// The first-run setup guide was finished (or dismissed).
     public var onboardingCompleted: Bool {
         get { defaults.bool(forKey: "onboardingCompleted") }
