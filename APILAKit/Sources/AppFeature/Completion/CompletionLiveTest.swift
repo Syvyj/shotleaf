@@ -12,27 +12,47 @@ public enum CompletionLiveTest {
     public static func run(_ coordinator: AppCoordinator, text: String, out: URL) async {
         let completion = coordinator.inlineCompletion
         _ = try? await EmbeddedModel.completion.load() // measure typing, not the first load
-        let file = FileManager.default.temporaryDirectory.appendingPathComponent("apila-live-test-\(UUID().uuidString.prefix(6)).txt")
-        try? Data().write(to: file)
-        guard let textEdit = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.TextEdit") else { return }
+        // "chrome:" — a web editor (contenteditable, like Claude's or Slack's
+        // input) in a new Chrome tab; otherwise a scratch TextEdit document.
+        var text = text
+        let chrome = text.hasPrefix("chrome:")
+        if chrome { text.removeFirst("chrome:".count) }
+        let id = UUID().uuidString.prefix(6)
+        let bundleID = chrome ? "com.google.Chrome" : "com.apple.TextEdit"
+        let file: URL
+        let documentName: String
+        if chrome {
+            documentName = "APILA live test \(id)"
+            file = FileManager.default.temporaryDirectory.appendingPathComponent("apila-live-test-\(id).html")
+            let page = """
+                <!doctype html><meta charset="utf-8"><title>\(documentName)</title>
+                <div id="e" contenteditable="true" style="font: 16px -apple-system; margin: 40px; padding: 12px; border: 1px solid #ccc; min-height: 80px"></div>
+                <script>document.getElementById('e').focus()</script>
+                """
+            try? page.write(to: file, atomically: true, encoding: .utf8)
+        } else {
+            file = FileManager.default.temporaryDirectory.appendingPathComponent("apila-live-test-\(id).txt")
+            documentName = file.lastPathComponent
+            try? Data().write(to: file)
+        }
+        guard let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else { return }
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.activates = true
-        _ = try? await NSWorkspace.shared.open([file], withApplicationAt: textEdit, configuration: configuration)
-        try? await Task.sleep(for: .seconds(1.5))
+        _ = try? await NSWorkspace.shared.open([file], withApplicationAt: appURL, configuration: configuration)
+        try? await Task.sleep(for: .seconds(chrome ? 2.5 : 1.5))
         // Safety: every key below goes to whatever has focus. Type only while
         // the scratch document itself is focused — never into another app.
-        let documentName = file.lastPathComponent
-        NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.TextEdit").first?.activate()
+        let isScratchFocused = { (name: String) in Self.isScratchFocused(name, app: bundleID) }
+        NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).first?.activate()
         try? await Task.sleep(for: .milliseconds(500))
         guard isScratchFocused(documentName) else {
-            let message = "aborted: the scratch TextEdit document isn't focused — nothing was typed"
+            let message = "aborted: the scratch document isn't focused — nothing was typed"
             try? message.write(to: out.appendingPathComponent("live-report.txt"), atomically: true, encoding: .utf8)
             print(message)
             return
         }
 
         // "#N" at the end: press digit N instead of Tab (the emoji picker).
-        var text = text
         var acceptDigit: String?
         if let hash = text.lastIndex(of: "#"), text[text.index(after: hash)...].allSatisfy(\.isNumber), text.index(after: hash) < text.endIndex {
             acceptDigit = String(text[text.index(after: hash)...])
@@ -66,7 +86,7 @@ public enum CompletionLiveTest {
         report.append("typing took \(typedAt - started)")
         report.append("suggestion after last key: \(firstSeen.map { "\($0)" } ?? "none") — \((completion.suggestion ?? "nil").debugDescription)")
         if let emoji = completion.pickerEmoji { report.append("emoji picker: \(emoji.joined(separator: " "))") }
-        await snapshot(to: out.appendingPathComponent("live-before-tab.png"))
+        await snapshot(to: out.appendingPathComponent("live-before-tab.png"), app: bundleID)
 
         guard isScratchFocused(documentName) else { return abort(out) }
         if let acceptDigit { type(acceptDigit) } else { key(48) } // the digit / Tab
@@ -76,7 +96,7 @@ public enum CompletionLiveTest {
         if let field = FocusedField.current(excluding: [], screenTop: top) {
             report.append("field now: \((field.beforeCursor + "‸" + field.afterCursor).debugDescription)")
         }
-        await snapshot(to: out.appendingPathComponent("live-after-tab.png"))
+        await snapshot(to: out.appendingPathComponent("live-after-tab.png"), app: bundleID)
 
         // Close the scratch document (⌘W; TextEdit saves the temp file itself) —
         // only if it's still the one in front.
@@ -86,9 +106,9 @@ public enum CompletionLiveTest {
         print(report.joined(separator: "\n"))
     }
 
-    /// TextEdit is the frontmost app and its focused window is our scratch file.
-    private static func isScratchFocused(_ documentName: String) -> Bool {
-        guard let front = NSWorkspace.shared.frontmostApplication, front.bundleIdentifier == "com.apple.TextEdit" else { return false }
+    /// `app` is the frontmost app and its focused window is our scratch file / tab.
+    private static func isScratchFocused(_ documentName: String, app bundleID: String) -> Bool {
+        guard let front = NSWorkspace.shared.frontmostApplication, front.bundleIdentifier == bundleID else { return false }
         let app = AXUIElementCreateApplication(front.processIdentifier)
         var window: CFTypeRef?
         guard AXUIElementCopyAttributeValue(app, kAXFocusedWindowAttribute as CFString, &window) == .success, let window else { return false }
@@ -136,9 +156,9 @@ public enum CompletionLiveTest {
         CGEvent(keyboardEventSource: nil, virtualKey: 55, keyDown: false).map { $0.flags = []; $0.post(tap: .cghidEventTap) }
     }
 
-    private static func snapshot(to url: URL) async {
+    private static func snapshot(to url: URL, app bundleID: String) async {
         guard let content = try? await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true),
-              let window = content.windows.first(where: { $0.owningApplication?.bundleIdentifier == "com.apple.TextEdit" && $0.windowLayer == 0 }),
+              let window = content.windows.first(where: { $0.owningApplication?.bundleIdentifier == bundleID && $0.windowLayer == 0 }),
               let display = content.displays.first(where: { $0.frame.intersects(window.frame) })
         else { return }
         // The window plus a margin, from the whole display, so APILA's ghost text is in it too.

@@ -506,26 +506,10 @@ struct FocusedField: @unchecked Sendable {
               !excluded.contains(app.bundleIdentifier ?? "")
         else { return nil }
         if let subrole: String = attribute(element, kAXSubroleAttribute), subrole == kAXSecureTextFieldSubrole { return nil }
-        var settable: DarwinBoolean = false
-        guard AXUIElementIsAttributeSettable(element, kAXValueAttribute as CFString, &settable) == .success, settable.boolValue,
-              let value: String = attribute(element, kAXValueAttribute),
-              let rangeValue: AXValue = attribute(element, kAXSelectedTextRangeAttribute)
-        else { return nil }
-        var range = CFRange()
-        guard AXValueGetValue(rangeValue, .cfRange, &range), range.length == 0, range.location > 0 else { return nil }
-        let text = value as NSString
-        guard range.location <= text.length else { return nil }
-        // The rest of this line (mid-text suggestions must fit in before it).
-        let rest = text.substring(from: range.location)
-        let afterCursor = String(rest.prefix { $0 != "\n" && $0 != "\r" }.prefix(200))
-        var charRange = CFRange(location: range.location - 1, length: 1)
-        guard let query = AXValueCreate(.cfRange, &charRange) else { return nil }
-        var boundsRef: CFTypeRef?
-        guard AXUIElementCopyParameterizedAttributeValue(element, kAXBoundsForRangeParameterizedAttribute as CFString, query, &boundsRef) == .success,
-              let boundsRef, CFGetTypeID(boundsRef) == AXValueGetTypeID()
-        else { return nil }
-        var bounds = CGRect.zero
-        guard AXValueGetValue(boundsRef as! AXValue, .cgRect, &bounds), bounds.height > 2 else { return nil }
+        // Plain fields (Cocoa, Qt…) expose their text as a value; web editors
+        // (Chromium, Electron — Claude, Slack, Notion) only through text markers.
+        guard let read = viaValue(element) ?? viaTextMarkers(element) else { return nil }
+        let bounds = read.caret
         // AX uses top-left global coordinates; AppKit — bottom-left of the main screen.
         let caret = CGRect(x: bounds.minX, y: top - bounds.maxY, width: bounds.width, height: bounds.height)
         var rightEdge = caret.maxX + 600
@@ -537,9 +521,76 @@ struct FocusedField: @unchecked Sendable {
         }
         var title = ""
         if let window: AXUIElement = attribute(element, kAXWindowAttribute), let t: String = attribute(window, kAXTitleAttribute) { title = t }
-        return FocusedField(element: element, beforeCursor: text.substring(to: range.location), caret: caret, rightEdge: rightEdge,
+        return FocusedField(element: element, beforeCursor: read.before, caret: caret, rightEdge: rightEdge,
                             pid: pid, bundleID: app.bundleIdentifier ?? "", appName: app.localizedName, windowTitle: title,
-                            afterCursor: afterCursor)
+                            afterCursor: read.after)
+    }
+
+    /// Text before / after the cursor (rest of the line) and the box of the
+    /// character before it (AX coordinates).
+    private typealias Read = (before: String, after: String, caret: CGRect)
+
+    /// The field's value and selected range, and the bounds of a character range.
+    private static func viaValue(_ element: AXUIElement) -> Read? {
+        var settable: DarwinBoolean = false
+        guard AXUIElementIsAttributeSettable(element, kAXValueAttribute as CFString, &settable) == .success, settable.boolValue,
+              let value: String = attribute(element, kAXValueAttribute),
+              let rangeValue: AXValue = attribute(element, kAXSelectedTextRangeAttribute)
+        else { return nil }
+        var range = CFRange()
+        guard AXValueGetValue(rangeValue, .cfRange, &range), range.length == 0, range.location > 0 else { return nil }
+        let text = value as NSString
+        guard range.location <= text.length else { return nil }
+        var charRange = CFRange(location: range.location - 1, length: 1)
+        guard let query = AXValueCreate(.cfRange, &charRange),
+              let bounds = rect(parameterized(element, kAXBoundsForRangeParameterizedAttribute, query)), bounds.height > 2
+        else { return nil }
+        let rest = text.substring(from: range.location)
+        return (text.substring(to: range.location), String(rest.prefix { $0 != "\n" && $0 != "\r" }.prefix(200)), bounds)
+    }
+
+    /// Web editors: the selection as a text-marker range, the text from the
+    /// start to it, and the bounds of the character just before it.
+    private static func viaTextMarkers(_ element: AXUIElement) -> Read? {
+        guard let selection = marker(element, "AXSelectedTextMarkerRange", AXTextMarkerRangeGetTypeID()).map({ $0 as! AXTextMarkerRange }),
+              let start = marker(element, "AXStartTextMarker", AXTextMarkerGetTypeID()).map({ $0 as! AXTextMarker }),
+              let end = marker(element, "AXEndTextMarker", AXTextMarkerGetTypeID()).map({ $0 as! AXTextMarker })
+        else { return nil }
+        let caretStart = AXTextMarkerRangeCopyStartMarker(selection)
+        let caretEnd = AXTextMarkerRangeCopyEndMarker(selection)
+        func string(_ from: AXTextMarker, _ to: AXTextMarker) -> String? {
+            parameterized(element, "AXStringForTextMarkerRange", AXTextMarkerRangeCreate(nil, from, to)) as? String
+        }
+        guard string(caretStart, caretEnd)?.isEmpty != false, // no selection, just a cursor
+              let before = string(start, caretStart), !before.isEmpty,
+              let previousRef = parameterized(element, "AXPreviousTextMarkerForTextMarker", caretStart),
+              CFGetTypeID(previousRef) == AXTextMarkerGetTypeID()
+        else { return nil }
+        let previous = previousRef as! AXTextMarker
+        guard let bounds = rect(parameterized(element, "AXBoundsForTextMarkerRange", AXTextMarkerRangeCreate(nil, previous, caretStart))),
+              bounds.height > 2
+        else { return nil }
+        let after = string(caretEnd, end) ?? ""
+        return (before, String(after.prefix { $0 != "\n" && $0 != "\r" }.prefix(200)), bounds)
+    }
+
+    private static func marker(_ element: AXUIElement, _ name: String, _ type: CFTypeID) -> CFTypeRef? {
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, name as CFString, &value) == .success, let value, CFGetTypeID(value) == type
+        else { return nil }
+        return value
+    }
+
+    private static func parameterized(_ element: AXUIElement, _ name: String, _ parameter: CFTypeRef) -> CFTypeRef? {
+        var value: CFTypeRef?
+        guard AXUIElementCopyParameterizedAttributeValue(element, name as CFString, parameter, &value) == .success else { return nil }
+        return value
+    }
+
+    private static func rect(_ value: CFTypeRef?) -> CGRect? {
+        guard let value, CFGetTypeID(value) == AXValueGetTypeID() else { return nil }
+        var rect = CGRect.zero
+        return AXValueGetValue(value as! AXValue, .cgRect, &rect) ? rect : nil
     }
 
     private static func attribute<T>(_ element: AXUIElement, _ name: String) -> T? {

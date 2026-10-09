@@ -27,5 +27,5 @@ if security find-identity -p codesigning | grep -q "APILA Local Signing"; then
 else
   echo "warning: 'APILA Local Signing' certificate not found — ad-hoc build, permissions reset on rebuild" >&2
 fi
-open "$DEST"
+open -g "$DEST" # in the background: keep the user's focus where it is
 echo "APILA started from $DEST"

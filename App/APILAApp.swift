@@ -28,6 +28,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let coordinator = AppCoordinator()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if let i = CommandLine.arguments.firstIndex(of: "--ax-watch") { // developer run, read-only
+            let args = CommandLine.arguments
+            let out = URL(fileURLWithPath: args.count > i + 1 ? args[i + 1] : NSTemporaryDirectory())
+            let seconds = args.count > i + 2 ? Double(args[i + 2]) ?? 180 : 180
+            Task { await AccessibilityProbe.watch(out: out, seconds: seconds); exit(0) }
+            return
+        }
+        if let i = CommandLine.arguments.firstIndex(of: "--ax-probe") { // developer run, read-only
+            let out = URL(fileURLWithPath: CommandLine.arguments.count > i + 1 ? CommandLine.arguments[i + 1] : NSTemporaryDirectory())
+            Task { await AccessibilityProbe.run(out: out); exit(0) }
+            return
+        }
         if CommandLine.arguments.contains("--completion-eval") { // developer run, see CompletionEval
             Task { await CompletionEval.run(); exit(0) }
             return
