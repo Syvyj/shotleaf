@@ -37,6 +37,22 @@ struct ScrollStitcherTests {
         #expect(same)
     }
 
+    @Test("Smooth scrolling: a frame half a pixel between two rows still matches")
+    func subpixel() {
+        // Real text is soft from row to row (antialiasing): blur the fake page vertically.
+        let rough = Self.page(height: 1000), w4 = 60 * 4
+        let page = rough.indices.map { i in
+            let rows = [i - 2 * w4, i - w4, i, i + w4, i + 2 * w4].filter(rough.indices.contains)
+            return UInt8(rows.reduce(0) { $0 + Int(rough[$1]) } / rows.count)
+        }
+        let a = Self.window(page, at: 37, height: 200), b = Self.window(page, at: 38, height: 200)
+        let blurred = zip(a, b).map { UInt8((Int($0) + Int($1)) / 2) }
+        var s = ScrollStitcher(width: 60, height: 200)
+        _ = s.add(Self.window(page, at: 0, height: 200))
+        let step = s.add(blurred)
+        #expect(step == .added(rows: 37) || step == .added(rows: 38), "\(step)")
+    }
+
     @Test("A jump past one frame is reported, not glued wrong")
     func lost() {
         let page = Self.page(height: 1000)

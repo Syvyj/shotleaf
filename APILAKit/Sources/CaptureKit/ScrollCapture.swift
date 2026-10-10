@@ -98,7 +98,9 @@ private final class ScrollControlBar {
         frameWindow.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         frameWindow.contentView = FrameView()
 
-        let size = CGSize(width: 420, height: 44)
+        // Wide enough for the longest status and both buttons in any language.
+        label.stringValue = String(localized: "Maximum length reached — press Done")
+        let size = CGSize(width: min(max(420, Self.rowWidth(label)), screen.visibleFrame.width - 16), height: 44)
         let below = area.minY - size.height - 12
         let y = below >= screen.visibleFrame.minY ? below : min(area.maxY + 12, screen.visibleFrame.maxY - size.height)
         let x = min(max(area.midX - size.width / 2, screen.visibleFrame.minX + 8), screen.visibleFrame.maxX - size.width - 8)
@@ -110,9 +112,18 @@ private final class ScrollControlBar {
         barWindow.hasShadow = true
         barWindow.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         barWindow.contentView = makeBar(size: size)
+        label.stringValue = String(localized: "Scroll down slowly")
 
         frameWindow.orderFrontRegardless()
         barWindow.makeKeyAndOrderFront(nil)
+    }
+
+    /// The bar's natural width with `label` showing its current text.
+    private static func rowWidth(_ label: NSTextField) -> CGFloat {
+        let buttons = [String(localized: "Done") + "  ↩", String(localized: "Cancel") + "  esc"].map {
+            NSButton(title: $0, target: nil, action: nil).fittingSize.width
+        }
+        return label.fittingSize.width + buttons.reduce(0, +) + 18 + 8 + 2 * 8 + 4
     }
 
     private func makeBar(size: CGSize) -> NSView {

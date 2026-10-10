@@ -3,10 +3,10 @@ import Foundation
 
 /// Glues frames of a scrolling area into one tall image (unit-tested).
 ///
-/// Each frame is compared with the previous one row by row (rows hashed,
-/// edges left out so an overlay scrollbar doesn't spoil the match). The shift
-/// where the most rows line up is how far the content scrolled; the rows that
-/// scrolled in at the bottom are appended.
+/// Each frame is compared with the previous one row by row (each row boiled
+/// down to a few brightness blocks, edges left out so an overlay scrollbar
+/// doesn't spoil the match). The shift where the rows differ least is how far
+/// the content scrolled; the rows that scrolled in at the bottom are appended.
 /// ponytail: down-scrolling only, and sticky footers get repeated — add
 /// footer trimming if real pages need it.
 struct ScrollStitcher {
@@ -18,11 +18,15 @@ struct ScrollStitcher {
     /// Height limit of the result, in pixels (memory guard).
     let maxHeight: Int
 
+    /// A row's brightness in a few blocks across: survives the sub-pixel
+    /// blur of smooth scrolling (Chromium, Electron), unlike an exact hash.
     struct Row: Equatable {
-        let hash: Int
+        let blocks: [Float]
         /// One color across the row: matches anything, so it doesn't count.
         let plain: Bool
     }
+
+    static let blockCount = 16
 
     enum Step: Equatable {
         case first
@@ -77,40 +81,53 @@ struct ScrollStitcher {
         // Middle 80% of the row, every other pixel: skips scrollbars and
         // window edges, and keeps up with frames coming in several a second.
         let from = width / 10, to = width - width / 10
+        let span = max(1, (to - from) / blockCount)
         return frame.withUnsafeBytes { raw in
-            let px = raw.bindMemory(to: UInt32.self)
+            let px = raw.bindMemory(to: UInt8.self)
             return (0..<height).map { y in
-                let base = y * width
-                let first = px[base + from] & 0x00FF_FFFF
-                var hash: UInt64 = 0xcbf2_9ce4_8422_2325 // FNV-1a
-                var plain = true
-                for x in stride(from: from, to: to, by: 2) {
-                    let v = px[base + x] & 0x00FF_FFFF // ignore alpha
-                    hash = (hash ^ UInt64(v)) &* 0x0000_0100_0000_01B3
-                    if v != first { plain = false }
+                var blocks = [Float](repeating: 0, count: blockCount)
+                for b in 0..<blockCount {
+                    var sum = 0, n = 0
+                    for x in stride(from: from + b * span, to: min(from + (b + 1) * span, to), by: 2) {
+                        let i = (y * width + x) * 4
+                        sum += Int(px[i]) * 3 + Int(px[i + 1]) * 6 + Int(px[i + 2]) // ~luma ×10
+                        n += 1
+                    }
+                    blocks[b] = n > 0 ? Float(sum) / Float(n * 10) : 0
                 }
-                return Row(hash: Int(truncatingIfNeeded: hash), plain: plain)
+                let plain = (blocks.max() ?? 0) - (blocks.min() ?? 0) < 0.5
+                return Row(blocks: blocks, plain: plain)
             }
         }
     }
 
     /// How many rows the content moved up between `a` and `b`: 0 = still,
-    /// nil = no convincing overlap.
+    /// nil = no convincing overlap. The shift where the rows differ least
+    /// wins — if it clearly beats the typical shift (smooth scrolling blurs
+    /// rows a little, so nothing matches exactly).
     static func shift(from a: [Row], to b: [Row]) -> Int? {
         let h = min(a.count, b.count)
         let minOverlap = max(8, h / 8)
-        var best: (shift: Int, score: Double)?
+        var best: (shift: Int, distance: Float)?
+        var all: [Float] = []
         for s in 0...(h - minOverlap) {
-            var matched = 0, counted = 0
+            var total: Float = 0, counted = 0
             for k in 0..<(h - s) where !b[k].plain {
+                var d: Float = 0
+                for i in 0..<blockCount { d += abs(b[k].blocks[i] - a[k + s].blocks[i]) }
+                total += d
                 counted += 1
-                if b[k].hash == a[k + s].hash { matched += 1 }
+                // Early out once clearly worse than the best (the rough figure is enough for the median).
+                if let best, counted.isMultiple(of: 64), total / Float(counted) > best.distance * 3 + 1 { break }
             }
             guard counted >= 4 else { continue }
-            let score = Double(matched) / Double(counted)
-            if score > (best?.score ?? 0) + 0.0001 { best = (s, score) }
+            let distance = total / Float(counted)
+            all.append(distance)
+            if distance < (best?.distance ?? .infinity) - 0.0001 { best = (s, distance) }
         }
-        guard let best, best.score >= 0.6 else { return nil }
-        return best.shift
+        guard let best, !all.isEmpty else { return 0 } // nothing but blank rows: nothing to tell
+
+        let typical = all.sorted()[all.count / 2]
+        return best.distance <= typical * 0.5 || best.distance < 0.5 ? best.shift : nil
     }
 }
