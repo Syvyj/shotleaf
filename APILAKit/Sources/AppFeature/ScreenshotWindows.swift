@@ -234,23 +234,3 @@ private struct CountdownBadge: View {
         .background(Leaf.surface, in: Capsule())
     }
 }
-
-/// Soft feedback sounds, off with Settings → General → Sounds.
-@MainActor
-enum Sound {
-    static let key = "sounds"
-    private static var on: Bool { UserDefaults.standard.object(forKey: key) as? Bool ?? true }
-    private static let shutterSound = NSSound(contentsOfFile: "/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Screen Capture.aif", byReference: true)
-        ?? NSSound(named: "Grab")
-    private static let copySound = NSSound(named: "Pop")
-
-    static func shutter() { play(shutterSound) }
-    static func copied() { play(copySound) }
-
-    private static func play(_ sound: NSSound?) {
-        guard on, let sound else { return }
-        sound.volume = 0.5
-        sound.stop()
-        sound.play()
-    }
-}

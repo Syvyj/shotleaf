@@ -116,3 +116,16 @@ struct ScreenshotWindowTests {
         try renderPreview(view, "screenshot-window-dark.png", dark: true)
     }
 }
+
+@Suite("Sounds")
+struct SoundTests {
+    @Test("Synthesized sounds are short, unclipped and load as WAV")
+    func synth() {
+        for samples in [Synth.shutter(), Synth.bloop()] {
+            let peak = samples.map(abs).max() ?? 0
+            #expect(peak > 0.1 && peak <= 1, "peak \(peak)")
+            #expect(Double(samples.count) / Synth.rate < 0.25)
+            #expect(NSSound(data: Synth.wav(samples)) != nil)
+        }
+    }
+}
