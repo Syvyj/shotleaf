@@ -69,7 +69,7 @@ struct ScreenshotView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header.zIndex(1) // tips and menus draw over the canvas
-            canvas
+            canvas.overlay(alignment: .top) { toastPill }
             toolbar.zIndex(1) // its tips show above, over the canvas
         }
         .onChange(of: doc.tool) { _, tool in
@@ -107,16 +107,24 @@ struct ScreenshotView: View {
             toolRow
             Color.clear
                 .frame(maxWidth: .infinity, maxHeight: 36)
-                .overlay(alignment: .trailing) {
-                    if let toast {
-                        Text(LocalizedStringKey(toast))
-                            .font(Leaf.font(12, .semibold))
-                            .foregroundStyle(Leaf.ink)
-                            .fixedSize()
-                            .transition(.opacity)
-                    }
-                }
                 .overlay(WindowDragArea())
+        }
+    }
+
+    /// "Copied", "Saved to…": a pill over the top of the shot, never in the way of the tools.
+    @ViewBuilder
+    private var toastPill: some View {
+        if let toast {
+            Text(LocalizedStringKey(toast))
+                .font(Leaf.font(12, .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12).padding(.vertical, 6)
+                .background(Leaf.leaf, in: Capsule())
+                .shadow(color: .black.opacity(0.2), radius: 6, y: 2)
+                .fixedSize()
+                .padding(.top, 10)
+                .allowsHitTesting(false)
+                .transition(.move(edge: .top).combined(with: .opacity))
         }
     }
 
