@@ -28,16 +28,19 @@ struct WatermarkControls: View {
         }
     }
 
-    /// A logo or any picture, picked in a sheet on the current window — a
-    /// free-standing open panel would hide behind the floating screenshot window.
+    /// A logo or any picture; nothing happens if cancelled.
     static func chooseImage(_ picked: @escaping (String) -> Void) {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.image]
         panel.canChooseDirectories = false
+        present(panel) { if let url = $0.first { picked(url.path) } }
+    }
+
+    /// An open panel as a sheet on the current window — a free-standing one
+    /// would hide behind APILA's floating windows.
+    static func present(_ panel: NSOpenPanel, _ picked: @escaping ([URL]) -> Void) {
         NSApp.activate()
-        let done: (NSApplication.ModalResponse) -> Void = { response in
-            if response == .OK, let path = panel.url?.path { picked(path) }
-        }
+        let done: (NSApplication.ModalResponse) -> Void = { if $0 == .OK { picked(panel.urls) } }
         if let window = NSApp.keyWindow { panel.beginSheetModal(for: window, completionHandler: done) } else { done(panel.runModal()) }
     }
 }

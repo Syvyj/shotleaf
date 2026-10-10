@@ -70,7 +70,7 @@ final class ScreenshotWindows {
             }
         )
         let width = max(display.width + margin, ScreenshotView.minContentWidth) + 28
-        panel = makePanel(ScreenshotView(image: image, cgImage: cgImage, pixelSize: pixels, displaySize: display, actions: actions, doc: doc),
+        panel = Self.makePanel(ScreenshotView(image: image, cgImage: cgImage, pixelSize: pixels, displaySize: display, actions: actions, doc: doc),
                           proposedWidth: width, resizable: true)
         panel.setFrameOrigin(Self.placed(panel.frame.size, centeredIn: visible))
         present(panel)
@@ -81,7 +81,7 @@ final class ScreenshotWindows {
         if sound { Sound.shutter() }
         var panel: FloatingPanel!
         let view = TextResultView(text: text, title: title, copy: Self.copyText) { [weak self] in self?.close(panel) }
-        panel = makePanel(view, proposedWidth: 520, resizable: true)
+        panel = Self.makePanel(view, proposedWidth: 520, resizable: true)
         let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
         panel.setFrameOrigin(Self.placed(panel.frame.size, centeredIn: screen?.visibleFrame ?? .zero))
         present(panel)
@@ -107,7 +107,7 @@ final class ScreenshotWindows {
     /// the shot: the picker leaves APILA's own windows out.
     func countdown(_ seconds: Int) async {
         let model = Countdown(left: seconds)
-        let panel = makePanel(CountdownBadge(model: model))
+        let panel = Self.makePanel(CountdownBadge(model: model))
         panel.ignoresMouseEvents = true
         if let screen = NSScreen.screens.first(where: { $0.frame.contains(NSEvent.mouseLocation) }) ?? NSScreen.main {
             panel.setFrameOrigin(NSPoint(x: screen.visibleFrame.midX - panel.frame.width / 2,
@@ -130,7 +130,7 @@ final class ScreenshotWindows {
         // Pinned copies start at their real size, capped so they don't cover the screen.
         let size = Self.fit(points: size, in: CGSize(width: 900, height: 700))
         var panel: FloatingPanel!
-        panel = makePanel(PinnedScreenshotView(
+        panel = Self.makePanel(PinnedScreenshotView(
             image: image, size: size,
             copy: { Self.copy(data) },
             close: { [weak self] in self?.close(panel) }
@@ -144,7 +144,7 @@ final class ScreenshotWindows {
 
     /// `proposedWidth` + `resizable`: the window opens at that width and the
     /// smallest height the view allows, and can only grow from there.
-    private func makePanel<V: View>(_ view: V, proposedWidth: CGFloat? = nil, resizable: Bool = false) -> FloatingPanel {
+    static func makePanel<V: View>(_ view: V, proposedWidth: CGFloat? = nil, resizable: Bool = false) -> FloatingPanel {
         let panel = FloatingPanel(
             contentRect: .zero,
             // No system .resizable: it ignored our minimum; our grips/edges resize.

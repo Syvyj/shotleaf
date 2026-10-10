@@ -142,15 +142,16 @@ public final class AppCoordinator {
 
     private var batchWindow: NSWindow?
 
-    /// "Watermark Photos…": one watermark on many photos.
+    /// "Watermark Photos…": one watermark on many photos, in a window that
+    /// looks like the screenshot window (leaf chrome, no system title bar).
     public func showBatchWatermark() {
         if batchWindow?.isVisible != true { batchWindow = nil } // closed: start over with no photos
         if batchWindow == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1100, height: 760),
-                                  styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
-            window.title = String(localized: "Watermark Photos")
-            window.isReleasedWhenClosed = false
-            window.contentView = NSHostingView(rootView: BatchWatermarkView(model: BatchWatermark()))
+            var window: FloatingPanel!
+            let view = BatchWatermarkView(model: BatchWatermark(), close: { window?.orderOut(nil) })
+            window = ScreenshotWindows.makePanel(view, proposedWidth: 1100, resizable: true)
+            window.level = .normal // a longer task: other apps may go on top of it
+            window.setContentSize(NSSize(width: 1100, height: max(window.frame.height, 740)))
             window.center()
             batchWindow = window
         }

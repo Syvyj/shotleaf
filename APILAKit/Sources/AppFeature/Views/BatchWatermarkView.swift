@@ -3,31 +3,89 @@ import ImageIO
 
 /// "Watermark Photos": drop photos, set the mark once, look through them and
 /// move it on the ones where it's in the way (a grid spot or by hand).
+/// Same look as the screenshot window: leaf chrome, name on top, the photo on
+/// a canvas, settings beside it, actions in one row at the bottom.
 struct BatchWatermarkView: View {
     @Bindable var model: BatchWatermark
+    var close: () -> Void = {}
     @State private var preview: CGImage?
 
     var body: some View {
-        HStack(spacing: 0) {
-            VStack(spacing: 12) {
-                if model.photos.isEmpty { dropZone } else {
-                    previewArea
-                    thumbnails
+        VStack(alignment: .leading, spacing: 12) {
+            header
+            HStack(alignment: .top, spacing: 12) {
+                VStack(spacing: 10) {
+                    if model.photos.isEmpty { dropZone } else {
+                        previewArea
+                        thumbnails
+                    }
                 }
+                .padding(12)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(.primary.opacity(0.035)))
+                sidebar
+                    .padding(14)
+                    .frame(width: 300)
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(.primary.opacity(0.035)))
             }
-            .padding(16)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            Divider()
-            sidebar.padding(16)
-                .frame(width: 320)
-                .frame(maxHeight: .infinity, alignment: .top)
+            actionRow.zIndex(1)
         }
-        .frame(minWidth: 980, minHeight: 700)
-        .background(Leaf.surface)
+        .padding(14)
+        .frame(minWidth: 980, maxWidth: .infinity, minHeight: 680, maxHeight: .infinity)
+        .leafPanelChrome()
+        .overlay(alignment: .bottomTrailing) { WindowResizeGrip().frame(width: 12, height: 12).padding(2) }
+        .overlay(WindowEdgeResizer())
         .dropDestination(for: URL.self) { urls, _ in model.add(urls); return true }
         .task(id: model.selected) {
             preview = nil
             if let url = model.selected { preview = await Self.loadPreview(url) }
+        }
+    }
+
+    // MARK: Header & actions
+
+    private var header: some View {
+        HStack(spacing: 8) {
+            BrandLogo()
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Watermark Photos").font(Leaf.font(15, .semibold))
+                Text("\(model.photos.count) photos").font(.system(size: 10.5, weight: .medium, design: .monospaced)).opacity(0.5)
+            }
+            .fixedSize()
+            Spacer()
+        }
+        .overlay(WindowDragArea())
+    }
+
+    private var actionRow: some View {
+        HStack(spacing: 6) {
+            if let progress = model.progress {
+                ProgressView(value: progress).tint(Leaf.leaf).frame(width: 220)
+            } else {
+                Button { Task { await model.apply() } } label: {
+                    HStack(spacing: 5) {
+                        Text("Apply to \(model.photos.count) photos")
+                        Text(verbatim: "⌘↩").font(Leaf.font(10.5, .semibold)).opacity(0.5)
+                    }
+                }
+                .buttonStyle(LeafButtonStyle(prominent: true))
+                .keyboardShortcut(.return, modifiers: .command)
+                .disabled(model.photos.isEmpty || (model.watermark.kind == .image && model.watermark.imagePath == nil))
+            }
+            Button("Add photos") { choosePhotos() }.buttonStyle(LeafButtonStyle())
+            if let result = model.result {
+                Text(result).font(Leaf.font(12, .medium)).foregroundStyle(Leaf.ink).lineLimit(1).padding(.leading, 6)
+            }
+            Spacer(minLength: 6)
+            Button(action: close) {
+                HStack(spacing: 5) {
+                    Text("Close")
+                    Text(verbatim: "esc").font(Leaf.font(10.5, .semibold)).opacity(0.5)
+                }
+            }
+            .buttonStyle(LeafButtonStyle())
+            .keyboardShortcut(.cancelAction)
         }
     }
 
@@ -98,22 +156,13 @@ struct BatchWatermarkView: View {
 
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                BrandLogo()
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Watermark Photos").font(Leaf.font(15, .semibold))
-                    Text("\(model.photos.count) photos").font(Leaf.font(11)).opacity(0.5)
+            section("Watermark")
+            HStack(spacing: 6) {
+                choice("Text", on: model.watermark.kind == .text) { model.watermark.kind = .text }
+                choice("Image", on: model.watermark.kind == .image) {
+                    model.watermark.kind = .image
+                    if model.watermark.imagePath == nil { WatermarkControls.chooseImage { model.watermark.imagePath = $0 } }
                 }
-            }
-
-            Picker("", selection: $model.watermark.kind) {
-                Text("Text").tag(Watermark.Kind.text)
-                Text("Image").tag(Watermark.Kind.image)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .onChange(of: model.watermark.kind) { _, kind in
-                if kind == .image, model.watermark.imagePath == nil { WatermarkControls.chooseImage { model.watermark.imagePath = $0 } }
             }
             WatermarkControls(watermark: $model.watermark)
 
@@ -131,7 +180,8 @@ struct BatchWatermarkView: View {
                             model.overrides[url] = .init(position: $0, center: nil)
                         }
                         Button("Same as the others") { model.overrides[url] = nil }
-                            .buttonStyle(.link).font(Leaf.font(11)).tint(Leaf.ink)
+                            .buttonStyle(.plain).font(Leaf.font(11, .semibold)).foregroundStyle(Leaf.ink)
+                            .opacity(own == nil ? 0.35 : 1)
                             .disabled(own == nil)
                     }
                 }
@@ -139,34 +189,37 @@ struct BatchWatermarkView: View {
             Text("Or drag the watermark on the photo.").font(Leaf.font(11)).opacity(0.6)
 
             section("Save")
-            Picker("Format", selection: $model.format) {
-                Text("As the original").tag(BatchWatermark.Format.original)
-                Text(verbatim: "PNG").tag(BatchWatermark.Format.png)
-                Text(verbatim: "JPEG").tag(BatchWatermark.Format.jpeg)
+            HStack(spacing: 6) {
+                choice("As the original", on: model.format == .original) { model.format = .original }
+                choice("PNG", on: model.format == .png) { model.format = .png }
+                choice("JPEG", on: model.format == .jpeg) { model.format = .jpeg }
             }
             HStack {
                 Text(model.folder.map { ($0.path as NSString).abbreviatingWithTildeInPath } ?? "—")
                     .font(Leaf.font(11)).lineLimit(1).truncationMode(.middle).opacity(0.7)
                 Spacer()
-                Button("Choose…") { chooseFolder() }
+                Button("Choose…") { chooseFolder() }.buttonStyle(LeafButtonStyle())
             }
             Text("Photos keep their size, colour profile and metadata. PNG is lossless; JPEG and HEIC are written at maximum quality. The originals stay untouched.")
                 .font(Leaf.font(11)).opacity(0.6).fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
-
-            if let progress = model.progress {
-                ProgressView(value: progress).tint(Leaf.leaf)
-            } else {
-                Button { Task { await model.apply() } } label: {
-                    Text("Apply to \(model.photos.count) photos").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(LeafButtonStyle(prominent: true))
-                .disabled(model.photos.isEmpty || (model.watermark.kind == .image && model.watermark.imagePath == nil))
-            }
-            if let result = model.result {
-                Text(result).font(Leaf.font(12, .medium)).foregroundStyle(Leaf.ink)
-            }
         }
+    }
+
+    /// A tile like the editor's tools: green when on.
+    private func choice(_ title: LocalizedStringKey, on: Bool, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title).font(Leaf.font(12, .semibold))
+                .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.8))
+                .padding(.horizontal, 10).frame(height: 28)
+                .background {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.primary.opacity(0.05)))
+                        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .strokeBorder(on ? AnyShapeStyle(Leaf.markGradient) : AnyShapeStyle(.clear), lineWidth: 1.2))
+                }
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private func section(_ title: LocalizedStringKey) -> some View {
@@ -179,7 +232,7 @@ struct BatchWatermarkView: View {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = BatchWatermark.imageTypes
         panel.allowsMultipleSelection = true
-        if panel.runModal() == .OK { model.add(panel.urls) }
+        WatermarkControls.present(panel) { model.add($0) }
     }
 
     private func chooseFolder() {
@@ -187,7 +240,7 @@ struct BatchWatermarkView: View {
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.canCreateDirectories = true
-        if panel.runModal() == .OK { model.outputFolder = panel.url }
+        WatermarkControls.present(panel) { model.outputFolder = $0.first }
     }
 
     static func fit(_ size: CGSize, in room: CGSize) -> CGSize {

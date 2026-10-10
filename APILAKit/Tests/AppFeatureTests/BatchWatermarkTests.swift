@@ -58,6 +58,6 @@ struct BatchWatermarkTests {
         #expect(model.folder?.lastPathComponent == "Watermarked")
         let sidebarNeeds = NSHostingView(rootView: BatchWatermarkView(model: model)).fittingSize.height
         #expect(sidebarNeeds <= 700, "needs \(sidebarNeeds) pt") // fits the window without scrolling
-        try renderPreview(BatchWatermarkView(model: model).frame(width: 1000, height: 700), "batch-watermark.png")
+        try renderPreview(BatchWatermarkView(model: model).frame(width: 1040, height: 700), "batch-watermark.png")
     }
 }
