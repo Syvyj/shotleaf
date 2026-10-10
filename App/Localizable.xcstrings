@@ -1,6 +1,306 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Search the clipboard": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пошук у буфері"
+          }
+        }
+      }
+    },
+    "Paused": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пауза"
+          }
+        }
+      }
+    },
+    "Copy something — it shows up here": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопіюйте щось — воно з'явиться тут"
+          }
+        }
+      }
+    },
+    "Nothing found": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нічого не знайдено"
+          }
+        }
+      }
+    },
+    "paste": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "вставити"
+          }
+        }
+      }
+    },
+    "plain text": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "без форматування"
+          }
+        }
+      }
+    },
+    "copy only": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "лише скопіювати"
+          }
+        }
+      }
+    },
+    "pin": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "закріпити"
+          }
+        }
+      }
+    },
+    "delete": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "видалити"
+          }
+        }
+      }
+    },
+    "type": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "тип"
+          }
+        }
+      }
+    },
+    "edit": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "редагувати"
+          }
+        }
+      }
+    },
+    "All": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усе"
+          }
+        }
+      }
+    },
+    "Links": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання"
+          }
+        }
+      }
+    },
+    "Images": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Картинки"
+          }
+        }
+      }
+    },
+    "Colors": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кольори"
+          }
+        }
+      }
+    },
+    "Files": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файли"
+          }
+        }
+      }
+    },
+    "now": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "щойно"
+          }
+        }
+      }
+    },
+    "Clipboard History": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Історія буфера"
+          }
+        }
+      }
+    },
+    "Open Clipboard…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити буфер…"
+          }
+        }
+      }
+    },
+    "Nothing copied yet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ще нічого не скопійовано"
+          }
+        }
+      }
+    },
+    "Resume Recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відновити запис"
+          }
+        }
+      }
+    },
+    "Pause for 5 Minutes": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пауза на 5 хвилин"
+          }
+        }
+      }
+    },
+    "Clear History": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистити історію"
+          }
+        }
+      }
+    },
+    "Keep clipboard history": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігати історію буфера"
+          }
+        }
+      }
+    },
+    "Only on this Mac. Passwords from password managers are never kept; card numbers and tokens are dropped after a minute.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лише на цьому Mac. Паролі з менеджерів паролів не зберігаються ніколи; номери карток і токени зникають за хвилину."
+          }
+        }
+      }
+    },
+    "Keep": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігати"
+          }
+        }
+      }
+    },
+    "%lld entries": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld записів"
+          }
+        }
+      }
+    },
+    "%lld days": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld днів"
+          }
+        }
+      }
+    },
+    "Never keep copies from": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не зберігати скопійоване з"
+          }
+        }
+      }
+    },
+    "Add App…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати застосунок…"
+          }
+        }
+      }
+    },
     "Watermark Photos": {
       "localizations": {
         "uk": {

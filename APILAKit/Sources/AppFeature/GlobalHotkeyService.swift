@@ -26,6 +26,9 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
     public static let editLastDefault = HotkeyShortcut(
         id: "ctrl-opt-cmd-e", title: "⌃⌥⌘E", keyCode: UInt32(kVK_ANSI_E), modifiers: UInt32(controlKey | optionKey | cmdKey)
     )
+    public static let clipboardDefault = HotkeyShortcut(
+        id: "ctrl-cmd-v", title: "⌃⌘V", keyCode: UInt32(kVK_ANSI_V), modifiers: UInt32(controlKey | cmdKey)
+    )
     public static let editClipboardDefault = HotkeyShortcut(
         id: "ctrl-opt-cmd-v", title: "⌃⌥⌘V", keyCode: UInt32(kVK_ANSI_V), modifiers: UInt32(controlKey | optionKey | cmdKey)
     )
@@ -49,7 +52,7 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
                 return HotkeyShortcut(customKeyCode: code, modifiers: mods, title: String(parts[3]))
             }
         }
-        return [captureDefault, screenshotDefault, scrollingDefault, editLastDefault, editClipboardDefault].first { $0.id == id }
+        return [captureDefault, screenshotDefault, scrollingDefault, editLastDefault, editClipboardDefault, clipboardDefault].first { $0.id == id }
     }
 
     /// Builds a shortcut from a key press in the recorder. Nil when it has no
@@ -93,6 +96,7 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
     case scrolling                          // scrolling screenshot → preview window
     case editLast = "edit-last"             // the last screenshot back in the editor
     case editClipboard = "edit-clipboard"   // an image from the clipboard in the editor
+    case clipboard                          // the clipboard history panel
 
     public var id: String { rawValue }
 
@@ -103,6 +107,7 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
         case .scrolling: String(localized: "Scrolling Screenshot")
         case .editLast: String(localized: "Edit Last Screenshot")
         case .editClipboard: String(localized: "Edit Image from Clipboard")
+        case .clipboard: String(localized: "Clipboard History")
         }
     }
 
@@ -113,6 +118,7 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
         case .scrolling: .scrollingDefault
         case .editLast: .editLastDefault
         case .editClipboard: .editClipboardDefault
+        case .clipboard: .clipboardDefault
         }
     }
 }

@@ -47,6 +47,22 @@ public struct MenuBarRootView: View {
 
         Divider()
 
+        Menu("Clipboard History") {
+            Button(Self.label(String(localized: "Open Clipboard…"), coordinator.actionHotkeys[.clipboard])) { coordinator.showClipboard() }
+            Divider()
+            ForEach(Array(coordinator.clipboard.items.prefix(10).enumerated()), id: \.element.id) { i, item in
+                Button("\(i + 1). \(String(ClipboardPanelView.line(item).prefix(50)))") { coordinator.pasteFromHistory(item.id) }
+            }
+            if coordinator.clipboard.items.isEmpty { Text("Nothing copied yet") }
+            Divider()
+            if coordinator.clipboard.isPaused {
+                Button("Resume Recording") { coordinator.pauseClipboard(minutes: nil) }
+            } else {
+                Button("Pause for 5 Minutes") { coordinator.pauseClipboard(minutes: 5) }
+            }
+            Button("Clear History") { coordinator.clipboard.clear() }
+        }
+
         Toggle("Complete my text as I type", isOn: Binding(
             get: { coordinator.completionEnabled }, set: { coordinator.setCompletion($0) }
         ))

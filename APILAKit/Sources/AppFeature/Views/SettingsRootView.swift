@@ -42,6 +42,7 @@ public struct SettingsRootView: View {
             shortcutSection
             screenshotSection
             toolsSection
+            clipboardSection
             completionSection
             generalSection
             permissionsSection
@@ -197,6 +198,64 @@ public struct SettingsRootView: View {
         } header: {
             Text("Screenshots")
         }
+    }
+
+    // MARK: Clipboard
+
+    @AppStorage(ClipboardHistory.enabledKey) private var clipboardEnabled = true
+    @AppStorage(ClipboardHistory.limitKey) private var clipboardLimit = 200
+    @AppStorage(ClipboardHistory.imageDaysKey) private var clipboardImageDays = 30
+    @AppStorage(ClipboardHistory.excludedKey) private var clipboardExcluded = ClipboardHistory.defaultExcluded.joined(separator: "\n")
+
+    private var clipboardSection: some View {
+        Section {
+            Toggle(isOn: $clipboardEnabled) {
+                Text("Keep clipboard history")
+                Text("Only on this Mac. Passwords from password managers are never kept; card numbers and tokens are dropped after a minute.")
+            }
+            if clipboardEnabled {
+                Picker("Keep", selection: $clipboardLimit) {
+                    ForEach([50, 100, 200, 500], id: \.self) { Text("\($0) entries").tag($0) }
+                }
+                Picker("Images", selection: $clipboardImageDays) {
+                    ForEach([7, 30, 90], id: \.self) { Text("\($0) days").tag($0) }
+                }
+                LabeledContent("Never keep copies from") {
+                    VStack(alignment: .trailing, spacing: 4) {
+                        // Defaults that aren't installed stay listed but out of sight.
+                        ForEach(excludedApps.filter { NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0) != nil
+                            || !ClipboardHistory.defaultExcluded.contains($0) }, id: \.self) { id in
+                            HStack(spacing: 6) {
+                                Text(Self.appName(id)).foregroundStyle(.secondary)
+                                Button { excludedApps.removeAll { $0 == id } } label: { Image(systemName: "minus.circle") }
+                                    .buttonStyle(.borderless)
+                            }
+                        }
+                        Button("Add App…") { addExcludedApp() }
+                    }
+                }
+                Button("Clear History") { coordinator.clipboard.clear() }
+            }
+        } header: {
+            Text("Clipboard")
+        }
+    }
+
+    private var excludedApps: [String] {
+        get { clipboardExcluded.split(separator: "\n").map(String.init) }
+        nonmutating set { clipboardExcluded = newValue.joined(separator: "\n") }
+    }
+
+    private static func appName(_ bundleID: String) -> String {
+        NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID).map { $0.deletingPathExtension().lastPathComponent } ?? bundleID
+    }
+
+    private func addExcludedApp() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.application]
+        panel.directoryURL = URL(fileURLWithPath: "/Applications")
+        guard panel.runModal() == .OK, let url = panel.url, let id = Bundle(url: url)?.bundleIdentifier, !excludedApps.contains(id) else { return }
+        excludedApps.append(id)
     }
 
     // MARK: Editor tools

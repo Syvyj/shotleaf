@@ -18,6 +18,7 @@ public final class AppCoordinator {
     public private(set) var permissions: [PermissionKind: PermissionStatus] = [:]
     public init(container: AppContainer = AppContainer()) {
         self.container = container
+        self.clipboard = ClipboardHistory(recognizer: container.recognizer)
     }
 
     public func start() async {
@@ -29,6 +30,7 @@ public final class AppCoordinator {
         inlineCompletion.quickFixes = container.settings.completionQuickFixes
         inlineCompletion.history.enabled = container.settings.completionLearnsStyle
         if container.settings.completionEnabled { inlineCompletion.start() }
+        clipboard.start()
         Self.log.notice("startup permissions: \(String(describing: self.permissions), privacy: .public) bundle: \(Bundle.main.bundlePath, privacy: .public)")
 
         let hotkeys = container.hotkeys
@@ -52,6 +54,7 @@ public final class AppCoordinator {
                 case HotkeyAction.scrolling.rawValue: self.takeScrollingScreenshot()
                 case HotkeyAction.editLast.rawValue: self.editLastScreenshot()
                 case HotkeyAction.editClipboard.rawValue: self.editClipboardImage()
+                case HotkeyAction.clipboard.rawValue: self.clipboardPanel.toggle()
                 default: break
                 }
             }
@@ -61,6 +64,27 @@ public final class AppCoordinator {
     // MARK: Screenshots
 
     private let screenshots = ScreenshotWindows()
+
+    // MARK: Clipboard
+
+    let clipboard: ClipboardHistory
+    @ObservationIgnored private lazy var clipboardPanel: ClipboardPanelController = {
+        let controller = ClipboardPanelController(history: clipboard)
+        controller.openImage = { [weak self] in self?.screenshots.show($0, sound: false) }
+        return controller
+    }()
+
+    public func showClipboard() { clipboardPanel.show() }
+
+    /// From the menu: the entry goes onto the clipboard and into the app in front.
+    public func pasteFromHistory(_ id: UUID) {
+        guard let item = clipboard.items.first(where: { $0.id == id }) else { return }
+        clipboardPanel.pick(item, .paste)
+    }
+
+    public func pauseClipboard(minutes: Int?) {
+        clipboard.pausedUntil = minutes.map { Date().addingTimeInterval(Double($0) * 60) }
+    }
 
     /// Shottr-style: pick a region → preview window (copy, save, pin, drag, Live Text).
     /// `delay`: seconds to wait first (with a countdown), to open a menu or
