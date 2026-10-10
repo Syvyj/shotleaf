@@ -362,8 +362,12 @@ struct ScreenshotView: View {
                     if let kind = Watermark.Kind(rawValue: value) {
                         var w = doc.watermark ?? Watermark.saved ?? Watermark()
                         w.kind = kind
-                        if kind == .image, w.imagePath == nil { w.imagePath = chooseWatermarkImage() }
-                        setWatermark(kind == .image && w.imagePath == nil ? nil : w)
+                        w.center = nil
+                        if kind == .image, w.imagePath == nil {
+                            WatermarkControls.chooseImage { w.imagePath = $0; setWatermark(w) }
+                        } else {
+                            setWatermark(w)
+                        }
                     } else {
                         setWatermark(nil)
                     }
@@ -376,34 +380,10 @@ struct ScreenshotView: View {
             .pickerStyle(.segmented)
             .labelsHidden()
             if let w = doc.watermark {
-                if w.kind == .text {
-                    TextField("Watermark text", text: watermarkBinding(\.text))
-                        .textFieldStyle(.roundedBorder)
-                } else {
-                    Button("Choose image…") { if let path = chooseWatermarkImage() { var n = w; n.imagePath = path; setWatermark(n) } }
-                        .buttonStyle(LeafButtonStyle())
+                PositionGrid(title: "Position", selection: w.center == nil ? w.position : nil) { spot in
+                    var n = w; n.position = spot; n.center = nil; setWatermark(n)
                 }
-                HStack(alignment: .top, spacing: 10) {
-                    Text("Position").font(Leaf.font(12, .medium)).opacity(0.7).frame(width: 70, alignment: .leading)
-                    Grid(horizontalSpacing: 4, verticalSpacing: 4) {
-                        ForEach(0..<3) { row in
-                            GridRow {
-                                ForEach(0..<3) { column in
-                                    let spot = row * 3 + column
-                                    Button { var n = w; n.position = spot; setWatermark(n) } label: {
-                                        RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                            .fill(w.position == spot ? AnyShapeStyle(Leaf.leaf) : AnyShapeStyle(.primary.opacity(0.1)))
-                                            .frame(width: 26, height: 18)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                        }
-                    }
-                }
-                watermarkSlider("Size", \.size, Watermark.sizeRange)
-                watermarkSlider("Opacity", \.opacity, Watermark.opacityRange)
-                watermarkSlider("Rotation", \.rotation, Watermark.rotationRange)
+                WatermarkControls(watermark: Binding(get: { doc.watermark ?? w }, set: { setWatermark($0) }))
             }
         }
         .frame(width: 300, alignment: .leading)
@@ -411,26 +391,7 @@ struct ScreenshotView: View {
 
     private func setWatermark(_ w: Watermark?) {
         doc.watermark = w
-        Watermark.saved = w // the next shots start with it
-    }
-
-    private func watermarkBinding<T>(_ key: WritableKeyPath<Watermark, T>) -> Binding<T> {
-        Binding(get: { (doc.watermark ?? Watermark())[keyPath: key] },
-                set: { var w = doc.watermark ?? Watermark(); w[keyPath: key] = $0; setWatermark(w) })
-    }
-
-    private func watermarkSlider(_ title: String, _ key: WritableKeyPath<Watermark, CGFloat>, _ range: ClosedRange<CGFloat>) -> some View {
-        HStack(spacing: 10) {
-            Text(LocalizedStringKey(title)).font(Leaf.font(12, .medium)).opacity(0.7).frame(width: 70, alignment: .leading)
-            Slider(value: watermarkBinding(key), in: range).tint(Leaf.leaf)
-        }
-    }
-
-    private func chooseWatermarkImage() -> String? {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.image]
-        panel.canChooseDirectories = false
-        return panel.runModal() == .OK ? panel.url?.path : nil
+        if let w { Watermark.saved = w } // the starting point next time it's turned on
     }
 
     // MARK: Background ("Фон")

@@ -140,6 +140,23 @@ public final class AppCoordinator {
         screenshots.show(shot, sound: false)
     }
 
+    private var batchWindow: NSWindow?
+
+    /// "Watermark Photos…": one watermark on many photos.
+    public func showBatchWatermark() {
+        if batchWindow == nil {
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1100, height: 720),
+                                  styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
+            window.title = String(localized: "Watermark Photos")
+            window.isReleasedWhenClosed = false
+            window.contentView = NSHostingView(rootView: BatchWatermarkView(model: BatchWatermark()))
+            window.center()
+            batchWindow = window
+        }
+        NSApp.activate()
+        batchWindow?.makeKeyAndOrderFront(nil)
+    }
+
     // MARK: Settings
 
     /// The actions' shortcuts; missing = off.

@@ -219,8 +219,8 @@ final class AnnotationDocument {
 
     /// "Фон" around the result (nil = none).
     var backdrop: Backdrop?
-    /// Stamped on the result; starts as the last one used.
-    var watermark: Watermark? = Watermark.saved
+    /// Stamped on the result; off on every new shot (turning it on starts from the last one used).
+    var watermark: Watermark?
 
     /// nil = Select: click a mark to select, move, resize or delete it.
     var tool: AnnotationTool?

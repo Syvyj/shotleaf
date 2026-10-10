@@ -16,12 +16,14 @@ struct Watermark: Codable, Equatable {
     var opacity: CGFloat = 0.6
     /// Degrees, clockwise.
     var rotation: CGFloat = 0
+    /// Placed by hand: the mark's centre as a share of the area (overrides `position`).
+    var center: CGPoint?
 
     static let sizeRange: ClosedRange<CGFloat> = 0.05...0.8
     static let opacityRange: ClosedRange<CGFloat> = 0.1...1
     static let rotationRange: ClosedRange<CGFloat> = -45...45
 
-    /// The watermark new shots start with (nil = none).
+    /// The last watermark set up, the starting point next time it's turned on.
     static var saved: Watermark? {
         get { UserDefaults.standard.data(forKey: "watermark").flatMap { try? JSONDecoder().decode(Watermark.self, from: $0) } }
         set { UserDefaults.standard.set(newValue.flatMap { try? JSONEncoder().encode($0) }, forKey: "watermark") }
@@ -48,8 +50,12 @@ struct Watermark: Codable, Equatable {
         guard let mark else { return }
         let margin = min(area.width, area.height) * 0.04
         let column = position % 3, row = position / 3
-        let x = [area.minX + margin, area.midX - mark.size.width / 2, area.maxX - margin - mark.size.width][column]
-        let y = [area.minY + margin, area.midY - mark.size.height / 2, area.maxY - margin - mark.size.height][row]
+        var x = [area.minX + margin, area.midX - mark.size.width / 2, area.maxX - margin - mark.size.width][column]
+        var y = [area.minY + margin, area.midY - mark.size.height / 2, area.maxY - margin - mark.size.height][row]
+        if let center {
+            x = area.minX + center.x * area.width - mark.size.width / 2
+            y = area.minY + center.y * area.height - mark.size.height / 2
+        }
         let rect = CGRect(origin: CGPoint(x: x, y: y), size: mark.size)
 
         ctx.saveGState()

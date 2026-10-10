@@ -30,6 +30,7 @@ public struct MenuBarRootView: View {
         Button(Self.label(String(localized: "Edit Image from Clipboard"), coordinator.actionHotkeys[.editClipboard])) {
             coordinator.editClipboardImage()
         }
+        Button("Watermark Photos…") { coordinator.showBatchWatermark() }
         Menu("Recent Screenshots") {
             ForEach(coordinator.recentShots, id: \.self) { url in
                 Button {

@@ -1,6 +1,176 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Watermark Photos": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Водяний знак на фото"
+          }
+        }
+      }
+    },
+    "Watermark Photos…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Водяний знак на фото…"
+          }
+        }
+      }
+    },
+    "Drop photos here": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетягніть фото сюди"
+          }
+        }
+      }
+    },
+    "Choose photos…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрати фото…"
+          }
+        }
+      }
+    },
+    "Add photos": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати фото"
+          }
+        }
+      }
+    },
+    "%lld photos": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld фото"
+          }
+        }
+      }
+    },
+    "All photos": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усі фото"
+          }
+        }
+      }
+    },
+    "This photo": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Це фото"
+          }
+        }
+      }
+    },
+    "Or drag the watermark on the photo.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Або перетягніть знак прямо на фото."
+          }
+        }
+      }
+    },
+    "Same as the others": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Як в усіх"
+          }
+        }
+      }
+    },
+    "Format": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Формат"
+          }
+        }
+      }
+    },
+    "As the original": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Як в оригіналу"
+          }
+        }
+      }
+    },
+    "Another image…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Інше зображення…"
+          }
+        }
+      }
+    },
+    "Photos keep their size, colour profile and metadata. PNG is lossless; JPEG and HEIC are written at maximum quality. The originals stay untouched.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фото зберігають розмір, колірний профіль і метадані. PNG — без втрат, JPEG і HEIC — з максимальною якістю. Оригінали не змінюються."
+          }
+        }
+      }
+    },
+    "Apply to %lld photos": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Застосувати до %lld фото"
+          }
+        }
+      }
+    },
+    "Done: %lld photos in “%@”": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово: %lld фото в «%@»"
+          }
+        }
+      }
+    },
+    "Done with %lld errors — those photos couldn’t be read or written": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово, але %lld з помилками — ці фото не вдалося прочитати чи записати"
+          }
+        }
+      }
+    },
     "Watermark": {
       "localizations": {
         "uk": {
