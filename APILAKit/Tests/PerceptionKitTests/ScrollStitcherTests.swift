@@ -53,6 +53,28 @@ struct ScrollStitcherTests {
         #expect(step == .added(rows: 37) || step == .added(rows: 38), "\(step)")
     }
 
+    @Test("Sticky header and footer: matched around, the footer kept once at the end")
+    func sticky() throws {
+        let page = Self.page(height: 1000)
+        let w = 60 * 4
+        func bar(_ rows: Int, _ v: UInt8) -> [UInt8] {
+            (0..<rows * 60).flatMap { i in i % 7 == 0 ? [0, 0, 0, 255] : [v, v, v, 255] } // a striped, non-plain bar
+        }
+        let top = bar(20, 90), bottom = bar(30, 200)
+        func frame(_ at: Int) -> [UInt8] { top + Array(page[(at + 20) * w ..< (at + 170) * w]) + bottom }
+        var s = ScrollStitcher(width: 60, height: 200)
+        _ = s.add(frame(0))
+        #expect(s.add(frame(40)) == .added(rows: 40))
+        #expect(s.add(frame(100)) == .added(rows: 60))
+        // header + page rows 20..<270 (frame 0 showed 20..<170, then +100) + footer
+        #expect(s.stitchedHeight == 20 + 250 + 30)
+        let image = try #require(s.image())
+        #expect(image.height == 300)
+        let data = Array(s.pixels + bottom)
+        #expect(Array(data[(20 + 250) * w ..< 300 * w]) == bottom)
+        #expect(Array(s.pixels[20 * w ..< 270 * w]) == Array(page[20 * w ..< 270 * w]))
+    }
+
     @Test("A jump past one frame is reported, not glued wrong")
     func lost() {
         let page = Self.page(height: 1000)

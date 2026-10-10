@@ -7,14 +7,20 @@ import Foundation
 /// down to a few brightness blocks, edges left out so an overlay scrollbar
 /// doesn't spoil the match). The shift where the rows differ least is how far
 /// the content scrolled; the rows that scrolled in at the bottom are appended.
-/// ponytail: down-scrolling only, and sticky footers get repeated — add
-/// footer trimming if real pages need it.
+/// Rows that stay put at the top and bottom while the rest moves are a sticky
+/// header / footer: left out of the matching, the footer kept once at the end.
+/// ponytail: down-scrolling only.
 struct ScrollStitcher {
     let width: Int
     let height: Int
     /// The stitched picture so far, RGBA rows top to bottom.
     private(set) var pixels: [UInt8] = []
     private var previous: [Row] = []
+    /// Sticky bars, in rows; decided on the first real scroll (nil = not yet).
+    private var header = 0
+    private var footer: Int?
+    /// The sticky footer from the latest frame, drawn once below the content.
+    private var footerPixels: [UInt8] = []
     /// Height limit of the result, in pixels (memory guard).
     let maxHeight: Int
 
@@ -42,7 +48,7 @@ struct ScrollStitcher {
         self.maxHeight = maxHeight
     }
 
-    var stitchedHeight: Int { pixels.count / (width * 4) }
+    var stitchedHeight: Int { (pixels.count + footerPixels.count) / (width * 4) }
 
     /// Adds one frame (RGBA8, `width`×`height`, tightly packed).
     mutating func add(_ frame: [UInt8]) -> Step {
@@ -53,20 +59,31 @@ struct ScrollStitcher {
             pixels = frame
             return .first
         }
-        guard let shift = Self.shift(from: previous, to: rows) else { return .lost }
+        let rowBytes = width * 4
+        let edges = footer.map { (top: header, bottom: $0) } ?? Self.staticEdges(previous, rows)
+        if footer == nil, edges.top + edges.bottom >= height - Self.minOverlap(height) { return .still }
+        guard let shift = Self.shift(from: previous, to: rows, skipTop: edges.top, skipBottom: edges.bottom) else { return .lost }
         guard shift > 0 else { return .still }
-        let room = (maxHeight - stitchedHeight)
+        if footer == nil { // the first real scroll: what stayed put is a bar
+            header = edges.top
+            let bar = rows.suffix(edges.bottom)
+            let bottom = bar.filter { !$0.plain }.count * 2 >= bar.count ? edges.bottom : 0 // mostly content, not a blank margin
+            footer = bottom
+            pixels.removeLast(bottom * rowBytes) // the first frame's footer goes to the end instead
+        }
+        let f = footer ?? 0
+        footerPixels = Array(frame[(height - f) * rowBytes ..< height * rowBytes])
+        let room = maxHeight - stitchedHeight
         guard room > 0 else { return .full }
         let take = min(shift, room)
-        let rowBytes = width * 4
-        pixels.append(contentsOf: frame[(height - shift) * rowBytes ..< (height - shift + take) * rowBytes])
+        pixels.append(contentsOf: frame[(height - f - shift) * rowBytes ..< (height - f - shift + take) * rowBytes])
         return take < shift ? .full : .added(rows: take)
     }
 
     func image() -> CGImage? {
         guard !pixels.isEmpty else { return nil }
         let h = stitchedHeight
-        return pixels.withUnsafeBytes { buffer -> CGImage? in
+        return (pixels + footerPixels).withUnsafeBytes { buffer -> CGImage? in
             guard let provider = CGDataProvider(data: Data(buffer) as CFData) else { return nil }
             return CGImage(width: width, height: h, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
                            space: CGColorSpace(name: CGColorSpace.sRGB)!,
@@ -105,16 +122,36 @@ struct ScrollStitcher {
     /// nil = no convincing overlap. The shift where the rows differ least
     /// wins — if it clearly beats the typical shift (smooth scrolling blurs
     /// rows a little, so nothing matches exactly).
-    static func shift(from a: [Row], to b: [Row]) -> Int? {
+    static func minOverlap(_ h: Int) -> Int { max(8, h / 8) }
+
+    static func distance(_ x: Row, _ y: Row) -> Float {
+        var d: Float = 0
+        for i in 0..<blockCount { d += abs(x.blocks[i] - y.blocks[i]) }
+        return d
+    }
+
+    /// Rows that didn't change at the top and bottom (each at most a third of the frame).
+    static func staticEdges(_ a: [Row], _ b: [Row]) -> (top: Int, bottom: Int) {
         let h = min(a.count, b.count)
-        let minOverlap = max(8, h / 8)
+        let same = { (k: Int) in distance(a[k], b[k]) < 8 }
+        let top = (0..<h).first { !same($0) } ?? h
+        let bottom = (0..<h).first { !same(h - 1 - $0) } ?? h
+        guard top < h else { return (h, 0) } // nothing changed at all
+        return (min(top, h / 3), min(bottom, h / 3))
+    }
+
+    /// Rows `skipTop` / `skipBottom` (sticky bars) are left out of the matching.
+    static func shift(from a: [Row], to b: [Row], skipTop: Int = 0, skipBottom: Int = 0) -> Int? {
+        let h = min(a.count, b.count)
+        let minOverlap = minOverlap(h)
+        let span = h - skipTop - skipBottom
+        guard span > minOverlap else { return 0 }
         var best: (shift: Int, distance: Float)?
         var all: [Float] = []
-        for s in 0...(h - minOverlap) {
+        for s in 0...(span - minOverlap) {
             var total: Float = 0, counted = 0
-            for k in 0..<(h - s) where !b[k].plain {
-                var d: Float = 0
-                for i in 0..<blockCount { d += abs(b[k].blocks[i] - a[k + s].blocks[i]) }
+            for k in skipTop..<(h - skipBottom - s) where !b[k].plain {
+                let d = distance(b[k], a[k + s])
                 total += d
                 counted += 1
                 // Early out once clearly worse than the best (the rough figure is enough for the median).
