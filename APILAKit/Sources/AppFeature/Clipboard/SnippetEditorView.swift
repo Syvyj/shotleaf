@@ -9,6 +9,7 @@ struct SnippetEditorView: View {
     @State private var folder: UUID?
     @State private var selected: UUID?
     @State private var query = ""
+    @FocusState private var naming: UUID?
 
     private var shown: [Snippet] {
         store.search(query).filter { folder == nil || $0.folder == folder }
@@ -96,12 +97,13 @@ struct SnippetEditorView: View {
             if let color {
                 Button { recolor?() } label: { Circle().fill(Color(nsColor: color)).frame(width: 10, height: 10) }
                     .buttonStyle(.plain)
-                    .instantTip(String(localized: "Change colour"))
+                    .help(String(localized: "Change colour")) // the system tip: by the pointer, never cut off
             } else {
                 Image(systemName: "tray.full").font(.system(size: 11)).frame(width: 10)
             }
             if on, let rename {
                 TextField("", text: rename).textFieldStyle(.plain).font(Leaf.font(13, .medium))
+                    .focused($naming, equals: id)
             } else {
                 Text(name).font(Leaf.font(13, .medium)).lineLimit(1)
             }
@@ -110,7 +112,7 @@ struct SnippetEditorView: View {
             if on, let id {
                 Button { deleteFolder(id) } label: { Image(systemName: "trash").font(.system(size: 11)) }
                     .buttonStyle(.plain).opacity(0.6)
-                    .instantTip(String(localized: "Delete the folder (its snippets stay)"))
+                    .help(String(localized: "Delete the folder (its snippets stay)"))
             }
         }
         .foregroundStyle(on ? Leaf.ink : Color.primary)
@@ -249,6 +251,7 @@ struct SnippetEditorView: View {
         store.folders.append(new)
         folder = new.id
         selected = nil
+        naming = new.id // type its name right away
     }
 
     private func deleteFolder(_ id: UUID) {
