@@ -48,11 +48,7 @@ struct BatchWatermarkView: View {
     private var header: some View {
         HStack(spacing: 8) {
             BrandLogo()
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Watermark Photos").font(Leaf.font(15, .semibold))
-                Text("\(model.photos.count) photos").font(.system(size: 10.5, weight: .medium, design: .monospaced)).opacity(0.5)
-            }
-            .fixedSize()
+            Text("Watermark Photos").font(Leaf.font(15, .semibold)).fixedSize() // the count is on the Apply button
             Spacer()
         }
         .overlay(WindowDragArea())
