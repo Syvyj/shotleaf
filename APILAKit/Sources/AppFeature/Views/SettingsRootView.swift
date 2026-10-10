@@ -1,5 +1,6 @@
 import SwiftUI
 import Core
+import SettingsKit
 
 /// Settings window: shortcuts, inline completion (and its model), general,
 /// permissions.
@@ -8,6 +9,13 @@ public struct SettingsRootView: View {
 
     @State private var hotkeyError: String?
     @AppStorage(Sound.key) private var sounds = true
+    // Screenshots (the same keys SettingsStore reads).
+    @AppStorage("afterCapture") private var afterCapture: SettingsStore.AfterCapture = .editor
+    @AppStorage("saveFolder") private var saveFolder = ""
+    @AppStorage("fileNameTemplate") private var fileNameTemplate = SettingsStore.defaultFileName
+    @AppStorage("saveAt1x") private var saveAt1x = false
+    @AppStorage("captureDelay") private var captureDelay = 0
+    @AppStorage(SettingsStore.showsCursorKey) private var showsCursor = false
 
     public init(coordinator: AppCoordinator) {
         self.coordinator = coordinator
@@ -29,6 +37,7 @@ public struct SettingsRootView: View {
                 }
             }
             shortcutSection
+            screenshotSection
             completionSection
             generalSection
             permissionsSection
@@ -142,6 +151,57 @@ public struct SettingsRootView: View {
         } header: {
             Text("General")
         }
+    }
+
+    // MARK: Screenshots
+
+    private var screenshotSection: some View {
+        Section {
+            Picker("After a screenshot", selection: $afterCapture) {
+                Text("Open the editor").tag(SettingsStore.AfterCapture.editor)
+                Text("Copy").tag(SettingsStore.AfterCapture.copy)
+                Text("Save").tag(SettingsStore.AfterCapture.save)
+                Text("Copy and save").tag(SettingsStore.AfterCapture.copyAndSave)
+            }
+            LabeledContent("Save to") {
+                HStack {
+                    Text(saveFolder.isEmpty ? String(localized: "Desktop") : (saveFolder as NSString).abbreviatingWithTildeInPath)
+                        .lineLimit(1).truncationMode(.middle).foregroundStyle(.secondary)
+                    Button("Choose…") { chooseFolder() }
+                    if !saveFolder.isEmpty { Button("Desktop") { saveFolder = "" } }
+                }
+            }
+            LabeledContent {
+                TextField("", text: $fileNameTemplate, prompt: Text(verbatim: SettingsStore.defaultFileName))
+                    .frame(width: 220)
+            } label: {
+                Text("File name")
+                Text("{date} and {time} are filled in: \(ScreenshotWindows.fileName(Date(), template: fileNameTemplate))")
+            }
+            Toggle(isOn: $saveAt1x) {
+                Text("Save at 1x")
+                Text("Retina shots are saved at half the pixels — smaller files.")
+            }
+            Picker("Delay", selection: $captureDelay) {
+                Text("Off").tag(0)
+                Text(verbatim: "3 s").tag(3)
+                Text(verbatim: "5 s").tag(5)
+                Text(verbatim: "10 s").tag(10)
+            }
+            .pickerStyle(.segmented)
+            Toggle("Include the pointer", isOn: $showsCursor)
+        } header: {
+            Text("Screenshots")
+        }
+    }
+
+    private func chooseFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.directoryURL = ScreenshotWindows.saveFolder
+        if panel.runModal() == .OK, let url = panel.url { saveFolder = url.path }
     }
 
     // MARK: Completion

@@ -10,9 +10,17 @@ import ScreenCaptureKit
 final class RegionPicker {
     static let shared = RegionPicker()
 
-    /// Last picked region (display + view rect) for "R — repeat".
-    /// ponytail: in memory only; persist if users want it across launches.
-    private var last: (displayID: CGDirectDisplayID, rect: CGRect)?
+    /// Last picked region (display + view rect) for "R — repeat"; kept across launches.
+    private var last: (displayID: CGDirectDisplayID, rect: CGRect)? {
+        get {
+            guard let saved = UserDefaults.standard.array(forKey: "lastRegion") as? [Double], saved.count == 5 else { return nil }
+            return (CGDirectDisplayID(saved[0]), CGRect(x: saved[1], y: saved[2], width: saved[3], height: saved[4]))
+        }
+        set {
+            let saved = newValue.map { [Double($0.displayID), $0.rect.minX, $0.rect.minY, $0.rect.width, $0.rect.height] }
+            UserDefaults.standard.set(saved, forKey: "lastRegion")
+        }
+    }
 
     private var windows: [NSPanel] = []
     private var continuation: CheckedContinuation<Picked, Error>?
@@ -79,7 +87,7 @@ final class RegionPicker {
             let config = SCStreamConfiguration()
             config.width = Int(CGFloat(display.width) * scale)
             config.height = Int(CGFloat(display.height) * scale)
-            config.showsCursor = false
+            config.showsCursor = UserDefaults.standard.bool(forKey: "captureShowsCursor") // Settings → Screenshots
             config.captureResolution = .best
             let filter = SCContentFilter(display: display, excludingApplications: ownApps, exceptingWindows: [])
             let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)

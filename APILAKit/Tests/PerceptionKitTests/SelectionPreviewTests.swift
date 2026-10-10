@@ -1,4 +1,5 @@
 import Testing
+import SwiftUI
 import AppKit
 @testable import CaptureKit
 
@@ -42,6 +43,20 @@ struct SelectionPreviewTests {
         if let dir = ProcessInfo.processInfo.environment["APILA_PREVIEW_DIR"],
            let png = rep.representation(using: .png, properties: [:]) {
             try png.write(to: URL(fileURLWithPath: dir).appendingPathComponent(name))
+        }
+    }
+
+    @Test("Scrolling bar hugs its content")
+    func scrollBar() throws {
+        let model = ScrollBarModel()
+        model.status = "Scroll down slowly · 2 834 px"
+        let host = NSHostingView(rootView: ScrollBarView(model: model))
+        host.frame = CGRect(origin: .zero, size: host.fittingSize)
+        #expect(host.fittingSize.width < 520 && host.fittingSize.height < 70, "\(host.fittingSize)")
+        let rep = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+        host.cacheDisplay(in: host.bounds, to: rep)
+        if let dir = ProcessInfo.processInfo.environment["APILA_PREVIEW_DIR"], let png = rep.representation(using: .png, properties: [:]) {
+            try png.write(to: URL(fileURLWithPath: dir).appendingPathComponent("scroll-bar.png"))
         }
     }
 

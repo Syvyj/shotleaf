@@ -1,6 +1,156 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Edit Last Screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Редагувати останній знімок"
+          }
+        }
+      }
+    },
+    "Edit Image from Clipboard": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Редагувати картинку з буфера"
+          }
+        }
+      }
+    },
+    "After a screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Після знімка"
+          }
+        }
+      }
+    },
+    "Open the editor": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити редактор"
+          }
+        }
+      }
+    },
+    "Copy and save": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копіювати й зберегти"
+          }
+        }
+      }
+    },
+    "Save to": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігати в"
+          }
+        }
+      }
+    },
+    "Desktop": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Робочий стіл"
+          }
+        }
+      }
+    },
+    "Choose…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрати…"
+          }
+        }
+      }
+    },
+    "File name": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ім'я файлу"
+          }
+        }
+      }
+    },
+    "{date} and {time} are filled in: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{date} і {time} підставляються: %@"
+          }
+        }
+      }
+    },
+    "Save at 1x": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігати в розмірі 1x"
+          }
+        }
+      }
+    },
+    "Retina shots are saved at half the pixels — smaller files.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знімки Retina зберігаються з удвічі меншою кількістю пікселів — файли менші."
+          }
+        }
+      }
+    },
+    "Delay": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Затримка"
+          }
+        }
+      }
+    },
+    "Include the pointer": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додавати вказівник миші"
+          }
+        }
+      }
+    },
+    "Screenshots": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скріншоти"
+          }
+        }
+      }
+    },
     "Pen": {
       "localizations": {
         "uk": {

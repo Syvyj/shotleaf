@@ -16,6 +16,8 @@ struct ScreenshotWindowTests {
         var c = DateComponents(); c.year = 2026; c.month = 10; c.day = 8; c.hour = 16; c.minute = 5; c.second = 9
         let date = Calendar.current.date(from: c)!
         #expect(ScreenshotWindows.fileName(date) == "APILA 2026-10-08 at 16.05.09.png")
+        #expect(ScreenshotWindows.fileName(date, template: "shot {date}/{time}") == "shot 2026-10-08-16.05.09.png")
+        #expect(ScreenshotWindows.fileName(date, template: "  ") == "APILA 2026-10-08 at 16.05.09.png")
     }
 
     @Test("Preview scales big captures down to the room, never up")
@@ -125,6 +127,19 @@ struct ScreenshotWindowTests {
 @Suite("Pen, background, formats")
 @MainActor
 struct PenBackdropTests {
+    @Test("1x halves a Retina PNG; image data becomes a PNG payload with its pixel size")
+    func oneXAndPayload() throws {
+        let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 40, pixelsHigh: 20, bitsPerSample: 8, samplesPerPixel: 4,
+                                   hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+        let png = try #require(rep.representation(using: .png, properties: [:]))
+        let half = try #require(NSBitmapImageRep(data: ScreenshotWindows.oneX(png, scale: 2)))
+        #expect(half.pixelsWide == 20 && half.pixelsHigh == 10)
+        #expect(ScreenshotWindows.oneX(png, scale: 1) == png)
+        let tiff = try #require(rep.tiffRepresentation)
+        let payload = try #require(ScreenshotWindows.payload(fromImageData: tiff))
+        #expect(payload.width == 40 && payload.height == 20)
+    }
+
     @Test("Pen: hit along the line, moves as a whole; tool keys keep their numbers")
     func pen() {
         let line = Annotation.Kind.pen([CGPoint(x: 0, y: 0), CGPoint(x: 100, y: 0), CGPoint(x: 100, y: 100)])

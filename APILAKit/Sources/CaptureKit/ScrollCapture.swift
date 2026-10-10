@@ -1,6 +1,7 @@
 import AppKit
 import Core
 import ScreenCaptureKit
+import SwiftUI
 
 /// Scrolling screenshot: pick an area, then scroll it while APILA films it
 /// and glues the frames (`ScrollStitcher`). Done / ↩ finishes, Esc cancels.
@@ -74,20 +75,28 @@ final class ScrollCapture {
     }
 }
 
-/// A green frame around the area being filmed, and a bar under it with the
-/// progress and Done / Cancel. Takes ↩ and Esc without activating APILA, so
-/// the app being scrolled stays in front.
+/// A green frame around the area being filmed, and a capsule under it with
+/// the progress and Cancel / Done, in the capture overlay's style. Takes ↩ and
+/// Esc without activating APILA, so the app being scrolled stays in front.
 @MainActor
 private final class ScrollControlBar {
-    enum Outcome { case done, cancel }
-    private(set) var outcome: Outcome?
-    var status = "" { didSet { label.stringValue = status } }
+    typealias Outcome = ScrollBarModel.Outcome
+    private let model = ScrollBarModel()
+    var outcome: Outcome? { model.outcome }
+    var status: String {
+        get { model.status }
+        set { guard newValue != model.status else { return }; model.status = newValue; fit() }
+    }
 
     private let frameWindow: NSPanel
     private let barWindow: KeyPanel
-    private let label = NSTextField(labelWithString: String(localized: "Scroll down slowly"))
+    private let hosting: NSHostingView<ScrollBarView>
+    private let area: CGRect
+    private let screen: NSScreen
 
     init(around area: CGRect, on screen: NSScreen) {
+        self.area = area
+        self.screen = screen
         frameWindow = NSPanel(contentRect: area.insetBy(dx: -3, dy: -3), styleMask: [.borderless, .nonactivatingPanel],
                               backing: .buffered, defer: false)
         frameWindow.isOpaque = false
@@ -98,62 +107,30 @@ private final class ScrollControlBar {
         frameWindow.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         frameWindow.contentView = FrameView()
 
-        // Wide enough for the longest status and both buttons in any language.
-        label.stringValue = String(localized: "Maximum length reached — press Done")
-        let size = CGSize(width: min(max(420, Self.rowWidth(label)), screen.visibleFrame.width - 16), height: 44)
-        let below = area.minY - size.height - 12
-        let y = below >= screen.visibleFrame.minY ? below : min(area.maxY + 12, screen.visibleFrame.maxY - size.height)
-        let x = min(max(area.midX - size.width / 2, screen.visibleFrame.minX + 8), screen.visibleFrame.maxX - size.width - 8)
-        barWindow = KeyPanel(contentRect: CGRect(origin: CGPoint(x: x, y: y), size: size), styleMask: [.borderless, .nonactivatingPanel],
-                             backing: .buffered, defer: false)
+        hosting = NSHostingView(rootView: ScrollBarView(model: model))
+        barWindow = KeyPanel(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         barWindow.isOpaque = false
         barWindow.backgroundColor = .clear
         barWindow.level = .floating
-        barWindow.hasShadow = true
+        barWindow.hasShadow = false // the capsule draws its own
         barWindow.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        barWindow.contentView = makeBar(size: size)
-        label.stringValue = String(localized: "Scroll down slowly")
+        barWindow.contentView = hosting
+        fit()
 
         frameWindow.orderFrontRegardless()
         barWindow.makeKeyAndOrderFront(nil)
     }
 
-    /// The bar's natural width with `label` showing its current text.
-    private static func rowWidth(_ label: NSTextField) -> CGFloat {
-        let buttons = [String(localized: "Done") + "  ↩", String(localized: "Cancel") + "  esc"].map {
-            NSButton(title: $0, target: nil, action: nil).fittingSize.width
-        }
-        return label.fittingSize.width + buttons.reduce(0, +) + 18 + 8 + 2 * 8 + 4
+    /// The bar hugs its content, centred under the area (or above it, if
+    /// there's no room below), always on screen.
+    private func fit() {
+        let size = hosting.fittingSize
+        let visible = screen.visibleFrame
+        let below = area.minY - size.height - 10
+        let y = below >= visible.minY ? below : min(area.maxY + 10, visible.maxY - size.height)
+        let x = min(max(area.midX - size.width / 2, visible.minX + 8), visible.maxX - size.width - 8)
+        barWindow.setFrame(CGRect(x: x.rounded(), y: y.rounded(), width: size.width, height: size.height), display: true)
     }
-
-    private func makeBar(size: CGSize) -> NSView {
-        let background = NSVisualEffectView(frame: CGRect(origin: .zero, size: size))
-        background.material = .hudWindow
-        background.state = .active
-        background.wantsLayer = true
-        background.layer?.cornerRadius = size.height / 2
-
-        label.font = .systemFont(ofSize: 13, weight: .medium)
-        label.lineBreakMode = .byTruncatingTail
-        let done = NSButton(title: String(localized: "Done") + "  ↩", target: self, action: #selector(doneTapped))
-        done.keyEquivalent = "\r"
-        done.bezelStyle = .rounded
-        let cancel = NSButton(title: String(localized: "Cancel") + "  esc", target: self, action: #selector(cancelTapped))
-        cancel.keyEquivalent = "\u{1b}"
-        cancel.bezelStyle = .rounded
-        let row = NSStackView(views: [label, cancel, done])
-        row.spacing = 8
-        row.edgeInsets = NSEdgeInsets(top: 0, left: 18, bottom: 0, right: 8)
-        row.frame = background.bounds
-        row.autoresizingMask = [.width, .height]
-        label.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        background.addSubview(row)
-        return background
-    }
-
-    @objc private func doneTapped() { outcome = .done }
-    @objc private func cancelTapped() { outcome = .cancel }
 
     func close() {
         frameWindow.orderOut(nil)
@@ -165,9 +142,71 @@ private final class ScrollControlBar {
             let path = NSBezierPath(roundedRect: bounds.insetBy(dx: 1.5, dy: 1.5), xRadius: 4, yRadius: 4)
             path.lineWidth = 3
             path.setLineDash([8, 5], count: 2, phase: 0)
-            NSColor(srgbRed: 0.79, green: 0.91, blue: 0.42, alpha: 1).setStroke() // lime
+            CaptureStyle.lime.setStroke()
             path.stroke()
         }
+    }
+}
+
+@MainActor
+@Observable
+final class ScrollBarModel {
+    enum Outcome { case done, cancel }
+    var status = String(localized: "Scroll down slowly")
+    var outcome: Outcome?
+}
+
+/// Dark leaf-glass capsule: a live dot, the progress, esc / ↩ buttons.
+struct ScrollBarView: View {
+    let model: ScrollBarModel
+    @State private var pulse = false
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(Color(nsColor: CaptureStyle.lime))
+                .frame(width: 8, height: 8)
+                .opacity(pulse ? 0.35 : 1)
+                .animation(.easeInOut(duration: 0.8).repeatForever(), value: pulse)
+                .onAppear { pulse = true }
+            Text(model.status)
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .monospacedDigit()
+                .foregroundStyle(.white)
+                .fixedSize()
+                .padding(.trailing, 4)
+            Button { model.outcome = .cancel } label: {
+                key("Cancel", "esc", prominent: false)
+            }
+            .keyboardShortcut(.cancelAction)
+            Button { model.outcome = .done } label: {
+                key("Done", "↩", prominent: true)
+            }
+            .keyboardShortcut(.defaultAction)
+        }
+        .buttonStyle(.plain)
+        .padding(.leading, 16).padding(.trailing, 6).padding(.vertical, 6)
+        .background(Capsule().fill(Color(nsColor: CaptureStyle.capsule)))
+        .overlay(Capsule().strokeBorder(Color(nsColor: CaptureStyle.capsuleStroke)))
+        .padding(10) // room for the shadow inside the window
+        .shadow(color: .black.opacity(0.3), radius: 8, y: 3)
+        .fixedSize()
+    }
+
+    private func key(_ title: LocalizedStringKey, _ cap: String, prominent: Bool) -> some View {
+        HStack(spacing: 6) {
+            Text(title).font(.system(size: 13, weight: .semibold, design: .rounded))
+            Text(cap).font(.system(size: 10.5, weight: .bold, design: .rounded)).opacity(0.6)
+        }
+        .foregroundStyle(prominent ? Color(red: 0.07, green: 0.1, blue: 0.07) : .white)
+        .padding(.horizontal, 12).frame(height: 28)
+        .background {
+            Capsule().fill(prominent
+                ? AnyShapeStyle(LinearGradient(colors: [Color(nsColor: CaptureStyle.leaf), Color(nsColor: CaptureStyle.lime)],
+                                               startPoint: .leading, endPoint: .trailing))
+                : AnyShapeStyle(Color.white.opacity(0.12)))
+        }
+        .contentShape(Capsule())
     }
 }
 

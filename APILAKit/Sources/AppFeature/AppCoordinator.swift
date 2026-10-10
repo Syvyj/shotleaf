@@ -50,6 +50,8 @@ public final class AppCoordinator {
                 case HotkeyAction.screenshotText.rawValue: self.textFromScreenshot()
                 case HotkeyAction.capture.rawValue: self.takeScreenshot()
                 case HotkeyAction.scrolling.rawValue: self.takeScrollingScreenshot()
+                case HotkeyAction.editLast.rawValue: self.editLastScreenshot()
+                case HotkeyAction.editClipboard.rawValue: self.editClipboardImage()
                 default: break
                 }
             }
@@ -62,12 +64,13 @@ public final class AppCoordinator {
 
     /// Shottr-style: pick a region → preview window (copy, save, pin, drag, Live Text).
     /// `delay`: seconds to wait first (with a countdown), to open a menu or
-    /// tooltip that should be in the shot.
-    public func takeScreenshot(delay: Int = 0) {
+    /// tooltip that should be in the shot; nil = the default from Settings.
+    public func takeScreenshot(delay: Int? = nil) {
         Task {
+            let delay = delay ?? container.settings.captureDelay
             if delay > 0 { await screenshots.countdown(delay) }
             do {
-                screenshots.show(try await container.capture.captureRegion())
+                deliver(try await container.capture.captureRegion())
             } catch AppError.cancelled {
                 // Esc in the picker: nothing to show.
             } catch {
@@ -94,12 +97,35 @@ public final class AppCoordinator {
     public func takeScrollingScreenshot() {
         Task {
             do {
-                screenshots.show(try await container.capture.captureScrolling())
+                deliver(try await container.capture.captureScrolling())
             } catch AppError.cancelled {
             } catch {
                 screenshots.showProblem(error)
             }
         }
+    }
+
+    /// A new shot: into the editor, or straight to the clipboard / a file
+    /// (Settings → Screenshots). Kept for "Edit Last Screenshot" either way.
+    private func deliver(_ shot: ImagePayload) {
+        screenshots.remember(shot)
+        let after = container.settings.afterCapture
+        if after == .editor { screenshots.show(shot); return }
+        Sound.shutter()
+        if after == .copy || after == .copyAndSave { ScreenshotWindows.copy(shot.data) }
+        if after == .save || after == .copyAndSave { _ = ScreenshotWindows.save(shot.data, scale: NSScreen.main?.backingScaleFactor ?? 2) }
+    }
+
+    /// The last screenshot back in the editor (as it was taken).
+    public func editLastScreenshot() {
+        guard let shot = screenshots.lastCapture() else { NSSound.beep(); return }
+        screenshots.show(shot, sound: false)
+    }
+
+    /// An image from the clipboard in the editor, to mark up like a screenshot.
+    public func editClipboardImage() {
+        guard let shot = ScreenshotWindows.clipboardImage() else { NSSound.beep(); return }
+        screenshots.show(shot, sound: false)
     }
 
     // MARK: Settings

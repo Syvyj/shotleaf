@@ -23,6 +23,12 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
     public static let scrollingDefault = HotkeyShortcut(
         id: "cmd-shift-3", title: "⌘⇧3", keyCode: UInt32(kVK_ANSI_3), modifiers: UInt32(cmdKey | shiftKey)
     )
+    public static let editLastDefault = HotkeyShortcut(
+        id: "ctrl-opt-cmd-e", title: "⌃⌥⌘E", keyCode: UInt32(kVK_ANSI_E), modifiers: UInt32(controlKey | optionKey | cmdKey)
+    )
+    public static let editClipboardDefault = HotkeyShortcut(
+        id: "ctrl-opt-cmd-v", title: "⌃⌥⌘V", keyCode: UInt32(kVK_ANSI_V), modifiers: UInt32(controlKey | optionKey | cmdKey)
+    )
 
     init(id: String, title: String, keyCode: UInt32, modifiers: UInt32) {
         self.id = id
@@ -43,7 +49,7 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
                 return HotkeyShortcut(customKeyCode: code, modifiers: mods, title: String(parts[3]))
             }
         }
-        return [captureDefault, screenshotDefault, scrollingDefault].first { $0.id == id }
+        return [captureDefault, screenshotDefault, scrollingDefault, editLastDefault, editClipboardDefault].first { $0.id == id }
     }
 
     /// Builds a shortcut from a key press in the recorder. Nil when it has no
@@ -85,6 +91,8 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
     case capture                            // screenshot → preview window
     case screenshotText = "screenshot-text" // screenshot → OCR text
     case scrolling                          // scrolling screenshot → preview window
+    case editLast = "edit-last"             // the last screenshot back in the editor
+    case editClipboard = "edit-clipboard"   // an image from the clipboard in the editor
 
     public var id: String { rawValue }
 
@@ -93,6 +101,8 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
         case .capture: String(localized: "Screenshot")
         case .screenshotText: String(localized: "Text from Screenshot")
         case .scrolling: String(localized: "Scrolling Screenshot")
+        case .editLast: String(localized: "Edit Last Screenshot")
+        case .editClipboard: String(localized: "Edit Image from Clipboard")
         }
     }
 
@@ -101,6 +111,8 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
         case .capture: .captureDefault
         case .screenshotText: .screenshotDefault
         case .scrolling: .scrollingDefault
+        case .editLast: .editLastDefault
+        case .editClipboard: .editClipboardDefault
         }
     }
 }

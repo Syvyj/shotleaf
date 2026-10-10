@@ -1,5 +1,6 @@
 import AppKit
 import Core
+import SettingsKit
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -9,9 +10,9 @@ import UniformTypeIdentifiers
 final class ScreenshotWindows {
     private(set) var open: [ObjectIdentifier: FloatingPanel] = [:] // internal for tests
 
-    func show(_ payload: ImagePayload) {
+    func show(_ payload: ImagePayload, sound: Bool = true) {
         guard let image = NSImage(data: payload.data) else { return }
-        Sound.shutter()
+        if sound { Sound.shutter() }
         let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
         let scale = screen?.backingScaleFactor ?? 2
         let pixels = CGSize(width: payload.width, height: payload.height)
@@ -40,7 +41,7 @@ final class ScreenshotWindows {
         let close: () -> Void = { [weak self] in self?.close(panel) }
         let actions = ScreenshotActions(
             copy: { Self.copy(result()) },
-            save: { Self.save(result()) },
+            save: { Self.save(result(), scale: scale) },
             pin: { [weak self] in
                 let png = result()
                 guard let pinned = NSImage(data: png), let rep = NSBitmapImageRep(data: png) else { return }
@@ -52,10 +53,12 @@ final class ScreenshotWindows {
             saveAs: { type in
                 let ask = NSSavePanel()
                 ask.allowedContentTypes = [type]
-                ask.directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0]
-                ask.nameFieldStringValue = (Self.fileName(Date()) as NSString).deletingPathExtension
+                ask.directoryURL = Self.saveFolder
+                ask.nameFieldStringValue = (Self.fileName(Date(), template: Self.settings.fileNameTemplate) as NSString).deletingPathExtension
                 ask.beginSheetModal(for: panel) { response in
-                    guard response == .OK, let url = ask.url, let data = Self.encoded(result(), as: type, scale: scale) else { return }
+                    let png = Self.settings.saveAt1x ? Self.oneX(result(), scale: scale) : result()
+                    guard response == .OK, let url = ask.url,
+                          let data = Self.encoded(png, as: type, scale: Self.settings.saveAt1x ? 1 : scale) else { return }
                     try? data.write(to: url)
                 }
             },
@@ -211,18 +214,78 @@ final class ScreenshotWindows {
         return out as Data
     }
 
-    /// Saves to the Desktop as "APILA 2026-10-08 at 16.50.12.png".
-    static func save(_ png: Data, to folder: URL? = nil, now: Date = Date()) -> URL? {
-        let folder = folder ?? FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0]
-        let url = folder.appendingPathComponent(fileName(now))
-        return (try? png.write(to: url)) != nil ? url : nil
+    static let settings = SettingsStore()
+
+    /// Settings → Screenshots, or the Desktop.
+    static var saveFolder: URL {
+        settings.saveFolder ?? FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0]
     }
 
-    static func fileName(_ date: Date) -> String {
+    /// Saves as "APILA 2026-10-08 at 16.50.12.png" (the name and folder from
+    /// Settings), at 1x if asked; `scale` = pixels per point of the shot.
+    static func save(_ png: Data, to folder: URL? = nil, now: Date = Date(), scale: CGFloat = 1) -> URL? {
+        let folder = folder ?? saveFolder
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let url = folder.appendingPathComponent(fileName(now, template: settings.fileNameTemplate))
+        let data = settings.saveAt1x ? oneX(png, scale: scale) : png
+        return (try? data.write(to: url)) != nil ? url : nil
+    }
+
+    /// `template` with {date} and {time} filled in, made safe for Finder.
+    static func fileName(_ date: Date, template: String = SettingsStore.defaultFileName) -> String {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd 'at' HH.mm.ss"
-        return "APILA \(f.string(from: date)).png"
+        f.dateFormat = "yyyy-MM-dd"
+        let day = f.string(from: date)
+        f.dateFormat = "HH.mm.ss"
+        let name = template.replacingOccurrences(of: "{date}", with: day).replacingOccurrences(of: "{time}", with: f.string(from: date))
+            .replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: ".")
+            .trimmingCharacters(in: .whitespaces)
+        return (name.isEmpty ? "APILA \(day) at \(f.string(from: date))" : name) + ".png"
+    }
+
+    /// A Retina PNG scaled down to one pixel per point.
+    static func oneX(_ png: Data, scale: CGFloat) -> Data {
+        guard scale > 1, let image = NSBitmapImageRep(data: png)?.cgImage else { return png }
+        let w = Int((CGFloat(image.width) / scale).rounded()), h = Int((CGFloat(image.height) / scale).rounded())
+        guard w > 0, h > 0,
+              let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return png }
+        ctx.interpolationQuality = .high
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+        return ctx.makeImage().flatMap { NSBitmapImageRep(cgImage: $0).representation(using: .png, properties: [:]) } ?? png
+    }
+
+    // MARK: Last shot & clipboard
+
+    private static var lastURL: URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("APILA/last-capture.png")
+    }
+
+    /// Keeps the newest capture on disk for "Edit Last Screenshot" (survives a restart).
+    func remember(_ shot: ImagePayload) {
+        try? FileManager.default.createDirectory(at: Self.lastURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? shot.data.write(to: Self.lastURL)
+    }
+
+    func lastCapture() -> ImagePayload? {
+        (try? Data(contentsOf: Self.lastURL)).flatMap(Self.payload(fromImageData:))
+    }
+
+    /// The clipboard's image (PNG or anything AppKit reads), as a PNG payload.
+    static func clipboardImage() -> ImagePayload? {
+        let board = NSPasteboard.general
+        guard let data = board.data(forType: .png) ?? board.data(forType: .tiff)
+                ?? (NSImage(pasteboard: board)?.tiffRepresentation) else { return nil }
+        return payload(fromImageData: data)
+    }
+
+    static func payload(fromImageData data: Data) -> ImagePayload? {
+        guard let rep = NSBitmapImageRep(data: data), rep.pixelsWide > 0,
+              let png = rep.representation(using: .png, properties: [:]) else { return nil }
+        return ImagePayload(data: png, width: rep.pixelsWide, height: rep.pixelsHigh)
     }
 
     /// ponytail: temp files stay until macOS cleans the temp dir — a drop target

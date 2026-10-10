@@ -24,6 +24,12 @@ public struct MenuBarRootView: View {
         Button(Self.label(String(localized: "Text from Screenshot…"), coordinator.actionHotkeys[.screenshotText])) {
             coordinator.textFromScreenshot()
         }
+        Button(Self.label(String(localized: "Edit Last Screenshot"), coordinator.actionHotkeys[.editLast])) {
+            coordinator.editLastScreenshot()
+        }
+        Button(Self.label(String(localized: "Edit Image from Clipboard"), coordinator.actionHotkeys[.editClipboard])) {
+            coordinator.editClipboardImage()
+        }
 
         Divider()
 
