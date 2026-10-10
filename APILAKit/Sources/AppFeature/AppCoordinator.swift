@@ -144,8 +144,9 @@ public final class AppCoordinator {
 
     /// "Watermark Photos…": one watermark on many photos.
     public func showBatchWatermark() {
+        if batchWindow?.isVisible != true { batchWindow = nil } // closed: start over with no photos
         if batchWindow == nil {
-            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1100, height: 720),
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1100, height: 760),
                                   styleMask: [.titled, .closable, .resizable, .miniaturizable], backing: .buffered, defer: false)
             window.title = String(localized: "Watermark Photos")
             window.isReleasedWhenClosed = false

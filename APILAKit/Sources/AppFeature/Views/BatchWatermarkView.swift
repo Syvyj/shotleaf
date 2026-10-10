@@ -18,10 +18,11 @@ struct BatchWatermarkView: View {
             .padding(16)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             Divider()
-            ScrollView { sidebar.padding(16) }
+            sidebar.padding(16)
                 .frame(width: 320)
+                .frame(maxHeight: .infinity, alignment: .top)
         }
-        .frame(minWidth: 980, minHeight: 640)
+        .frame(minWidth: 980, minHeight: 700)
         .background(Leaf.surface)
         .dropDestination(for: URL.self) { urls, _ in model.add(urls); return true }
         .task(id: model.selected) {
@@ -96,7 +97,7 @@ struct BatchWatermarkView: View {
     // MARK: Settings
 
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 BrandLogo()
                 VStack(alignment: .leading, spacing: 0) {
@@ -105,7 +106,6 @@ struct BatchWatermarkView: View {
                 }
             }
 
-            section("All photos")
             Picker("", selection: $model.watermark.kind) {
                 Text("Text").tag(Watermark.Kind.text)
                 Text("Image").tag(Watermark.Kind.image)
@@ -115,20 +115,28 @@ struct BatchWatermarkView: View {
             .onChange(of: model.watermark.kind) { _, kind in
                 if kind == .image, model.watermark.imagePath == nil { WatermarkControls.chooseImage { model.watermark.imagePath = $0 } }
             }
-            PositionGrid(title: "Position", selection: model.watermark.position) { model.watermark.position = $0 }
             WatermarkControls(watermark: $model.watermark)
 
-            if let url = model.selected {
-                section("This photo")
-                let own = model.overrides[url]
-                PositionGrid(title: "Position", selection: own.map { $0.center == nil ? $0.position : -1 } ?? model.watermark.position) {
-                    model.overrides[url] = .init(position: $0, center: nil)
+            section("Position")
+            HStack(alignment: .top, spacing: 24) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("All photos").font(Leaf.font(12, .medium)).opacity(0.7)
+                    PositionGrid(selection: model.watermark.position) { model.watermark.position = $0 }
                 }
-                Text("Or drag the watermark on the photo.").font(Leaf.font(11)).opacity(0.6)
-                Button("Same as the others") { model.overrides[url] = nil }
-                    .buttonStyle(LeafButtonStyle())
-                    .disabled(own == nil)
+                if let url = model.selected {
+                    let own = model.overrides[url]
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("This photo").font(Leaf.font(12, .medium)).opacity(0.7)
+                        PositionGrid(selection: own.map { $0.center == nil ? $0.position : -1 } ?? model.watermark.position) {
+                            model.overrides[url] = .init(position: $0, center: nil)
+                        }
+                        Button("Same as the others") { model.overrides[url] = nil }
+                            .buttonStyle(.link).font(Leaf.font(11)).tint(Leaf.ink)
+                            .disabled(own == nil)
+                    }
+                }
             }
+            Text("Or drag the watermark on the photo.").font(Leaf.font(11)).opacity(0.6)
 
             section("Save")
             Picker("Format", selection: $model.format) {
@@ -144,6 +152,7 @@ struct BatchWatermarkView: View {
             }
             Text("Photos keep their size, colour profile and metadata. PNG is lossless; JPEG and HEIC are written at maximum quality. The originals stay untouched.")
                 .font(Leaf.font(11)).opacity(0.6).fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
 
             if let progress = model.progress {
                 ProgressView(value: progress).tint(Leaf.leaf)
@@ -161,7 +170,7 @@ struct BatchWatermarkView: View {
     }
 
     private func section(_ title: LocalizedStringKey) -> some View {
-        Text(title).font(Leaf.font(11, .semibold)).textCase(.uppercase).opacity(0.5).padding(.top, 6)
+        Text(title).font(Leaf.font(11, .semibold)).textCase(.uppercase).opacity(0.5).padding(.top, 4)
     }
 
     // MARK: Helpers

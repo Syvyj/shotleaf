@@ -43,14 +43,15 @@ struct WatermarkControls: View {
 }
 
 /// Nine spots, row by row from the top-left; nil selection = placed by hand.
+/// Without a title it's just the grid.
 struct PositionGrid: View {
-    let title: LocalizedStringKey
+    var title: LocalizedStringKey?
     let selection: Int?
     let pick: (Int) -> Void
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
-            Text(title).font(Leaf.font(12, .medium)).opacity(0.7).frame(width: 90, alignment: .leading)
+            if let title { Text(title).font(Leaf.font(12, .medium)).opacity(0.7).frame(width: 90, alignment: .leading) }
             Grid(horizontalSpacing: 4, verticalSpacing: 4) {
                 ForEach(0..<3) { row in
                     GridRow {

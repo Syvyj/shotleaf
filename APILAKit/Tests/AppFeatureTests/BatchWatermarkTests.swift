@@ -56,6 +56,8 @@ struct BatchWatermarkTests {
         model.overrides[photo] = .init(position: 8, center: CGPoint(x: 0.3, y: 0.2))
         #expect(model.mark(for: photo).center == CGPoint(x: 0.3, y: 0.2))
         #expect(model.folder?.lastPathComponent == "Watermarked")
-        try renderPreview(BatchWatermarkView(model: model).frame(width: 1000, height: 660), "batch-watermark.png")
+        let sidebarNeeds = NSHostingView(rootView: BatchWatermarkView(model: model)).fittingSize.height
+        #expect(sidebarNeeds <= 700, "needs \(sidebarNeeds) pt") // fits the window without scrolling
+        try renderPreview(BatchWatermarkView(model: model).frame(width: 1000, height: 700), "batch-watermark.png")
     }
 }
