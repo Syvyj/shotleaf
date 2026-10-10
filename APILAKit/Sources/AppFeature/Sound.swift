@@ -1,8 +1,7 @@
 import AppKit
 
 /// APILA's own feedback sounds, synthesized at launch (no audio files):
-/// a soft two-step shutter when a capture opens, a short rising "bloop" on
-/// copy. Off with Settings → General → Sounds.
+/// a soft leaf "shhf" when a capture opens, two quick wooden notes on copy. Off with Settings → General → Sounds.
 @MainActor
 enum Sound {
     static let key = "sounds"
@@ -24,35 +23,36 @@ enum Sound {
 enum Synth {
     static let rate = 44_100.0
 
-    /// Two muffled clicks 55 ms apart, each a lowpassed noise tick on a low thump.
+    /// A soft "shhf" like a leaf brushing past: band-limited noise that swells
+    /// in and fades out, no clicks.
     static func shutter() -> [Float] {
-        var out = [Float](repeating: 0, count: Int(rate * 0.16))
         var seed: UInt32 = 0x4150
-        for (start, gain, pitch) in [(0.0, 0.55, 190.0), (0.055, 0.4, 240.0)] {
-            var low: Double = 0
-            for i in 0..<Int(rate * 0.06) {
+        var fast = 0.0, slow = 0.0
+        let length = 0.16
+        return (0..<Int(rate * length)).map { i in
+            let t = Double(i) / rate
+            seed = seed &* 1_664_525 &+ 1_013_904_223
+            let noise = Double(seed) / Double(UInt32.max) * 2 - 1
+            fast += 0.45 * (noise - fast)            // drop the hiss
+            slow += 0.04 * (fast - slow)             // and the rumble
+            let swell = sin(.pi * min(t / length, 1))
+            return Float(0.5 * (fast - slow) * swell * swell)
+        }
+    }
+
+    /// Two quick wooden notes (E6, A6), marimba-like: a sine with a faint
+    /// fourth partial, struck and fading. Steady pitch.
+    static func bloop() -> [Float] {
+        var out = [Float](repeating: 0, count: Int(rate * 0.22))
+        for (start, f, gain) in [(0.0, 1318.5, 0.28), (0.06, 1760.0, 0.32)] {
+            for i in 0..<Int(rate * 0.16) {
                 let t = Double(i) / rate
-                seed = seed &* 1_664_525 &+ 1_013_904_223
-                let noise = Double(seed) / Double(UInt32.max) * 2 - 1
-                low += 0.35 * (noise - low)                                   // one-pole lowpass
-                let tick = low * exp(-t / 0.004)
-                let thump = sin(2 * .pi * pitch * t) * exp(-t / 0.018) * 0.6
-                out[Int(start * rate) + i] += Float(gain * (tick + thump))
+                let envelope = min(t / 0.002, 1) * exp(-t / 0.04)
+                let tone = sin(2 * .pi * f * t) + 0.12 * sin(2 * .pi * 4 * f * t) * exp(-t / 0.008)
+                out[Int(start * rate) + i] += Float(gain * envelope * tone)
             }
         }
         return out
-    }
-
-    /// A sine gliding up a fifth (A5 → E6) with a soft attack and quick fade.
-    static func bloop() -> [Float] {
-        var phase = 0.0
-        return (0..<Int(rate * 0.18)).map { i in
-            let t = Double(i) / rate
-            let f = 880 * pow(1.5, min(t / 0.05, 1))
-            phase += 2 * .pi * f / rate
-            let envelope = min(t / 0.004, 1) * exp(-t / 0.045)
-            return Float(0.35 * envelope * (sin(phase) + 0.15 * sin(2 * phase)))
-        }
     }
 
     static func wav(_ samples: [Float]) -> Data {
