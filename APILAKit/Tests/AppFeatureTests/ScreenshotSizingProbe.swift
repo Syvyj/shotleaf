@@ -22,7 +22,7 @@ struct ScreenshotSizingTests {
         print("SIZING panel", panel.frame, "screens", NSScreen.screens.map(\.visibleFrame))
         // 800×800 pt image + canvas margin + 14 pt padding each side; + header/actions.
         let m = 2 * ScreenshotView.margin
-        #expect(panel.frame.width == 800 + m + 28)
+        #expect(panel.frame.width == max(800 + m, ScreenshotView.minContentWidth) + 28)
         #expect(panel.frame.height > 800 + m && panel.frame.height <= 800 + m + ScreenshotWindows.chromeHeight)
         #expect(NSScreen.screens.contains { $0.visibleFrame.contains(panel.frame) })
 

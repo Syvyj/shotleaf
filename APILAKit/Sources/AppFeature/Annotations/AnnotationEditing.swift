@@ -28,6 +28,8 @@ enum AnnotationEditing {
         }
         switch kind {
         case .arrow(let a, let b), .measure(let a, let b): return distance(from: p, toSegment: a, b) <= tolerance
+        case .pen(let points):
+            return zip(points, points.dropFirst()).contains { distance(from: p, toSegment: $0, $1) <= tolerance }
         case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r):
             return r.insetBy(dx: -tolerance / 2, dy: -tolerance / 2).contains(p)
         case .piece(let source, let offset, _):
@@ -86,6 +88,7 @@ enum AnnotationEditing {
         case .focus(let r): return .focus(m(r))
         case .ellipse(let r): return .ellipse(m(r))
         case .crop(let r): return .crop(m(r))
+        case .pen(let points): return .pen(points.map(m))
         case .erase(let r, let fill): return .erase(m(r), fill: fill)
         case .step(let c, let n): return .step(center: m(c), number: n)
         case .text(let o, let s, let tail, let w, let f): return .text(origin: m(o), string: s, tail: tail, width: w, size: f) // the tail keeps pointing

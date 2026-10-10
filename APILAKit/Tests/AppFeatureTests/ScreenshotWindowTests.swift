@@ -1,5 +1,6 @@
 import Testing
 import SwiftUI
+import UniformTypeIdentifiers
 @testable import Core
 @testable import PerceptionKit
 @testable import AppFeature
@@ -114,6 +115,49 @@ struct ScreenshotWindowTests {
         doc.applyCrop(original: cg, size: CGSize(width: 640, height: 360))
         try renderPreview(view, "screenshot-cropped.png")
         try renderPreview(view, "screenshot-window-dark.png", dark: true)
+        doc.lineWidth = 4
+        doc.add(.pen([CGPoint(x: 40, y: 40), CGPoint(x: 80, y: 20), CGPoint(x: 140, y: 60), CGPoint(x: 200, y: 30)]))
+        doc.backdrop = Backdrop(fill: .gradient(1))
+        try renderPreview(view, "screenshot-backdrop.png")
+    }
+}
+
+@Suite("Pen, background, formats")
+@MainActor
+struct PenBackdropTests {
+    @Test("Pen: hit along the line, moves as a whole; tool keys keep their numbers")
+    func pen() {
+        let line = Annotation.Kind.pen([CGPoint(x: 0, y: 0), CGPoint(x: 100, y: 0), CGPoint(x: 100, y: 100)])
+        #expect(AnnotationEditing.contains(line, CGPoint(x: 50, y: 3)))
+        #expect(!AnnotationEditing.contains(line, CGPoint(x: 50, y: 50)))
+        #expect(AnnotationEditing.moved(line, by: CGSize(width: 10, height: 5)) == .pen([CGPoint(x: 10, y: 5), CGPoint(x: 110, y: 5), CGPoint(x: 110, y: 105)]))
+        #expect(AnnotationTool.arrow.key == "1" && AnnotationTool.blur.key == "5" && AnnotationTool.focus.key == "9" && AnnotationTool.pen.key == "d")
+        #expect(Set(AnnotationTool.allCases.map(\.key)).count == AnnotationTool.allCases.count)
+    }
+
+    @Test("Background frames the shot with padding (in pixels) and keeps it opaque")
+    func backdrop() throws {
+        let shot = try #require(CGContext(data: nil, width: 200, height: 100, bitsPerComponent: 8, bytesPerRow: 0,
+                                          space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)?.makeImage())
+        let framed = try #require(Backdrop(fill: .solid(3), padding: 40, corner: 10).framed(shot, scale: 2))
+        #expect(framed.width == 360 && framed.height == 260)
+    }
+
+    @Test("Save as: JPEG, HEIC and PDF come out readable")
+    func formats() throws {
+        let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 40, pixelsHigh: 20, bitsPerSample: 8, samplesPerPixel: 4,
+                                   hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+        let png = try #require(rep.representation(using: .png, properties: [:]))
+        for type in [UTType.jpeg, .heic] {
+            let data = try #require(ScreenshotWindows.encoded(png, as: type, scale: 2))
+            #expect(NSImage(data: data)?.size.width ?? 0 > 0, "\(type)")
+        }
+        let pdf = try #require(ScreenshotWindows.encoded(png, as: .pdf, scale: 2))
+        #expect(PDFPageSize(pdf) == CGSize(width: 20, height: 10))
+    }
+
+    private func PDFPageSize(_ data: Data) -> CGSize? {
+        CGPDFDocument(CGDataProvider(data: data as CFData)!)?.page(at: 1)?.getBoxRect(.mediaBox).size
     }
 }
 

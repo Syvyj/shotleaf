@@ -1,6 +1,7 @@
 import AppKit
 import Core
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Opens screenshot preview windows and pinned screenshots. Each capture gets
 /// its own window, so several can be open (and pinned) at once.
@@ -26,11 +27,13 @@ final class ScreenshotWindows {
         let result: () -> Data = {
             let picture = doc.base?.image ?? cgImage
             let size = doc.base?.size ?? display
-            guard !doc.isEmpty || doc.base != nil,
-                  let composed = AnnotationRenderer.export(picture, imageSize: size, items: doc.items),
-                  let png = NSBitmapImageRep(cgImage: composed).representation(using: .png, properties: [:])
+            guard !doc.isEmpty || doc.base != nil || doc.backdrop != nil,
+                  var composed = AnnotationRenderer.export(picture, imageSize: size, items: doc.items,
+                                                           canvas: doc.base?.cutOut == true ? .clear : .white)
             else { return payload.data }
-            return png
+            if let backdrop = doc.backdrop,
+               let framed = backdrop.framed(composed, scale: CGFloat(picture.width) / size.width) { composed = framed }
+            return NSBitmapImageRep(cgImage: composed).representation(using: .png, properties: [:]) ?? payload.data
         }
 
         var panel: FloatingPanel!
@@ -45,7 +48,23 @@ final class ScreenshotWindows {
                 self?.pin(pinned, size: CGSize(width: CGFloat(rep.pixelsWide) / scale, height: CGFloat(rep.pixelsHigh) / scale), data: png)
             },
             close: close,
-            dragFile: { Self.writeTempPNG(result()) }
+            dragFile: { Self.writeTempPNG(result()) },
+            saveAs: { type in
+                let ask = NSSavePanel()
+                ask.allowedContentTypes = [type]
+                ask.directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0]
+                ask.nameFieldStringValue = (Self.fileName(Date()) as NSString).deletingPathExtension
+                ask.beginSheetModal(for: panel) { response in
+                    guard response == .OK, let url = ask.url, let data = Self.encoded(result(), as: type, scale: scale) else { return }
+                    try? data.write(to: url)
+                }
+            },
+            share: {
+                guard let view = panel.contentView else { return }
+                let at = view.convert(panel.mouseLocationOutsideOfEventStream, from: nil)
+                NSSharingServicePicker(items: [Self.writeTempPNG(result())])
+                    .show(relativeTo: NSRect(origin: at, size: .zero), of: view, preferredEdge: .maxY)
+            }
         )
         let width = max(display.width + margin, ScreenshotView.minContentWidth) + 28
         panel = makePanel(ScreenshotView(image: image, cgImage: cgImage, pixelSize: pixels, displaySize: display, actions: actions, doc: doc),
@@ -169,6 +188,27 @@ final class ScreenshotWindows {
         pasteboard.setData(png, forType: .png)
         if let tiff = NSImage(data: png)?.tiffRepresentation { pasteboard.setData(tiff, forType: .tiff) }
         Sound.copied()
+    }
+
+    /// The PNG in another format; PDF pages are sized in points (`scale` px per pt).
+    static func encoded(_ png: Data, as type: UTType, scale: CGFloat) -> Data? {
+        guard type != .png else { return png }
+        guard let source = CGImageSourceCreateWithData(png as CFData, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return nil }
+        let out = NSMutableData()
+        if type == .pdf {
+            var page = CGRect(x: 0, y: 0, width: CGFloat(image.width) / scale, height: CGFloat(image.height) / scale)
+            guard let consumer = CGDataConsumer(data: out), let pdf = CGContext(consumer: consumer, mediaBox: &page, nil) else { return nil }
+            pdf.beginPDFPage(nil)
+            pdf.draw(image, in: page)
+            pdf.endPDFPage()
+            pdf.closePDF()
+        } else {
+            guard let destination = CGImageDestinationCreateWithData(out, type.identifier as CFString, 1, nil) else { return nil }
+            CGImageDestinationAddImage(destination, image, [kCGImageDestinationLossyCompressionQuality: 0.9] as CFDictionary)
+            guard CGImageDestinationFinalize(destination) else { return nil }
+        }
+        return out as Data
     }
 
     /// Saves to the Desktop as "APILA 2026-10-08 at 16.50.12.png".

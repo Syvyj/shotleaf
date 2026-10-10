@@ -27,6 +27,8 @@ struct Annotation: Identifiable, Equatable {
         case crop(CGRect)
         /// Ruler: a line labelled with its length in screenshot pixels.
         case measure(from: CGPoint, to: CGPoint)
+        /// Freehand line, as drawn.
+        case pen([CGPoint])
     }
 
     let id = UUID()
@@ -45,6 +47,8 @@ struct Annotation: Identifiable, Equatable {
             return r.insetBy(dx: -lineWidth, dy: -lineWidth)
         case .crop(let r):
             return r
+        case .pen(let points):
+            return points.reduce(CGRect.null) { $0.union(CGRect(origin: $1, size: .zero)) }.insetBy(dx: -lineWidth, dy: -lineWidth)
         case .measure(let a, let b):
             return CaptureMath.rect(a, b).insetBy(dx: -40, dy: -24) // room for the label
         case .highlight(let r), .blur(let r):
@@ -90,8 +94,11 @@ enum AnnotationColor: String, CaseIterable, Identifiable {
 }
 
 enum AnnotationTool: String, CaseIterable, Identifiable {
-    case arrow, rectangle, text, highlight, blur, step, erase, cut, focus, ellipse, crop, ruler
+    case arrow, rectangle, text, highlight, pen, blur, step, erase, cut, focus, ellipse, crop, ruler
     var id: String { rawValue }
+
+    /// The tools on 1…9, in their original order (kept stable for muscle memory).
+    private static let numbered: [AnnotationTool] = [.arrow, .rectangle, .text, .highlight, .blur, .step, .erase, .cut, .focus]
 
     var title: String {
         switch self {
@@ -99,6 +106,7 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
         case .rectangle: String(localized: "Box")
         case .text: String(localized: "Text")
         case .highlight: String(localized: "Marker")
+        case .pen: String(localized: "Pen")
         case .blur: String(localized: "Blur")
         case .step: String(localized: "Steps")
         case .erase: String(localized: "Erase")
@@ -111,7 +119,7 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
     }
 
     /// Tools whose marks have a line thickness.
-    var usesLineWidth: Bool { self == .arrow || self == .rectangle || self == .ellipse }
+    var usesLineWidth: Bool { [.arrow, .rectangle, .ellipse, .pen].contains(self) }
 
     /// 1…9 for the original tools (kept stable), letters for later ones —
     /// none of them clash with P / T / A in the toolbar.
@@ -120,7 +128,8 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
         case .ellipse: "o"
         case .crop: "c"
         case .ruler: "m"
-        default: Character(String((Self.allCases.firstIndex(of: self) ?? 0) + 1))
+        case .pen: "d"
+        default: Character(String((Self.numbered.firstIndex(of: self) ?? 0) + 1))
         }
     }
 }
@@ -134,6 +143,8 @@ final class AnnotationDocument {
         let image: CGImage
         /// In image points.
         let size: CGSize
+        /// After "Remove background": transparent around the subject.
+        var cutOut = false
     }
 
     /// One undo step: the marks and the picture under them.
@@ -146,6 +157,9 @@ final class AnnotationDocument {
     private(set) var base: Base?
     private var redoStack: [Snapshot] = []
     private var undoStack: [Snapshot] = []
+
+    /// "Фон" around the result (nil = none).
+    var backdrop: Backdrop?
 
     /// nil = Select: click a mark to select, move, resize or delete it.
     var tool: AnnotationTool?
@@ -235,8 +249,15 @@ final class AnnotationDocument {
         undoStack.append(Snapshot(items: items, base: base))
         redoStack.removeAll()
         items = kept
-        base = Base(image: cropped, size: area.size)
+        base = Base(image: cropped, size: area.size, cutOut: current.cutOut)
         selection = nil
+    }
+
+    /// A new picture of the same size under the marks ("Remove background") — one undo step.
+    func replacePicture(_ image: CGImage, size: CGSize, cutOut: Bool) {
+        undoStack.append(Snapshot(items: items, base: base))
+        redoStack.removeAll()
+        base = Base(image: image, size: size, cutOut: cutOut)
     }
 
     func undo() {

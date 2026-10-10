@@ -48,6 +48,7 @@ enum AnnotationRenderer {
             case .measure(let a, let b):
                 measure(from: a, to: b, pixelsPerPoint: CGFloat(image.width) / max(imageSize.width, 1), color: item.color.nsColor, in: ctx)
             case .rectangle(let r): box(r, width: item.lineWidth, color: color, in: ctx)
+            case .pen(let points): pen(points, width: item.lineWidth, color: color, in: ctx)
             case .focus, .crop: break // focus drawn above; crop is a guide / export bound
             case .ellipse(let r):
                 softShadow(ctx)
@@ -101,6 +102,22 @@ enum AnnotationRenderer {
         ctx.setStrokeColor(color)
         ctx.setLineWidth(width)
         ctx.addPath(CGPath(roundedRect: r, cornerWidth: 4, cornerHeight: 4, transform: nil))
+        ctx.strokePath()
+    }
+
+    /// Smooth freehand line: curves through the midpoints between samples.
+    private static func pen(_ points: [CGPoint], width: CGFloat, color: CGColor, in ctx: CGContext) {
+        guard let first = points.first else { return }
+        softShadow(ctx)
+        ctx.setStrokeColor(color)
+        ctx.setLineWidth(width)
+        ctx.setLineCap(.round)
+        ctx.setLineJoin(.round)
+        ctx.move(to: first)
+        for (a, b) in zip(points.dropFirst(), points.dropFirst(2)) {
+            ctx.addQuadCurve(to: CGPoint(x: (a.x + b.x) / 2, y: (a.y + b.y) / 2), control: a)
+        }
+        ctx.addLine(to: points.last!)
         ctx.strokePath()
     }
 

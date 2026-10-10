@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import VisionKit
+import UniformTypeIdentifiers
 
 /// What the screenshot window can do; wired by `ScreenshotWindows`. Copy,
 /// save, pin and drag use the screenshot *with* its annotations.
@@ -11,6 +12,10 @@ struct ScreenshotActions {
     var close: () -> Void
     /// A PNG file of the current result, for drag-and-drop into other apps.
     var dragFile: () -> URL?
+    /// "Save as…" in another format (asks where).
+    var saveAs: (UTType) -> Void = { _ in }
+    /// The system share menu (AirDrop, Messages, Mail…).
+    var share: () -> Void = {}
 }
 
 /// Shottr-style window after a capture: the shot on a canvas that grows with
@@ -38,6 +43,8 @@ struct ScreenshotView: View {
     @State private var toast: String?
     @State private var dragStart: CGPoint?
     @State private var dragNow: CGPoint?
+    /// The pen line being drawn.
+    @State private var penPoints: [CGPoint] = []
     @State private var drag: Drag?
     @State private var textDraft: (origin: CGPoint, string: String, width: CGFloat?, size: CGFloat)?
     /// The text mark being re-edited (double-click), hidden while its field is open.
@@ -45,7 +52,8 @@ struct ScreenshotView: View {
     /// For double-click detection on marks.
     @State private var lastClick: (id: Annotation.ID, at: Date)?
     @FocusState private var textFocused: Bool
-    private enum Flyout { case shapes, style, fontSize }
+    private enum Flyout { case shapes, style, fontSize, backdrop, saveAs }
+    @State private var removingBackground = false
     @State private var flyout: Flyout?
     /// The shape the shapes button shows when another tool is in use.
     @State private var lastShape: AnnotationTool = .arrow
@@ -56,7 +64,7 @@ struct ScreenshotView: View {
     static let margin: CGFloat = 40
 
     /// Wide enough for the header (with the tools) and the action row.
-    static let minContentWidth: CGFloat = 800
+    static let minContentWidth: CGFloat = 970
 
     private var editingText: Bool { textDraft != nil }
 
@@ -142,6 +150,7 @@ struct ScreenshotView: View {
             divider
             styleButton
             fontSizeButton
+            backdropButton
         }
         .fixedSize(horizontal: false, vertical: true)
         .disabled(editingText)
@@ -328,7 +337,7 @@ struct ScreenshotView: View {
         Image(systemName: "chevron.down").font(.system(size: 9, weight: .bold)).opacity(0.6)
     }
 
-    private func flyoutCard<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+    private func flyoutCard<Content: View>(above: Bool = false, @ViewBuilder _ content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 6, content: content)
             .padding(8)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -336,7 +345,111 @@ struct ScreenshotView: View {
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(.primary.opacity(0.1)))
             .shadow(color: .black.opacity(0.18), radius: 12, y: 4)
             .fixedSize()
-            .offset(y: 42)
+            .offset(y: above ? -42 : 42)
+    }
+
+    // MARK: Background ("Фон")
+
+    private var backdropButton: some View {
+        let on = doc.backdrop != nil
+        return Button { flyout = flyout == .backdrop ? nil : .backdrop } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "photo.artframe").font(.system(size: 15, weight: .medium))
+                Text("Background").font(Leaf.font(13, .semibold))
+                chevron
+            }
+            .fixedSize()
+            .padding(.horizontal, 8)
+            .frame(height: 36)
+            .background(tile(on || flyout == .backdrop))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.8))
+        .instantTip("Background, padding, corners · remove the background", hidden: flyout == .backdrop)
+        .overlay(alignment: .topTrailing) {
+            if flyout == .backdrop { flyoutCard { backdropPanel } }
+        }
+    }
+
+    private var backdropPanel: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 6) {
+                backdropSwatch(nil)
+                ForEach(Backdrop.gradients.indices, id: \.self) { backdropSwatch(.gradient($0)) }
+            }
+            HStack(spacing: 6) {
+                ForEach(Backdrop.solids.indices, id: \.self) { backdropSwatch(.solid($0)) }
+            }
+            backdropSlider("Padding", \.padding, Backdrop.paddingRange)
+            backdropSlider("Corners", \.corner, Backdrop.cornerRange)
+            Divider()
+            Button { removeBackground() } label: {
+                HStack(spacing: 6) {
+                    if removingBackground { ProgressView().controlSize(.small) } else { Image(systemName: "wand.and.stars") }
+                    Text("Remove background")
+                }
+            }
+            .buttonStyle(LeafButtonStyle())
+            .disabled(removingBackground || doc.base?.cutOut == true)
+        }
+        .frame(width: 330, alignment: .leading)
+    }
+
+    /// nil = no background.
+    private func backdropSwatch(_ fill: Backdrop.Fill?) -> some View {
+        let on = doc.backdrop?.fill == fill
+        let solid = if case .solid = fill { true } else { false }
+        return Button {
+            if let fill {
+                var b = doc.backdrop ?? Backdrop()
+                b.fill = fill
+                doc.backdrop = b
+            } else {
+                doc.backdrop = nil
+            }
+        } label: {
+            Group {
+                if let fill {
+                    RoundedRectangle(cornerRadius: solid ? 13 : 7, style: .continuous).fill(Backdrop(fill: fill).style)
+                } else {
+                    RoundedRectangle(cornerRadius: 7, style: .continuous).fill(.primary.opacity(0.06))
+                        .overlay(Image(systemName: "nosign").font(.system(size: 12, weight: .semibold)).opacity(0.6))
+                }
+            }
+            .frame(width: solid ? 26 : 36, height: 26)
+            .overlay(RoundedRectangle(cornerRadius: solid ? 13 : 7, style: .continuous).strokeBorder(.primary.opacity(0.15), lineWidth: 1))
+            .padding(2)
+            .overlay(RoundedRectangle(cornerRadius: solid ? 15 : 9, style: .continuous).strokeBorder(on ? Leaf.ink : .clear, lineWidth: 2))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func backdropSlider(_ title: String, _ key: WritableKeyPath<Backdrop, CGFloat>, _ range: ClosedRange<CGFloat>) -> some View {
+        HStack(spacing: 10) {
+            Text(LocalizedStringKey(title)).font(Leaf.font(12, .medium)).opacity(0.7).frame(width: 70, alignment: .leading)
+            Slider(value: Binding(
+                get: { (doc.backdrop ?? Backdrop())[keyPath: key] },
+                set: { var b = doc.backdrop ?? Backdrop(); b[keyPath: key] = $0; doc.backdrop = b }
+            ), in: range)
+            .tint(Leaf.leaf)
+        }
+    }
+
+    /// Keeps the main subject, the rest transparent (on the backdrop, if any).
+    private func removeBackground() {
+        removingBackground = true
+        let picture = pictureCG, size = pictureSize
+        Task {
+            let cut = await Task.detached { BackgroundRemover.cutOut(picture) }.value
+            removingBackground = false
+            if let cut {
+                doc.replacePicture(cut, size: size, cutOut: true)
+                flash("Background removed · ⌘Z brings it back")
+            } else {
+                flash("No subject found to keep")
+            }
+        }
     }
 
     // The toolbar shows — and edits — the selected mark's style when there is one.
@@ -363,12 +476,19 @@ struct ScreenshotView: View {
             ZStack(alignment: .topLeading) {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(.primary.opacity(0.035))
+                if let backdrop = doc.backdrop {
+                    let area = AnnotationRenderer.exportBounds(visibleItems, imageSize: pictureSize)
+                        .insetBy(dx: -backdrop.padding, dy: -backdrop.padding)
+                    Rectangle().fill(backdrop.style)
+                        .frame(width: area.width, height: area.height)
+                        .offset(x: origin.x + area.minX, y: origin.y + area.minY)
+                }
                 Image(nsImage: pictureNS)
                     .resizable()
                     .interpolation(.high)
                     .frame(width: pictureSize.width, height: pictureSize.height)
-                    .clipShape(RoundedRectangle(cornerRadius: doc.isEmpty ? 8 : 0, style: .continuous))
-                    .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
+                    .clipShape(RoundedRectangle(cornerRadius: doc.backdrop?.corner ?? (doc.isEmpty ? 8 : 0), style: .continuous))
+                    .shadow(color: .black.opacity(doc.backdrop == nil ? 0.12 : 0.28), radius: doc.backdrop == nil ? 6 : 12, y: 3)
                     .offset(x: origin.x, y: origin.y)
                 Canvas { context, _ in
                     context.translateBy(x: origin.x, y: origin.y)
@@ -472,6 +592,9 @@ struct ScreenshotView: View {
             .onChanged { value in
                 let p = CGPoint(x: value.location.x - origin.x, y: value.location.y - origin.y)
                 if dragStart == nil { begin(at: p) }
+                if case .draw = drag, doc.tool == .pen, penPoints.last.map({ hypot($0.x - p.x, $0.y - p.y) > 1.5 }) ?? true {
+                    penPoints.append(p)
+                }
                 dragNow = p
             }
             .onEnded { _ in
@@ -479,6 +602,7 @@ struct ScreenshotView: View {
                 dragStart = nil
                 dragNow = nil
                 drag = nil
+                penPoints = []
             }
     }
 
@@ -579,6 +703,7 @@ struct ScreenshotView: View {
         case .cut:
             guard big else { return nil }
             return final ? .piece(source: rect, offset: .zero, fill: sampled()) : .rectangle(rect) // outline while selecting
+        case .pen: return penPoints.isEmpty ? nil : .pen(penPoints)
         case .text, .step: return nil
         }
     }
@@ -619,14 +744,37 @@ struct ScreenshotView: View {
             Button { copy() } label: { keyed(liveText == nil ? "Copy" : "Copy text", "⌘C", show: keys) }
                 .buttonStyle(LeafButtonStyle(prominent: true))
                 .keyboardShortcut("c", modifiers: .command)
-            Button {
-                if let url = actions.save() { flash(String(localized: "Saved to \(url.deletingLastPathComponent().lastPathComponent)")) }
-            } label: { keyed("Save", "⌘S", show: keys) }
+            HStack(spacing: 2) {
+                Button {
+                    if let url = actions.save() { flash(String(localized: "Saved to \(url.deletingLastPathComponent().lastPathComponent)")) }
+                } label: { keyed("Save", "⌘S", show: keys) }
+                .keyboardShortcut("s", modifiers: .command)
+                Button { flyout = flyout == .saveAs ? nil : .saveAs } label: { chevron.frame(height: 17) }
+                    .instantTip("Save as…", hidden: flyout == .saveAs, above: true)
+            }
             .buttonStyle(LeafButtonStyle())
-            .keyboardShortcut("s", modifiers: .command)
+            .overlay(alignment: .bottomLeading) {
+                if flyout == .saveAs {
+                    flyoutCard(above: true) {
+                        ForEach([UTType.png, .jpeg, .heic, .pdf], id: \.self) { type in
+                            Button { flyout = nil; actions.saveAs(type) } label: {
+                                Text(verbatim: "\(type.preferredFilenameExtension?.uppercased() ?? "")…")
+                                    .font(Leaf.font(13, .medium))
+                                    .padding(.horizontal, 8).padding(.vertical, 4)
+                                    .frame(width: 110, alignment: .leading)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
             Button { actions.pin() } label: { keyed("Pin", "P", show: keys) }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut("p", modifiers: [])
+            Button { actions.share() } label: { Image(systemName: "square.and.arrow.up").frame(height: 17) }
+                .buttonStyle(LeafButtonStyle())
+                .instantTip("Share", above: true)
             Button { toggleLiveText() } label: { keyed("Text", "T", show: keys) }
                 .buttonStyle(LeafButtonStyle(prominent: liveText != nil))
                 .keyboardShortcut("t", modifiers: [])

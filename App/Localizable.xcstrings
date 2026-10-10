@@ -1,6 +1,106 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Pen": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ручка"
+          }
+        }
+      }
+    },
+    "Background": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фон"
+          }
+        }
+      }
+    },
+    "Background, padding, corners · remove the background": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фон, поле, кути · прибрати фон"
+          }
+        }
+      }
+    },
+    "Padding": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поле"
+          }
+        }
+      }
+    },
+    "Corners": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кути"
+          }
+        }
+      }
+    },
+    "Remove background": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прибрати фон"
+          }
+        }
+      }
+    },
+    "Background removed · ⌘Z brings it back": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фон прибрано · ⌘Z поверне"
+          }
+        }
+      }
+    },
+    "No subject found to keep": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не знайшов, що залишити"
+          }
+        }
+      }
+    },
+    "Save as…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти як…"
+          }
+        }
+      }
+    },
+    "Share": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поширити"
+          }
+        }
+      }
+    },
     "%@ is taken (by another app or another APILA shortcut) — kept %@.": {
       "localizations": {
         "uk": {

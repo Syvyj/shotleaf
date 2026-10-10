@@ -42,6 +42,12 @@ struct ToolIcon: View {
                 var nib = Path()
                 nib.move(to: p(6, 12)); nib.addLine(to: p(12.5, 3.5)); nib.addLine(to: p(15, 5.5)); nib.addLine(to: p(8.5, 13.8)); nib.closeSubpath()
                 ctx.stroke(nib, with: ink, style: line)
+            case .pen: // a squiggle drawn by hand
+                var path = Path()
+                path.move(to: p(2.5, 12))
+                path.addCurve(to: p(8, 10), control1: p(4, 6), control2: p(7, 5))
+                path.addCurve(to: p(15.5, 6), control1: p(9, 15), control2: p(14, 15))
+                ctx.stroke(path, with: ink, style: line)
             case .blur:
                 for (i, (x, y)) in [(3, 3), (8, 3), (13, 3), (3, 8), (8, 8), (13, 8), (3, 13), (8, 13), (13, 13)].enumerated() {
                     let shade: GraphicsContext.Shading = i.isMultiple(of: 2) ? ink : soft
