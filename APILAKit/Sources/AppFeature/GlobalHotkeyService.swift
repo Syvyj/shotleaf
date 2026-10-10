@@ -27,7 +27,7 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
         id: "ctrl-opt-cmd-e", title: "⌃⌥⌘E", keyCode: UInt32(kVK_ANSI_E), modifiers: UInt32(controlKey | optionKey | cmdKey)
     )
     public static let clipboardDefault = HotkeyShortcut(
-        id: "ctrl-cmd-v", title: "⌃⌘V", keyCode: UInt32(kVK_ANSI_V), modifiers: UInt32(controlKey | cmdKey)
+        id: "shift-cmd-v", title: "⇧⌘V", keyCode: UInt32(kVK_ANSI_V), modifiers: UInt32(shiftKey | cmdKey)
     )
     public static let editClipboardDefault = HotkeyShortcut(
         id: "ctrl-opt-cmd-v", title: "⌃⌥⌘V", keyCode: UInt32(kVK_ANSI_V), modifiers: UInt32(controlKey | optionKey | cmdKey)

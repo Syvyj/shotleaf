@@ -30,7 +30,7 @@ final class ClipboardPanelModel {
     }
 }
 
-/// ⌃⌘V: the clipboard history in a panel by the text cursor. It takes the
+/// ⇧⌘V: the clipboard history in a panel by the mouse pointer. It takes the
 /// keyboard without activating APILA, so the app being typed in stays in
 /// front; picking an entry puts it on the clipboard and presses ⌘V there.
 @MainActor
@@ -75,16 +75,12 @@ final class ClipboardPanelController {
         model = nil
     }
 
-    /// Below the text cursor when Accessibility can see one, else by the mouse;
-    /// always on screen.
-    static func origin(for size: CGSize) -> CGPoint {
-        let top = NSScreen.screens.first?.frame.maxY ?? 0
-        let caret = FocusedField.current(excluding: [], screenTop: top)?.caret
-        let anchor = caret.map { CGPoint(x: $0.minX, y: $0.minY - 8) } ?? NSEvent.mouseLocation
-        let screen = NSScreen.screens.first { $0.frame.contains(anchor) } ?? NSScreen.main
+    /// By the mouse pointer, like a menu (below-right of it); always on screen.
+    static func origin(for size: CGSize, at mouse: CGPoint = NSEvent.mouseLocation) -> CGPoint {
+        let screen = NSScreen.screens.first { $0.frame.contains(mouse) } ?? NSScreen.main
         let visible = screen?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
-        var origin = CGPoint(x: anchor.x - 24, y: anchor.y - size.height)
-        if origin.y < visible.minY, let caret { origin.y = caret.maxY + 8 } // no room below: above the line
+        var origin = CGPoint(x: mouse.x - 24, y: mouse.y - size.height - 8)
+        if origin.y < visible.minY { origin.y = mouse.y + 8 } // no room below: above the pointer
         origin.x = min(max(origin.x, visible.minX + 8), visible.maxX - size.width - 8)
         origin.y = min(max(origin.y, visible.minY + 8), visible.maxY - size.height - 8)
         return origin

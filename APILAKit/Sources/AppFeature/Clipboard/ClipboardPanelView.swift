@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// The ⌃⌘V panel: search on top, type chips, the list (1–9 on the first rows)
-/// and a preview of the selected entry, key hints at the bottom.
+/// The ⇧⌘V panel, in the screenshot window's look: name, search and type
+/// tiles on top; the list (1–9 on the first rows) and a preview on canvas
+/// cards; actions with their keys at the bottom.
 struct ClipboardPanelView: View {
     @Bindable var model: ClipboardPanelModel
     let pick: (ClipItem, ClipboardPanelController.Mode) -> Void
@@ -10,47 +11,107 @@ struct ClipboardPanelView: View {
 
     var body: some View {
         let results = model.results
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 10) {
-                Image(systemName: "magnifyingglass").font(.system(size: 15, weight: .semibold)).foregroundStyle(Leaf.ink)
+        VStack(alignment: .leading, spacing: 12) {
+            header
+            HStack(spacing: 12) {
+                list(results).frame(width: 380).background(card)
+                preview.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(card)
+            }
+            actionRow
+        }
+        .padding(14)
+        .frame(width: 780, height: 500)
+        .leafPanelChrome()
+        .onAppear { searching = true }
+    }
+
+    /// The canvas look of the screenshot window.
+    private var card: some View { RoundedRectangle(cornerRadius: 10, style: .continuous).fill(.primary.opacity(0.035)) }
+
+    /// Like the screenshot window: name on the left, then the search and the
+    /// type filters as tool tiles.
+    private var header: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 8) {
+                BrandLogo()
+                Text("Clipboard").font(Leaf.font(15, .semibold))
+            }
+            .fixedSize()
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass").font(.system(size: 14, weight: .semibold)).foregroundStyle(Leaf.ink)
                 TextField("Search the clipboard", text: $model.query)
                     .textFieldStyle(.plain)
-                    .font(Leaf.font(16))
+                    .font(Leaf.font(14))
                     .focused($searching)
                 if model.history.isPaused {
                     Text("Paused").font(Leaf.font(11, .semibold)).foregroundStyle(Leaf.ink)
-                        .padding(.horizontal, 8).padding(.vertical, 3).background(Capsule().fill(Leaf.ink.opacity(0.12)))
                 }
             }
-            .padding(.horizontal, 16).padding(.top, 14).padding(.bottom, 10)
-            .overlay(WindowDragArea().allowsHitTesting(false))
-
-            HStack(spacing: 6) {
+            .padding(.horizontal, 10)
+            .frame(height: 36)
+            .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(.primary.opacity(0.04)))
+            HStack(spacing: 4) {
                 ForEach(ClipboardPanelModel.kinds, id: \.self) { kind in
                     Button { model.kind = kind } label: {
-                        Text(Self.title(kind)).font(Leaf.font(12, .semibold))
-                            .foregroundStyle(model.kind == kind ? Leaf.ink : Color.primary.opacity(0.65))
-                            .padding(.horizontal, 10).frame(height: 24)
-                            .background(Capsule().fill(model.kind == kind ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.primary.opacity(0.05))))
-                            .contentShape(Capsule())
+                        Image(systemName: Self.symbol(kind))
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(model.kind == kind ? Leaf.ink : Color.primary.opacity(0.8))
+                            .frame(width: 38, height: 36)
+                            .background(tile(model.kind == kind))
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .instantTip(String(localized: Self.titleString(kind)))
                 }
             }
-            .padding(.horizontal, 14).padding(.bottom, 8)
-
-            Divider().opacity(0.5)
-            HStack(spacing: 0) {
-                list(results).frame(width: 380)
-                Divider().opacity(0.5)
-                preview.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            }
-            Divider().opacity(0.5)
-            hints
         }
-        .frame(width: 720, height: 460)
-        .leafPanelChrome()
-        .onAppear { searching = true }
+        .overlay(WindowDragArea().allowsHitTesting(false))
+        .zIndex(1) // tips over the list
+    }
+
+    /// The editor's tool tile: green when on.
+    private func tile(_ on: Bool) -> some View {
+        RoundedRectangle(cornerRadius: 9, style: .continuous)
+            .fill(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.primary.opacity(0.04)))
+            .overlay {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .strokeBorder(on ? AnyShapeStyle(Leaf.markGradient) : AnyShapeStyle(.clear), lineWidth: 1.2)
+            }
+    }
+
+    /// The screenshot window's action row: buttons with their keys on them.
+    private var actionRow: some View {
+        ViewThatFits(in: .horizontal) { actions(keys: true); actions(keys: false) }
+    }
+
+    private func actions(keys: Bool) -> some View {
+        let item = model.current
+        return HStack(spacing: 6) {
+            Button { if let item { pick(item, .paste) } } label: { keyed("Paste", "↩", show: keys) }
+                .buttonStyle(LeafButtonStyle(prominent: true)).disabled(item == nil)
+            Button { if let item { pick(item, .plain) } } label: { keyed("Plain text", "⌥↩", show: keys) }
+                .buttonStyle(LeafButtonStyle()).disabled(item == nil)
+            Button { if let item { pick(item, .copy) } } label: { keyed("Copy", "⌘↩", show: keys) }
+                .buttonStyle(LeafButtonStyle()).disabled(item == nil)
+            Button { if let item { model.history.togglePin(item.id) } } label: { keyed(item?.pinned == true ? "Unpin" : "Pin", "⌘P", show: keys) }
+                .buttonStyle(LeafButtonStyle()).disabled(item == nil)
+            Spacer(minLength: 6)
+            Button { if let item { model.history.remove(item.id); model.move(0) } } label: { keyed("Delete", "⌘⌫", show: keys) }
+                .buttonStyle(LeafButtonStyle()).disabled(item == nil)
+            Button(action: close) { keyed("Close", "esc", show: keys) }
+                .buttonStyle(LeafButtonStyle())
+        }
+    }
+
+    private func keyed(_ title: String, _ key: String, show: Bool) -> some View {
+        HStack(spacing: 5) {
+            Text(LocalizedStringKey(title))
+            if show { Text(key)
+                .font(Leaf.font(10.5, .semibold))
+                .opacity(0.5)
+                .padding(.horizontal, 3).padding(.vertical, 1)
+                .background(.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 4)) }
+        }
     }
 
     // MARK: List
@@ -93,7 +154,7 @@ struct ClipboardPanelView: View {
             Text(Self.meta(item)).font(Leaf.font(11)).opacity(0.45).lineLimit(1).fixedSize()
         }
         .padding(.horizontal, 8).frame(height: 32)
-        .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.clear)))
+        .background { if on { tile(true) } }
         .contentShape(Rectangle())
     }
 
@@ -158,26 +219,9 @@ struct ClipboardPanelView: View {
         return result
     }
 
-    private var hints: some View {
-        HStack(spacing: 14) {
-            hint("↩", "paste"); hint("⌥↩", "plain text"); hint("⌘↩", "copy only"); hint("⌘P", "pin"); hint("⌘⌫", "delete"); hint("Tab", "type")
-            if model.current?.hasImage == true { hint("⌘E", "edit") }
-            Spacer()
-            hint("esc", "close")
-        }
-        .padding(.horizontal, 14).frame(height: 34)
-    }
-
-    private func hint(_ key: String, _ title: LocalizedStringKey) -> some View {
-        HStack(spacing: 5) {
-            Keycap(key: key)
-            Text(title).font(Leaf.font(11)).opacity(0.6)
-        }
-    }
-
     // MARK: Texts
 
-    static func title(_ kind: ClipItem.Kind?) -> LocalizedStringKey {
+    static func titleString(_ kind: ClipItem.Kind?) -> String.LocalizationValue {
         switch kind {
         case nil: "All"
         case .text?: "Text"
@@ -185,6 +229,17 @@ struct ClipboardPanelView: View {
         case .image?: "Images"
         case .color?: "Colors"
         case .file?: "Files"
+        }
+    }
+
+    static func symbol(_ kind: ClipItem.Kind?) -> String {
+        switch kind {
+        case nil: "square.grid.2x2"
+        case .text?: "text.alignleft"
+        case .link?: "link"
+        case .image?: "photo"
+        case .color?: "paintpalette"
+        case .file?: "doc"
         }
     }
 
