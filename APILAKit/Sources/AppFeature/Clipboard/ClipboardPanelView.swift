@@ -1,21 +1,26 @@
 import SwiftUI
 
-/// The ⇧⌘V panel, in the screenshot window's look: name, search and type
+/// The ⇧⌘V panel (history and snippets), in the screenshot window's look: name, search and type
 /// tiles on top; the list (1–9 on the first rows) and a preview on canvas
 /// cards; actions with their keys at the bottom.
 struct ClipboardPanelView: View {
     @Bindable var model: ClipboardPanelModel
     let pick: (ClipItem, ClipboardPanelController.Mode) -> Void
+    var pickSnippet: (Snippet, ClipboardPanelController.Mode) -> Void = { _, _ in }
+    var editSnippets: () -> Void = {}
     let close: () -> Void
     @FocusState private var searching: Bool
+    @FocusState private var answering: Int?
 
     var body: some View {
         let results = model.results
         VStack(alignment: .leading, spacing: 12) {
             header
             HStack(spacing: 12) {
-                list(results).frame(width: 380).background(card)
-                preview.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(card)
+                Group { if model.showsSnippets { snippetList } else { list(results) } }
+                    .frame(width: 380).background(card)
+                Group { if model.showsSnippets { snippetPreview } else { preview } }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(card)
             }
             actionRow
         }
@@ -52,21 +57,30 @@ struct ClipboardPanelView: View {
             .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(.primary.opacity(0.04)))
             HStack(spacing: 4) {
                 ForEach(ClipboardPanelModel.kinds, id: \.self) { kind in
-                    Button { model.kind = kind } label: {
-                        Image(systemName: Self.symbol(kind))
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundStyle(model.kind == kind ? Leaf.ink : Color.primary.opacity(0.8))
-                            .frame(width: 38, height: 36)
-                            .background(tile(model.kind == kind))
-                            .contentShape(Rectangle())
+                    tileButton(Self.symbol(kind), String(localized: Self.titleString(kind)), on: !model.showsSnippets && model.kind == kind) {
+                        model.showsSnippets = false
+                        model.kind = kind
                     }
-                    .buttonStyle(.plain)
-                    .instantTip(String(localized: Self.titleString(kind)))
                 }
+                Rectangle().fill(.primary.opacity(0.12)).frame(width: 1, height: 22).padding(.horizontal, 4)
+                tileButton("text.badge.star", String(localized: "Snippets"), on: model.showsSnippets) { model.showsSnippets = true }
             }
         }
         .overlay(WindowDragArea().allowsHitTesting(false))
         .zIndex(1) // tips over the list
+    }
+
+    private func tileButton(_ symbol: String, _ tip: String, on: Bool, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.8))
+                .frame(width: 38, height: 36)
+                .background(tile(on))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .instantTip(tip)
     }
 
     /// The editor's tool tile: green when on.
@@ -84,7 +98,27 @@ struct ClipboardPanelView: View {
         ViewThatFits(in: .horizontal) { actions(keys: true); actions(keys: false) }
     }
 
+    @ViewBuilder
     private func actions(keys: Bool) -> some View {
+        if model.showsSnippets { snippetActions(keys: keys) } else { historyActions(keys: keys) }
+    }
+
+    private func snippetActions(keys: Bool) -> some View {
+        let snippet = model.asking ?? model.currentSnippet
+        return HStack(spacing: 6) {
+            Button { if let snippet { pickSnippet(snippet, .paste) } } label: { keyed("Paste", "↩", show: keys) }
+                .buttonStyle(LeafButtonStyle(prominent: true)).disabled(snippet == nil)
+            Button { if let snippet { pickSnippet(snippet, .copy) } } label: { keyed("Copy", "⌘↩", show: keys) }
+                .buttonStyle(LeafButtonStyle()).disabled(snippet == nil)
+            Button(action: editSnippets) { keyed("Edit Snippets…", "", show: false) }
+                .buttonStyle(LeafButtonStyle())
+            Spacer(minLength: 6)
+            Button(action: close) { keyed("Close", "esc", show: keys) }
+                .buttonStyle(LeafButtonStyle())
+        }
+    }
+
+    private func historyActions(keys: Bool) -> some View {
         let item = model.current
         return HStack(spacing: 6) {
             Button { if let item { pick(item, .paste) } } label: { keyed("Paste", "↩", show: keys) }
@@ -156,6 +190,94 @@ struct ClipboardPanelView: View {
         .padding(.horizontal, 8).frame(height: 32)
         .background { if on { tile(true) } }
         .contentShape(Rectangle())
+    }
+
+    // MARK: Snippets
+
+    private var snippetList: some View {
+        let results = model.snippetResults
+        return ScrollViewReader { scroller in
+            ScrollView {
+                LazyVStack(spacing: 2) {
+                    if results.isEmpty {
+                        VStack(spacing: 10) {
+                            Text(model.snippets.snippets.isEmpty ? "No snippets yet" : "Nothing found").font(Leaf.font(13)).opacity(0.5)
+                            if model.snippets.snippets.isEmpty {
+                                Button("Create a snippet", action: editSnippets).buttonStyle(LeafButtonStyle(prominent: true))
+                            }
+                        }
+                        .padding(.top, 40)
+                    }
+                    ForEach(Array(results.enumerated()), id: \.element.id) { i, snippet in
+                        snippetRow(snippet, index: i)
+                            .id(snippet.id)
+                            .onTapGesture(count: 2) { pickSnippet(snippet, .paste) }
+                            .onTapGesture { model.selected = i }
+                    }
+                }
+                .padding(8)
+            }
+            .onChange(of: model.selected) { _, i in
+                if results.indices.contains(i) { scroller.scrollTo(results[i].id) }
+            }
+        }
+    }
+
+    private func snippetRow(_ snippet: Snippet, index: Int) -> some View {
+        let on = index == model.selected
+        return HStack(spacing: 10) {
+            Text(index < 9 ? "\(index + 1)" : "")
+                .font(Leaf.font(11, .semibold)).monospacedDigit()
+                .frame(width: 20, height: 20)
+                .background(RoundedRectangle(cornerRadius: 5).fill(on ? Leaf.fresh.opacity(0.45) : Color.primary.opacity(index < 9 ? 0.06 : 0)))
+                .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.55))
+            Circle().fill(Color(nsColor: model.snippets.folder(snippet.folder).map { SnippetFolder.colors[$0.color % SnippetFolder.colors.count] } ?? .tertiaryLabelColor))
+                .frame(width: 8, height: 8)
+            Text(snippet.title).font(Leaf.font(13)).lineLimit(1)
+            Spacer(minLength: 4)
+            if !snippet.abbreviation.isEmpty { Keycap(key: snippet.abbreviation) }
+        }
+        .padding(.horizontal, 8).frame(height: 32)
+        .background { if on { tile(true) } }
+        .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private var snippetPreview: some View {
+        if let snippet = model.asking {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(snippet.title).font(Leaf.font(14, .semibold))
+                ForEach(Array(SnippetText.questions(in: snippet.text).enumerated()), id: \.element) { i, question in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(question).font(Leaf.font(12, .medium)).opacity(0.7)
+                        TextField("", text: Binding(get: { model.answers[question] ?? "" }, set: { model.answers[question] = $0 }))
+                            .textFieldStyle(.roundedBorder)
+                            .focused($answering, equals: i)
+                    }
+                }
+                Text(SnippetText.expand(snippet.text, answers: model.answers).text)
+                    .font(Leaf.font(12)).opacity(0.6).lineLimit(6)
+                Spacer(minLength: 0)
+                Text("↩ pastes · esc goes back").font(Leaf.font(11)).opacity(0.5)
+            }
+            .padding(14)
+            .onAppear { answering = 0 }
+        } else if let snippet = model.currentSnippet {
+            VStack(alignment: .leading, spacing: 10) {
+                ScrollView {
+                    Text(SnippetText.expand(snippet.text, clipboard: "📋").text)
+                        .font(Leaf.font(13)).textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                Spacer(minLength: 0)
+                Text([model.snippets.folder(snippet.folder)?.name, snippet.abbreviation.isEmpty ? nil : snippet.abbreviation]
+                    .compactMap { $0 }.joined(separator: " · "))
+                    .font(Leaf.font(11)).opacity(0.5)
+            }
+            .padding(14)
+        } else {
+            Color.clear
+        }
     }
 
     // MARK: Preview

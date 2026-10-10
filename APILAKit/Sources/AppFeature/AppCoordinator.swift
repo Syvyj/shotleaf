@@ -31,6 +31,7 @@ public final class AppCoordinator {
         inlineCompletion.history.enabled = container.settings.completionLearnsStyle
         if container.settings.completionEnabled { inlineCompletion.start() }
         clipboard.start()
+        expander.start()
         Self.log.notice("startup permissions: \(String(describing: self.permissions), privacy: .public) bundle: \(Bundle.main.bundlePath, privacy: .public)")
 
         let hotkeys = container.hotkeys
@@ -68,13 +69,38 @@ public final class AppCoordinator {
     // MARK: Clipboard
 
     let clipboard: ClipboardHistory
+    let snippets = SnippetStore()
     @ObservationIgnored private lazy var clipboardPanel: ClipboardPanelController = {
-        let controller = ClipboardPanelController(history: clipboard)
+        let controller = ClipboardPanelController(history: clipboard, snippets: snippets)
+        controller.openSnippetEditor = { [weak self] in self?.showSnippetEditor() }
         controller.openImage = { [weak self] in self?.screenshots.show($0, sound: false) }
         return controller
     }()
 
     public func showClipboard() { clipboardPanel.show() }
+
+    @ObservationIgnored private lazy var expander: SnippetExpander = {
+        let expander = SnippetExpander(store: snippets)
+        expander.ask = { [weak self] in self?.clipboardPanel.pick($0, .paste) }
+        return expander
+    }()
+
+    private var snippetWindow: NSWindow?
+
+    /// The snippets editor (a window like the screenshot one).
+    public func showSnippetEditor() {
+        if snippetWindow?.isVisible != true {
+            var window: FloatingPanel!
+            window = ScreenshotWindows.makePanel(SnippetEditorView(store: snippets, close: { window?.orderOut(nil) }),
+                                                 proposedWidth: 1000, resizable: true)
+            window.level = .normal
+            window.setContentSize(NSSize(width: 1000, height: max(window.frame.height, 620)))
+            window.center()
+            snippetWindow = window
+        }
+        NSApp.activate()
+        snippetWindow?.makeKeyAndOrderFront(nil)
+    }
 
     /// From the menu: the entry goes onto the clipboard and into the app in front.
     public func pasteFromHistory(_ id: UUID) {

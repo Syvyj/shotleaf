@@ -84,7 +84,7 @@ struct ClipboardHistoryTests {
         h.add(ClipItem(kind: .link, text: "https://multiplex.ua/imax/schedule"))
         h.add(ClipItem(kind: .text, text: "о, IMAX я б прям пішов у суботу, якщо будуть квитки на вечір"))
         h.togglePin(h.items[3].id)
-        let model = ClipboardPanelModel(history: h)
+        let model = ClipboardPanelModel(history: h, snippets: SnippetStore(file: dir.appendingPathComponent("s.json")))
         model.query = "imax"
         try renderPreview(ClipboardPanelView(model: model, pick: { _, _ in }, close: {}), "clipboard-panel.png")
         model.query = ""

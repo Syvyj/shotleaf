@@ -7,26 +7,40 @@ import SwiftUI
 @Observable
 final class ClipboardPanelModel {
     let history: ClipboardHistory
+    let snippets: SnippetStore
     var query = "" { didSet { selected = 0 } }
     var kind: ClipItem.Kind? { didSet { selected = 0 } }
+    /// The Snippets tab instead of the history.
+    var showsSnippets = false { didSet { selected = 0; asking = nil } }
     var selected = 0
+    /// A snippet with {?questions}, waiting for the answers.
+    var asking: Snippet?
+    var answers: [String: String] = [:]
 
-    init(history: ClipboardHistory) { self.history = history }
+    init(history: ClipboardHistory, snippets: SnippetStore) {
+        self.history = history
+        self.snippets = snippets
+    }
 
     var results: [ClipItem] { history.search(query, kind: kind) }
-    var current: ClipItem? { let r = results; return r.indices.contains(selected) ? r[selected] : nil }
+    var current: ClipItem? { guard !showsSnippets else { return nil }; let r = results; return r.indices.contains(selected) ? r[selected] : nil }
+    var snippetResults: [Snippet] { snippets.search(query) }
+    var currentSnippet: Snippet? { guard showsSnippets else { return nil }; let r = snippetResults; return r.indices.contains(selected) ? r[selected] : nil }
+    var count: Int { showsSnippets ? snippetResults.count : results.count }
 
     static let kinds: [ClipItem.Kind?] = [nil, .text, .link, .image, .color, .file]
 
     func move(_ by: Int) {
-        let count = results.count
-        guard count > 0 else { return }
+        guard count > 0 else { selected = 0; return }
         selected = min(max(selected + by, 0), count - 1)
     }
 
+    /// Tab: through the history's types, then the Snippets tab, and round.
     func nextKind(_ by: Int) {
-        let i = Self.kinds.firstIndex(of: kind) ?? 0
-        kind = Self.kinds[(i + by + Self.kinds.count) % Self.kinds.count]
+        let positions = Self.kinds.count + 1
+        let now = showsSnippets ? Self.kinds.count : Self.kinds.firstIndex(of: kind) ?? 0
+        let next = (now + by + positions) % positions
+        if next == Self.kinds.count { showsSnippets = true } else { showsSnippets = false; kind = Self.kinds[next] }
     }
 }
 
@@ -38,25 +52,35 @@ final class ClipboardPanelController {
     enum Mode { case paste, plain, copy }
 
     let history: ClipboardHistory
+    let snippets: SnippetStore
     var openImage: (ImagePayload) -> Void = { _ in }
+    var openSnippetEditor: () -> Void = {}
     private var panel: FloatingPanel?
     private var model: ClipboardPanelModel?
     private var monitor: Any?
     /// The app the user was in: the paste goes there, and only there.
     private var target: pid_t?
 
-    init(history: ClipboardHistory) { self.history = history }
+    init(history: ClipboardHistory, snippets: SnippetStore) {
+        self.history = history
+        self.snippets = snippets
+    }
 
     var isShown: Bool { panel?.isVisible == true }
 
     func toggle() { isShown ? close() : show() }
 
-    func show() {
+    func show(snippets showsSnippets: Bool = false, asking: Snippet? = nil) {
         close()
         target = NSWorkspace.shared.frontmostApplication?.processIdentifier
-        let model = ClipboardPanelModel(history: history)
+        let model = ClipboardPanelModel(history: history, snippets: snippets)
+        model.showsSnippets = showsSnippets
+        model.asking = asking
         self.model = model
-        let view = ClipboardPanelView(model: model, pick: { [weak self] in self?.pick($0, $1) }, close: { [weak self] in self?.close() })
+        let view = ClipboardPanelView(model: model, pick: { [weak self] in self?.pick($0, $1) },
+                                      pickSnippet: { [weak self] in self?.pick($0, $1) },
+                                      editSnippets: { [weak self] in self?.close(); self?.openSnippetEditor() },
+                                      close: { [weak self] in self?.close() })
         let panel = ScreenshotWindows.makePanel(view)
         panel.setFrameOrigin(Self.origin(for: panel.frame.size))
         self.panel = panel
@@ -90,6 +114,23 @@ final class ClipboardPanelController {
     private func handle(_ event: NSEvent) -> Bool {
         guard let model else { return false }
         let mods = event.modifierFlags.intersection([.command, .option, .shift, .control])
+        if let snippet = model.asking { // the questions' fields have the keyboard
+            switch Int(event.keyCode) {
+            case 36, 76: finish(snippet, answers: model.answers, mods.contains(.command) ? .copy : .paste); return true
+            case 53: model.asking = nil; return true
+            default: return false
+            }
+        }
+        if model.showsSnippets {
+            switch Int(event.keyCode) {
+            case 36, 76:
+                if let snippet = model.currentSnippet { pick(snippet, mods.contains(.command) ? .copy : .paste) }
+                return true
+            case 51 where mods == .command: return true
+            default: break
+            }
+            if mods == .command, ["p", "e"].contains(event.charactersIgnoringModifiers?.lowercased() ?? "") { return true }
+        }
         switch Int(event.keyCode) {
         case 125: model.move(1); return true                                   // ↓
         case 126: model.move(-1); return true                                  // ↑
@@ -114,16 +155,41 @@ final class ClipboardPanelController {
         }
         // 1–9 paste that row: always with ⌘, and bare while the search is empty.
         if let n = Int(key), (1...9).contains(n), mods == .command || (mods.isEmpty && model.query.isEmpty) {
-            let results = model.results
-            if results.indices.contains(n - 1) { pick(results[n - 1], .paste) }
+            if model.showsSnippets {
+                let results = model.snippetResults
+                if results.indices.contains(n - 1) { pick(results[n - 1], .paste) }
+            } else {
+                let results = model.results
+                if results.indices.contains(n - 1) { pick(results[n - 1], .paste) }
+            }
             return true
         }
         return false
     }
 
+    /// A snippet: its questions first (in the panel), then the filled-in text.
+    func pick(_ snippet: Snippet, _ mode: Mode) {
+        if !SnippetText.questions(in: snippet.text).isEmpty, model?.asking == nil {
+            if model == nil { show(snippets: true, asking: snippet) } else { model?.answers = [:]; model?.asking = snippet }
+            return
+        }
+        finish(snippet, answers: model?.answers ?? [:], mode)
+    }
+
+    private func finish(_ snippet: Snippet, answers: [String: String], _ mode: Mode) {
+        let filled = SnippetText.expand(snippet.text, answers: answers, clipboard: NSPasteboard.general.string(forType: .string) ?? "")
+        Paster.put(filled.text)
+        close()
+        pasteIntoTarget(mode, thenLeft: filled.afterCursor)
+    }
+
     func pick(_ item: ClipItem, _ mode: Mode) {
         history.copy(item, plain: mode == .plain)
         close()
+        pasteIntoTarget(mode)
+    }
+
+    private func pasteIntoTarget(_ mode: Mode, thenLeft left: Int = 0) {
         // Paste only into the app the panel was opened over — never anywhere else.
         guard mode != .copy, let target, NSWorkspace.shared.frontmostApplication?.processIdentifier == target else {
             Sound.copied()
@@ -132,18 +198,69 @@ final class ClipboardPanelController {
         Task {
             try? await Task.sleep(for: .milliseconds(60)) // the panel's key status goes back to the app first
             guard NSWorkspace.shared.frontmostApplication?.processIdentifier == target else { return }
-            Self.pressCommandV()
+            Paster.pressCommandV()
+            if left > 0 { // the caret to the snippet's {cursor}
+                try? await Task.sleep(for: .milliseconds(120))
+                Paster.pressLeft(left)
+            }
         }
+    }
+}
+
+/// Puts text on the clipboard and presses keys in the app in front — always as
+/// APILA's own events (the completion tap and the history skip them), with
+/// modifiers released.
+@MainActor
+enum Paster {
+    static let marker: Int64 = 0x4150_494C
+
+    /// Text on the clipboard, marked as APILA's so the history doesn't keep it.
+    static func put(_ text: String, on board: NSPasteboard = .general) {
+        board.clearContents()
+        board.setString(text, forType: .string)
+        board.setData(Data(), forType: ClipboardHistory.ownType)
     }
 
     /// ⌘V as a real press: ⌘ down, V, ⌘ up — so ⌘ is never left held.
     static func pressCommandV() {
+        press([(55, true, .maskCommand), (9, true, .maskCommand), (9, false, .maskCommand), (55, false, [])])
+    }
+
+    /// ← `count` times (to put the caret at a snippet's {cursor}).
+    static func pressLeft(_ count: Int) {
+        press(Array(repeating: [(123, true, CGEventFlags()), (123, false, CGEventFlags())], count: count).flatMap { $0 })
+    }
+
+    /// ⌫ `count` times (to remove a typed abbreviation).
+    static func pressDelete(_ count: Int) {
+        press(Array(repeating: [(51, true, CGEventFlags()), (51, false, CGEventFlags())], count: count).flatMap { $0 })
+    }
+
+    private static func press(_ keys: [(Int, Bool, CGEventFlags)]) {
         let source = CGEventSource(stateID: .combinedSessionState)
-        for (key, down, flags) in [(55, true, CGEventFlags.maskCommand), (9, true, .maskCommand), (9, false, .maskCommand), (55, false, [])] {
+        for (key, down, flags) in keys {
             guard let event = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(key), keyDown: down) else { continue }
             event.flags = flags
-            event.setIntegerValueField(.eventSourceUserData, value: 0x4150_494C) // APILA's own (the completion tap skips it)
+            event.setIntegerValueField(.eventSourceUserData, value: marker)
             event.post(tap: .cghidEventTap)
         }
+    }
+
+    /// Everything on the clipboard, to put back after a temporary paste.
+    static func snapshot(_ board: NSPasteboard = .general) -> [[NSPasteboard.PasteboardType: Data]] {
+        (board.pasteboardItems ?? []).map { item in
+            Dictionary(uniqueKeysWithValues: item.types.compactMap { type in item.data(forType: type).map { (type, $0) } })
+        }
+    }
+
+    static func restore(_ saved: [[NSPasteboard.PasteboardType: Data]], to board: NSPasteboard = .general) {
+        board.clearContents()
+        let items = saved.map { types in
+            let item = NSPasteboardItem()
+            for (type, data) in types { item.setData(data, forType: type) }
+            item.setData(Data(), forType: ClipboardHistory.ownType)
+            return item
+        }
+        board.writeObjects(items)
     }
 }

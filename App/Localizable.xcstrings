@@ -1,6 +1,256 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Snippets": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сніпети"
+          }
+        }
+      }
+    },
+    "Edit Snippets…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Редагувати сніпети…"
+          }
+        }
+      }
+    },
+    "No snippets yet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сніпетів ще немає"
+          }
+        }
+      }
+    },
+    "Create a snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Створити сніпет"
+          }
+        }
+      }
+    },
+    "↩ pastes · esc goes back": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↩ вставляє · esc — назад"
+          }
+        }
+      }
+    },
+    "All Snippets": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усі сніпети"
+          }
+        }
+      }
+    },
+    "Change colour": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Змінити колір"
+          }
+        }
+      }
+    },
+    "Delete the folder (its snippets stay)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити папку (сніпети лишаться)"
+          }
+        }
+      }
+    },
+    "No snippets here yet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тут ще немає сніпетів"
+          }
+        }
+      }
+    },
+    "Untitled": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без назви"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Назва"
+          }
+        }
+      }
+    },
+    "Abbreviation": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скорочення"
+          }
+        }
+      }
+    },
+    "Folder": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Папка"
+          }
+        }
+      }
+    },
+    "“%@” already uses this abbreviation": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Це скорочення вже має «%@»"
+          }
+        }
+      }
+    },
+    "Insert:": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставити:"
+          }
+        }
+      }
+    },
+    "{?Name} asks before pasting; {cursor} is where the caret ends up.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{?Name} спитає перед вставкою; {cursor} — де стане курсор."
+          }
+        }
+      }
+    },
+    "Pastes as": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставиться так"
+          }
+        }
+      }
+    },
+    "(clipboard)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "(буфер)"
+          }
+        }
+      }
+    },
+    "Delete Snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити сніпет"
+          }
+        }
+      }
+    },
+    "Pick a snippet or create one": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виберіть сніпет або створіть новий"
+          }
+        }
+      }
+    },
+    "New Snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новий сніпет"
+          }
+        }
+      }
+    },
+    "New Folder": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нова папка"
+          }
+        }
+      }
+    },
+    "New snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новий сніпет"
+          }
+        }
+      }
+    },
+    "New folder": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нова папка"
+          }
+        }
+      }
+    },
+    "Search": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пошук"
+          }
+        }
+      }
+    },
     "Paste": {
       "localizations": {
         "uk": {
