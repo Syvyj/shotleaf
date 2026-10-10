@@ -30,6 +30,19 @@ public struct MenuBarRootView: View {
         Button(Self.label(String(localized: "Edit Image from Clipboard"), coordinator.actionHotkeys[.editClipboard])) {
             coordinator.editClipboardImage()
         }
+        Menu("Recent Screenshots") {
+            ForEach(coordinator.recentShots, id: \.self) { url in
+                Button {
+                    coordinator.openRecent(url)
+                } label: {
+                    if let thumb = Self.thumbnail(url) { Image(nsImage: thumb) }
+                    Text(Self.recentTitle(url))
+                }
+            }
+            if coordinator.recentShots.isEmpty { Text("No screenshots yet") }
+            Divider()
+            Button("Show in Finder") { coordinator.showRecentFolder() }
+        }
 
         Divider()
 
@@ -43,6 +56,27 @@ public struct MenuBarRootView: View {
 
         Button("Quit APILA") { NSApplication.shared.terminate(nil) }
             .keyboardShortcut("q")
+    }
+
+    /// "14:05" today, "11 Oct 2026, 14:05" before, from the file's time-stamped name.
+    static func recentTitle(_ url: URL) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd HH.mm.ss.SSS"
+        guard let date = f.date(from: url.deletingPathExtension().lastPathComponent) else { return url.lastPathComponent }
+        return date.formatted(date: Calendar.current.isDateInToday(date) ? .omitted : .abbreviated, time: .shortened)
+    }
+
+    /// A small picture for the menu row.
+    /// ponytail: decodes up to 10 full PNGs each time the menu opens; cache if it ever feels slow.
+    static func thumbnail(_ url: URL) -> NSImage? {
+        guard let image = NSImage(contentsOf: url), image.size.width > 0 else { return nil }
+        let side: CGFloat = 32
+        let size = image.size.width >= image.size.height
+            ? CGSize(width: side, height: max(1, side * image.size.height / image.size.width))
+            : CGSize(width: max(1, side * image.size.width / image.size.height), height: side)
+        let thumb = NSImage(size: size, flipped: false) { rect in image.draw(in: rect); return true }
+        return thumb
     }
 
     private static func label(_ title: String, _ shortcut: HotkeyShortcut?) -> String {

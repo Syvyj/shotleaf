@@ -324,8 +324,9 @@ enum AnnotationRenderer {
 
     /// The screenshot with its marks, at the original pixel density. Canvas
     /// area outside the image is filled with `canvas`.
-    static func export(_ image: CGImage, imageSize: CGSize, items: [Annotation], canvas: NSColor = .white) -> CGImage? {
-        guard !items.isEmpty else { return image }
+    static func export(_ image: CGImage, imageSize: CGSize, items: [Annotation], canvas: NSColor = .white,
+                       watermark: Watermark? = nil) -> CGImage? {
+        guard !items.isEmpty || watermark != nil else { return image }
         let bounds = exportBounds(items, imageSize: imageSize)
         let scale = CGFloat(image.width) / imageSize.width
         guard let ctx = CGContext(data: nil, width: Int((bounds.width * scale).rounded()), height: Int((bounds.height * scale).rounded()),
@@ -341,6 +342,7 @@ enum AnnotationRenderer {
         ctx.interpolationQuality = .high
         drawUpright(image, in: CGRect(origin: .zero, size: imageSize), ctx: ctx)
         draw(items, image: image, imageSize: imageSize, in: ctx, cropGuide: false)
+        watermark?.draw(in: ctx, area: bounds)
         return ctx.makeImage()
     }
 }

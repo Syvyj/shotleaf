@@ -120,6 +120,7 @@ struct ScreenshotWindowTests {
         doc.lineWidth = 4
         doc.add(.pen([CGPoint(x: 40, y: 40), CGPoint(x: 80, y: 20), CGPoint(x: 140, y: 60), CGPoint(x: 200, y: 30)]))
         doc.backdrop = Backdrop(fill: .gradient(1))
+        doc.watermark = Watermark(text: "© APILA", position: 8, size: 0.3, opacity: 0.7, rotation: -12)
         try renderPreview(view, "screenshot-backdrop.png")
     }
 }
@@ -127,6 +128,47 @@ struct ScreenshotWindowTests {
 @Suite("Pen, background, formats")
 @MainActor
 struct PenBackdropTests {
+    @Test("Watermark lands in its corner of the export")
+    func watermark() throws {
+        let black = try #require(CGContext(data: nil, width: 400, height: 200, bitsPerComponent: 8, bytesPerRow: 0,
+                                           space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        black.setFillColor(.black); black.fill(CGRect(x: 0, y: 0, width: 400, height: 200))
+        let shot = try #require(black.makeImage())
+        let out = try #require(AnnotationRenderer.export(shot, imageSize: CGSize(width: 400, height: 200), items: [],
+                                                          watermark: Watermark(text: "APILA", position: 8, size: 0.4, opacity: 1)))
+        let rep = NSBitmapImageRep(cgImage: out)
+        func brightness(_ x: ClosedRange<Int>, _ y: ClosedRange<Int>) -> CGFloat {
+            var sum: CGFloat = 0
+            for i in x { for j in y { sum += rep.colorAt(x: i, y: j)?.brightnessComponent ?? 0 } }
+            return sum
+        }
+        #expect(brightness(230...390, 130...190) > 50)   // bottom-right: the white text
+        #expect(brightness(10...170, 10...70) == 0)        // top-left: untouched
+    }
+
+    @Test("Tool keys: a taken key moves over, editor keys are refused, order moves")
+    func toolPrefs() {
+        defer { ToolPrefs.reset() }
+        ToolPrefs.reset()
+        #expect(ToolPrefs.setKey("D", for: .arrow))
+        #expect(AnnotationTool.arrow.key == "d" && AnnotationTool.pen.key == nil)
+        #expect(!ToolPrefs.setKey("p", for: .blur) && AnnotationTool.blur.key == "5")
+        #expect(ToolPrefs.setKey("", for: .blur) && AnnotationTool.blur.key == nil)
+        ToolPrefs.move(.rectangle, by: -1)
+        #expect(Array(AnnotationTool.ordered.prefix(2)) == [.rectangle, .arrow])
+    }
+
+    @Test("Recent screenshots: newest first, only the last ten kept")
+    func recent() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("apila-recent-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let shot = ImagePayload(data: Data([1]), width: 1, height: 1)
+        var list: [URL] = []
+        for i in 0..<12 { list = ScreenshotWindows.remember(shot, in: dir, now: Date(timeIntervalSince1970: Double(i) * 60)) }
+        #expect(list.count == 10 && ScreenshotWindows.recent(in: dir).count == 10)
+        #expect(list.first!.lastPathComponent > list.last!.lastPathComponent)
+    }
+
     @Test("1x halves a Retina PNG; image data becomes a PNG payload with its pixel size")
     func oneXAndPayload() throws {
         let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 40, pixelsHigh: 20, bitsPerSample: 8, samplesPerPixel: 4,

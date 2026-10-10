@@ -16,6 +16,9 @@ public struct SettingsRootView: View {
     @AppStorage("saveAt1x") private var saveAt1x = false
     @AppStorage("captureDelay") private var captureDelay = 0
     @AppStorage(SettingsStore.showsCursorKey) private var showsCursor = false
+    /// Bumped after a tool key / order change, to redraw the list.
+    @State private var toolsChanged = 0
+    @State private var toolKeyError: String?
 
     public init(coordinator: AppCoordinator) {
         self.coordinator = coordinator
@@ -38,6 +41,7 @@ public struct SettingsRootView: View {
             }
             shortcutSection
             screenshotSection
+            toolsSection
             completionSection
             generalSection
             permissionsSection
@@ -192,6 +196,43 @@ public struct SettingsRootView: View {
             Toggle("Include the pointer", isOn: $showsCursor)
         } header: {
             Text("Screenshots")
+        }
+    }
+
+    // MARK: Editor tools
+
+    private var toolsSection: some View {
+        Section {
+            let _ = toolsChanged
+            let tools = AnnotationTool.ordered
+            ForEach(Array(tools.enumerated()), id: \.element) { i, tool in
+                HStack(spacing: 10) {
+                    ToolIcon(tool: tool, size: 16).frame(width: 20)
+                    Text(tool.title)
+                    Spacer()
+                    TextField("", text: Binding(
+                        get: { tool.key.map { String($0).uppercased() } ?? "" },
+                        set: { typed in
+                            toolKeyError = ToolPrefs.setKey(typed, for: tool) ? nil
+                                : String(localized: "P, T and 0 are taken by the editor itself.")
+                            toolsChanged += 1
+                        }
+                    ), prompt: Text("—"))
+                    .multilineTextAlignment(.center)
+                    .frame(width: 44)
+                    Button { ToolPrefs.move(tool, by: -1); toolsChanged += 1 } label: { Image(systemName: "chevron.up") }
+                        .buttonStyle(.borderless).disabled(i == 0)
+                    Button { ToolPrefs.move(tool, by: 1); toolsChanged += 1 } label: { Image(systemName: "chevron.down") }
+                        .buttonStyle(.borderless).disabled(i == tools.count - 1)
+                }
+            }
+            if let toolKeyError { Text(toolKeyError).font(.caption).foregroundStyle(.orange) }
+            Button("Reset keys and order") { ToolPrefs.reset(); toolKeyError = nil; toolsChanged += 1 }
+        } header: {
+            Text("Editor tools")
+        } footer: {
+            Text("Type a key for a tool; a tool already on it gives it up. Empty — no key. Arrow, box and oval share one button.")
+                .font(.caption).foregroundStyle(.secondary)
         }
     }
 

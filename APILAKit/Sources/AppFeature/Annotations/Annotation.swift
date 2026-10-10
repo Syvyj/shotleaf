@@ -121,9 +121,15 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
     /// Tools whose marks have a line thickness.
     var usesLineWidth: Bool { [.arrow, .rectangle, .ellipse, .pen].contains(self) }
 
-    /// 1…9 for the original tools (kept stable), letters for later ones —
-    /// none of them clash with P / T / A in the toolbar.
-    var key: Character {
+    /// The editor key: the user's own (Settings → Editor tools) or the
+    /// default — 1…9 for the original tools, letters for later ones. None of
+    /// them may be P / T / 0, which the editor uses itself. nil = no key.
+    var key: Character? {
+        if let custom = ToolPrefs.keys[rawValue] { return custom.first }
+        return defaultKey
+    }
+
+    var defaultKey: Character {
         switch self {
         case .ellipse: "o"
         case .crop: "c"
@@ -131,6 +137,59 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
         case .pen: "d"
         default: Character(String((Self.numbered.firstIndex(of: self) ?? 0) + 1))
         }
+    }
+
+    /// The toolbar order: the user's, with any tool it lacks at the end.
+    static var ordered: [AnnotationTool] {
+        let saved = ToolPrefs.order.compactMap(AnnotationTool.init(rawValue:))
+        return saved + allCases.filter { !saved.contains($0) }
+    }
+
+    /// "  D" for tooltips and menus ("" without a key).
+    var keyLabel: String { key.map { String($0).uppercased() } ?? "" }
+}
+
+/// The user's editor tool keys and order, in UserDefaults.
+enum ToolPrefs {
+    /// Keys the editor keeps for itself.
+    static let reserved: Set<Character> = ["p", "t", "0", " "]
+
+    /// tool → key ("" = no key); missing = the default.
+    static var keys: [String: String] {
+        get { UserDefaults.standard.dictionary(forKey: "toolKeys") as? [String: String] ?? [:] }
+        set { UserDefaults.standard.set(newValue, forKey: "toolKeys") }
+    }
+
+    static var order: [String] {
+        get { UserDefaults.standard.stringArray(forKey: "toolOrder") ?? [] }
+        set { UserDefaults.standard.set(newValue, forKey: "toolOrder") }
+    }
+
+    /// Gives `tool` the key `typed` (its last letter or digit; empty = none).
+    /// A tool already on that key loses it. Reserved keys are refused (false).
+    @discardableResult
+    static func setKey(_ typed: String, for tool: AnnotationTool) -> Bool {
+        let key = typed.lowercased().last.map(String.init) ?? ""
+        if let k = key.first, reserved.contains(k) { return false }
+        var all = keys
+        if !key.isEmpty {
+            for other in AnnotationTool.allCases where other != tool && other.key.map(String.init) == key { all[other.rawValue] = "" }
+        }
+        all[tool.rawValue] = key == String(tool.defaultKey) ? nil : key
+        keys = all
+        return true
+    }
+
+    static func move(_ tool: AnnotationTool, by offset: Int) {
+        var list = AnnotationTool.ordered
+        guard let i = list.firstIndex(of: tool), list.indices.contains(i + offset) else { return }
+        list.swapAt(i, i + offset)
+        order = list.map(\.rawValue)
+    }
+
+    static func reset() {
+        UserDefaults.standard.removeObject(forKey: "toolKeys")
+        UserDefaults.standard.removeObject(forKey: "toolOrder")
     }
 }
 
@@ -160,6 +219,8 @@ final class AnnotationDocument {
 
     /// "Фон" around the result (nil = none).
     var backdrop: Backdrop?
+    /// Stamped on the result; starts as the last one used.
+    var watermark: Watermark? = Watermark.saved
 
     /// nil = Select: click a mark to select, move, resize or delete it.
     var tool: AnnotationTool?

@@ -1,6 +1,166 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Watermark": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Водяний знак"
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Немає"
+          }
+        }
+      }
+    },
+    "Image": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зображення"
+          }
+        }
+      }
+    },
+    "Watermark text": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст знака"
+          }
+        }
+      }
+    },
+    "Choose image…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрати зображення…"
+          }
+        }
+      }
+    },
+    "Position": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Позиція"
+          }
+        }
+      }
+    },
+    "Size": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розмір"
+          }
+        }
+      }
+    },
+    "Opacity": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Непрозорість"
+          }
+        }
+      }
+    },
+    "Rotation": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обертання"
+          }
+        }
+      }
+    },
+    "Editor tools": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Інструменти редактора"
+          }
+        }
+      }
+    },
+    "Reset keys and order": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скинути клавіші й порядок"
+          }
+        }
+      }
+    },
+    "Type a key for a tool; a tool already on it gives it up. Empty — no key. Arrow, box and oval share one button.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введіть клавішу для інструмента; якщо вона вже зайнята, інший інструмент її втратить. Порожньо — без клавіші. Стрілка, рамка й овал ділять одну кнопку."
+          }
+        }
+      }
+    },
+    "P, T and 0 are taken by the editor itself.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P, T і 0 зайняті самим редактором."
+          }
+        }
+      }
+    },
+    "Recent Screenshots": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Недавні знімки"
+          }
+        }
+      }
+    },
+    "No screenshots yet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знімків ще немає"
+          }
+        }
+      }
+    },
+    "Show in Finder": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показати у Finder"
+          }
+        }
+      }
+    },
     "Edit Last Screenshot": {
       "localizations": {
         "uk": {

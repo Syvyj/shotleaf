@@ -28,9 +28,9 @@ final class ScreenshotWindows {
         let result: () -> Data = {
             let picture = doc.base?.image ?? cgImage
             let size = doc.base?.size ?? display
-            guard !doc.isEmpty || doc.base != nil || doc.backdrop != nil,
+            guard !doc.isEmpty || doc.base != nil || doc.backdrop != nil || doc.watermark != nil,
                   var composed = AnnotationRenderer.export(picture, imageSize: size, items: doc.items,
-                                                           canvas: doc.base?.cutOut == true ? .clear : .white)
+                                                           canvas: doc.base?.cutOut == true ? .clear : .white, watermark: doc.watermark)
             else { return payload.data }
             if let backdrop = doc.backdrop,
                let framed = backdrop.framed(composed, scale: CGFloat(picture.width) / size.width) { composed = framed }
@@ -259,19 +259,34 @@ final class ScreenshotWindows {
 
     // MARK: Last shot & clipboard
 
-    private static var lastURL: URL {
+    /// The newest captures, as taken (Application Support/APILA/Recent).
+    static var recentFolder: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("APILA/last-capture.png")
+            .appendingPathComponent("APILA/Recent", isDirectory: true)
+    }
+    static let recentLimit = 10
+
+    /// Keeps a new capture (the oldest beyond `recentLimit` go). Survives a restart.
+    @discardableResult
+    static func remember(_ shot: ImagePayload, in folder: URL = recentFolder, now: Date = Date()) -> [URL] {
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd HH.mm.ss.SSS"
+        try? shot.data.write(to: folder.appendingPathComponent("\(f.string(from: now)).png"))
+        let all = recent(in: folder, limit: .max)
+        for old in all.dropFirst(recentLimit) { try? FileManager.default.removeItem(at: old) }
+        return Array(all.prefix(recentLimit))
     }
 
-    /// Keeps the newest capture on disk for "Edit Last Screenshot" (survives a restart).
-    func remember(_ shot: ImagePayload) {
-        try? FileManager.default.createDirectory(at: Self.lastURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try? shot.data.write(to: Self.lastURL)
+    /// Newest first (the names sort by time).
+    static func recent(in folder: URL = recentFolder, limit: Int = recentLimit) -> [URL] {
+        let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
+        return Array(files.filter { $0.pathExtension == "png" }.sorted { $0.lastPathComponent > $1.lastPathComponent }.prefix(limit))
     }
 
-    func lastCapture() -> ImagePayload? {
-        (try? Data(contentsOf: Self.lastURL)).flatMap(Self.payload(fromImageData:))
+    static func load(_ url: URL) -> ImagePayload? {
+        (try? Data(contentsOf: url)).flatMap(payload(fromImageData:))
     }
 
     /// The clipboard's image (PNG or anything AppKit reads), as a PNG payload.

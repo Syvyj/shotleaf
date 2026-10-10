@@ -52,7 +52,7 @@ struct ScreenshotView: View {
     /// For double-click detection on marks.
     @State private var lastClick: (id: Annotation.ID, at: Date)?
     @FocusState private var textFocused: Bool
-    private enum Flyout { case shapes, style, fontSize, backdrop, saveAs }
+    private enum Flyout { case shapes, style, fontSize, backdrop, saveAs, watermark }
     @State private var removingBackground = false
     @State private var flyout: Flyout?
     /// The shape the shapes button shows when another tool is in use.
@@ -138,14 +138,18 @@ struct ScreenshotView: View {
 
     /// Arrow, box and oval share one button; its menu picks which.
     static let shapeTools: [AnnotationTool] = [.arrow, .rectangle, .ellipse]
-    private static let singleTools = AnnotationTool.allCases.filter { !shapeTools.contains($0) }
+    private static var toolbarTools: [AnnotationTool] {
+        let ordered = AnnotationTool.ordered
+        let firstShape = ordered.first { shapeTools.contains($0) }
+        return ordered.filter { !shapeTools.contains($0) || $0 == firstShape }
+    }
 
     private var toolRow: some View {
         HStack(spacing: 4) {
             toolButton(nil, title: String(localized: "Select · drag the shot out"), key: "0")
-            shapesButton
-            ForEach(Self.singleTools) { tool in
-                toolButton(tool, title: tool.title, key: tool.key)
+            // The user's order; the three shapes share one button where the first of them sits.
+            ForEach(Self.toolbarTools, id: \.self) { tool in
+                if Self.shapeTools.contains(tool) { shapesButton } else { toolButton(tool, title: tool.title, key: tool.keyLabel) }
             }
             divider
             styleButton
@@ -176,7 +180,7 @@ struct ScreenshotView: View {
         flyout = nil
     }
 
-    private func toolButton(_ tool: AnnotationTool?, title: String, key: Character) -> some View {
+    private func toolButton(_ tool: AnnotationTool?, title: String, key: String) -> some View {
         let on = doc.tool == tool
         return Button { pick(tool) } label: {
             ToolIcon(tool: tool, size: 22)
@@ -186,7 +190,7 @@ struct ScreenshotView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .instantTip("\(title)  \(String(key).uppercased())")
+        .instantTip("\(title)  \(key.uppercased())")
     }
 
     private var shapesButton: some View {
@@ -203,7 +207,7 @@ struct ScreenshotView: View {
         .buttonStyle(.plain)
         .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.8))
         .background(tile(on))
-        .instantTip("\(shown.title)  \(String(shown.key).uppercased())", hidden: flyout == .shapes)
+        .instantTip("\(shown.title)  \(shown.keyLabel)", hidden: flyout == .shapes)
         .overlay(alignment: .topLeading) {
             if flyout == .shapes {
                 flyoutCard {
@@ -213,7 +217,7 @@ struct ScreenshotView: View {
                                 ToolIcon(tool: tool, size: 20)
                                 Text(tool.title).font(Leaf.font(13, .medium))
                                 Spacer(minLength: 16)
-                                Keycap(key: String(tool.key).uppercased())
+                                if tool.key != nil { Keycap(key: tool.keyLabel) }
                             }
                             .padding(.horizontal, 8).padding(.vertical, 5)
                             .frame(width: 150)
@@ -346,6 +350,87 @@ struct ScreenshotView: View {
             .shadow(color: .black.opacity(0.18), radius: 12, y: 4)
             .fixedSize()
             .offset(y: above ? -42 : 42)
+    }
+
+    // MARK: Watermark
+
+    private var watermarkPanel: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Picker("", selection: Binding(
+                get: { doc.watermark?.kind.rawValue ?? "none" },
+                set: { value in
+                    if let kind = Watermark.Kind(rawValue: value) {
+                        var w = doc.watermark ?? Watermark.saved ?? Watermark()
+                        w.kind = kind
+                        if kind == .image, w.imagePath == nil { w.imagePath = chooseWatermarkImage() }
+                        setWatermark(kind == .image && w.imagePath == nil ? nil : w)
+                    } else {
+                        setWatermark(nil)
+                    }
+                }
+            )) {
+                Text("None").tag("none")
+                Text("Text").tag(Watermark.Kind.text.rawValue)
+                Text("Image").tag(Watermark.Kind.image.rawValue)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            if let w = doc.watermark {
+                if w.kind == .text {
+                    TextField("Watermark text", text: watermarkBinding(\.text))
+                        .textFieldStyle(.roundedBorder)
+                } else {
+                    Button("Choose image…") { if let path = chooseWatermarkImage() { var n = w; n.imagePath = path; setWatermark(n) } }
+                        .buttonStyle(LeafButtonStyle())
+                }
+                HStack(alignment: .top, spacing: 10) {
+                    Text("Position").font(Leaf.font(12, .medium)).opacity(0.7).frame(width: 70, alignment: .leading)
+                    Grid(horizontalSpacing: 4, verticalSpacing: 4) {
+                        ForEach(0..<3) { row in
+                            GridRow {
+                                ForEach(0..<3) { column in
+                                    let spot = row * 3 + column
+                                    Button { var n = w; n.position = spot; setWatermark(n) } label: {
+                                        RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                            .fill(w.position == spot ? AnyShapeStyle(Leaf.leaf) : AnyShapeStyle(.primary.opacity(0.1)))
+                                            .frame(width: 26, height: 18)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                    }
+                }
+                watermarkSlider("Size", \.size, Watermark.sizeRange)
+                watermarkSlider("Opacity", \.opacity, Watermark.opacityRange)
+                watermarkSlider("Rotation", \.rotation, Watermark.rotationRange)
+            }
+        }
+        .frame(width: 300, alignment: .leading)
+    }
+
+    private func setWatermark(_ w: Watermark?) {
+        doc.watermark = w
+        Watermark.saved = w // the next shots start with it
+    }
+
+    private func watermarkBinding<T>(_ key: WritableKeyPath<Watermark, T>) -> Binding<T> {
+        Binding(get: { (doc.watermark ?? Watermark())[keyPath: key] },
+                set: { var w = doc.watermark ?? Watermark(); w[keyPath: key] = $0; setWatermark(w) })
+    }
+
+    private func watermarkSlider(_ title: String, _ key: WritableKeyPath<Watermark, CGFloat>, _ range: ClosedRange<CGFloat>) -> some View {
+        HStack(spacing: 10) {
+            Text(LocalizedStringKey(title)).font(Leaf.font(12, .medium)).opacity(0.7).frame(width: 70, alignment: .leading)
+            Slider(value: watermarkBinding(key), in: range).tint(Leaf.leaf)
+        }
+    }
+
+    private func chooseWatermarkImage() -> String? {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.image]
+        panel.canChooseDirectories = false
+        return panel.runModal() == .OK ? panel.url?.path : nil
     }
 
     // MARK: Background ("Фон")
@@ -494,6 +579,7 @@ struct ScreenshotView: View {
                     context.translateBy(x: origin.x, y: origin.y)
                     context.withCGContext { cg in
                         AnnotationRenderer.draw(visibleItems, image: pictureCG, imageSize: pictureSize, in: cg)
+                        doc.watermark?.draw(in: cg, area: AnnotationRenderer.exportBounds(visibleItems, imageSize: pictureSize))
                     }
                     if let selected = visibleSelection { drawSelection(selected, in: &context) }
                 }
@@ -775,6 +861,12 @@ struct ScreenshotView: View {
             Button { actions.share() } label: { Image(systemName: "square.and.arrow.up").frame(height: 17) }
                 .buttonStyle(LeafButtonStyle())
                 .instantTip("Share", above: true)
+            Button { flyout = flyout == .watermark ? nil : .watermark } label: { Image(systemName: "signature").frame(height: 17) }
+                .buttonStyle(LeafButtonStyle(prominent: doc.watermark != nil))
+                .instantTip("Watermark", hidden: flyout == .watermark, above: true)
+                .overlay(alignment: .bottomLeading) {
+                    if flyout == .watermark { flyoutCard(above: true) { watermarkPanel } }
+                }
             Button { toggleLiveText() } label: { keyed("Text", "T", show: keys) }
                 .buttonStyle(LeafButtonStyle(prominent: liveText != nil))
                 .keyboardShortcut("t", modifiers: [])
@@ -816,8 +908,8 @@ struct ScreenshotView: View {
     /// the field then), except esc, which always drops the text being typed.
     @ViewBuilder
     private var keyboard: some View {
-        if editingText {
-            Button("") { textDraft = nil; editingTextID = nil; doc.tool = nil }
+        if editingText || flyout == .watermark { // typing: the letters belong to the field
+            Button("") { textDraft = nil; editingTextID = nil; doc.tool = nil; flyout = nil }
                 .keyboardShortcut(.cancelAction)
         } else {
             Button("") {
@@ -838,7 +930,9 @@ struct ScreenshotView: View {
                 .disabled(!doc.canRedo)
             Button("") { pick(nil) }.keyboardShortcut("0", modifiers: [])
             ForEach(AnnotationTool.allCases) { tool in
-                Button("") { pick(tool) }.keyboardShortcut(KeyEquivalent(tool.key), modifiers: [])
+                if let key = tool.key {
+                    Button("") { pick(tool) }.keyboardShortcut(KeyEquivalent(key), modifiers: [])
+                }
             }
         }
     }

@@ -108,7 +108,7 @@ public final class AppCoordinator {
     /// A new shot: into the editor, or straight to the clipboard / a file
     /// (Settings → Screenshots). Kept for "Edit Last Screenshot" either way.
     private func deliver(_ shot: ImagePayload) {
-        screenshots.remember(shot)
+        recentShots = ScreenshotWindows.remember(shot)
         let after = container.settings.afterCapture
         if after == .editor { screenshots.show(shot); return }
         Sound.shutter()
@@ -118,8 +118,20 @@ public final class AppCoordinator {
 
     /// The last screenshot back in the editor (as it was taken).
     public func editLastScreenshot() {
-        guard let shot = screenshots.lastCapture() else { NSSound.beep(); return }
+        guard let last = recentShots.first else { NSSound.beep(); return }
+        openRecent(last)
+    }
+
+    /// The newest captures, newest first (for the menu).
+    public private(set) var recentShots: [URL] = ScreenshotWindows.recent()
+
+    public func openRecent(_ url: URL) {
+        guard let shot = ScreenshotWindows.load(url) else { NSSound.beep(); return }
         screenshots.show(shot, sound: false)
+    }
+
+    public func showRecentFolder() {
+        NSWorkspace.shared.activateFileViewerSelecting(recentShots.isEmpty ? [ScreenshotWindows.recentFolder] : [recentShots[0]])
     }
 
     /// An image from the clipboard in the editor, to mark up like a screenshot.
