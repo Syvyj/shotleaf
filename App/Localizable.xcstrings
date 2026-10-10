@@ -1223,6 +1223,16 @@
         }
       }
     },
+    "Sounds": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Звуки"
+          }
+        }
+      }
+    },
     "Something went wrong": {
       "localizations": {
         "uk": {

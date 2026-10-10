@@ -10,6 +10,7 @@ final class ScreenshotWindows {
 
     func show(_ payload: ImagePayload) {
         guard let image = NSImage(data: payload.data) else { return }
+        Sound.shutter()
         let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
         let scale = screen?.backingScaleFactor ?? 2
         let pixels = CGSize(width: payload.width, height: payload.height)
@@ -54,7 +55,8 @@ final class ScreenshotWindows {
     }
 
     /// Text read off a screenshot, in a small window to select, fix and copy.
-    func showText(_ text: String, title: LocalizedStringKey = "Text from Screenshot") {
+    func showText(_ text: String, title: LocalizedStringKey = "Text from Screenshot", sound: Bool = true) {
+        if sound { Sound.shutter() }
         var panel: FloatingPanel!
         let view = TextResultView(text: text, title: title, copy: Self.copyText) { [weak self] in self?.close(panel) }
         panel = makePanel(view, proposedWidth: 520, resizable: true)
@@ -70,12 +72,13 @@ final class ScreenshotWindows {
             String(localized: "APILA needs the Screen Recording permission. Allow it in System Settings → Privacy & Security, then restart APILA.")
         default: error.localizedDescription
         }
-        showText(message, title: "Couldn’t take the screenshot")
+        showText(message, title: "Couldn’t take the screenshot", sound: false)
     }
 
     static func copyText(_ text: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
+        Sound.copied()
     }
 
     /// A small "3… 2… 1" badge near the top of the screen. It never reaches
@@ -165,6 +168,7 @@ final class ScreenshotWindows {
         pasteboard.clearContents()
         pasteboard.setData(png, forType: .png)
         if let tiff = NSImage(data: png)?.tiffRepresentation { pasteboard.setData(tiff, forType: .tiff) }
+        Sound.copied()
     }
 
     /// Saves to the Desktop as "APILA 2026-10-08 at 16.50.12.png".
@@ -228,5 +232,25 @@ private struct CountdownBadge: View {
         .padding(.horizontal, 16).padding(.vertical, 8)
         .background(.regularMaterial, in: Capsule())
         .background(Leaf.surface, in: Capsule())
+    }
+}
+
+/// Soft feedback sounds, off with Settings → General → Sounds.
+@MainActor
+enum Sound {
+    static let key = "sounds"
+    private static var on: Bool { UserDefaults.standard.object(forKey: key) as? Bool ?? true }
+    private static let shutterSound = NSSound(contentsOfFile: "/System/Library/Components/CoreAudio.component/Contents/SharedSupport/SystemSounds/system/Screen Capture.aif", byReference: true)
+        ?? NSSound(named: "Grab")
+    private static let copySound = NSSound(named: "Pop")
+
+    static func shutter() { play(shutterSound) }
+    static func copied() { play(copySound) }
+
+    private static func play(_ sound: NSSound?) {
+        guard on, let sound else { return }
+        sound.volume = 0.5
+        sound.stop()
+        sound.play()
     }
 }

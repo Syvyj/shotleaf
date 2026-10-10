@@ -7,6 +7,7 @@ public struct SettingsRootView: View {
     @Bindable private var coordinator: AppCoordinator
 
     @State private var hotkeyError: String?
+    @AppStorage(Sound.key) private var sounds = true
 
     public init(coordinator: AppCoordinator) {
         self.coordinator = coordinator
@@ -130,6 +131,7 @@ public struct SettingsRootView: View {
                 get: { coordinator.showInDock },
                 set: { coordinator.setShowInDock($0) }
             ))
+            Toggle("Sounds", isOn: $sounds)
             Toggle("Open APILA at login", isOn: Binding(
                 get: { coordinator.launchAtLogin },
                 set: { coordinator.setLaunchAtLogin($0) }
