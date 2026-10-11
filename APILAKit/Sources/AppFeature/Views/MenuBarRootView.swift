@@ -49,6 +49,7 @@ public struct MenuBarRootView: View {
 
         Menu("Clipboard History") {
             Button(Self.label(String(localized: "Open Clipboard…"), coordinator.actionHotkeys[.clipboard])) { coordinator.showClipboard() }
+            Button(Self.label(String(localized: "Snippets…"), coordinator.actionHotkeys[.snippets])) { coordinator.showClipboard(snippets: true) }
             Button("Edit Snippets…") { coordinator.showSnippetEditor() }
             Divider()
             ForEach(Array(coordinator.clipboard.items.prefix(10).enumerated()), id: \.element.id) { i, item in

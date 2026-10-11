@@ -56,6 +56,7 @@ public final class AppCoordinator {
                 case HotkeyAction.editLast.rawValue: self.editLastScreenshot()
                 case HotkeyAction.editClipboard.rawValue: self.editClipboardImage()
                 case HotkeyAction.clipboard.rawValue: self.clipboardPanel.toggle()
+                case HotkeyAction.snippets.rawValue: self.clipboardPanel.toggle(snippets: true)
                 default: break
                 }
             }
@@ -77,7 +78,7 @@ public final class AppCoordinator {
         return controller
     }()
 
-    public func showClipboard() { clipboardPanel.show() }
+    public func showClipboard(snippets: Bool = false) { clipboardPanel.show(snippets: snippets) }
 
     @ObservationIgnored private lazy var expander: SnippetExpander = {
         let expander = SnippetExpander(store: snippets)

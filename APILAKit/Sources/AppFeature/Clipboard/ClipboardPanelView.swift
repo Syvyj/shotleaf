@@ -63,7 +63,7 @@ struct ClipboardPanelView: View {
                     }
                 }
                 Rectangle().fill(.primary.opacity(0.12)).frame(width: 1, height: 22).padding(.horizontal, 4)
-                tileButton("text.badge.star", String(localized: "Snippets"), on: model.showsSnippets) { model.showsSnippets = true }
+                tileButton("text.badge.star", String(localized: "Snippets") + "  Tab", on: model.showsSnippets) { model.showsSnippets = true }
             }
         }
         .overlay(WindowDragArea().allowsHitTesting(false))

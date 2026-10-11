@@ -35,12 +35,10 @@ final class ClipboardPanelModel {
         selected = min(max(selected + by, 0), count - 1)
     }
 
-    /// Tab: through the history's types, then the Snippets tab, and round.
+    /// ⇧Tab: the history's types, round and round.
     func nextKind(_ by: Int) {
-        let positions = Self.kinds.count + 1
-        let now = showsSnippets ? Self.kinds.count : Self.kinds.firstIndex(of: kind) ?? 0
-        let next = (now + by + positions) % positions
-        if next == Self.kinds.count { showsSnippets = true } else { showsSnippets = false; kind = Self.kinds[next] }
+        let i = Self.kinds.firstIndex(of: kind) ?? 0
+        kind = Self.kinds[(i + by + Self.kinds.count) % Self.kinds.count]
     }
 }
 
@@ -68,7 +66,7 @@ final class ClipboardPanelController {
 
     var isShown: Bool { panel?.isVisible == true }
 
-    func toggle() { isShown ? close() : show() }
+    func toggle(snippets: Bool = false) { isShown ? close() : show(snippets: snippets) }
 
     func show(snippets showsSnippets: Bool = false, asking: Snippet? = nil) {
         close()
@@ -121,7 +119,7 @@ final class ClipboardPanelController {
             default: return false
             }
         }
-        if model.showsSnippets {
+        if model.showsSnippets, Int(event.keyCode) != 48 {
             switch Int(event.keyCode) {
             case 36, 76:
                 if let snippet = model.currentSnippet { pick(snippet, mods.contains(.command) ? .copy : .paste) }
@@ -134,7 +132,9 @@ final class ClipboardPanelController {
         switch Int(event.keyCode) {
         case 125: model.move(1); return true                                   // ↓
         case 126: model.move(-1); return true                                  // ↑
-        case 48: model.nextKind(mods.contains(.shift) ? -1 : 1); return true   // Tab
+        case 48:                                                               // Tab: history ↔ snippets, ⇧Tab: the types
+            if mods.contains(.shift) { model.showsSnippets = false; model.nextKind(1) } else { model.showsSnippets.toggle() }
+            return true
         case 53: close(); return true                                          // esc
         case 36, 76:                                                           // ↩
             guard let item = model.current else { return true }

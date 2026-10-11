@@ -29,6 +29,9 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
     public static let clipboardDefault = HotkeyShortcut(
         id: "shift-cmd-v", title: "⇧⌘V", keyCode: UInt32(kVK_ANSI_V), modifiers: UInt32(shiftKey | cmdKey)
     )
+    public static let snippetsDefault = HotkeyShortcut(
+        id: "shift-cmd-b", title: "⇧⌘B", keyCode: UInt32(kVK_ANSI_B), modifiers: UInt32(shiftKey | cmdKey)
+    )
     public static let editClipboardDefault = HotkeyShortcut(
         id: "ctrl-opt-cmd-v", title: "⌃⌥⌘V", keyCode: UInt32(kVK_ANSI_V), modifiers: UInt32(controlKey | optionKey | cmdKey)
     )
@@ -52,7 +55,7 @@ public struct HotkeyShortcut: Sendable, Hashable, Identifiable {
                 return HotkeyShortcut(customKeyCode: code, modifiers: mods, title: String(parts[3]))
             }
         }
-        return [captureDefault, screenshotDefault, scrollingDefault, editLastDefault, editClipboardDefault, clipboardDefault].first { $0.id == id }
+        return [captureDefault, screenshotDefault, scrollingDefault, editLastDefault, editClipboardDefault, clipboardDefault, snippetsDefault].first { $0.id == id }
     }
 
     /// Builds a shortcut from a key press in the recorder. Nil when it has no
@@ -97,6 +100,7 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
     case editLast = "edit-last"             // the last screenshot back in the editor
     case editClipboard = "edit-clipboard"   // an image from the clipboard in the editor
     case clipboard                          // the clipboard history panel
+    case snippets                           // the same panel, on its Snippets tab
 
     public var id: String { rawValue }
 
@@ -108,6 +112,7 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
         case .editLast: String(localized: "Edit Last Screenshot")
         case .editClipboard: String(localized: "Edit Image from Clipboard")
         case .clipboard: String(localized: "Clipboard History")
+        case .snippets: String(localized: "Snippets")
         }
     }
 
@@ -119,6 +124,7 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
         case .editLast: .editLastDefault
         case .editClipboard: .editClipboardDefault
         case .clipboard: .clipboardDefault
+        case .snippets: .snippetsDefault
         }
     }
 }
