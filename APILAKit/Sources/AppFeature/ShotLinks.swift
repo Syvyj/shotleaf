@@ -61,22 +61,36 @@ enum ShotLinks {
 
     private static let service = "app.apila.shots"
 
+    /// Read once per launch (each Keychain read of an item APILA didn't create asks for the password).
+    nonisolated(unsafe) private static var cache: String??
+
     static var token: String? {
         get {
+            if let cache { return cache }
             var item: CFTypeRef?
             let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
                                         kSecReturnData as String: true]
-            guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess, let data = item as? Data else { return nil }
-            return String(data: data, encoding: .utf8)
+            let found = SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess
+                ? (item as? Data).flatMap { String(data: $0, encoding: .utf8) } : nil
+            cache = .some(found)
+            // A key put there by another tool (e.g. `security`) makes macOS ask every time; saved again by
+            // APILA itself, it's APILA's own and no longer asks.
+            if let found, !UserDefaults.standard.bool(forKey: ownedKey) { token = found }
+            return found
         }
         set {
             let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service]
             SecItemDelete(query as CFDictionary)
+            cache = .some(newValue)
+            UserDefaults.standard.set(true, forKey: ownedKey)
             guard let newValue, !newValue.isEmpty else { return }
             var add = query
+            add[kSecAttrAccount as String] = "apila"
             add[kSecValueData as String] = Data(newValue.utf8)
             add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
             SecItemAdd(add as CFDictionary, nil)
         }
     }
+
+    private static let ownedKey = "shotsKeyOwned"
 }
