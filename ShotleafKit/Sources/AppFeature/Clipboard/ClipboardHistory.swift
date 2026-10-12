@@ -25,6 +25,8 @@ struct ClipItem: Codable, Identifiable, Equatable {
     var pinned = false
     /// Looks like a card number or a token: dropped after a minute.
     var sensitive = false
+    /// Taken with Shotleaf (kept even if never copied). Optional: older history has no such field.
+    var screenshot: Bool?
 
     /// What search matches against.
     var searchable: String { [text, imageText ?? ""].joined(separator: "\n") }
@@ -182,6 +184,31 @@ final class ClipboardHistory {
         }
     }
 
+    /// A new screenshot goes into the history straight away, so several can be
+    /// picked and pasted together later. The id lets the editor update it.
+    @discardableResult
+    func addScreenshot(_ png: Data) -> UUID? {
+        guard enabled, !isPaused, let rep = NSBitmapImageRep(data: png) else { return nil }
+        var item = ClipItem(kind: .image, text: "")
+        item.hasImage = true
+        item.imageSize = CGSize(width: rep.pixelsWide, height: rep.pixelsHigh)
+        item.screenshot = true
+        item.appName = AppInfo.name
+        item.bundleID = AppInfo.bundleID
+        add(item, png: png)
+        return item.id
+    }
+
+    /// The screenshot as edited (marks, crop, background) replaces the one captured.
+    func updateImage(_ id: UUID, png: Data) {
+        guard let i = items.firstIndex(where: { $0.id == id }), let rep = NSBitmapImageRep(data: png) else { return }
+        try? png.write(to: imageURL(items[i]))
+        items[i].imageSize = CGSize(width: rep.pixelsWide, height: rep.pixelsHigh)
+        items[i].imageText = nil
+        save()
+        if let recognizer { readText(of: id, png: png, recognizer) }
+    }
+
     private func readText(of id: UUID, png: Data, _ recognizer: any TextRecognizing) {
         Task {
             guard let rep = NSBitmapImageRep(data: png),
@@ -253,6 +280,39 @@ final class ClipboardHistory {
             items.insert(moved, at: 0)
             save()
         }
+    }
+
+    /// Several entries as one paste. Each image (and file) is its own pasteboard
+    /// item — a PNG plus a named file, so apps that take several pictures or
+    /// attachments get them all; the texts go in as one, a line each.
+    func copyTogether(_ picked: [ClipItem], to board: NSPasteboard = .general) {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("Shotleaf Paste/\(UUID().uuidString)", isDirectory: true)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        var objects: [NSPasteboardItem] = []
+        let text = picked.filter { $0.kind != .image && $0.kind != .file }.map(\.text).joined(separator: "\n")
+        if !text.isEmpty {
+            let item = NSPasteboardItem()
+            item.setString(text, forType: .string)
+            objects.append(item)
+        }
+        for (n, entry) in picked.filter({ $0.kind == .image }).enumerated() {
+            guard let png = try? Data(contentsOf: imageURL(entry)) else { continue }
+            let file = folder.appendingPathComponent(String(localized: "Screenshot") + " \(n + 1).png")
+            try? png.write(to: file)
+            let item = NSPasteboardItem()
+            item.setData(png, forType: .png)
+            item.setString(file.absoluteString, forType: .fileURL)
+            objects.append(item)
+        }
+        for url in picked.flatMap(\.fileURLs) {
+            let item = NSPasteboardItem()
+            item.setString(url.absoluteString, forType: .fileURL)
+            objects.append(item)
+        }
+        objects.forEach { $0.setData(Data(), forType: Self.ownType) }
+        board.clearContents()
+        board.writeObjects(objects)
+        lastChange = board.changeCount
     }
 
     // MARK: Storage

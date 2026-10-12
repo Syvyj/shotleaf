@@ -164,10 +164,14 @@ public final class AppCoordinator {
     /// (Settings → Screenshots). Kept for "Edit Last Screenshot" either way.
     private func deliver(_ shot: ImagePayload) {
         recentShots = ScreenshotWindows.remember(shot)
+        let entry = clipboard.addScreenshot(shot.data)
         let after = container.settings.afterCapture
-        if after == .editor { screenshots.show(shot); return }
+        if after == .editor {
+            screenshots.show(shot, edited: entry.map { id in { [weak self] png in self?.clipboard.updateImage(id, png: png) } })
+            return
+        }
         Sound.shutter()
-        if after == .copy || after == .copyAndSave { ScreenshotWindows.copy(shot.data) }
+        if after == .copy || after == .copyAndSave { ScreenshotWindows.copy(shot.data, own: entry != nil) }
         if after == .save || after == .copyAndSave { _ = ScreenshotWindows.save(shot.data, scale: NSScreen.main?.backingScaleFactor ?? 2) }
     }
 

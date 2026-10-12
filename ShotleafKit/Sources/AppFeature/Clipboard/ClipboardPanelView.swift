@@ -472,7 +472,7 @@ struct ClipboardPanelView: View {
         case .image:
             let size = item.imageSize.map { "\(Int($0.width))×\(Int($0.height))" } ?? ""
             let words = item.imageText?.split(whereSeparator: \.isNewline).first.map(String.init) ?? ""
-            return [String(localized: "Image"), size, words.isEmpty ? "" : "«\(words.prefix(40))»"].filter { !$0.isEmpty }.joined(separator: " · ")
+            return [item.screenshot == true ? String(localized: "Screenshot") : String(localized: "Image"), size, words.isEmpty ? "" : "«\(words.prefix(40))»"].filter { !$0.isEmpty }.joined(separator: " · ")
         case .file: return item.fileURLs.map(\.lastPathComponent).joined(separator: ", ")
         default: return item.text.split(whereSeparator: \.isNewline).first.map { String($0).trimmingCharacters(in: .whitespaces) } ?? item.text
         }

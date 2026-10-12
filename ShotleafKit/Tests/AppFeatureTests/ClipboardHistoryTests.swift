@@ -36,6 +36,32 @@ struct ClipboardHistoryTests {
         #expect(ClipboardHistory.read(board) == nil)
     }
 
+    @Test("A screenshot is kept without copying, its edit replaces it, and several paste as separate pictures")
+    func screenshotsTogether() throws {
+        let folder = Self.temp()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let history = ClipboardHistory(folder: folder)
+        let png = { (w: Int) in
+            NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: w, pixelsHigh: 4, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
+                             isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!.representation(using: .png, properties: [:])!
+        }
+        let first = try #require(history.addScreenshot(png(8)))
+        history.addScreenshot(png(10))
+        history.updateImage(first, png: png(12))
+        let shot = try #require(history.items.first { $0.id == first })
+        #expect(shot.screenshot == true && shot.imageSize == CGSize(width: 12, height: 4) && history.items.count == 2)
+
+        history.add(ClipItem(kind: .text, text: "see below"))
+        let board = NSPasteboard(name: .init("shotleaf-test-\(UUID())"))
+        defer { board.releaseGlobally() }
+        history.copyTogether(history.items, to: board)
+        let items = board.pasteboardItems ?? []
+        #expect(items.count == 3) // the text, then each picture on its own
+        #expect(items.first?.string(forType: .string) == "see below")
+        #expect(items.dropFirst().allSatisfy { $0.data(forType: .png) != nil && $0.string(forType: .fileURL) != nil })
+        #expect(items.allSatisfy { $0.types.contains(ClipboardHistory.ownType) })
+    }
+
     @Test("Same text moves up, pins come first, search matches every word and image text, survives a restart")
     func history() {
         let dir = Self.temp()

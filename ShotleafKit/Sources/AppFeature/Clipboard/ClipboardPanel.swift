@@ -259,9 +259,8 @@ final class ClipboardPanelController {
 
     /// The picked entries as one text, a line each (pictures left out).
     func pasteTogether(_ items: [ClipItem]) {
-        let text = items.filter { $0.kind != .image }.map(\.text).joined(separator: "\n")
-        guard !text.isEmpty else { return }
-        Paster.put(text)
+        guard !items.isEmpty else { return }
+        history.copyTogether(items)
         close()
         pasteIntoTarget(.paste)
     }
