@@ -125,3 +125,6 @@ document.querySelectorAll(".m-type").forEach(async (m) => {
     await press(all); typed.textContent += ghost.textContent; ghost.textContent = ""; await sleep(3200);
   }
 });
+
+// Phones: a tool's long feature list opens on request.
+document.querySelectorAll(".more-feats").forEach((b) => b.addEventListener("click", () => b.closest(".tool").classList.add("open")));
