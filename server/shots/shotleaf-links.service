@@ -1,0 +1,21 @@
+[Unit]
+Description=Shotleaf expiring screenshot links
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+# The secret and the address live in /etc/shotleaf-links.env (see README.md).
+EnvironmentFile=/etc/shotleaf-links.env
+Environment=SHOTS_DIR=/var/lib/shotleaf-links
+ExecStart=/usr/bin/python3 /opt/shotleaf-links/shots.py
+DynamicUser=yes
+StateDirectory=shotleaf-links
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

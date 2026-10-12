@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""APILA expiring screenshot links — one file, Python 3 standard library only.
+"""Shotleaf expiring screenshot links — one file, Python 3 standard library only.
 
 POST /upload?ttl=SECONDS   (Authorization: Bearer <SHOTS_TOKEN>, body: PNG/JPEG)
     -> 201 {"url": "<SHOTS_PUBLIC_URL>/<id>", "expires": <unix time>}
@@ -7,7 +7,7 @@ GET  /<id>                 -> the image, until it expires; then 404
 A sweep every minute deletes expired files.
 
 Settings (environment):
-    SHOTS_TOKEN       required; long random secret, the same one goes into APILA
+    SHOTS_TOKEN       required; long random secret, the same one goes into Shotleaf
     SHOTS_PUBLIC_URL  e.g. https://shot.example.com (what links start with)
     SHOTS_DIR         where images live (default ./data)
     SHOTS_PORT        default 8787
@@ -73,7 +73,7 @@ def sweeper():
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "apila-shots"
+    server_version = "shotleaf-links"
 
     def send(self, code, body=b"", content_type="application/json", headers=None):
         self.send_response(code)
@@ -151,7 +151,7 @@ def main():
         raise SystemExit("Set SHOTS_TOKEN (e.g. `openssl rand -hex 24`).")
     os.makedirs(DATA, exist_ok=True)
     threading.Thread(target=sweeper, daemon=True).start()
-    print(f"apila-shots on {HOST}:{PORT}, files in {DATA}", flush=True)
+    print(f"shotleaf-links on {HOST}:{PORT}, files in {DATA}", flush=True)
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
 
 

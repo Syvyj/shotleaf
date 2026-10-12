@@ -1,4 +1,4 @@
-# PLAN.md — APILA
+# PLAN.md — Shotleaf
 
 Робочий план. Позначки: `[x]` зроблено · `[ ]` в черзі.
 Архітектурні рішення — у `ARCHITECTURE_DECISIONS.md`; тут лише «що робимо і в якому порядку».
@@ -48,12 +48,12 @@
 - [x] Історія останніх результатів
 - [x] Запуск при вході (`SMAppService`)
 
-## Етап 6 — Скріншоти рівня Shottr (перед MLX)
+## Етап 6 — Повноцінні скріншоти (перед MLX)
 
-- [x] 6.1 Власний екран вибору (ScreenCaptureKit): лупа з пікселями, розміри області, область / вікно / весь екран, повтор останньої області — власний стиль APILA (фіолетово-бірюзовий акцент, без системних іконок)
+- [x] 6.1 Власний екран вибору (ScreenCaptureKit): лупа з пікселями, розміри області, область / вікно / весь екран, повтор останньої області — власний стиль Shotleaf (фіолетово-бірюзовий акцент, без системних іконок)
 - [x] 6.2 Вікно після знімка (⌘⇧2): копіювати (↩/⌘C), зберегти на робочий стіл (⌘S), перетягнути в будь-яку програму, закріпити поверх усіх вікон (P), OCR (T) і «запитати ШІ» (A)
 - [x] 6.3 Анотації (1–8): стрілка, рамка, текст, маркер, розмиття, номерки кроків, розумна гумка, вирізати й перетягнути шматок; кольори; ⌘Z/⇧⌘Z; малювання і на полотні поза знімком (експорт його включає)
-- [x] 6.3+ Власні іконки інструментів; товщина ліній S/M/L; вибір будь-якої мітки (ручки, переміщення, зміна розміру, ⌫ видалити, колір/товщина виділеної); інструмент «Фокус» (9); перетягування знімка цілим — у режимі Select, як у Shottr
+- [x] 6.3+ Власні іконки інструментів; товщина ліній S/M/L; вибір будь-якої мітки (ручки, переміщення, зміна розміру, ⌫ видалити, колір/товщина виділеної); інструмент «Фокус» (9); перетягування знімка цілим — у режимі Select
 - [x] Овал (O), обрізка (C) у двох режимах — рамка для експорту та «Apply crop» (знімок обрізається, ⌘Z повертає), редагування тексту подвійним кліком
 - [x] 6.4 Інструменти: піпетка кольору (C у пікері), лінійка (M), затримка 3/5/10 с з меню
 - [x] 6.5 Скролінговий знімок (меню → Scrolling Screenshot…; склейка рядків, ADR у коді ScrollStitcher)
@@ -65,7 +65,7 @@
 - [x] Окремий глобальний хоткей «Text from Screenshot» (за замовчуванням ⌘⇧1; ⌘⇧2 — скріншот, ⌘⇧3 — скролінговий; можна вимкнути або записати свій)
 - [x] Анотації на скріншоті / власний оверлей вибору області (етап 6: інструменти, виноски, Live Text, кроп)
 - [x] Embedded-модель на MLX Swift: Gemma 4 E2B 4-bit (VLM), провайдер «Built-in», завантаження в Settings (ADR-0006, ADR-0064)
-- [x] Дописування тексту inline (Cotypist): сіра підказка й плашка посеред тексту, Tab слово / ⌥Tab усе, базова Gemma з KV-кешем, контекст (екран, буфер, стиль), емодзі-панель за змістом, одруківки, повзунок, веб-редактори через text markers (ADR-0065, ADR-0066)
+- [x] Дописування тексту inline: сіра підказка й плашка посеред тексту, Tab слово / ⌥Tab усе, базова Gemma з KV-кешем, контекст (екран, буфер, стиль), емодзі-панель за змістом, одруківки, повзунок, веб-редактори через text markers (ADR-0065, ADR-0066)
 - [ ] Підпис Developer ID + нотаризація
 
 ## Запуск
@@ -77,19 +77,19 @@
 Підпис локальним сертифікатом (login keychain) робить дозволи macOS сталими між перезбірками — але лише якщо сертифікат довірений для підпису коду (інакше TCC запам'ятовує cdhash конкретної збірки). Один раз:
 
 ```bash
-security find-certificate -c "APILA Local Signing" -p > /tmp/apila-cert.pem && security add-trusted-cert -r trustRoot -p codeSign -k ~/Library/Keychains/login.keychain-db /tmp/apila-cert.pem
-tccutil reset ScreenCapture app.apila.APILA && tccutil reset Accessibility app.apila.APILA
+security find-certificate -c "APILA Local Signing" -p > /tmp/shotleaf-cert.pem && security add-trusted-cert -r trustRoot -p codeSign -k ~/Library/Keychains/login.keychain-db /tmp/shotleaf-cert.pem
+tccutil reset ScreenCapture dev.syvyj.shotleaf && tccutil reset Accessibility dev.syvyj.shotleaf
 ```
 
 ## Перевірка
 
 ```bash
-swift build --package-path APILAKit
-swift test --package-path APILAKit
-xcodebuild -project APILA.xcodeproj -scheme APILA -configuration Debug CODE_SIGNING_ALLOWED=NO build
+swift build --package-path ShotleafKit
+swift test --package-path ShotleafKit
+xcodebuild -project Shotleaf.xcodeproj -scheme Shotleaf -configuration Debug CODE_SIGNING_ALLOWED=NO build
 ```
 
 ## Фокус (2026-10-10)
 
-- [x] Прибрано ШІ-панель, чат-модель і провайдерів — APILA зосереджена на скріншотах, тексті зі скріншотів і дописуванні (ADR-0067)
+- [x] Прибрано ШІ-панель, чат-модель і провайдерів — Shotleaf зосереджена на скріншотах, тексті зі скріншотів і дописуванні (ADR-0067)
 - [x] ⌘⇧1: текст зі скріншоту у віконці (редагувати, ⌘↩ копіювати все)
