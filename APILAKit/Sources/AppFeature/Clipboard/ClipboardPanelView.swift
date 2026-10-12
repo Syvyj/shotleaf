@@ -17,10 +17,14 @@ struct ClipboardPanelView: View {
         VStack(alignment: .leading, spacing: 12) {
             header
             HStack(spacing: 12) {
-                Group { if model.showsSnippets { snippetList } else { list(results) } }
-                    .frame(width: 380).background(card)
-                Group { if model.showsSnippets { snippetPreview } else { preview } }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(card)
+                if model.showsSnippets {
+                    folderList.frame(width: 230).background(card)
+                    Group { if model.asking != nil { snippetPreview } else { snippetList } }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(card)
+                } else {
+                    list(results).frame(width: 380).background(card)
+                    preview.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(card)
+                }
             }
             actionRow
         }
@@ -194,6 +198,40 @@ struct ClipboardPanelView: View {
 
     // MARK: Snippets
 
+    /// Folders on the left, like the snippets editor.
+    private var folderList: some View {
+        let searching = !model.query.isEmpty
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 2) {
+                folderRow(nil, name: String(localized: "All Snippets"), color: nil, count: model.snippets.snippets.count, dimmed: searching)
+                ForEach(model.snippets.folders) { f in
+                    folderRow(f.id, name: f.name, color: SnippetFolder.colors[f.color % SnippetFolder.colors.count],
+                              count: model.snippets.snippets.filter { $0.folder == f.id }.count, dimmed: searching)
+                }
+                Spacer(minLength: 8)
+                Text(searching ? "Searching all folders" : "← → folders").font(Leaf.font(11)).opacity(0.45).padding(.horizontal, 8)
+            }
+            .padding(8)
+        }
+    }
+
+    private func folderRow(_ id: UUID?, name: String, color: NSColor?, count: Int, dimmed: Bool) -> some View {
+        let on = !dimmed && model.snippetFolder == id
+        return HStack(spacing: 8) {
+            if let color { Circle().fill(Color(nsColor: color)).frame(width: 10, height: 10) }
+            else { Image(systemName: "tray.full").font(.system(size: 11)).frame(width: 10) }
+            Text(name).font(Leaf.font(13, .medium)).lineLimit(1)
+            Spacer(minLength: 4)
+            Text("\(count)").font(Leaf.font(11)).opacity(0.45).monospacedDigit()
+        }
+        .foregroundStyle(on ? Leaf.ink : Color.primary)
+        .opacity(dimmed ? 0.5 : 1)
+        .padding(.horizontal, 8).frame(height: 30)
+        .background { if on { tile(true) } }
+        .contentShape(Rectangle())
+        .onTapGesture { model.query = ""; model.snippetFolder = id }
+    }
+
     private var snippetList: some View {
         let results = model.snippetResults
         return ScrollViewReader { scroller in
@@ -233,11 +271,14 @@ struct ClipboardPanelView: View {
                 .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.55))
             Circle().fill(Color(nsColor: model.snippets.folder(snippet.folder).map { SnippetFolder.colors[$0.color % SnippetFolder.colors.count] } ?? .tertiaryLabelColor))
                 .frame(width: 8, height: 8)
-            Text(snippet.title).font(Leaf.font(13)).lineLimit(1)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(snippet.title).font(Leaf.font(13, .medium)).lineLimit(1)
+                Text(snippet.text.replacingOccurrences(of: "\n", with: " ")).font(Leaf.font(11)).opacity(0.5).lineLimit(1)
+            }
             Spacer(minLength: 4)
             if !snippet.abbreviation.isEmpty { Keycap(key: snippet.abbreviation) }
         }
-        .padding(.horizontal, 8).frame(height: 32)
+        .padding(.horizontal, 8).frame(height: 42)
         .background { if on { tile(true) } }
         .contentShape(Rectangle())
     }

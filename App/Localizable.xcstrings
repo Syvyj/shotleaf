@@ -1,6 +1,26 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Searching all folders": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пошук по всіх папках"
+          }
+        }
+      }
+    },
+    "← → folders": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "← → папки"
+          }
+        }
+      }
+    },
     "Snippets…": {
       "localizations": {
         "uk": {

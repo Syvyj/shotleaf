@@ -24,7 +24,23 @@ final class ClipboardPanelModel {
 
     var results: [ClipItem] { history.search(query, kind: kind) }
     var current: ClipItem? { guard !showsSnippets else { return nil }; let r = results; return r.indices.contains(selected) ? r[selected] : nil }
-    var snippetResults: [Snippet] { snippets.search(query) }
+    /// The folder on the Snippets tab (nil = all); remembered for next time.
+    var snippetFolder: UUID? = UserDefaults.standard.string(forKey: "snippetFolder").flatMap(UUID.init) {
+        didSet { selected = 0; UserDefaults.standard.set(snippetFolder?.uuidString, forKey: "snippetFolder") }
+    }
+    /// The folder's snippets; a search looks through all of them.
+    var snippetResults: [Snippet] {
+        let found = snippets.search(query)
+        guard query.isEmpty, let folder = snippetFolder, snippets.folder(folder) != nil else { return found }
+        return found.filter { $0.folder == folder }
+    }
+
+    /// ← →: the previous / next folder ("All" first).
+    func nextFolder(_ by: Int) {
+        let all: [UUID?] = [nil] + snippets.folders.map(\.id)
+        let i = all.firstIndex(of: snippetFolder) ?? 0
+        snippetFolder = all[min(max(i + by, 0), all.count - 1)]
+    }
     var currentSnippet: Snippet? { guard showsSnippets else { return nil }; let r = snippetResults; return r.indices.contains(selected) ? r[selected] : nil }
     var count: Int { showsSnippets ? snippetResults.count : results.count }
 
@@ -125,6 +141,8 @@ final class ClipboardPanelController {
                 if let snippet = model.currentSnippet { pick(snippet, mods.contains(.command) ? .copy : .paste) }
                 return true
             case 51 where mods == .command: return true
+            case 123 where model.query.isEmpty: model.nextFolder(-1); return true // ←
+            case 124 where model.query.isEmpty: model.nextFolder(1); return true  // →
             default: break
             }
             if mods == .command, ["p", "e"].contains(event.charactersIgnoringModifiers?.lowercased() ?? "") { return true }
