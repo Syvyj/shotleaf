@@ -69,6 +69,36 @@ final class SnippetStore {
         }
     }
 
+    // MARK: Sharing a folder
+
+    /// A folder's snippets as files in `dir`: each picture as "<title>.png"
+    /// ("<title> 2.png"…), and the texts together in "<folder>.txt". For the
+    /// share menu (AirDrop, Mail, Messages) or a copy in Finder.
+    func exportFiles(of folderID: UUID, into dir: URL) -> [URL] {
+        let fm = FileManager.default
+        try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
+        let clean = { (name: String) in name.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-") }
+        var urls: [URL] = [], used: Set<String> = []
+        let inFolder = snippets.filter { $0.folder == folderID }
+        for snippet in inFolder {
+            for source in imageURLs(snippet) {
+                let base = clean(snippet.title.isEmpty ? String(localized: "Image") : snippet.title)
+                var name = base + ".png", n = 2
+                while used.contains(name) { name = "\(base) \(n).png"; n += 1 }
+                used.insert(name)
+                let target = dir.appendingPathComponent(name)
+                try? fm.removeItem(at: target)
+                if (try? fm.copyItem(at: source, to: target)) != nil { urls.append(target) }
+            }
+        }
+        let texts = inFolder.filter { !$0.text.isEmpty }.map { "\($0.title)\n\($0.text)" }
+        if !texts.isEmpty {
+            let file = dir.appendingPathComponent(clean(folder(folderID)?.name ?? String(localized: "Snippets")) + ".txt")
+            if (try? texts.joined(separator: "\n\n———\n\n").write(to: file, atomically: true, encoding: .utf8)) != nil { urls.append(file) }
+        }
+        return urls
+    }
+
     // MARK: Pictures
 
     func imageURL(_ name: String) -> URL { imageFolder.appendingPathComponent(name) }

@@ -25,6 +25,11 @@ struct SnippetTests {
         let items = board.pasteboardItems ?? []
         #expect(items.count == 3 && items[0].string(forType: .string) == "Як доїхати:" && items[1].data(forType: .png) != nil)
 
+        store.save(title: "Адреса", text: "вул. Садова, 1", pngs: [], folder: work.id)
+        let shared = store.exportFiles(of: work.id, into: dir.appendingPathComponent("out/Робота"))
+        #expect(shared.map(\.lastPathComponent) == ["Схема.png", "Схема 2.png", "Робота.txt"])
+        #expect(try String(contentsOf: shared[2], encoding: .utf8).contains("Адреса\nвул. Садова, 1"))
+
         let files = store.imageURLs(saved)
         store.snippets.removeAll()
         #expect(files.allSatisfy { !FileManager.default.fileExists(atPath: $0.path) })

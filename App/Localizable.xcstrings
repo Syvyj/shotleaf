@@ -2660,6 +2660,46 @@
         }
       }
     },
+    "Share…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поділитися…"
+          }
+        }
+      }
+    },
+    "Save to Finder…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти у Finder…"
+          }
+        }
+      }
+    },
+    "Share the folder: its pictures and texts as files": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поділитися папкою: її картинки й тексти як файли"
+          }
+        }
+      }
+    },
+    "Save Here": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти тут"
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {

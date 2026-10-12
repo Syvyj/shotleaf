@@ -111,6 +111,12 @@ struct SnippetEditorView: View {
             Spacer(minLength: 4)
             Text("\(count)").font(Leaf.font(11)).opacity(0.45).monospacedDigit()
             if on, let id {
+                Menu {
+                    Button("Share…") { shareFolder(id) }
+                    Button("Save to Finder…") { saveFolder(id) }
+                } label: { Image(systemName: "square.and.arrow.up").font(.system(size: 11)) }
+                    .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().opacity(0.6)
+                    .help(String(localized: "Share the folder: its pictures and texts as files"))
                 Button { deleteFolder(id) } label: { Image(systemName: "trash").font(.system(size: 11)) }
                     .buttonStyle(.plain).opacity(0.6)
                     .help(String(localized: "Delete the folder (its snippets stay)"))
@@ -280,6 +286,29 @@ struct SnippetEditorView: View {
         for i in store.snippets.indices where store.snippets[i].folder == id { store.snippets[i].folder = nil }
         store.folders.removeAll { $0.id == id }
         folder = nil
+    }
+
+    /// The folder's files through the system share menu (AirDrop, Mail, Messages…), by the pointer.
+    private func shareFolder(_ id: UUID) {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("Shotleaf Share/\(UUID().uuidString)/\(store.folder(id)?.name ?? "")")
+        let files = store.exportFiles(of: id, into: dir)
+        guard !files.isEmpty, let window = NSApp.keyWindow, let view = window.contentView else { NSSound.beep(); return }
+        let at = view.convert(window.mouseLocationOutsideOfEventStream, from: nil)
+        NSSharingServicePicker(items: files).show(relativeTo: NSRect(origin: at, size: .zero), of: view, preferredEdge: .maxY)
+    }
+
+    /// A copy of the folder (pictures + texts) where the user picks, shown in Finder.
+    private func saveFolder(_ id: UUID) {
+        let ask = NSOpenPanel()
+        ask.canChooseDirectories = true
+        ask.canChooseFiles = false
+        ask.canCreateDirectories = true
+        ask.prompt = String(localized: "Save Here")
+        ask.begin { response in
+            guard response == .OK, let base = ask.url else { return }
+            let files = store.exportFiles(of: id, into: base.appendingPathComponent(store.folder(id)?.name ?? String(localized: "Snippets")))
+            if files.isEmpty { NSSound.beep() } else { NSWorkspace.shared.activateFileViewerSelecting(files) }
+        }
     }
 
     private func addPictures(to id: UUID) {
