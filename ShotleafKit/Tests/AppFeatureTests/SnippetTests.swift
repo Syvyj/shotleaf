@@ -44,6 +44,16 @@ struct SnippetTests {
         #expect(SnippetText.expand("x{cursor}y{cursor}z") == ("xyz", 2))       // only the first counts
     }
 
+    @Test("An abbreviation that starts with a letter fires only as a whole word")
+    func wholeWord() {
+        let mail = [Snippet(title: "Mail", text: "me@example.com", abbreviation: "mail")]
+        #expect(SnippetExpander.match("mail", in: mail) != nil)
+        #expect(SnippetExpander.match("write to mail", in: mail) != nil)
+        #expect(SnippetExpander.match(";mail", in: mail) != nil)
+        #expect(SnippetExpander.match("gmail", in: mail) == nil)
+        #expect(SnippetExpander.match("xx;addr", in: [Snippet(title: "A", text: "a", abbreviation: ";addr")]) != nil)
+    }
+
     @Test("Abbreviation: the typing must end with it; the longest wins")
     func match() {
         let s = [Snippet(title: "a", text: "A", abbreviation: ";addr"), Snippet(title: "b", text: "B", abbreviation: "dr"),

@@ -40,9 +40,17 @@ final class SnippetExpander {
     }
 
     /// The snippet whose abbreviation the typing ends with (the longest wins).
+    /// One that starts with a letter ("mail") counts only as a whole word, so
+    /// typing "gmail" doesn't set it off; ";mail" style ones work anywhere.
     static func match(_ typed: String, in snippets: [Snippet]) -> Snippet? {
-        snippets.filter { !$0.abbreviation.isEmpty && typed.hasSuffix($0.abbreviation) }
-            .max { $0.abbreviation.count < $1.abbreviation.count }
+        snippets.filter { snippet in
+            let abbr = snippet.abbreviation
+            guard !abbr.isEmpty, typed.hasSuffix(abbr) else { return false }
+            guard abbr.first?.isLetter == true || abbr.first?.isNumber == true else { return true }
+            let before = typed.dropLast(abbr.count).last
+            return before.map { !$0.isLetter && !$0.isNumber } ?? true
+        }
+        .max { $0.abbreviation.count < $1.abbreviation.count }
     }
 
     private func expand(_ snippet: Snippet) {

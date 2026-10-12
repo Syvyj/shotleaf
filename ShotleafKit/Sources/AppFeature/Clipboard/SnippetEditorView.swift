@@ -181,6 +181,10 @@ struct SnippetEditorView: View {
                     }
                     .frame(width: 150)
                 }
+                if store.snippets[i].abbreviation.first?.isLetter == true {
+                    Text("Tip: start it with ; (like ;\(store.snippets[i].abbreviation)) so it never goes off while you type a normal word.")
+                        .font(Leaf.font(11)).opacity(0.55)
+                }
                 if let clash = abbreviationClash(store.snippets[i]) {
                     Text("“\(clash)” already uses this abbreviation").font(Leaf.font(11)).foregroundStyle(.orange)
                 }

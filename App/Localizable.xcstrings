@@ -2650,6 +2650,16 @@
         }
       }
     },
+    "Tip: start it with ; (like ;%@) so it never goes off while you type a normal word.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Порада: почніть із ; (як-от ;%@), щоб воно не спрацьовувало, коли пишете звичайне слово."
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {
