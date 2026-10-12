@@ -7,6 +7,7 @@ public enum AppInfo {
     public static let author = "Oleksii Ziuzin (Syvyj)"
     public static let copyright = "© 2026 Oleksii Ziuzin (Syvyj)"
     public static let website = URL(string: "https://syvyj.dev")!
+    public static let email = "shotleaf@syvyj.dev"
 
     /// ~/Library/Application Support/Shotleaf
     public static var supportFolder: URL {
