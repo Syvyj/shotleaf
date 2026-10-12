@@ -190,10 +190,11 @@ struct ClipboardPanelView: View {
                     ForEach(Array(results.enumerated()), id: \.element.id) { i, item in
                         row(item, index: i)
                             .id(item.id)
-                            .onTapGesture(count: 2) { pick(item, .paste) }
+                            .onHover { if $0 { model.selected = i } } // the preview follows the mouse
                             .onTapGesture {
-                                if NSEvent.modifierFlags.contains(.command) { model.toggleMark(item.id) } // ⌘-click: pick several
-                                model.selected = i
+                                // One click pastes; ⌘-click picks several instead.
+                                if NSEvent.modifierFlags.contains(.command) { model.toggleMark(item.id); model.selected = i }
+                                else { pick(item, .paste) }
                             }
                     }
                 }
@@ -308,8 +309,8 @@ struct ClipboardPanelView: View {
                     ForEach(Array(results.enumerated()), id: \.element.id) { i, snippet in
                         snippetRow(snippet, index: i)
                             .id(snippet.id)
-                            .onTapGesture(count: 2) { pickSnippet(snippet, .paste) }
-                            .onTapGesture { model.selected = i }
+                            .onHover { if $0 { model.selected = i } }
+                            .onTapGesture { pickSnippet(snippet, .paste) } // one click pastes
                     }
                 }
                 .padding(8)
