@@ -36,7 +36,7 @@ struct SnippetTests {
         let folder = SnippetFolder(name: "Робота")
         store.folders.append(folder)
         store.snippets.append(Snippet(title: "Реквізити ФОП", text: "IBAN UA00 1234 5678 0000 0000 0000 001", abbreviation: ";рекв", folder: folder.id))
-        store.snippets.append(Snippet(title: "Підпис", text: "З повагою, Олексій", abbreviation: ";підп"))
+        store.snippets.append(Snippet(title: "Підпис", text: "З повагою, Оксана", abbreviation: ";підп"))
         #expect(store.search("iban").count == 1 && store.search(";підп").count == 1 && store.search("").count == 2)
         let again = SnippetStore(file: file)
         #expect(again.snippets.count == 2 && again.folder(again.snippets[0].folder)?.name == "Робота")
@@ -65,7 +65,7 @@ struct SnippetTests {
         let work = SnippetFolder(name: "Робота", color: 0)
         store.folders = [work, SnippetFolder(name: "Підписи", color: 1), SnippetFolder(name: "Адреси", color: 2)]
         store.snippets = [
-            Snippet(title: "Відповідь клієнту", text: "Добрий день, {?Ім'я}!\nДякую за звернення. Надішлю рахунок до {date}.\n{cursor}\nЗ повагою, Олексій", abbreviation: ";відп", folder: work.id),
+            Snippet(title: "Відповідь клієнту", text: "Добрий день, {?Ім'я}!\nДякую за звернення. Надішлю рахунок до {date}.\n{cursor}\nЗ повагою, Оксана", abbreviation: ";відп", folder: work.id),
             Snippet(title: "Реквізити ФОП", text: "IBAN UA00 1234 5678 0000 0000 0000 001", abbreviation: ";рекв", folder: work.id),
         ]
         try renderPreview(SnippetEditorView(store: store).frame(width: 1000, height: 600), "snippets-editor.png")

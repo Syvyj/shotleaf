@@ -113,7 +113,7 @@ struct ClipActionTests {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-mark-\(UUID())")
         defer { try? FileManager.default.removeItem(at: dir) }
         let h = ClipboardHistory(folder: dir)
-        for text in ["вул. Хрещатик, 22", "+380 67 123 45 67", "Олексій Зюзін", "https://shop.ua/item?id=7&utm_source=fb"] {
+        for text in ["вул. Хрещатик, 22", "+380 67 123 45 67", "Оксана Петренко", "https://shop.ua/item?id=7&utm_source=fb"] {
             h.add(ClipItem(kind: ClipboardHistory.kind(of: text), text: text))
         }
         let model = ClipboardPanelModel(history: h, snippets: SnippetStore(file: dir.appendingPathComponent("s.json")))
