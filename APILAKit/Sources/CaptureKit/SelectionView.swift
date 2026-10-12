@@ -295,26 +295,44 @@ final class SelectionView: NSView {
         keys.append(("S", scrolling ? String(localized: "scrolling: on") : String(localized: "scrolling")))
         keys.append(("esc", String(localized: "cancel")))
 
-        let keyFont = CaptureStyle.font(11, .semibold)
-        let textFont = CaptureStyle.font(12)
-        let parts = keys.map { (NSAttributedString(string: $0.0, attributes: CaptureStyle.label(keyFont)),
-                                NSAttributedString(string: $0.1, attributes: CaptureStyle.label(textFont, color: NSColor(white: 1, alpha: 0.75)))) }
-        let gap: CGFloat = 18
-        let width = parts.reduce(0) { $0 + $1.0.size().width + 12 + 6 + $1.1.size().width } + gap * CGFloat(parts.count - 1) + 28
-        let height: CGFloat = 36
-        let box = CGRect(x: bounds.midX - width / 2, y: bounds.maxY - height - 28, width: width, height: height)
+        // The windows' Leaves look: a light leaf panel, green keys, dark ink.
+        let keyFont = CaptureStyle.font(13, .bold)
+        let textFont = CaptureStyle.font(14, .medium)
+        let parts = keys.map { (NSAttributedString(string: $0.0, attributes: CaptureStyle.label(keyFont, color: CaptureStyle.forest)),
+                                NSAttributedString(string: $0.1, attributes: CaptureStyle.label(textFont, color: CaptureStyle.forest.withAlphaComponent(0.8)))) }
+        let gap: CGFloat = 22
+        let width = parts.reduce(0) { $0 + $1.0.size().width + 16 + 8 + $1.1.size().width } + gap * CGFloat(parts.count - 1) + 36
+        let height: CGFloat = 48
+        // Above the Dock (the screen's visible area), with room to breathe.
+        let dock = window?.screen.map { $0.visibleFrame.minY - $0.frame.minY } ?? 0
+        let box = CGRect(x: bounds.midX - width / 2, y: bounds.maxY - dock - height - 56, width: width, height: height)
         // Don't cover what the user is pointing at.
         if let cursor, box.insetBy(dx: -20, dy: -20).contains(cursor) { return }
-        drawCapsule(box, radius: height / 2)
 
-        var x = box.minX + 14
+        let shape = NSBezierPath(roundedRect: box, xRadius: 14, yRadius: 14)
+        NSGraphicsContext.saveGraphicsState()
+        let shadow = NSShadow()
+        shadow.shadowColor = NSColor.black.withAlphaComponent(0.25)
+        shadow.shadowBlurRadius = 18
+        shadow.shadowOffset = NSSize(width: 0, height: -4)
+        shadow.set()
+        CaptureStyle.panel.setFill()
+        shape.fill()
+        NSGraphicsContext.restoreGraphicsState()
+        NSGradient(starting: CaptureStyle.leaf.withAlphaComponent(0.16), ending: CaptureStyle.leaf.withAlphaComponent(0))?
+            .draw(in: shape, angle: -90) // the green wash from the top, like the windows
+        NSColor.black.withAlphaComponent(0.10).setStroke()
+        shape.lineWidth = 1
+        shape.stroke()
+
+        var x = box.minX + 18
         for (key, label) in parts {
             let ks = key.size()
-            let cap = CGRect(x: x, y: box.midY - 10, width: ks.width + 12, height: 20)
-            CaptureStyle.keycap.setFill()
-            NSBezierPath(roundedRect: cap, xRadius: 6, yRadius: 6).fill()
-            key.draw(at: CGPoint(x: cap.minX + 6, y: box.midY - ks.height / 2))
-            x = cap.maxX + 6
+            let cap = CGRect(x: x, y: box.midY - 13, width: ks.width + 16, height: 26)
+            CaptureStyle.leaf.withAlphaComponent(0.35).setFill()
+            NSBezierPath(roundedRect: cap, xRadius: 7, yRadius: 7).fill()
+            key.draw(at: CGPoint(x: cap.minX + 8, y: box.midY - ks.height / 2))
+            x = cap.maxX + 8
             label.draw(at: CGPoint(x: x, y: box.midY - label.size().height / 2))
             x += label.size().width + gap
         }
