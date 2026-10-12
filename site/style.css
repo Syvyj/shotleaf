@@ -220,7 +220,8 @@ footer a:hover { color: var(--text); }
 
 /* — scrolling capture — */
 @property --sc { syntax: "<integer>"; inherits: true; initial-value: 2834; }
-.m-scroll .m-scroll .view { position: relative; aspect-ratio: 10 / 9; border-radius: 1.4cqw; overflow: hidden; background: #fff; border: .35cqw solid #9ccc5a; }
+.m-scroll .stage { display: grid; grid-template-columns: 1.4fr 1fr; gap: 3cqw; align-items: start; }
+.m-scroll .view { position: relative; aspect-ratio: 10 / 9; border-radius: 1.4cqw; overflow: hidden; background: #fff; border: .35cqw solid #9ccc5a; }
 .m-scroll .page { position: absolute; left: 0; right: 0; top: 0; padding: 12% 6% 0; }
 .m-scroll .sticky { position: absolute; left: 0; right: 0; top: 0; height: 9%; background: #26331f; z-index: 2; display: flex; align-items: center; padding: 0 5%; gap: 2cqw; }
 .m-scroll .sticky i { width: 8cqw; height: 1.2cqw; border-radius: 1cqw; background: rgba(255, 255, 255, .45); }
@@ -248,7 +249,8 @@ footer a:hover { color: var(--text); }
 @keyframes s-blink { 50% { opacity: .3; } }
 
 /* — text from a screenshot — */
-.m-ocr .m-ocr .paper { position: relative; aspect-ratio: 4 / 3; border-radius: 1.2cqw; background: #fffbe8; box-shadow: 0 1cqw 2.4cqw rgba(0, 0, 0, .15); padding: 10% 9%; font: 600 4cqw/1.35 var(--hand); color: #283a7a; transform: rotate(-2deg); overflow: hidden; }
+.m-ocr .stage { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 3cqw; align-items: center; }
+.m-ocr .paper { position: relative; aspect-ratio: 4 / 3; border-radius: 1.2cqw; background: #fffbe8; box-shadow: 0 1cqw 2.4cqw rgba(0, 0, 0, .15); padding: 10% 9%; font: 600 4cqw/1.35 var(--hand); color: #283a7a; transform: rotate(-2deg); overflow: hidden; }
 .m-ocr .scan { position: absolute; left: 0; right: 0; height: 18%; top: -20%; background: linear-gradient(transparent, rgba(156, 204, 90, .55), transparent); }
 .m-ocr .win { padding-bottom: 0; }
 .m-ocr .text { margin: 0 2.4cqw; background: #fff; border-radius: 1.4cqw; padding: 2cqw 2.2cqw; min-height: 17cqw; font-size: 1.9cqw; line-height: 1.45; }
@@ -306,7 +308,6 @@ footer a:hover { color: var(--text); }
   .mock *, .mock { animation: none !important; transition: none !important; }
   .m-edit .cursor, .m-pick .cursor, .m-pick .loupe { display: none; }
 }
-
 
 
 @media (max-width: 960px) {
