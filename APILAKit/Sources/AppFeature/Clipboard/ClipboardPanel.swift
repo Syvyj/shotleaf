@@ -8,11 +8,20 @@ import SwiftUI
 final class ClipboardPanelModel {
     let history: ClipboardHistory
     let snippets: SnippetStore
-    var query = "" { didSet { selected = 0 } }
+    var query = "" { didSet { selected = 0; actionsShown = false } }
     var kind: ClipItem.Kind? { didSet { selected = 0 } }
     /// The Snippets tab instead of the history.
     var showsSnippets = false { didSet { selected = 0; asking = nil } }
     var selected = 0
+    /// Entries picked with ⌘-click / ⇧↑↓, in the order picked.
+    var marked: [UUID] = []
+    /// ⌘K: the actions list instead of the preview.
+    var actionsShown = false { didSet { actionIndex = 0 } }
+    var actionIndex = 0
+    var actions: [ClipAction] {
+        guard let item = current, item.kind != .image, item.kind != .file else { return [] }
+        return ClipAction.available(for: item.text)
+    }
     /// A snippet with {?questions}, waiting for the answers.
     var asking: Snippet?
     var answers: [String: String] = [:]
@@ -47,9 +56,23 @@ final class ClipboardPanelModel {
     static let kinds: [ClipItem.Kind?] = [nil, .text, .link, .image, .color, .file]
 
     func move(_ by: Int) {
+        actionsShown = false
         guard count > 0 else { selected = 0; return }
         selected = min(max(selected + by, 0), count - 1)
     }
+
+    func toggleMark(_ id: UUID) {
+        if let i = marked.firstIndex(of: id) { marked.remove(at: i) } else { marked.append(id) }
+    }
+
+    /// ⇧↑ / ⇧↓: take the current entry and the next one into the selection.
+    func extendMark(_ by: Int) {
+        if let id = current?.id, !marked.contains(id) { marked.append(id) }
+        move(by)
+        if let id = current?.id, !marked.contains(id) { marked.append(id) }
+    }
+
+    var markedItems: [ClipItem] { marked.compactMap { id in history.items.first { $0.id == id } } }
 
     /// ⇧Tab: the history's types, round and round.
     func nextKind(_ by: Int) {
@@ -94,6 +117,9 @@ final class ClipboardPanelController {
         let view = ClipboardPanelView(model: model, pick: { [weak self] in self?.pick($0, $1) },
                                       pickSnippet: { [weak self] in self?.pick($0, $1) },
                                       editSnippets: { [weak self] in self?.close(); self?.openSnippetEditor() },
+                                      pickTogether: { [weak self] in self?.pasteTogether($0) },
+                                      pickQueue: { [weak self] in self?.startQueue($0) },
+                                      runAction: { [weak self] in self?.run($0) },
                                       close: { [weak self] in self?.close() })
         let panel = ScreenshotWindows.makePanel(view)
         panel.setFrameOrigin(Self.origin(for: panel.frame.size))
@@ -133,6 +159,34 @@ final class ClipboardPanelController {
             case 36, 76: finish(snippet, answers: model.answers, mods.contains(.command) ? .copy : .paste); return true
             case 53: model.asking = nil; return true
             default: return false
+            }
+        }
+        if model.actionsShown {
+            let actions = model.actions
+            switch Int(event.keyCode) {
+            case 125: model.actionIndex = min(model.actionIndex + 1, max(actions.count - 1, 0)); return true
+            case 126: model.actionIndex = max(model.actionIndex - 1, 0); return true
+            case 36, 76: if actions.indices.contains(model.actionIndex) { run(actions[model.actionIndex]) }; return true
+            case 53: model.actionsShown = false; return true
+            default:
+                if let n = Int(event.charactersIgnoringModifiers ?? ""), actions.indices.contains(n - 1) { run(actions[n - 1]); return true }
+                if mods == .command, event.charactersIgnoringModifiers?.lowercased() == "k" { model.actionsShown = false; return true }
+                return false
+            }
+        }
+        if !model.showsSnippets {
+            switch Int(event.keyCode) {
+            case 125 where mods == .shift: model.extendMark(1); return true
+            case 126 where mods == .shift: model.extendMark(-1); return true
+            case 53 where !model.marked.isEmpty: model.marked = []; return true
+            case 36, 76 where model.marked.count > 1:
+                if mods.contains(.command) { startQueue(model.markedItems) } else { pasteTogether(model.markedItems) }
+                return true
+            default: break
+            }
+            if mods == .command, event.charactersIgnoringModifiers?.lowercased() == "k", !model.actions.isEmpty {
+                model.actionsShown = true
+                return true
             }
         }
         if model.showsSnippets, Int(event.keyCode) != 48 {
@@ -199,6 +253,57 @@ final class ClipboardPanelController {
         Paster.put(filled.text)
         close()
         pasteIntoTarget(mode, thenLeft: filled.afterCursor)
+    }
+
+    // MARK: Several entries, actions
+
+    /// The picked entries as one text, a line each (pictures left out).
+    func pasteTogether(_ items: [ClipItem]) {
+        let text = items.filter { $0.kind != .image }.map(\.text).joined(separator: "\n")
+        guard !text.isEmpty else { return }
+        Paster.put(text)
+        close()
+        pasteIntoTarget(.paste)
+    }
+
+    /// Pastes the first now; then each ⇧⌘V pastes the next one.
+    func startQueue(_ items: [ClipItem]) {
+        history.queue = items.map(\.id)
+        history.queueTotal = items.count
+        close()
+        pasteNextQueued()
+    }
+
+    var isQueueing: Bool { !history.queue.isEmpty }
+
+    func pasteNextQueued() {
+        guard let id = history.queue.first else { return }
+        history.queue.removeFirst()
+        guard let item = history.items.first(where: { $0.id == id }) else { pasteNextQueued(); return }
+        target = NSWorkspace.shared.frontmostApplication?.processIdentifier
+        history.copy(item)
+        pasteIntoTarget(.paste)
+        let done = history.queueTotal - history.queue.count
+        Toast.show(history.queue.isEmpty ? String(localized: "Queue done: \(done) of \(history.queueTotal)")
+                                         : String(localized: "Pasted \(done) of \(history.queueTotal) · ⇧⌘V — the next one"))
+    }
+
+    func cancelQueue() {
+        history.queue = []
+    }
+
+    fileprivate func run(_ action: ClipAction) {
+        guard let item = model?.current, let text = action.apply(item.text) else { return }
+        if action == .saveSnippet {
+            let title = text.split(whereSeparator: \.isNewline).first.map { String($0.prefix(40)) } ?? String(localized: "New snippet")
+            snippets.snippets.insert(Snippet(title: title, text: text), at: 0)
+            model?.actionsShown = false
+            Toast.show(String(localized: "Saved as a snippet"))
+            return
+        }
+        Paster.put(text)
+        close()
+        pasteIntoTarget(.paste)
     }
 
     func pick(_ item: ClipItem, _ mode: Mode) {
@@ -280,5 +385,36 @@ enum Paster {
             return item
         }
         board.writeObjects(items)
+    }
+}
+
+/// A short note at the top of the screen with the mouse (the queue's progress…).
+@MainActor
+enum Toast {
+    private static var panel: FloatingPanel?
+    private static var hide: Task<Void, Never>?
+
+    static func show(_ text: String) {
+        panel?.orderOut(nil)
+        let view = Text(text)
+            .font(Leaf.font(13, .semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 16).padding(.vertical, 9)
+            .background(Capsule().fill(Leaf.leaf))
+            .padding(8)
+        let new = ScreenshotWindows.makePanel(view)
+        new.ignoresMouseEvents = true
+        let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
+        let visible = screen?.visibleFrame ?? .zero
+        new.setFrameOrigin(CGPoint(x: visible.midX - new.frame.width / 2, y: visible.maxY - new.frame.height - 12))
+        new.orderFrontRegardless()
+        panel = new
+        hide?.cancel()
+        hide = Task {
+            try? await Task.sleep(for: .seconds(1.8))
+            guard !Task.isCancelled else { return }
+            panel?.orderOut(nil)
+            panel = nil
+        }
     }
 }

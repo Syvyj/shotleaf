@@ -51,6 +51,11 @@ public struct MenuBarRootView: View {
             Button(Self.label(String(localized: "Open Clipboard…"), coordinator.actionHotkeys[.clipboard])) { coordinator.showClipboard() }
             Button(Self.label(String(localized: "Snippets…"), coordinator.actionHotkeys[.snippets])) { coordinator.showClipboard(snippets: true) }
             Button("Edit Snippets…") { coordinator.showSnippetEditor() }
+            if !coordinator.clipboard.queue.isEmpty {
+                Divider()
+                Text("Queue: \(coordinator.clipboard.queueTotal - coordinator.clipboard.queue.count) of \(coordinator.clipboard.queueTotal) pasted")
+                Button("Cancel Queue") { coordinator.cancelPasteQueue() }
+            }
             Divider()
             ForEach(Array(coordinator.clipboard.items.prefix(10).enumerated()), id: \.element.id) { i, item in
                 Button("\(i + 1). \(String(ClipboardPanelView.line(item).prefix(50)))") { coordinator.pasteFromHistory(item.id) }

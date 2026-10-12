@@ -55,7 +55,9 @@ public final class AppCoordinator {
                 case HotkeyAction.scrolling.rawValue: self.takeScrollingScreenshot()
                 case HotkeyAction.editLast.rawValue: self.editLastScreenshot()
                 case HotkeyAction.editClipboard.rawValue: self.editClipboardImage()
-                case HotkeyAction.clipboard.rawValue: self.clipboardPanel.toggle()
+                case HotkeyAction.clipboard.rawValue:
+                    // While a queue runs, the panel's key pastes its next entry.
+                    if self.clipboardPanel.isQueueing { self.clipboardPanel.pasteNextQueued() } else { self.clipboardPanel.toggle() }
                 case HotkeyAction.snippets.rawValue: self.clipboardPanel.toggle(snippets: true)
                 default: break
                 }
@@ -108,6 +110,8 @@ public final class AppCoordinator {
         guard let item = clipboard.items.first(where: { $0.id == id }) else { return }
         clipboardPanel.pick(item, .paste)
     }
+
+    public func cancelPasteQueue() { clipboardPanel.cancelQueue() }
 
     public func pauseClipboard(minutes: Int?) {
         clipboard.pausedUntil = minutes.map { Date().addingTimeInterval(Double($0) * 60) }

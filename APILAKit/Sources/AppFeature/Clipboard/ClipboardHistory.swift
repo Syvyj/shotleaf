@@ -42,6 +42,9 @@ final class ClipboardHistory {
     private(set) var items: [ClipItem] = []
     /// No recording until then.
     var pausedUntil: Date?
+    /// "Paste one by one": what ⇧⌘V pastes next, and how many there were.
+    var queue: [UUID] = []
+    var queueTotal = 0
 
     // Settings → Clipboard (read live, so the Settings window just writes UserDefaults).
     static let enabledKey = "clipboardEnabled", limitKey = "clipboardLimit", imageDaysKey = "clipboardImageDays", excludedKey = "clipboardExcluded"

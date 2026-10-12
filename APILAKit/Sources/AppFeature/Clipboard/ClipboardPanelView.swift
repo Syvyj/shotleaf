@@ -8,6 +8,9 @@ struct ClipboardPanelView: View {
     let pick: (ClipItem, ClipboardPanelController.Mode) -> Void
     var pickSnippet: (Snippet, ClipboardPanelController.Mode) -> Void = { _, _ in }
     var editSnippets: () -> Void = {}
+    var pickTogether: ([ClipItem]) -> Void = { _ in }
+    var pickQueue: ([ClipItem]) -> Void = { _ in }
+    var runAction: (ClipAction) -> Void = { _ in }
     let close: () -> Void
     @FocusState private var searching: Bool
     @FocusState private var answering: Int?
@@ -23,7 +26,8 @@ struct ClipboardPanelView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(card)
                 } else {
                     list(results).frame(width: 380).background(card)
-                    preview.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(card)
+                    Group { if model.actionsShown { actionList } else { preview } }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(card)
                 }
             }
             actionRow
@@ -122,7 +126,26 @@ struct ClipboardPanelView: View {
         }
     }
 
+    @ViewBuilder
     private func historyActions(keys: Bool) -> some View {
+        if model.marked.count > 1 { markedActions(keys: keys) } else { singleActions(keys: keys) }
+    }
+
+    /// Several entries picked: paste them as one text, or one by one.
+    private func markedActions(keys: Bool) -> some View {
+        HStack(spacing: 6) {
+            Button { pickTogether(model.markedItems) } label: { keyed("Paste Together", "↩", show: keys) }
+                .buttonStyle(LeafButtonStyle(prominent: true))
+            Button { pickQueue(model.markedItems) } label: { keyed("Paste One by One", "⌘↩", show: keys) }
+                .buttonStyle(LeafButtonStyle())
+            Text("\(model.marked.count) picked").font(Leaf.font(12, .medium)).opacity(0.6).padding(.leading, 4)
+            Spacer(minLength: 6)
+            Button { model.marked = [] } label: { keyed("Clear Selection", "esc", show: keys) }
+                .buttonStyle(LeafButtonStyle())
+        }
+    }
+
+    private func singleActions(keys: Bool) -> some View {
         let item = model.current
         return HStack(spacing: 6) {
             Button { if let item { pick(item, .paste) } } label: { keyed("Paste", "↩", show: keys) }
@@ -133,6 +156,8 @@ struct ClipboardPanelView: View {
                 .buttonStyle(LeafButtonStyle()).disabled(item == nil)
             Button { if let item { model.history.togglePin(item.id) } } label: { keyed(item?.pinned == true ? "Unpin" : "Pin", "⌘P", show: keys) }
                 .buttonStyle(LeafButtonStyle()).disabled(item == nil)
+            Button { model.actionsShown.toggle() } label: { keyed("Actions", "⌘K", show: keys) }
+                .buttonStyle(LeafButtonStyle(prominent: model.actionsShown)).disabled(model.actions.isEmpty)
             Spacer(minLength: 6)
             Button { if let item { model.history.remove(item.id); model.move(0) } } label: { keyed("Delete", "⌘⌫", show: keys) }
                 .buttonStyle(LeafButtonStyle()).disabled(item == nil)
@@ -166,7 +191,10 @@ struct ClipboardPanelView: View {
                         row(item, index: i)
                             .id(item.id)
                             .onTapGesture(count: 2) { pick(item, .paste) }
-                            .onTapGesture { model.selected = i }
+                            .onTapGesture {
+                                if NSEvent.modifierFlags.contains(.command) { model.toggleMark(item.id) } // ⌘-click: pick several
+                                model.selected = i
+                            }
                     }
                 }
                 .padding(8)
@@ -185,6 +213,10 @@ struct ClipboardPanelView: View {
                 .frame(width: 20, height: 20)
                 .background(RoundedRectangle(cornerRadius: 5).fill(on ? Leaf.fresh.opacity(0.45) : Color.primary.opacity(index < 9 ? 0.06 : 0)))
                 .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.55))
+            if let order = model.marked.firstIndex(of: item.id) {
+                Text("\(order + 1)").font(Leaf.font(10, .bold)).foregroundStyle(.white)
+                    .frame(width: 18, height: 18).background(Circle().fill(Leaf.leaf))
+            }
             ClipIcon(item: item, history: model.history)
             Text(Self.line(item)).font(Leaf.font(13)).lineLimit(1).truncationMode(.tail)
             Spacer(minLength: 4)
@@ -194,6 +226,33 @@ struct ClipboardPanelView: View {
         .padding(.horizontal, 8).frame(height: 32)
         .background { if on { tile(true) } }
         .contentShape(Rectangle())
+    }
+
+    // MARK: Actions (⌘K)
+
+    private var actionList: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Paste it…").font(Leaf.font(11, .semibold)).opacity(0.5).padding(.horizontal, 8).padding(.bottom, 4)
+            ForEach(Array(model.actions.enumerated()), id: \.element) { i, action in
+                let on = i == model.actionIndex
+                HStack(spacing: 10) {
+                    Text("\(i + 1)").font(Leaf.font(11, .semibold)).monospacedDigit()
+                        .frame(width: 20, height: 20)
+                        .background(RoundedRectangle(cornerRadius: 5).fill(on ? Leaf.fresh.opacity(0.45) : Color.primary.opacity(0.06)))
+                    Image(systemName: action.symbol).font(.system(size: 13)).frame(width: 18)
+                    Text(String(localized: action.title)).font(Leaf.font(13))
+                    Spacer()
+                }
+                .foregroundStyle(on ? Leaf.ink : Color.primary)
+                .padding(.horizontal, 8).frame(height: 32)
+                .background { if on { tile(true) } }
+                .contentShape(Rectangle())
+                .onTapGesture { model.actionIndex = i; runAction(action) }
+            }
+            Spacer(minLength: 0)
+            Text("↩ or 1–8 · esc goes back").font(Leaf.font(11)).opacity(0.45).padding(.horizontal, 8)
+        }
+        .padding(10)
     }
 
     // MARK: Snippets

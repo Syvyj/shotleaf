@@ -91,3 +91,40 @@ struct ClipboardHistoryTests {
         try renderPreview(ClipboardPanelView(model: model, pick: { _, _ in }, close: {}), "clipboard-panel-all.png", dark: true)
     }
 }
+
+@Suite("Clipboard actions and picking several")
+@MainActor
+struct ClipActionTests {
+    @Test("Clean links, one line, trim, JSON; only actions that change something are offered")
+    func actions() {
+        #expect(ClipAction.cleanLinks("see https://shop.ua/item?id=7&utm_source=fb&fbclid=XYZ now") == "see https://shop.ua/item?id=7 now")
+        #expect(ClipAction.cleanLinks("https://a.com/?utm_medium=x") == "https://a.com/")
+        #expect(ClipAction.cleanLinks("https://a.com/?q=1") == "https://a.com/?q=1")
+        #expect(ClipAction.oneLine.apply("один\n  два\n\nтри") == "один два три")
+        #expect(ClipAction.trim.apply("  a    b \n c  ") == "a b\nc")
+        #expect(ClipAction.formatJSON.apply(#"{"b":1,"a":[1,2]}"#)?.hasPrefix("{\n  \"a\"") == true)
+        #expect(ClipAction.formatJSON.apply("not json") == nil)
+        let offered = ClipAction.available(for: "hello")
+        #expect(offered.contains(.uppercase) && !offered.contains(.lowercase) && !offered.contains(.formatJSON) && offered.contains(.saveSnippet))
+    }
+
+    @Test("⇧↓ picks the current and the next; ⌘-click toggles; the order is kept; renders")
+    func marking() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("apila-mark-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let h = ClipboardHistory(folder: dir)
+        for text in ["вул. Хрещатик, 22", "+380 67 123 45 67", "Олексій Зюзін", "https://shop.ua/item?id=7&utm_source=fb"] {
+            h.add(ClipItem(kind: ClipboardHistory.kind(of: text), text: text))
+        }
+        let model = ClipboardPanelModel(history: h, snippets: SnippetStore(file: dir.appendingPathComponent("s.json")))
+        model.extendMark(1)
+        #expect(model.marked.count == 2 && model.selected == 1)
+        model.toggleMark(h.items[3].id)
+        #expect(model.markedItems.map(\.text) == [h.items[0].text, h.items[1].text, h.items[3].text])
+        try renderPreview(ClipboardPanelView(model: model, pick: { _, _ in }, close: {}), "clipboard-marked.png")
+        model.marked = []
+        model.selected = 0
+        model.actionsShown = true
+        try renderPreview(ClipboardPanelView(model: model, pick: { _, _ in }, close: {}), "clipboard-actions.png")
+    }
+}

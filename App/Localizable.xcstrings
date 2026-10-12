@@ -1,6 +1,206 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Clean links of trackers": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистити посилання від трекерів"
+          }
+        }
+      }
+    },
+    "UPPERCASE": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ВЕЛИКІ ЛІТЕРИ"
+          }
+        }
+      }
+    },
+    "lowercase": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "малі літери"
+          }
+        }
+      }
+    },
+    "Capitalize Words": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кожне Слово З Великої"
+          }
+        }
+      }
+    },
+    "Join into one line": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зібрати в один рядок"
+          }
+        }
+      }
+    },
+    "Trim spaces": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прибрати зайві пробіли"
+          }
+        }
+      }
+    },
+    "Format JSON": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відформатувати JSON"
+          }
+        }
+      }
+    },
+    "Save as snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти як сніпет"
+          }
+        }
+      }
+    },
+    "Paste it…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставити так…"
+          }
+        }
+      }
+    },
+    "↩ or 1–8 · esc goes back": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↩ або 1–8 · esc — назад"
+          }
+        }
+      }
+    },
+    "Actions": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дії"
+          }
+        }
+      }
+    },
+    "Paste Together": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставити разом"
+          }
+        }
+      }
+    },
+    "Paste One by One": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставляти по черзі"
+          }
+        }
+      }
+    },
+    "%lld picked": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрано: %lld"
+          }
+        }
+      }
+    },
+    "Clear Selection": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зняти вибір"
+          }
+        }
+      }
+    },
+    "Queue done: %lld of %lld": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Черга завершена: %lld з %lld"
+          }
+        }
+      }
+    },
+    "Pasted %lld of %lld · ⇧⌘V — the next one": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставлено %lld з %lld · ⇧⌘V — наступне"
+          }
+        }
+      }
+    },
+    "Saved as a snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережено як сніпет"
+          }
+        }
+      }
+    },
+    "Queue: %lld of %lld pasted": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Черга: вставлено %lld з %lld"
+          }
+        }
+      }
+    },
+    "Cancel Queue": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасувати чергу"
+          }
+        }
+      }
+    },
     "Searching all folders": {
       "localizations": {
         "uk": {
