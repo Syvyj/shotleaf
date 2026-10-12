@@ -4,161 +4,332 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shotleaf — screenshots and clipboard for macOS</title>
-<meta name="description" content="Shotleaf: screenshots with annotations, scrolling capture, text from screenshots, clipboard history and snippets — for macOS, private by design.">
+<meta name="description" content="Shotleaf: screenshots you can mark up and share, scrolling capture, text from any image, clipboard history and snippets. A native macOS app that keeps your data on your Mac.">
 <link rel="icon" href="assets/favicon.png">
 <link rel="alternate" hreflang="uk" href="uk/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- ponytail: Google Fonts for the draft; self-host the four families before launch (EU privacy) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="lf-oval" viewBox="0 0 100 232"><path d="M50 200C18 160 4 96 50 8c46 88 32 152 0 192z" fill="currentColor" fill-opacity=".26" stroke="currentColor" stroke-opacity=".55" stroke-width="1.4"/><path d="M50 230V22M50 160 26 128M50 160 74 128M50 118 22 86M50 118 78 86M50 78 31 52M50 78 69 52" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1.2"/></symbol>
+  <symbol id="lf-ginkgo" viewBox="0 0 120 152"><path d="M60 150V78" stroke="currentColor" stroke-opacity=".55" stroke-width="2" fill="none"/><path d="M60 80C30 80 6 50 8 20 30 6 52 8 58 30c2-22 26-26 54-10 2 30-22 60-52 60z" fill="currentColor" fill-opacity=".28" stroke="currentColor" stroke-opacity=".5" stroke-width="1.4"/><path d="M60 78 20 26M60 78 38 14M60 78 82 14M60 78 100 26M60 78V36" stroke="currentColor" stroke-opacity=".32" fill="none"/></symbol>
+  <symbol id="lf-sprig" viewBox="0 0 120 262"><path d="M60 260C57 180 63 100 60 8" stroke="currentColor" stroke-opacity=".6" stroke-width="1.5" fill="none"/><g fill="currentColor" fill-opacity=".28" stroke="currentColor" stroke-opacity=".5" stroke-width="1.1"><path d="M59 222c-20-4-34-18-36-34 18 0 32 14 36 34z"/><path d="M61 192c20-4 34-18 36-34-18 0-32 14-36 34z"/><path d="M59 160c-19-4-31-17-33-31 16 0 29 13 33 31z"/><path d="M61 130c18-4 30-16 32-30-16 0-28 12-32 30z"/><path d="M59 98c-16-4-26-14-28-26 14 0 24 10 28 26z"/><path d="M61 70c15-3 24-12 26-23-13 0-22 9-26 23z"/><path d="M60 40c-6-10-6-22 0-32 6 10 6 22 0 32z"/></g></symbol>
+  <symbol id="logo" viewBox="0 0 24 24"><path d="M3 9V4.6C3 3.7 3.7 3 4.6 3H9M21 15v4.4c0 .9-.7 1.6-1.6 1.6H15" fill="none" stroke="#7cb342" stroke-width="2.4" stroke-linecap="round"/><path d="M12 6.5c.5 3.7 1.3 4.5 5 5-3.7.5-4.5 1.3-5 5-.5-3.7-1.3-4.5-5-5 3.7-.5 4.5-1.3 5-5z" fill="#2d4a19"/></symbol>
+  <symbol id="cur" viewBox="0 0 20 28"><path d="M2 2v20l5.5-5 3.5 8.5 3.5-1.5-3.5-8.5H18z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+</svg>
+
 <header class="wrap top">
-  <a class="brand" href="./"><img src="assets/icon.png" alt="">Shotleaf</a>
-  <nav class="top">
-    <a href="#screenshots">Screenshots</a>
+  <a class="brand" href="./"><img src="assets/icon.png" alt=""><span>Shotleaf</span></a>
+  <nav>
+    <a href="#capture">Screenshots</a>
     <a href="#clipboard">Clipboard</a>
     <a href="#install">Install</a>
     <a class="lang" href="uk/">Українська</a>
+    <a class="pill" href="#support">Support ♥</a>
   </nav>
 </header>
 
 <main>
-<div class="wrap hero">
-  <img class="icon" src="assets/icon.png" alt="Shotleaf icon">
-  <h1>Screenshots and clipboard,<br>done properly.</h1>
-  <p class="lead">Capture, mark up and share any part of the screen. Keep everything you copy, and paste it back in a keystroke. A native macOS app that keeps your data on your Mac.</p>
-  <div class="cta">
-    <a class="btn primary" href="mailto:shotleaf@syvyj.dev?subject=Shotleaf%20early%20access">Get early access</a>
-    <a class="btn" href="#screenshots">See what it does</a>
+<section class="wrap hero">
+  <div>
+    <div class="eyebrow">Herbarium of a Mac app · No. 1</div>
+    <h1>Catch the moment.<br><em>Keep every leaf.</em></h1>
+    <p class="lead">Shotleaf is a quiet field kit for your Mac: precise screenshots you can mark up and share, text lifted from any image, and a clipboard that remembers. All of it stays on your Mac.</p>
+    <div class="cta">
+      <a class="btn primary" href="mailto:shotleaf@syvyj.dev?subject=Shotleaf%20early%20access">Get early access</a>
+      <a class="btn" href="#capture">Leaf through ↓</a>
+    </div>
+    <div class="meta">macOS 15+ · Apple silicon · early access</div>
   </div>
-  <p class="note">macOS 15 Sequoia or later · Apple silicon</p>
-  <img class="shot" src="assets/screenshot-backdrop.jpg" alt="The Shotleaf screenshot window with arrows, a callout, a step number, a background and a watermark" width="1600" height="948">
-</div>
 
-<section id="screenshots">
-  <div class="wrap">
+  <div class="sheet tilt-r" style="position:relative">
+    <span class="tape tl"></span><span class="tape tr"></span>
+    <svg class="leafdeco" style="right:-70px;bottom:-90px;width:120px;transform:rotate(28deg)"><use href="#lf-sprig"/></svg>
+    <div class="mock m-edit">
+      <div class="win">
+        <div class="win-head">
+          <svg class="logo"><use href="#logo"/></svg>
+          <div class="win-title">Screenshot<small>2240 × 1200</small></div>
+          <div class="tiles">
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M6 3l12 8-5.5 1.5L10 18z"/></svg></span>
+            <span class="tile t-arrow on"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M19 5h-8M19 5v8"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v14"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M4 18c4-7 7 3 10-3s4-7 6-8"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M10.5 9.5 12.5 8v8"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M7 3v14h14M3 7h14v14"/></svg></span>
+          </div>
+        </div>
+        <div class="canvas">
+          <div class="shot"><div class="word">Shotleaf</div><div class="lines"><i></i><i></i><i></i></div></div>
+          <svg class="ink" viewBox="0 0 160 86">
+            <path class="a-line" d="M118 22 87 37.5" pathLength="1" stroke-dasharray="1" stroke="#e5484d" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+            <path class="a-head" d="M87 37.5l7.8-1.2M87 37.5l4.6-6.2" stroke="#e5484d" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+            <rect class="a-rect" x="16.5" y="26" width="64" height="22" rx="2" pathLength="1" stroke-dasharray="1" stroke="#f5a524" fill="none" stroke-width="1.1"/>
+          </svg>
+          <svg class="ink" viewBox="0 0 160 86"><g class="a-step"><circle cx="16.5" cy="26" r="4.2" fill="#f5a524" stroke="#fff" stroke-width=".8"/><text x="16.5" y="27.9" font-size="5.4" font-weight="800" fill="#fff" text-anchor="middle" font-family="-apple-system, sans-serif">1</text></g></svg>
+          <div class="callout"><span>look here — the new name</span></div>
+          <div class="wm">© Shotleaf</div>
+          <div class="toast"><b>✓</b>Copied</div>
+        </div>
+        <div class="bar">
+          <span class="b go copy">Copy <i>⌘C</i></span><span class="b">Save <i>⌘S</i></span><span class="b">Pin <i>P</i></span>
+          <span class="sp"></span><span class="b">Undo <i>⌘Z</i></span><span class="b">Close <i>esc</i></span>
+        </div>
+      </div>
+      <svg class="cursor" style="left:78%;top:76%"><use href="#cur"/></svg>
+    </div>
+    <div class="note" style="left:-38px;bottom:-58px;transform:rotate(-4deg)">fig. 1 — an arrow, a box, a note: three keys
+      <svg width="60" height="50" style="left:-46px;top:-40px"><path d="M52 44C30 42 10 30 6 6M6 6l-3 9M6 6l8 5"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLATE I — CAPTURE ============ -->
+<section class="wrap plate" id="capture">
+  <svg class="leafdeco" style="left:-110px;top:40px;width:150px;transform:rotate(-24deg)"><use href="#lf-oval"/></svg>
+  <div class="plate-head">
+    <span class="num">Plate I</span>
     <h2>Screenshots</h2>
-    <p class="sub">One shortcut, and a calm editor opens right where you need it.</p>
+    <p>One shortcut, and a calm editor opens right where you need it.</p>
+  </div>
 
-    <div class="row">
-      <img src="assets/picker-drag.jpg" alt="Picking an area with a pixel loupe and its size shown" width="1600" height="1000" loading="lazy">
-      <div>
-        <h3>Pick exactly what you mean</h3>
-        <p>The screen freezes, so menus and hover states stay put. Drag an area, click a window, or press <kbd>↩</kbd> for the whole screen.</p>
-        <ul>
-          <li>Pixel loupe, size and colour under the cursor</li>
-          <li><kbd>R</kbd> repeats the last area, <kbd>C</kbd> copies a colour</li>
-          <li>Delay, pointer on or off, 1× size for sharp small images</li>
-        </ul>
+  <div class="specimen">
+    <div class="sheet tilt-l">
+      <span class="tape tl"></span><span class="tape br"></span>
+      <div class="mock m-pick">
+        <div class="desk">
+          <div class="doc"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="sun"></div>
+          <div class="dim"></div>
+          <div class="sel"></div>
+          <div class="loupe" style="left:47%;top:42%"></div>
+          <div class="hint"><span><kbd>drag</kbd>area</span><span><kbd>click</kbd>window</span><span><kbd>↩</kbd>full screen</span><span><kbd>R</kbd>repeat</span><span><kbd>C</kbd>copy color</span><span><kbd>esc</kbd>cancel</span></div>
+          <div class="flash"></div>
+        </div>
+        <svg class="cursor" style="left:47%;top:42%"><use href="#cur"/></svg>
       </div>
     </div>
+    <div>
+      <div class="label"><span class="no">Herb. Shotleaf · No. 001</span><b>Captura selecta</b>the area picker · habitat: any screen<br>keys: ⌘⇧2 · leg. Syvyj, 2026</div>
+      <h3>Pick exactly what you mean</h3>
+      <p>The screen freezes first, so menus and hover states stay put while you choose.</p>
+      <ul>
+        <li>Drag an area, click a window, or press <kbd>↩</kbd> for the whole screen</li>
+        <li>Pixel loupe, exact size, colour under the cursor</li>
+        <li><kbd>R</kbd> repeats the last area; delay and 1× size when you need them</li>
+      </ul>
+    </div>
+  </div>
 
-    <div class="row flip">
-      <img src="assets/screenshot-backdrop.jpg" alt="Annotation tools in the screenshot window" width="1600" height="948" loading="lazy">
-      <div>
-        <h3>Mark it up</h3>
-        <p>Arrows, boxes, ovals, callouts, pen, highlighter, numbered steps, blur, spotlight, ruler and crop, each with its own key. Everything stays editable until you copy.</p>
-        <ul>
-          <li>Backgrounds and padding for polished shots</li>
-          <li>Remove a background in one click</li>
-          <li>Text or image watermark in any corner</li>
-          <li>Copy <kbd>⌘C</kbd>, save as PNG, JPEG, HEIC or PDF, share, pin on top, or drag into any app</li>
-        </ul>
+  <div class="specimen flip">
+    <div class="sheet tilt-r">
+      <span class="tape tr"></span>
+      <div class="mock m-scroll">
+        <div class="stage">
+          <div class="view">
+            <div class="sticky"><i></i><i></i></div>
+            <div class="page">
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#9b6bd8"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#2fb3a6"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+            </div>
+          </div>
+          <div class="strip"><div class="grow">
+            <div class="sticky"><i></i><i></i></div>
+            <div class="page">
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#9b6bd8"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#2fb3a6"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+            </div>
+          </div></div>
+        </div>
+        <div class="rbar"><span class="dot"></span><span>Scroll down slowly · <span class="n"></span></span><span class="b ghost">Cancel <i>esc</i></span><span class="b go">Done <i>↩</i></span></div>
+      </div>
+      <div class="note" style="right:-10px;bottom:-50px;transform:rotate(3deg)">the header shows up only once</div>
+    </div>
+    <div>
+      <div class="label"><span class="no">Herb. Shotleaf · No. 002</span><b>Pagina longissima</b>scrolling capture · habitat: long pages, chats, tables<br>keys: ⌘⇧3</div>
+      <h3>Whole pages, in one piece</h3>
+      <p>Pick an area and scroll at your own pace. Shotleaf matches every step and stitches one long image, keeping sticky headers and footers from repeating.</p>
+    </div>
+  </div>
+
+  <div class="specimen">
+    <div class="sheet tilt-l">
+      <span class="tape tl"></span>
+      <div class="mock m-ocr">
+        <div class="stage">
+          <div class="paper">Meeting at 3 pm by the office<br>Agenda: Q3 report, budget<div class="scan"></div></div>
+          <div class="win">
+            <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title">Text from Screenshot<small>52 characters</small></div></div>
+            <div class="text"><div>Meeting at 3 pm by the office</div><div>Agenda: Q3 report, budget</div></div>
+            <div class="bar"><span class="b go">Copy all <i>⌘↩</i></span><span class="sp"></span><span class="b">Close <i>esc</i></span></div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="row">
-      <img src="assets/scroll-bar.png" alt="The scrolling capture bar" width="860" height="121" loading="lazy">
-      <div>
-        <h3>Scrolling screenshots</h3>
-        <p>Pick an area and scroll. Shotleaf stitches a long page together, and sticky headers and footers appear only once.</p>
-      </div>
+    <div>
+      <div class="label"><span class="no">Herb. Shotleaf · No. 003</span><b>Littera e pictura</b>text from a screenshot · recognised on device<br>keys: ⌘⇧1</div>
+      <h3>Text from anything you can see</h3>
+      <p>A slide in a call, a photo of a note, an error in a dialog that won’t let you select it. Select the area and get plain text, in Ukrainian, English and more.</p>
     </div>
+  </div>
 
-    <div class="row flip">
-      <img src="assets/text-window.jpg" alt="Text recognised from a screenshot" width="1600" height="1067" loading="lazy">
-      <div>
-        <h3>Text from any screenshot</h3>
-        <p>Select an area and get its text, recognised on your Mac. Works with English, Ukrainian and other languages.</p>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div class="card"><h3>Watermark photos</h3><p>Add a watermark to many photos at once. Full quality, metadata and colour profile kept, originals untouched.</p></div>
-      <div class="card"><h3>Expiring links</h3><p>Share a shot as a link that disappears after 1, 6 or 24 hours, on a server you run yourself.</p></div>
-      <div class="card"><h3>Edit again</h3><p>Reopen the last shot or an image from the clipboard, and find recent shots in the menu.</p></div>
-    </div>
+  <div class="seeds">
+    <div class="seed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M14 15h4M7 9l3 3-3 3"/></svg><h4>Backgrounds & watermarks</h4><p>Gradient backdrops, one-click background removal, a text or image watermark in any of nine spots.</p></div>
+    <div class="seed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16v12H4zM8 7l2-3h4l2 3"/><circle cx="12" cy="13" r="3"/></svg><h4>Watermark a whole shoot</h4><p>Many photos at once, each placed by hand if you like. Full quality, metadata kept, originals untouched.</p></div>
+    <div class="seed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><h4>Links that wilt</h4><p>Share a shot as a link that disappears in 1, 6 or 24 hours, on a server you own.</p></div>
   </div>
 </section>
 
-<section id="clipboard">
-  <div class="wrap">
+<!-- ============ PLATE II — CLIPBOARD ============ -->
+<section class="wrap plate" id="clipboard">
+  <svg class="leafdeco" style="right:-100px;top:120px;width:150px;transform:rotate(18deg)"><use href="#lf-ginkgo"/></svg>
+  <div class="plate-head">
+    <span class="num">Plate II</span>
     <h2>Clipboard</h2>
-    <p class="sub">Everything you copy, one shortcut away: <kbd>⇧⌘V</kbd>.</p>
+    <p>Everything you copy, one shortcut away: <kbd>⇧⌘V</kbd>.</p>
+  </div>
 
-    <div class="row">
-      <img src="assets/clipboard-panel.jpg" alt="The clipboard panel with search" width="1600" height="1079" loading="lazy">
-      <div>
-        <h3>History that stays out of the way</h3>
-        <p>The panel opens by the mouse. Type to search, then click or press <kbd>↩</kbd> to paste.</p>
-        <ul>
-          <li>Text, links, colours, images and files, with text found inside images</li>
-          <li>Passwords from password managers are never kept</li>
-          <li>Leave out the apps you choose</li>
-          <li>Paste several items together, or one after another</li>
-        </ul>
+  <div class="specimen">
+    <div class="sheet tilt-r">
+      <span class="tape tl"></span><span class="tape br"></span>
+      <div class="mock m-clip" data-q="imax" data-chars="characters">
+        <div class="win">
+          <div class="win-head">
+            <svg class="logo"><use href="#logo"/></svg>
+            <div class="win-title" style="margin-right:1cqw">Clipboard</div>
+            <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg><span class="q"></span><span class="caret"></span><span class="ph">Search the clipboard</span></div>
+          </div>
+          <div class="panel">
+            <div class="list">
+              <div class="row sel" data-text="IMAX on Sunday — 2 seats, row G"><span class="k">1</span><span class="t">IMAX on Sunday — 2 seats, row G</span><span class="w">now</span></div>
+              <div class="row" data-text="https://cinema.example/imax/schedule"><span class="k">2</span><span class="t">https://cinema.example/imax/schedule</span><span class="w">2 min</span></div>
+              <div class="row" data-text="#7CB342"><span class="k">3</span><span class="t"><span style="display:inline-block;width:1.4cqw;height:1.4cqw;border-radius:.3cqw;background:#7cb342;vertical-align:middle;margin-right:.6cqw"></span>#7CB342</span><span class="w">9 min</span></div>
+              <div class="row" data-text="Notes from the call — Q3 plan"><span class="k">4</span><span class="t">Notes from the call — Q3 plan</span><span class="w">1 h</span></div>
+              <div class="row" data-text="invoice-0142.pdf"><span class="k">5</span><span class="t">invoice-0142.pdf</span><span class="w">3 h</span></div>
+            </div>
+            <div class="prev"><span class="p">IMAX on Sunday — 2 seats, row G</span><small class="pm"></small></div>
+          </div>
+          <div class="bar"><span class="b go">Paste <i>↩</i></span><span class="b">Plain text <i>⌥↩</i></span><span class="b">Actions <i>⌘K</i></span><span class="sp"></span><span class="b">Close <i>esc</i></span></div>
+        </div>
+        <div class="dest"><span class="who"></span><span class="d"></span><span class="caret" style="background:#222"></span></div>
       </div>
     </div>
-
-    <div class="row flip">
-      <img src="assets/clipboard-actions.jpg" alt="Actions for a clipboard item" width="1600" height="1079" loading="lazy">
-      <div>
-        <h3>Paste it better</h3>
-        <p><kbd>⌘K</kbd> cleans trackers from links, changes letter case, joins lines, tidies JSON, or saves the item as a snippet.</p>
-      </div>
+    <div>
+      <div class="label"><span class="no">Herb. Shotleaf · No. 004</span><b>Memoria copiata</b>clipboard history · perennial, stays on this Mac<br>keys: ⇧⌘V</div>
+      <h3>A clipboard that remembers</h3>
+      <p>The panel opens by your mouse. Type a few letters, then click or press <kbd>↩</kbd> — it pastes straight into the app you were in.</p>
+      <ul>
+        <li>Text, links, colours, images and files — even text inside images is searchable</li>
+        <li>Passwords from password managers are never kept</li>
+        <li><kbd>⌘K</kbd> cleans trackers from links, changes case, tidies JSON</li>
+        <li>Pick several and paste them together, or one by one</li>
+      </ul>
     </div>
+  </div>
 
-    <div class="row">
-      <img src="assets/snippets-editor.jpg" alt="The snippets editor with folders" width="1600" height="1007" loading="lazy">
-      <div>
-        <h3>Snippets</h3>
-        <p>Keep replies, signatures and details in folders. Type an abbreviation anywhere and it expands, or open them with <kbd>⇧⌘B</kbd>.</p>
-        <ul>
-          <li>Date, time, clipboard and cursor position placeholders</li>
-          <li>Questions asked before pasting, like a name</li>
-        </ul>
+  <div class="specimen flip">
+    <div class="sheet tilt-l">
+      <span class="tape tr"></span>
+      <div class="mock m-snip" data-abbr=";reply" data-answer="Anna"
+           data-tpl="Hello, {name}!\nThanks for reaching out — I’ll send the invoice by {date}.\n{cursor}\n\nBest,\nOksana">
+        <div class="mail">
+          <div class="mail-top"><i></i><i></i><i></i></div>
+          <div class="field">To: <b>anna@studio.example</b></div>
+          <div class="field">Subject: <b>Invoice</b></div>
+          <div class="body"></div>
+        </div>
+        <div class="ask hide">
+          <div class="win">
+            <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title">Snippet<small>;reply</small></div></div>
+            <div class="q">Name<span class="ans"></span></div>
+          </div>
+        </div>
       </div>
+      <div class="note" style="left:-20px;bottom:-54px;transform:rotate(-3deg)">five letters → a whole reply</div>
+    </div>
+    <div>
+      <div class="label"><span class="no">Herb. Shotleaf · No. 005</span><b>Abbreviatio expansa</b>snippets · grows from a few letters<br>keys: ⇧⌘B</div>
+      <h3>Snippets that fill themselves in</h3>
+      <p>Keep replies, signatures and bank details in folders. Type an abbreviation in any app and it expands — with today’s date, the clipboard, and a question or two answered on the spot.</p>
+      <ul>
+        <li><kbd>{date}</kbd> <kbd>{time}</kbd> <kbd>{clipboard}</kbd> <kbd>{cursor}</kbd> <kbd>{?Name}</kbd></li>
+        <li>Folders on the left, snippets on the right; <kbd>Tab</kbd> switches from history</li>
+      </ul>
     </div>
   </div>
 </section>
 
-<section id="privacy">
-  <div class="wrap">
-    <h2>Private by design</h2>
-    <div class="grid">
-      <div class="card"><h3>On your Mac</h3><p>History, snippets and shots are stored locally. Text recognition runs on device.</p></div>
-      <div class="card"><h3>No account</h3><p>No sign-up, no tracking, no analytics.</p></div>
-      <div class="card"><h3>Native</h3><p>Built in Swift for macOS. Light on memory, and it looks at home on your Mac.</p></div>
+<!-- ============ PRIVACY ============ -->
+<section class="wrap plate" id="privacy">
+  <div class="plate-head">
+    <span class="num">Plate III</span>
+    <h2>Grown locally</h2>
+    <p>Nothing leaves your Mac unless you send it.</p>
+  </div>
+  <div class="ledger">
+    <div><h4>On your Mac</h4><p>History, snippets and shots live in your Library. Text recognition runs on device.</p></div>
+    <div><h4>No account</h4><p>No sign-up, no tracking, no analytics. Not now, not later.</p></div>
+    <div><h4>Native</h4><p>Written in Swift for macOS. Light on memory, quick to open, at home next to Apple’s apps.</p></div>
+  </div>
+</section>
+
+<!-- ============ SUPPORT ============ -->
+<section class="wrap plate" id="support">
+  <div class="support">
+    <svg class="leafdeco" style="right:-30px;top:-40px;width:220px;transform:rotate(22deg)"><use href="#lf-sprig"/></svg>
+    <svg class="leafdeco" style="right:170px;bottom:-80px;width:130px;transform:rotate(-30deg)"><use href="#lf-oval"/></svg>
+    <h2>Water the <em>leaf</em></h2>
+    <p>Shotleaf is made by one person, in the evenings. If it saves you a few minutes a day, a coffee keeps it growing.</p>
+    <div class="donate">
+      <span><b>Ko-fi</b><small data-soon="soon">Card or PayPal, no fees</small></span>
+      <span><b>Buy Me a Coffee</b><small data-soon="soon">A coffee, any amount</small></span>
+      <span><b>GitHub Sponsors</b><small data-soon="soon">Monthly, for developers</small></span>
+      <span><b>Monobank jar</b><small data-soon="soon">Ukrainian cards, Apple Pay</small></span>
     </div>
   </div>
 </section>
 
-<section id="install">
-  <div class="wrap">
-    <h2>Install</h2>
-    <p class="sub">Shotleaf is not notarised by Apple yet, so macOS asks once before the first launch.</p>
-    <ol class="steps">
-      <li>Move <b>Shotleaf</b> to <b>Applications</b> and open it.</li>
-      <li>When macOS says it can't check the app, open <b>System Settings → Privacy &amp; Security</b> and click <b>Open Anyway</b>.</li>
-      <li>Follow the setup guide: Shotleaf asks for <b>Screen Recording</b> (for screenshots) and <b>Accessibility</b> (for pasting).</li>
-    </ol>
+<!-- ============ INSTALL ============ -->
+<section class="wrap plate" id="install">
+  <div class="plate-head">
+    <span class="num">Plate IV</span>
+    <h2>Planting</h2>
+    <p>Not notarised by Apple yet, so macOS asks once before the first launch.</p>
   </div>
+  <ol class="steps">
+    <li>Move <b>Shotleaf</b> to <b>Applications</b> and open it.</li>
+    <li>If macOS says it can’t check the app, open <b>System Settings → Privacy &amp; Security</b> and click <b>Open Anyway</b>.</li>
+    <li>Follow the setup guide: allow <b>Screen Recording</b> for screenshots and <b>Accessibility</b> for pasting.</li>
+  </ol>
 </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <span>© 2026 Oleksii Ziuzin (Syvyj) · <a href="https://syvyj.dev">syvyj.dev</a></span>
-    <span><a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a> · <a href="uk/">Українська</a></span>
-  </div>
+<footer class="wrap">
+  <span>Herbarium Shotleafianum · leg. Syvyj · MMXXVI<br>© 2026 Oleksii Ziuzin · <a href="https://syvyj.dev">syvyj.dev</a></span>
+  <span><a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a> · <a href="uk/">Українська</a></span>
 </footer>
+
+<script src="mocks.js" defer></script>
 </body>
 </html>

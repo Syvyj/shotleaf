@@ -4,161 +4,332 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shotleaf — скріншоти й буфер обміну для macOS</title>
-<meta name="description" content="Shotleaf: скріншоти з анотаціями, прокручувані знімки, текст зі скріншотів, історія буфера обміну та сніпети для macOS. Ваші дані лишаються на вашому Mac.">
+<meta name="description" content="Shotleaf: скріншоти з позначками, прокручувані знімки, текст із будь-якого зображення, історія буфера обміну й сніпети. Нативний додаток для macOS, дані якого лишаються на вашому Mac.">
 <link rel="icon" href="../assets/favicon.png">
 <link rel="alternate" hreflang="en" href="../">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- ponytail: Google Fonts for the draft; self-host the four families before launch (EU privacy) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../style.css">
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="lf-oval" viewBox="0 0 100 232"><path d="M50 200C18 160 4 96 50 8c46 88 32 152 0 192z" fill="currentColor" fill-opacity=".26" stroke="currentColor" stroke-opacity=".55" stroke-width="1.4"/><path d="M50 230V22M50 160 26 128M50 160 74 128M50 118 22 86M50 118 78 86M50 78 31 52M50 78 69 52" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1.2"/></symbol>
+  <symbol id="lf-ginkgo" viewBox="0 0 120 152"><path d="M60 150V78" stroke="currentColor" stroke-opacity=".55" stroke-width="2" fill="none"/><path d="M60 80C30 80 6 50 8 20 30 6 52 8 58 30c2-22 26-26 54-10 2 30-22 60-52 60z" fill="currentColor" fill-opacity=".28" stroke="currentColor" stroke-opacity=".5" stroke-width="1.4"/><path d="M60 78 20 26M60 78 38 14M60 78 82 14M60 78 100 26M60 78V36" stroke="currentColor" stroke-opacity=".32" fill="none"/></symbol>
+  <symbol id="lf-sprig" viewBox="0 0 120 262"><path d="M60 260C57 180 63 100 60 8" stroke="currentColor" stroke-opacity=".6" stroke-width="1.5" fill="none"/><g fill="currentColor" fill-opacity=".28" stroke="currentColor" stroke-opacity=".5" stroke-width="1.1"><path d="M59 222c-20-4-34-18-36-34 18 0 32 14 36 34z"/><path d="M61 192c20-4 34-18 36-34-18 0-32 14-36 34z"/><path d="M59 160c-19-4-31-17-33-31 16 0 29 13 33 31z"/><path d="M61 130c18-4 30-16 32-30-16 0-28 12-32 30z"/><path d="M59 98c-16-4-26-14-28-26 14 0 24 10 28 26z"/><path d="M61 70c15-3 24-12 26-23-13 0-22 9-26 23z"/><path d="M60 40c-6-10-6-22 0-32 6 10 6 22 0 32z"/></g></symbol>
+  <symbol id="logo" viewBox="0 0 24 24"><path d="M3 9V4.6C3 3.7 3.7 3 4.6 3H9M21 15v4.4c0 .9-.7 1.6-1.6 1.6H15" fill="none" stroke="#7cb342" stroke-width="2.4" stroke-linecap="round"/><path d="M12 6.5c.5 3.7 1.3 4.5 5 5-3.7.5-4.5 1.3-5 5-.5-3.7-1.3-4.5-5-5 3.7-.5 4.5-1.3 5-5z" fill="#2d4a19"/></symbol>
+  <symbol id="cur" viewBox="0 0 20 28"><path d="M2 2v20l5.5-5 3.5 8.5 3.5-1.5-3.5-8.5H18z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+</svg>
+
 <header class="wrap top">
-  <a class="brand" href="./"><img src="../assets/icon.png" alt="">Shotleaf</a>
-  <nav class="top">
-    <a href="#screenshots">Скріншоти</a>
+  <a class="brand" href="./"><img src="../assets/icon.png" alt=""><span>Shotleaf</span></a>
+  <nav>
+    <a href="#capture">Скріншоти</a>
     <a href="#clipboard">Буфер обміну</a>
     <a href="#install">Встановлення</a>
     <a class="lang" href="../">English</a>
+    <a class="pill" href="#support">Підтримати ♥</a>
   </nav>
 </header>
 
 <main>
-<div class="wrap hero">
-  <img class="icon" src="../assets/icon.png" alt="Іконка Shotleaf">
-  <h1>Скріншоти й буфер обміну,<br>як слід.</h1>
-  <p class="lead">Знімайте, позначайте й діліться будь-якою частиною екрана. Усе, що копіюєте, зберігається, і вставити його можна однією клавішею. Нативний додаток для macOS, дані якого лишаються на вашому Mac.</p>
-  <div class="cta">
-    <a class="btn primary" href="mailto:shotleaf@syvyj.dev?subject=Shotleaf%20early%20access">Отримати ранній доступ</a>
-    <a class="btn" href="#screenshots">Що він уміє</a>
+<section class="wrap hero">
+  <div>
+    <div class="eyebrow">Гербарій одного Mac-додатка · № 1</div>
+    <h1>Спіймайте мить.<br><em>Бережіть кожен листок.</em></h1>
+    <p class="lead">Shotleaf — тихий польовий набір для вашого Mac: точні скріншоти з позначками, текст із будь-якого зображення й буфер обміну, що все пам’ятає. І все це лишається на вашому Mac.</p>
+    <div class="cta">
+      <a class="btn primary" href="mailto:shotleaf@syvyj.dev?subject=Shotleaf%20early%20access">Отримати ранній доступ</a>
+      <a class="btn" href="#capture">Погортати ↓</a>
+    </div>
+    <div class="meta">macOS 15+ · Apple silicon · ранній доступ</div>
   </div>
-  <p class="note">macOS 15 Sequoia або новіша · Apple silicon</p>
-  <img class="shot" src="../assets/screenshot-backdrop.jpg" alt="Вікно скріншота Shotleaf зі стрілками, виноскою, номером кроку, фоном і водяним знаком" width="1600" height="948">
-</div>
 
-<section id="screenshots">
-  <div class="wrap">
+  <div class="sheet tilt-r" style="position:relative">
+    <span class="tape tl"></span><span class="tape tr"></span>
+    <svg class="leafdeco" style="right:-70px;bottom:-90px;width:120px;transform:rotate(28deg)"><use href="#lf-sprig"/></svg>
+    <div class="mock m-edit">
+      <div class="win">
+        <div class="win-head">
+          <svg class="logo"><use href="#logo"/></svg>
+          <div class="win-title">Скріншот<small>2240 × 1200</small></div>
+          <div class="tiles">
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M6 3l12 8-5.5 1.5L10 18z"/></svg></span>
+            <span class="tile t-arrow on"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M19 5h-8M19 5v8"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v14"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M4 18c4-7 7 3 10-3s4-7 6-8"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M10.5 9.5 12.5 8v8"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M7 3v14h14M3 7h14v14"/></svg></span>
+          </div>
+        </div>
+        <div class="canvas">
+          <div class="shot"><div class="word">Shotleaf</div><div class="lines"><i></i><i></i><i></i></div></div>
+          <svg class="ink" viewBox="0 0 160 86">
+            <path class="a-line" d="M118 22 87 37.5" pathLength="1" stroke-dasharray="1" stroke="#e5484d" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+            <path class="a-head" d="M87 37.5l7.8-1.2M87 37.5l4.6-6.2" stroke="#e5484d" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+            <rect class="a-rect" x="16.5" y="26" width="64" height="22" rx="2" pathLength="1" stroke-dasharray="1" stroke="#f5a524" fill="none" stroke-width="1.1"/>
+          </svg>
+          <svg class="ink" viewBox="0 0 160 86"><g class="a-step"><circle cx="16.5" cy="26" r="4.2" fill="#f5a524" stroke="#fff" stroke-width=".8"/><text x="16.5" y="27.9" font-size="5.4" font-weight="800" fill="#fff" text-anchor="middle" font-family="-apple-system, sans-serif">1</text></g></svg>
+          <div class="callout"><span>дивись сюди — нова назва</span></div>
+          <div class="wm">© Shotleaf</div>
+          <div class="toast"><b>✓</b>Скопійовано</div>
+        </div>
+        <div class="bar">
+          <span class="b go copy">Копіювати <i>⌘C</i></span><span class="b">Зберегти <i>⌘S</i></span><span class="b">Закріпити <i>P</i></span>
+          <span class="sp"></span><span class="b">Скасувати дію <i>⌘Z</i></span><span class="b">Закрити <i>esc</i></span>
+        </div>
+      </div>
+      <svg class="cursor" style="left:78%;top:76%"><use href="#cur"/></svg>
+    </div>
+    <div class="note" style="left:-38px;bottom:-58px;transform:rotate(-4deg)">мал. 1 — стрілка, рамка, примітка: три клавіші
+      <svg width="60" height="50" style="left:-46px;top:-40px"><path d="M52 44C30 42 10 30 6 6M6 6l-3 9M6 6l8 5"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLATE I — CAPTURE ============ -->
+<section class="wrap plate" id="capture">
+  <svg class="leafdeco" style="left:-110px;top:40px;width:150px;transform:rotate(-24deg)"><use href="#lf-oval"/></svg>
+  <div class="plate-head">
+    <span class="num">Таблиця I</span>
     <h2>Скріншоти</h2>
-    <p class="sub">Одне сполучення клавіш, і спокійний редактор відкривається там, де він потрібен.</p>
+    <p>Одне сполучення клавіш, і спокійний редактор відкривається там, де він потрібен.</p>
+  </div>
 
-    <div class="row">
-      <img src="../assets/picker-drag.jpg" alt="Вибір області з лупою пікселів і розміром" width="1600" height="1000" loading="lazy">
-      <div>
-        <h3>Саме те, що ви мали на увазі</h3>
-        <p>Екран завмирає, тож меню й підсвічування не зникають. Виділіть область, клацніть вікно або натисніть <kbd>↩</kbd> для всього екрана.</p>
-        <ul>
-          <li>Лупа пікселів, розмір і колір під курсором</li>
-          <li><kbd>R</kbd> повторює останню область, <kbd>C</kbd> копіює колір</li>
-          <li>Затримка, курсор на знімку чи без нього, розмір 1× для чітких малих зображень</li>
-        </ul>
+  <div class="specimen">
+    <div class="sheet tilt-l">
+      <span class="tape tl"></span><span class="tape br"></span>
+      <div class="mock m-pick">
+        <div class="desk">
+          <div class="doc"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="sun"></div>
+          <div class="dim"></div>
+          <div class="sel"></div>
+          <div class="loupe" style="left:47%;top:42%"></div>
+          <div class="hint"><span><kbd>тягніть</kbd>область</span><span><kbd>клік</kbd>вікно</span><span><kbd>↩</kbd>весь екран</span><span><kbd>R</kbd>повторити</span><span><kbd>C</kbd>копіювати колір</span><span><kbd>esc</kbd>скасувати</span></div>
+          <div class="flash"></div>
+        </div>
+        <svg class="cursor" style="left:47%;top:42%"><use href="#cur"/></svg>
       </div>
     </div>
+    <div>
+      <div class="label"><span class="no">Herb. Shotleaf · No. 001</span><b>Captura selecta</b>вибір області · ареал: будь-який екран<br>клавіші: ⌘⇧2 · leg. Syvyj, 2026</div>
+      <h3>Саме те, що ви мали на увазі</h3>
+      <p>Спершу екран завмирає, тож меню й підсвічування не зникають, поки ви вибираєте.</p>
+      <ul>
+        <li>Виділіть область, клацніть вікно або натисніть <kbd>↩</kbd> для всього екрана</li>
+        <li>Лупа пікселів, точний розмір, колір під курсором</li>
+        <li><kbd>R</kbd> повторює останню область; затримка й розмір 1×, коли треба</li>
+      </ul>
+    </div>
+  </div>
 
-    <div class="row flip">
-      <img src="../assets/screenshot-backdrop.jpg" alt="Інструменти анотацій у вікні скріншота" width="1600" height="948" loading="lazy">
-      <div>
-        <h3>Позначайте</h3>
-        <p>Стрілки, рамки, овали, виноски, перо, маркер, номери кроків, розмиття, фокус, лінійка й обрізка, кожен зі своєю клавішею. Усе можна редагувати аж до копіювання.</p>
-        <ul>
-          <li>Фони й поля для охайних знімків</li>
-          <li>Прибрати фон одним кліком</li>
-          <li>Водяний знак текстом чи зображенням у будь-якому куті</li>
-          <li>Копіюйте <kbd>⌘C</kbd>, зберігайте в PNG, JPEG, HEIC чи PDF, діліться, закріплюйте поверх вікон або перетягуйте в будь-який додаток</li>
-        </ul>
+  <div class="specimen flip">
+    <div class="sheet tilt-r">
+      <span class="tape tr"></span>
+      <div class="mock m-scroll">
+        <div class="stage">
+          <div class="view">
+            <div class="sticky"><i></i><i></i></div>
+            <div class="page">
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#9b6bd8"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#2fb3a6"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+            </div>
+          </div>
+          <div class="strip"><div class="grow">
+            <div class="sticky"><i></i><i></i></div>
+            <div class="page">
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#9b6bd8"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#2fb3a6"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+            </div>
+          </div></div>
+        </div>
+        <div class="rbar"><span class="dot"></span><span>Повільно прокручуйте вниз · <span class="n"></span></span><span class="b ghost">Скасувати <i>esc</i></span><span class="b go">Готово <i>↩</i></span></div>
+      </div>
+      <div class="note" style="right:-10px;bottom:-50px;transform:rotate(3deg)">шапка — лише один раз</div>
+    </div>
+    <div>
+      <div class="label"><span class="no">Herb. Shotleaf · No. 002</span><b>Pagina longissima</b>прокручуваний знімок · ареал: довгі сторінки, чати, таблиці<br>клавіші: ⌘⇧3</div>
+      <h3>Цілі сторінки одним шматком</h3>
+      <p>Виділіть область і прокручуйте у своєму темпі. Shotleaf зіставляє кожен крок і склеює одне довге зображення, а закріплені шапки й підвали не повторюються.</p>
+    </div>
+  </div>
+
+  <div class="specimen">
+    <div class="sheet tilt-l">
+      <span class="tape tl"></span>
+      <div class="mock m-ocr">
+        <div class="stage">
+          <div class="paper">Зустріч о 15:00 біля офісу<br>Agenda: Q3 report, budget<div class="scan"></div></div>
+          <div class="win">
+            <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title">Текст зі скріншоту<small>52 символи</small></div></div>
+            <div class="text"><div>Зустріч о 15:00 біля офісу</div><div>Agenda: Q3 report, budget</div></div>
+            <div class="bar"><span class="b go">Копіювати все <i>⌘↩</i></span><span class="sp"></span><span class="b">Закрити <i>esc</i></span></div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="row">
-      <img src="../assets/scroll-bar.png" alt="Панель прокручуваного знімка" width="860" height="121" loading="lazy">
-      <div>
-        <h3>Прокручувані скріншоти</h3>
-        <p>Виділіть область і прокручуйте. Shotleaf склеїть довгу сторінку, а закріплені шапки й підвали з’являться лише раз.</p>
-      </div>
+    <div>
+      <div class="label"><span class="no">Herb. Shotleaf · No. 003</span><b>Littera e pictura</b>текст зі скріншота · розпізнається на пристрої<br>клавіші: ⌘⇧1</div>
+      <h3>Текст із усього, що бачите</h3>
+      <p>Слайд на дзвінку, фото записки, помилка в діалозі, яку не виділити. Виділіть область і отримайте текст українською, англійською та іншими мовами.</p>
     </div>
+  </div>
 
-    <div class="row flip">
-      <img src="../assets/text-window.jpg" alt="Текст, розпізнаний зі скріншота" width="1600" height="1067" loading="lazy">
-      <div>
-        <h3>Текст із будь-якого скріншота</h3>
-        <p>Виділіть область і отримайте її текст, розпізнаний на вашому Mac. Працює з українською, англійською та іншими мовами.</p>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div class="card"><h3>Водяні знаки на фото</h3><p>Додавайте водяний знак до багатьох фото одразу. Повна якість, метадані й колірний профіль зберігаються, оригінали не змінюються.</p></div>
-      <div class="card"><h3>Тимчасові посилання</h3><p>Діліться знімком через посилання, яке зникне за 1, 6 чи 24 години, на вашому власному сервері.</p></div>
-      <div class="card"><h3>Редагувати знову</h3><p>Відкрийте останній знімок або зображення з буфера, а недавні знімки знайдете в меню.</p></div>
-    </div>
+  <div class="seeds">
+    <div class="seed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M14 15h4M7 9l3 3-3 3"/></svg><h4>Фони й водяні знаки</h4><p>Градієнтні фони, прибирання фону одним кліком, водяний знак текстом чи зображенням у будь-якій з дев’яти позицій.</p></div>
+    <div class="seed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16v12H4zM8 7l2-3h4l2 3"/><circle cx="12" cy="13" r="3"/></svg><h4>Водяний знак на всю зйомку</h4><p>Багато фото одразу, кожне можна поставити вручну. Повна якість, метадані на місці, оригінали недоторкані.</p></div>
+    <div class="seed"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><h4>Посилання, що в’януть</h4><p>Діліться знімком через посилання, що зникне за 1, 6 чи 24 години, на вашому власному сервері.</p></div>
   </div>
 </section>
 
-<section id="clipboard">
-  <div class="wrap">
+<!-- ============ PLATE II — CLIPBOARD ============ -->
+<section class="wrap plate" id="clipboard">
+  <svg class="leafdeco" style="right:-100px;top:120px;width:150px;transform:rotate(18deg)"><use href="#lf-ginkgo"/></svg>
+  <div class="plate-head">
+    <span class="num">Таблиця II</span>
     <h2>Буфер обміну</h2>
-    <p class="sub">Усе скопійоване за одним сполученням клавіш: <kbd>⇧⌘V</kbd>.</p>
+    <p>Усе скопійоване — за одним сполученням: <kbd>⇧⌘V</kbd>.</p>
+  </div>
 
-    <div class="row">
-      <img src="../assets/clipboard-panel.jpg" alt="Панель буфера обміну з пошуком" width="1600" height="1079" loading="lazy">
-      <div>
-        <h3>Історія, яка не заважає</h3>
-        <p>Панель відкривається біля курсора. Почніть друкувати для пошуку, потім клацніть або натисніть <kbd>↩</kbd>, щоб вставити.</p>
-        <ul>
-          <li>Текст, посилання, кольори, зображення й файли, з пошуком тексту всередині зображень</li>
-          <li>Паролі з менеджерів паролів не зберігаються</li>
-          <li>Додатки, які ви виключите, не потрапляють в історію</li>
-          <li>Вставляйте кілька записів разом або по черзі</li>
-        </ul>
+  <div class="specimen">
+    <div class="sheet tilt-r">
+      <span class="tape tl"></span><span class="tape br"></span>
+      <div class="mock m-clip" data-q="imax" data-chars="символів">
+        <div class="win">
+          <div class="win-head">
+            <svg class="logo"><use href="#logo"/></svg>
+            <div class="win-title" style="margin-right:1cqw">Буфер обміну</div>
+            <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg><span class="q"></span><span class="caret"></span><span class="ph">Пошук у буфері</span></div>
+          </div>
+          <div class="panel">
+            <div class="list">
+              <div class="row sel" data-text="IMAX у неділю — 2 місця, ряд G"><span class="k">1</span><span class="t">IMAX у неділю — 2 місця, ряд G</span><span class="w">щойно</span></div>
+              <div class="row" data-text="https://cinema.example/imax/schedule"><span class="k">2</span><span class="t">https://cinema.example/imax/schedule</span><span class="w">2 хв</span></div>
+              <div class="row" data-text="#7CB342"><span class="k">3</span><span class="t"><span style="display:inline-block;width:1.4cqw;height:1.4cqw;border-radius:.3cqw;background:#7cb342;vertical-align:middle;margin-right:.6cqw"></span>#7CB342</span><span class="w">9 хв</span></div>
+              <div class="row" data-text="Нотатки з дзвінка — план на Q3"><span class="k">4</span><span class="t">Нотатки з дзвінка — план на Q3</span><span class="w">1 год</span></div>
+              <div class="row" data-text="рахунок-0142.pdf"><span class="k">5</span><span class="t">рахунок-0142.pdf</span><span class="w">3 год</span></div>
+            </div>
+            <div class="prev"><span class="p">IMAX у неділю — 2 місця, ряд G</span><small class="pm"></small></div>
+          </div>
+          <div class="bar"><span class="b go">Вставити <i>↩</i></span><span class="b">Без форматування <i>⌥↩</i></span><span class="b">Дії <i>⌘K</i></span><span class="sp"></span><span class="b">Закрити <i>esc</i></span></div>
+        </div>
+        <div class="dest"><span class="who"></span><span class="d"></span><span class="caret" style="background:#222"></span></div>
       </div>
     </div>
-
-    <div class="row flip">
-      <img src="../assets/clipboard-actions.jpg" alt="Дії із записом буфера" width="1600" height="1079" loading="lazy">
-      <div>
-        <h3>Вставляйте краще</h3>
-        <p><kbd>⌘K</kbd> чистить посилання від трекерів, змінює регістр, з’єднує рядки, форматує JSON або зберігає запис як сніпет.</p>
-      </div>
+    <div>
+      <div class="label"><span class="no">Herb. Shotleaf · No. 004</span><b>Memoria copiata</b>історія буфера · багаторічна, лишається на цьому Mac<br>клавіші: ⇧⌘V</div>
+      <h3>Буфер, що пам’ятає</h3>
+      <p>Панель відкривається біля курсора. Наберіть кілька літер, клацніть або натисніть <kbd>↩</kbd>, і запис одразу вставиться в додаток, де ви були.</p>
+      <ul>
+        <li>Текст, посилання, кольори, зображення й файли; шукається навіть текст на картинках</li>
+        <li>Паролі з менеджерів паролів не зберігаються</li>
+        <li><kbd>⌘K</kbd> чистить посилання від трекерів, змінює регістр, форматує JSON</li>
+        <li>Виберіть кілька й вставте разом або по черзі</li>
+      </ul>
     </div>
+  </div>
 
-    <div class="row">
-      <img src="../assets/snippets-editor.jpg" alt="Редактор сніпетів із папками" width="1600" height="1007" loading="lazy">
-      <div>
-        <h3>Сніпети</h3>
-        <p>Тримайте відповіді, підписи й реквізити в папках. Наберіть скорочення будь-де, і воно розгорнеться, або відкрийте їх через <kbd>⇧⌘B</kbd>.</p>
-        <ul>
-          <li>Підстановки дати, часу, буфера й місця курсора</li>
-          <li>Запитання перед вставкою, наприклад ім’я</li>
-        </ul>
+  <div class="specimen flip">
+    <div class="sheet tilt-l">
+      <span class="tape tr"></span>
+      <div class="mock m-snip" data-abbr=";відп" data-answer="пане Андрію"
+           data-tpl="Добрий день, {name}!\nДякую за звернення, надішлю рахунок до {date}.\n{cursor}\n\nЗ повагою,\nОксана">
+        <div class="mail">
+          <div class="mail-top"><i></i><i></i><i></i></div>
+          <div class="field">Кому: <b>andrii@studio.example</b></div>
+          <div class="field">Тема: <b>Рахунок</b></div>
+          <div class="body"></div>
+        </div>
+        <div class="ask hide">
+          <div class="win">
+            <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title">Сніпет<small>;відп</small></div></div>
+            <div class="q">Ім’я<span class="ans"></span></div>
+          </div>
+        </div>
       </div>
+      <div class="note" style="left:-20px;bottom:-54px;transform:rotate(-3deg)">п’ять літер → ціла відповідь</div>
+    </div>
+    <div>
+      <div class="label"><span class="no">Herb. Shotleaf · No. 005</span><b>Abbreviatio expansa</b>сніпети · проростають із кількох літер<br>клавіші: ⇧⌘B</div>
+      <h3>Сніпети, що заповнюються самі</h3>
+      <p>Тримайте відповіді, підписи й реквізити в папках. Наберіть скорочення в будь-якому додатку, і воно розгорнеться: із сьогоднішньою датою, вмістом буфера та відповіддю на пару запитань.</p>
+      <ul>
+        <li><kbd>{date}</kbd> <kbd>{time}</kbd> <kbd>{clipboard}</kbd> <kbd>{cursor}</kbd> <kbd>{?Ім’я}</kbd></li>
+        <li>Папки ліворуч, сніпети праворуч; <kbd>Tab</kbd> перемикає з історії</li>
+      </ul>
     </div>
   </div>
 </section>
 
-<section id="privacy">
-  <div class="wrap">
-    <h2>Приватність за задумом</h2>
-    <div class="grid">
-      <div class="card"><h3>На вашому Mac</h3><p>Історія, сніпети й знімки зберігаються локально. Текст розпізнається на пристрої.</p></div>
-      <div class="card"><h3>Без акаунта</h3><p>Без реєстрації, стеження й аналітики.</p></div>
-      <div class="card"><h3>Нативний</h3><p>Написаний на Swift для macOS. Ощадливий до пам’яті й виглядає як рідний.</p></div>
+<!-- ============ PRIVACY ============ -->
+<section class="wrap plate" id="privacy">
+  <div class="plate-head">
+    <span class="num">Таблиця III</span>
+    <h2>Вирощено локально</h2>
+    <p>Ніщо не залишає ваш Mac, якщо ви самі цього не надішлете.</p>
+  </div>
+  <div class="ledger">
+    <div><h4>На вашому Mac</h4><p>Історія, сніпети й знімки зберігаються у вашій бібліотеці. Текст розпізнається на пристрої.</p></div>
+    <div><h4>Без акаунта</h4><p>Без реєстрації, стеження й аналітики. Ні зараз, ні потім.</p></div>
+    <div><h4>Нативний</h4><p>Написаний на Swift для macOS. Ощадливий до пам’яті, швидко відкривається, почувається вдома поряд із програмами Apple.</p></div>
+  </div>
+</section>
+
+<!-- ============ SUPPORT ============ -->
+<section class="wrap plate" id="support">
+  <div class="support">
+    <svg class="leafdeco" style="right:-30px;top:-40px;width:220px;transform:rotate(22deg)"><use href="#lf-sprig"/></svg>
+    <svg class="leafdeco" style="right:170px;bottom:-80px;width:130px;transform:rotate(-30deg)"><use href="#lf-oval"/></svg>
+    <h2>Полийте <em>листок</em></h2>
+    <p>Shotleaf робить одна людина, вечорами. Якщо він заощаджує вам кілька хвилин на день, кава допоможе йому рости далі.</p>
+    <div class="donate">
+      <span><b>Ko-fi</b><small data-soon="скоро">Картка чи PayPal, без комісій</small></span>
+      <span><b>Buy Me a Coffee</b><small data-soon="скоро">Кава, будь-яка сума</small></span>
+      <span><b>GitHub Sponsors</b><small data-soon="скоро">Щомісяця, для розробників</small></span>
+      <span><b>Банка Monobank</b><small data-soon="скоро">Українські картки, Apple Pay</small></span>
     </div>
   </div>
 </section>
 
-<section id="install">
-  <div class="wrap">
-    <h2>Встановлення</h2>
-    <p class="sub">Shotleaf ще не нотаризований Apple, тож macOS один раз перепитає перед першим запуском.</p>
-    <ol class="steps">
-      <li>Перетягніть <b>Shotleaf</b> у <b>Програми</b> й відкрийте.</li>
-      <li>Коли macOS скаже, що не може перевірити додаток, відкрийте <b>Системні параметри → Приватність і безпека</b> й натисніть <b>Усе одно відкрити</b>.</li>
-      <li>Пройдіть майстер налаштування: Shotleaf попросить <b>Запис екрана</b> (для скріншотів) і <b>Доступність</b> (для вставки).</li>
-    </ol>
+<!-- ============ INSTALL ============ -->
+<section class="wrap plate" id="install">
+  <div class="plate-head">
+    <span class="num">Таблиця IV</span>
+    <h2>Посадка</h2>
+    <p>Ще не нотаризований Apple, тож macOS один раз перепитає перед першим запуском.</p>
   </div>
+  <ol class="steps">
+    <li>Перетягніть <b>Shotleaf</b> у <b>Програми</b> й відкрийте.</li>
+    <li>Якщо macOS скаже, що не може перевірити додаток, відкрийте <b>Системні параметри → Приватність і безпека</b> й натисніть <b>Усе одно відкрити</b>.</li>
+    <li>Пройдіть майстер: дозвольте <b>Запис екрана</b> для скріншотів і <b>Доступність</b> для вставки.</li>
+  </ol>
 </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <span>© 2026 Олексій Зюзін (Syvyj) · <a href="https://syvyj.dev">syvyj.dev</a></span>
-    <span><a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a> · <a href="../">English</a></span>
-  </div>
+<footer class="wrap">
+  <span>Herbarium Shotleafianum · leg. Syvyj · MMXXVI<br>© 2026 Олексій Зюзін · <a href="https://syvyj.dev">syvyj.dev</a></span>
+  <span><a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a> · <a href="../">English</a></span>
 </footer>
+
+<script src="../mocks.js" defer></script>
 </body>
 </html>
