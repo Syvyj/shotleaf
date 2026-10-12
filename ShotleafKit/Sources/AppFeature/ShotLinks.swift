@@ -67,34 +67,45 @@ enum ShotLinks {
     /// The key's old place (the app was called APILA): moved to `service` once.
     private static let oldService = "app.apila.shots"
 
-    private static func read(_ service: String) -> String? {
+    private static func query(_ service: String) -> [String: Any] {
+        [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service]
+    }
+
+    /// The key, and whether the answer is final (found, or not there) rather than denied / locked.
+    private static func read(_ service: String) -> (key: String?, final: Bool) {
         var item: CFTypeRef?
-        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
-                                    kSecReturnData as String: true]
-        guard SecItemCopyMatching(query as CFDictionary, &item) == errSecSuccess else { return nil }
-        return (item as? Data).flatMap { String(data: $0, encoding: .utf8) }
+        var query = query(service)
+        query[kSecReturnData as String] = true
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+        let key = status == errSecSuccess ? (item as? Data).flatMap { String(data: $0, encoding: .utf8) } : nil
+        return (key, status == errSecSuccess || status == errSecItemNotFound)
     }
 
     static var token: String? {
         get {
             if let cache { return cache }
-            if let found = read(service) {
+            let current = read(service)
+            if let found = current.key {
                 cache = .some(found)
                 // A key put there by another tool (e.g. `security`) makes macOS ask every time; saved again by
                 // Shotleaf itself, it's Shotleaf's own and no longer asks.
                 if !UserDefaults.standard.bool(forKey: ownedKey) { token = found }
                 return found
             }
-            let old = read(oldService)
+            // Denied or locked: no answer yet, ask again next time instead of caching "no key".
+            guard current.final else { return nil }
+            let (old, final) = read(oldService)
+            guard final else { return nil }
             if let old {
                 token = old
-                SecItemDelete([kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: oldService] as CFDictionary)
+                // Only once the key is safely in its new place.
+                if read(service).key == old { SecItemDelete(query(oldService) as CFDictionary) }
             }
             cache = .some(old)
             return old
         }
         set {
-            let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service]
+            let query = query(service)
             SecItemDelete(query as CFDictionary)
             cache = .some(newValue)
             UserDefaults.standard.set(true, forKey: ownedKey)

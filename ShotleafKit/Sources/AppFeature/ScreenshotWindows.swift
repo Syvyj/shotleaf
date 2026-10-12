@@ -262,8 +262,7 @@ final class ScreenshotWindows {
 
     /// The newest captures, as taken (Application Support/Shotleaf/Recent).
     static var recentFolder: URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("\(AppInfo.name)/Recent", isDirectory: true)
+        AppInfo.supportFolder.appendingPathComponent("Recent", isDirectory: true)
     }
     static let recentLimit = 10
 

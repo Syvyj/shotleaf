@@ -78,8 +78,7 @@ final class ClipboardHistory {
     }
 
     static var defaultFolder: URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("\(AppInfo.name)/Clipboard", isDirectory: true)
+        AppInfo.supportFolder.appendingPathComponent("Clipboard", isDirectory: true)
     }
 
     func start() {

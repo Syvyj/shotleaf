@@ -14,7 +14,7 @@ mkdir -p "$(dirname "$OUT")"
            mlx-swift-lm/LICENSE mlx-swift-lm/Libraries/MLXCXGrammar/xgrammar/LICENSE swift-asn1/LICENSE.txt swift-asn1/NOTICE.txt \
            swift-collections/LICENSE.txt swift-crypto/LICENSE.txt swift-crypto/NOTICE.txt swift-huggingface/LICENSE swift-jinja/LICENSE \
            swift-numerics/LICENSE.txt swift-transformers/LICENSE yyjson/LICENSE; do
-    [ -f "$f" ] || continue
+    [ -f "$f" ] || { echo "missing licence: $f (moved? update the list)" >&2; exit 1; }
     echo "================================================================================"
     echo "$(dirname "$f" | sed 's|/Source/Cmlx/| — |; s|/Libraries/MLXCXGrammar/| — |')  ($(basename "$f"))"
     echo "================================================================================"

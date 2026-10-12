@@ -23,16 +23,17 @@ public enum AppInfo {
     /// setup guide again — macOS sees a new app, so its permissions are gone.
     public static func migrateFromAPILA(defaults: UserDefaults = .standard, fileManager: FileManager = .default,
                                         support: URL? = nil, oldDomain: String = oldBundleID) {
-        let doneKey = "migratedFromAPILA"
-        guard !defaults.bool(forKey: doneKey) else { return }
-        defer { defaults.set(true, forKey: doneKey) }
-
+        // The files: tried on every launch until they've moved (a failed move is retried, never lost).
         let base = support ?? fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         let old = base.appendingPathComponent(oldName, isDirectory: true)
         let new = base.appendingPathComponent(name, isDirectory: true)
         if fileManager.fileExists(atPath: old.path), !fileManager.fileExists(atPath: new.path) {
-            try? fileManager.moveItem(at: old, to: new)
+            do { try fileManager.moveItem(at: old, to: new) } catch { NSLog("Shotleaf: couldn't move \(old.path): \(error)") }
         }
+
+        let doneKey = "migratedFromAPILA"
+        guard !defaults.bool(forKey: doneKey) else { return }
+        defer { defaults.set(true, forKey: doneKey) }
 
         guard let saved = defaults.persistentDomain(forName: oldDomain), !saved.isEmpty else { return }
         // The Keychain key must be saved again by Shotleaf itself (else macOS asks every time).

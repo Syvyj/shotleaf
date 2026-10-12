@@ -44,7 +44,7 @@ final class SnippetStore {
     }
 
     static var defaultFile: URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("\(AppInfo.name)/snippets.json")
+        AppInfo.supportFolder.appendingPathComponent("snippets.json")
     }
 
     private struct Saved: Codable {
