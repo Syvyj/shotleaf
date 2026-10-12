@@ -15,6 +15,7 @@ const io = new IntersectionObserver((entries) => {
 document.querySelectorAll(".mock").forEach((m) => io.observe(m));
 
 async function clipboard(m) {
+  if (m.dataset.static) return;
   const q = m.dataset.q, query = m.querySelector(".q"), ph = m.querySelector(".ph");
   const rows = [...m.querySelectorAll(".row")], prev = m.querySelector(".prev .p"), meta = m.querySelector(".pm");
   const paste = m.querySelector(".b.go"), win = m.querySelector(".win"), dest = m.querySelector(".dest .d");
