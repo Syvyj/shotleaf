@@ -48,10 +48,13 @@ final class SnippetExpander {
     private func expand(_ snippet: Snippet) {
         let saved = Paster.snapshot()
         let filled = SnippetText.expand(snippet.text, clipboard: NSPasteboard.general.string(forType: .string) ?? "")
-        Paster.pressDelete(snippet.abbreviation.count)
-        if !SnippetText.questions(in: snippet.text).isEmpty { ask(snippet); return }
-        Paster.put(filled.text, images: store.imageURLs(snippet))
+        let asks = !SnippetText.questions(in: snippet.text).isEmpty
         Task {
+            // We see the abbreviation's last key before the app has typed it: let it land, then erase.
+            try? await Task.sleep(for: .milliseconds(50))
+            await Paster.pressDelete(snippet.abbreviation.count)
+            if asks { ask(snippet); return }
+            Paster.put(filled.text, images: store.imageURLs(snippet))
             try? await Task.sleep(for: .milliseconds(40))
             Paster.pressCommandV()
             if filled.afterCursor > 0 {

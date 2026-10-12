@@ -388,9 +388,13 @@ enum Paster {
         press(Array(repeating: [(123, true, CGEventFlags()), (123, false, CGEventFlags())], count: count).flatMap { $0 })
     }
 
-    /// ⌫ `count` times (to remove a typed abbreviation).
-    static func pressDelete(_ count: Int) {
-        press(Array(repeating: [(51, true, CGEventFlags()), (51, false, CGEventFlags())], count: count).flatMap { $0 })
+    /// ⌫ `count` times (to remove a typed abbreviation), one at a time: some apps
+    /// drop keys that arrive all at once, which left the abbreviation's first character behind.
+    static func pressDelete(_ count: Int) async {
+        for _ in 0..<count {
+            press([(51, true, CGEventFlags()), (51, false, CGEventFlags())])
+            try? await Task.sleep(for: .milliseconds(8))
+        }
     }
 
     private static func press(_ keys: [(Int, Bool, CGEventFlags)]) {
