@@ -43,6 +43,7 @@ public struct SettingsRootView: View {
             screenshotSection
             toolsSection
             clipboardSection
+            linksSection
             completionSection
             generalSection
             permissionsSection
@@ -197,6 +198,50 @@ public struct SettingsRootView: View {
             Toggle("Include the pointer", isOn: $showsCursor)
         } header: {
             Text("Screenshots")
+        }
+    }
+
+    // MARK: Links
+
+    @AppStorage(ShotLinks.serverKey) private var linkServer = ""
+    @AppStorage(ShotLinks.hoursKey) private var linkHours = 6
+    @State private var linkKey = ShotLinks.token ?? ""
+    @State private var linkCheck: String?
+
+    private var linksSection: some View {
+        Section {
+            TextField("Server", text: $linkServer, prompt: Text(verbatim: "https://shot.example.com"))
+            SecureField("Key", text: $linkKey)
+                .onChange(of: linkKey) { _, key in ShotLinks.token = key.trimmingCharacters(in: .whitespacesAndNewlines) }
+            Picker("Links work for", selection: $linkHours) {
+                ForEach(ShotLinks.choices, id: \.self) { Text("\($0) h").tag($0) }
+            }
+            HStack {
+                Button("Check") { checkLinkServer() }
+                    .disabled(ShotLinks.endpoint(linkServer) == nil || linkKey.isEmpty)
+                if let linkCheck { Text(linkCheck).font(.caption).foregroundStyle(.secondary) }
+            }
+        } header: {
+            Text("Screenshot Links")
+        } footer: {
+            Text("Your own server (server/shots in the APILA repo). The screenshot window's link button uploads the shot and copies a link that stops working after the chosen time. The key is kept in the Keychain.")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+    }
+
+    /// Uploads a 1-pixel picture to see that the address and the key work.
+    private func checkLinkServer() {
+        linkCheck = String(localized: "Checking…")
+        let pixel = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 1, pixelsHigh: 1, bitsPerSample: 8, samplesPerPixel: 4,
+                                     hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)?
+            .representation(using: .png, properties: [:]) ?? Data()
+        Task {
+            do {
+                let url = try await ShotLinks.upload(pixel, hours: 1, server: linkServer, token: linkKey)
+                linkCheck = String(localized: "Works: \(url.host() ?? "")")
+            } catch {
+                linkCheck = error.localizedDescription
+            }
         }
     }
 

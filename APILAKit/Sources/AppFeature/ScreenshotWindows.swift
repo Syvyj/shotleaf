@@ -62,6 +62,7 @@ final class ScreenshotWindows {
                     try? data.write(to: url)
                 }
             },
+            link: { hours in try await ShotLinks.upload(result(), hours: hours) },
             share: {
                 guard let view = panel.contentView else { return }
                 let at = view.convert(panel.mouseLocationOutsideOfEventStream, from: nil)

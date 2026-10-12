@@ -14,6 +14,8 @@ struct ScreenshotActions {
     var dragFile: () -> URL?
     /// "Save as…" in another format (asks where).
     var saveAs: (UTType) -> Void = { _ in }
+    /// Uploads the result to the link server; the link lives that many hours.
+    var link: (Int) async throws -> URL = { _ in throw ShotLinks.Failure.notSetUp }
     /// The system share menu (AirDrop, Messages, Mail…).
     var share: () -> Void = {}
 }
@@ -52,7 +54,8 @@ struct ScreenshotView: View {
     /// For double-click detection on marks.
     @State private var lastClick: (id: Annotation.ID, at: Date)?
     @FocusState private var textFocused: Bool
-    private enum Flyout { case shapes, style, fontSize, backdrop, saveAs, watermark }
+    private enum Flyout { case shapes, style, fontSize, backdrop, saveAs, watermark, link }
+    @State private var linking = false
     @State private var removingBackground = false
     @State private var flyout: Flyout?
     /// The shape the shapes button shows when another tool is in use.
@@ -822,6 +825,30 @@ struct ScreenshotView: View {
             Button { actions.share() } label: { Image(systemName: "square.and.arrow.up").frame(height: 17) }
                 .buttonStyle(LeafButtonStyle())
                 .instantTip("Share", above: true)
+            HStack(spacing: 2) {
+                Button { makeLink(ShotLinks.defaultHours) } label: {
+                    if linking { ProgressView().controlSize(.small).frame(height: 17) } else { Image(systemName: "link").frame(height: 17) }
+                }
+                .instantTip(String(localized: "Link for \(ShotLinks.defaultHours) h"), hidden: flyout == .link, above: true)
+                Button { flyout = flyout == .link ? nil : .link } label: { chevron.frame(height: 17) }
+            }
+            .buttonStyle(LeafButtonStyle())
+            .disabled(linking)
+            .overlay(alignment: .bottomLeading) {
+                if flyout == .link {
+                    flyoutCard(above: true) {
+                        ForEach(ShotLinks.choices, id: \.self) { hours in
+                            Button { flyout = nil; makeLink(hours) } label: {
+                                Text("For \(hours) h").font(Leaf.font(13, .medium))
+                                    .padding(.horizontal, 8).padding(.vertical, 4)
+                                    .frame(width: 120, alignment: .leading)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
             Button { flyout = flyout == .watermark ? nil : .watermark } label: { Image(systemName: "signature").frame(height: 17) }
                 .buttonStyle(LeafButtonStyle(prominent: doc.watermark != nil))
                 .instantTip("Watermark", hidden: flyout == .watermark, above: true)
@@ -907,6 +934,23 @@ struct ScreenshotView: View {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
         flash(liveText.selectedText.isEmpty ? "Copied all text" : "Copied")
+    }
+
+    /// Uploads, then puts the link on the clipboard.
+    private func makeLink(_ hours: Int) {
+        linking = true
+        Task {
+            defer { linking = false }
+            do {
+                let url = try await actions.link(hours)
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(url.absoluteString, forType: .string)
+                Sound.copied()
+                flash(String(localized: "Link copied · works \(hours) h"))
+            } catch {
+                flash(error.localizedDescription)
+            }
+        }
     }
 
     private func toggleLiveText() {

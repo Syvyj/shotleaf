@@ -1,6 +1,156 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Set up the link server in Settings → Screenshot Links": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Налаштуйте сервер у Налаштуваннях → Посилання на скріншоти"
+          }
+        }
+      }
+    },
+    "The server said no: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер відмовив: %@"
+          }
+        }
+      }
+    },
+    "The server didn't answer as expected": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер відповів не так, як треба"
+          }
+        }
+      }
+    },
+    "Link for %lld h": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання на %lld год"
+          }
+        }
+      }
+    },
+    "For %lld h": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На %lld год"
+          }
+        }
+      }
+    },
+    "Link copied · works %lld h": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання скопійовано · діє %lld год"
+          }
+        }
+      }
+    },
+    "Server": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер"
+          }
+        }
+      }
+    },
+    "Key": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ"
+          }
+        }
+      }
+    },
+    "Links work for": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання діють"
+          }
+        }
+      }
+    },
+    "%lld h": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld год"
+          }
+        }
+      }
+    },
+    "Check": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевірити"
+          }
+        }
+      }
+    },
+    "Checking…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевіряю…"
+          }
+        }
+      }
+    },
+    "Works: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Працює: %@"
+          }
+        }
+      }
+    },
+    "Screenshot Links": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання на скріншоти"
+          }
+        }
+      }
+    },
+    "Your own server (server/shots in the APILA repo). The screenshot window's link button uploads the shot and copies a link that stops working after the chosen time. The key is kept in the Keychain.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш власний сервер (server/shots у репозиторії APILA). Кнопка посилання у вікні скріншоту завантажує знімок і копіює посилання, яке перестає працювати через вибраний час. Ключ зберігається в Связці ключів."
+          }
+        }
+      }
+    },
     "Clean links of trackers": {
       "localizations": {
         "uk": {
