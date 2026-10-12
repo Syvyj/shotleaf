@@ -30,6 +30,12 @@ public final class AppCoordinator {
         inlineCompletion.quickFixes = container.settings.completionQuickFixes
         inlineCompletion.history.enabled = container.settings.completionLearnsStyle
         if container.settings.completionEnabled { inlineCompletion.start() }
+        screenshots.toSnippets = { [weak self] png in
+            guard let self else { return nil }
+            let folder = UserDefaults.standard.string(forKey: "snippetFolder").flatMap(UUID.init) // the folder last opened in the panel
+            let saved = snippets.save(title: String(localized: "Screenshot"), text: "", pngs: [png], folder: folder)
+            return snippets.folder(saved.folder)?.name
+        }
         clipboard.start()
         expander.start()
         Self.log.notice("startup permissions: \(String(describing: self.permissions), privacy: .public) bundle: \(Bundle.main.bundlePath, privacy: .public)")

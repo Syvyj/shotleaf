@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 /// The snippets editor, in the screenshot window's look: folders, the
 /// snippets in the chosen one, and the selected snippet with a live preview.
@@ -192,6 +193,23 @@ struct SnippetEditorView: View {
                         .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(.primary.opacity(0.12)))
                         .frame(minHeight: 140)
                 }
+                field("Pictures") {
+                    HStack(alignment: .top, spacing: 8) {
+                        SnippetImages(urls: store.imageURLs(store.snippets[i]), remove: { url in
+                            store.snippets[i].images?.removeAll { $0 == url.lastPathComponent }
+                        })
+                        Button { addPictures(to: store.snippets[i].id) } label: {
+                            Image(systemName: "plus").frame(width: 56, height: 56)
+                                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(.primary.opacity(0.2), style: StrokeStyle(lineWidth: 1, dash: [4])))
+                        }
+                        .buttonStyle(.plain)
+                        .instantTip("Add pictures")
+                    }
+                }
+                .dropDestination(for: URL.self) { urls, _ in
+                    add(urls, to: store.snippets[i].id)
+                    return true
+                }
                 HStack(spacing: 6) {
                     Text("Insert:").font(Leaf.font(11, .medium)).opacity(0.6)
                     ForEach(["{date}", "{time}", "{clipboard}", "{cursor}", "{?Name}"], id: \.self) { variable in
@@ -260,8 +278,59 @@ struct SnippetEditorView: View {
         folder = nil
     }
 
+    private func addPictures(to id: UUID) {
+        let ask = NSOpenPanel()
+        ask.allowedContentTypes = [.image]
+        ask.allowsMultipleSelection = true
+        ask.begin { response in
+            guard response == .OK else { return }
+            add(ask.urls, to: id)
+        }
+    }
+
+    /// Image files become the snippet's pictures (kept as PNG in the store).
+    private func add(_ urls: [URL], to id: UUID) {
+        let names = urls.compactMap { url -> String? in
+            guard let data = try? Data(contentsOf: url), let rep = NSBitmapImageRep(data: data),
+                  let png = rep.representation(using: .png, properties: [:]) else { return nil }
+            return store.addImage(png)
+        }
+        guard !names.isEmpty, let i = store.snippets.firstIndex(where: { $0.id == id }) else { return }
+        store.snippets[i].images = (store.snippets[i].images ?? []) + names
+    }
+
     private func deleteSnippet(_ id: UUID) {
         store.snippets.removeAll { $0.id == id }
         selected = shown.first?.id
+    }
+}
+
+/// A snippet's pictures as small thumbnails (with × to remove, in the editor).
+struct SnippetImages: View {
+    let urls: [URL]
+    var remove: ((URL) -> Void)?
+
+    var body: some View {
+        if !urls.isEmpty {
+            HStack(spacing: 8) {
+                ForEach(urls, id: \.self) { url in
+                    Group {
+                        if let image = NSImage(contentsOf: url) { Image(nsImage: image).resizable().scaledToFill() } else { Color.secondary.opacity(0.2) }
+                    }
+                    .frame(width: 56, height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(.primary.opacity(0.12)))
+                    .overlay(alignment: .topTrailing) {
+                        if let remove {
+                            Button { remove(url) } label: {
+                                Image(systemName: "xmark.circle.fill").symbolRenderingMode(.palette).foregroundStyle(.white, .black.opacity(0.6))
+                            }
+                            .buttonStyle(.plain).padding(3)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 }

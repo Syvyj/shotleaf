@@ -2600,6 +2600,56 @@
         }
       }
     },
+    "Pictures": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Картинки"
+          }
+        }
+      }
+    },
+    "Add pictures": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати картинки"
+          }
+        }
+      }
+    },
+    "To Snippets": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У сніпети"
+          }
+        }
+      }
+    },
+    "Saved to “%@”": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережено в «%@»"
+          }
+        }
+      }
+    },
+    "Screenshots (%lld)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скріншоти (%lld)"
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {

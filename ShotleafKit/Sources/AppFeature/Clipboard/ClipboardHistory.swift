@@ -286,32 +286,8 @@ final class ClipboardHistory {
     /// item — a PNG plus a named file, so apps that take several pictures or
     /// attachments get them all; the texts go in as one, a line each.
     func copyTogether(_ picked: [ClipItem], to board: NSPasteboard = .general) {
-        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("Shotleaf Paste/\(UUID().uuidString)", isDirectory: true)
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        var objects: [NSPasteboardItem] = []
-        let text = picked.filter { $0.kind != .image && $0.kind != .file }.map(\.text).joined(separator: "\n")
-        if !text.isEmpty {
-            let item = NSPasteboardItem()
-            item.setString(text, forType: .string)
-            objects.append(item)
-        }
-        for (n, entry) in picked.filter({ $0.kind == .image }).enumerated() {
-            guard let png = try? Data(contentsOf: imageURL(entry)) else { continue }
-            let file = folder.appendingPathComponent(String(localized: "Screenshot") + " \(n + 1).png")
-            try? png.write(to: file)
-            let item = NSPasteboardItem()
-            item.setData(png, forType: .png)
-            item.setString(file.absoluteString, forType: .fileURL)
-            objects.append(item)
-        }
-        for url in picked.flatMap(\.fileURLs) {
-            let item = NSPasteboardItem()
-            item.setString(url.absoluteString, forType: .fileURL)
-            objects.append(item)
-        }
-        objects.forEach { $0.setData(Data(), forType: Self.ownType) }
-        board.clearContents()
-        board.writeObjects(objects)
+        Paster.put(picked.filter { $0.kind != .image && $0.kind != .file }.map(\.text).joined(separator: "\n"),
+                   images: picked.filter { $0.kind == .image }.map(imageURL), files: picked.flatMap(\.fileURLs), on: board)
         lastChange = board.changeCount
     }
 

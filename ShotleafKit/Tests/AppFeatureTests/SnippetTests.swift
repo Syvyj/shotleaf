@@ -5,6 +5,31 @@ import AppKit
 @Suite("Snippets")
 @MainActor
 struct SnippetTests {
+    @Test("Pictures: saved with the snippet, pasted as separate pictures after the text, dropped from disk when unused")
+    func pictures() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-snip-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = SnippetStore(file: dir.appendingPathComponent("s.json"))
+        let work = SnippetFolder(name: "Робота")
+        store.folders = [work]
+        let png = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 4, pixelsHigh: 4, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
+                                   isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!.representation(using: .png, properties: [:])!
+        let saved = store.save(title: "Схема", text: "Як доїхати:", pngs: [png, png], folder: work.id)
+        #expect(saved.folder == work.id && saved.images?.count == 2)
+        #expect(store.imageURLs(saved).allSatisfy { FileManager.default.fileExists(atPath: $0.path) })
+        #expect(SnippetStore(file: store.file).snippets.first?.images == saved.images) // survives a restart
+
+        let board = NSPasteboard(name: .init("shotleaf-test-\(UUID())"))
+        defer { board.releaseGlobally() }
+        Paster.put("Як доїхати:", images: store.imageURLs(saved), on: board)
+        let items = board.pasteboardItems ?? []
+        #expect(items.count == 3 && items[0].string(forType: .string) == "Як доїхати:" && items[1].data(forType: .png) != nil)
+
+        let files = store.imageURLs(saved)
+        store.snippets.removeAll()
+        #expect(files.allSatisfy { !FileManager.default.fileExists(atPath: $0.path) })
+    }
+
     @Test("Variables: date, time, clipboard, answers; {cursor} says how far back the caret goes")
     func expand() {
         var c = DateComponents(); c.year = 2026; c.month = 10; c.day = 14; c.hour = 9; c.minute = 5

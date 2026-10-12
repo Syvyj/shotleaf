@@ -18,6 +18,8 @@ struct ScreenshotActions {
     var link: (Int) async throws -> URL = { _ in throw ShotLinks.Failure.notSetUp }
     /// The system share menu (AirDrop, Messages, Mail…).
     var share: () -> Void = {}
+    /// Keeps the result as a snippet (in the folder last opened); that folder's name, if any.
+    var toSnippets: () -> String? = { nil }
 }
 
 /// The window after a capture: the shot on a canvas that grows with
@@ -806,6 +808,17 @@ struct ScreenshotView: View {
             .overlay(alignment: .bottomLeading) {
                 if flyout == .saveAs {
                     flyoutCard(above: true) {
+                        Button {
+                            flyout = nil
+                            let folder = actions.toSnippets()
+                            flash(folder.map { String(localized: "Saved to “\($0)”") } ?? String(localized: "Saved as a snippet"))
+                        } label: {
+                            Text("To Snippets").font(Leaf.font(13, .medium))
+                                .padding(.horizontal, 8).padding(.vertical, 4)
+                                .frame(width: 110, alignment: .leading)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
                         ForEach([UTType.png, .jpeg, .heic, .pdf], id: \.self) { type in
                             Button { flyout = nil; actions.saveAs(type) } label: {
                                 Text(verbatim: "\(type.preferredFilenameExtension?.uppercased() ?? "")…")

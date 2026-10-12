@@ -50,7 +50,7 @@ final class SnippetExpander {
         let filled = SnippetText.expand(snippet.text, clipboard: NSPasteboard.general.string(forType: .string) ?? "")
         Paster.pressDelete(snippet.abbreviation.count)
         if !SnippetText.questions(in: snippet.text).isEmpty { ask(snippet); return }
-        Paster.put(filled.text)
+        Paster.put(filled.text, images: store.imageURLs(snippet))
         Task {
             try? await Task.sleep(for: .milliseconds(40))
             Paster.pressCommandV()

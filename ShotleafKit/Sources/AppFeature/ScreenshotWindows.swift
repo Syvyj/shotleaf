@@ -9,6 +9,8 @@ import UniformTypeIdentifiers
 @MainActor
 final class ScreenshotWindows {
     private(set) var open: [ObjectIdentifier: FloatingPanel] = [:] // internal for tests
+    /// "To Snippets": keeps a PNG as a snippet; the folder's name, if it went into one.
+    var toSnippets: (Data) -> String? = { _ in nil }
 
     /// `edited` gets the shot as marked up — on copy and when the window closes —
     /// so its clipboard-history entry shows what was actually made.
@@ -79,7 +81,8 @@ final class ScreenshotWindows {
                 let at = view.convert(panel.mouseLocationOutsideOfEventStream, from: nil)
                 NSSharingServicePicker(items: [Self.writeTempPNG(result())])
                     .show(relativeTo: NSRect(origin: at, size: .zero), of: view, preferredEdge: .maxY)
-            }
+            },
+            toSnippets: { [weak self] in self?.toSnippets(result()) }
         )
         let width = max(display.width + margin, ScreenshotView.minContentWidth) + 28
         panel = Self.makePanel(ScreenshotView(image: image, cgImage: cgImage, pixelSize: pixels, displaySize: display, actions: actions, doc: doc),
