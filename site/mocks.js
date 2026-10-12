@@ -91,6 +91,8 @@ document.querySelectorAll(".m-snip").forEach(snippet);
     current = i; started = performance.now();
     tabs.forEach((t, n) => { t.classList.toggle("on", n === i); t.setAttribute("aria-selected", n === i); });
     slides.forEach((s, n) => s.classList.toggle("on", n === i));
+    // On a phone the tabs are a sideways strip: keep the current one in view.
+    if (box.scrollWidth > box.clientWidth) box.scrollTo({ left: tabs[i].offsetLeft - 24, behavior: reduce ? "auto" : "smooth" });
   };
   tabs.forEach((t, i) => t.addEventListener("click", () => { held = true; tabs[current].style.setProperty("--p", 0); show(i); }));
   if (reduce) return;

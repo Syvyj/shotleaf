@@ -2,6 +2,7 @@
 """Builds the site from src/page.html: index.html (English) and uk/index.html.
 In the template, [[English||Українська]] picks one side per language.
 Run: python3 site/build.py"""
+import hashlib
 import html
 import os
 import re
@@ -35,7 +36,9 @@ def render(template, lang):
     side = 0 if lang == "en" else 1
     page = template.replace("{{donate}}", donate_block())
     page = re.sub(r"\[\[(.*?)\|\|(.*?)\]\]", lambda m: m.group(1 + side), page, flags=re.S)
-    values = {"download": DOWNLOAD, "lang": lang, "root": "" if lang == "en" else "../",
+    # A new version of the CSS/JS gets a new URL, so browsers don't keep the old one.
+    ver = hashlib.sha1(b"".join(open(os.path.join(HERE, f), "rb").read() for f in ("style.css", "mocks.js"))).hexdigest()[:8]
+    values = {"ver": ver, "download": DOWNLOAD, "lang": lang, "root": "" if lang == "en" else "../",
               "other": "uk/" if lang == "en" else "../", "other_lang": "uk" if lang == "en" else "en"}
     page = re.sub(r"\{\{(\w+)\}\}", lambda m: values[m.group(1)], page)
     assert "[[" not in page and "{{" not in page, f"unfilled placeholder in {lang}"

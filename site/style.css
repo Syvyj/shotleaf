@@ -348,12 +348,26 @@ footer a:hover { color: var(--text); }
 
 
 @media (max-width: 960px) {
+  .hero { padding-top: 64px; }
+  .nav a.l:not(.lang) { display: none; }
+  .slides { margin-top: 44px; }
+  /* tabs become a strip you swipe sideways */
+  .tabs { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; margin: 36px -24px 0; padding: 4px 24px 10px; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: 0 0 230px; scroll-snap-align: start; }
+  .tool, #scrolling, #clipboard, #completion { grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 52px 0; }
+  #scrolling .stagebox, #clipboard .stagebox, #completion .stagebox { order: 0; }
+  .feats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
   .install { grid-template-columns: minmax(0, 1fr); }
   .give { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .nav a.l:not(.lang) { display: none; }
-  .hero { padding-top: 64px; }
+  .head { margin-top: 100px; }
+  .support { margin-top: 110px; padding: 60px 20px 52px; }
 }
 @media (max-width: 560px) {
   .nav .btn.primary { display: none; }
+  .tab { flex-basis: 78%; }
+  .feats, .give { grid-template-columns: minmax(0, 1fr); }
+  .tool h3 { font-size: 28px; }
+  .hero .sub { font-size: 18px; }
 }
 @media (prefers-reduced-motion: reduce) { .cap { transition: none; } }
