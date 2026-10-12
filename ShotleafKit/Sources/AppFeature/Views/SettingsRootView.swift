@@ -42,6 +42,7 @@ public struct SettingsRootView: View {
                     VStack(alignment: .trailing, spacing: 4) {
                         Link("syvyj.dev", destination: AppInfo.website).font(Leaf.font(11))
                         Link(AppInfo.email, destination: URL(string: "mailto:\(AppInfo.email)")!).font(Leaf.font(11))
+                        Link("Support the Author ♥", destination: AppInfo.supportPage).font(Leaf.font(11, .semibold))
                         Button("Third-party licences") { showNotices = true }.buttonStyle(.link).font(Leaf.font(11))
                     }
                 }

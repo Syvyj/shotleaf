@@ -2600,12 +2600,42 @@
         }
       }
     },
+    "Support the Author ♥": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтримати автора ♥"
+          }
+        }
+      }
+    },
+    "Support the Author…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтримати автора…"
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Як налаштувати…"
+          }
+        }
+      }
+    },
+    "Third-party licences": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ліцензії сторонніх бібліотек"
           }
         }
       }

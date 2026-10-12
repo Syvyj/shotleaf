@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import Core
 
 /// The menu bar menu: screenshots, text from a screenshot, settings, quit.
 public struct MenuBarRootView: View {
@@ -75,6 +76,7 @@ public struct MenuBarRootView: View {
         ))
         SettingsLink { Text("Settings…") }
         Button("Setup Guide…") { coordinator.showOnboarding() }
+        Button("Support the Author…") { NSWorkspace.shared.open(AppInfo.supportPage) }
 
         Divider()
 
