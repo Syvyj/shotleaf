@@ -179,7 +179,7 @@ final class ClipboardPanelController {
             case 125 where mods == .shift: model.extendMark(1); return true
             case 126 where mods == .shift: model.extendMark(-1); return true
             case 53 where !model.marked.isEmpty: model.marked = []; return true
-            case 36, 76 where model.marked.count > 1:
+            case 36 where model.marked.count > 1, 76 where model.marked.count > 1: // `where` binds to one pattern only
                 if mods.contains(.command) { startQueue(model.markedItems) } else { pasteTogether(model.markedItems) }
                 return true
             default: break
