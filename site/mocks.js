@@ -79,93 +79,46 @@ async function snippet(m) {
 document.querySelectorAll(".m-clip").forEach(clipboard);
 document.querySelectorAll(".m-snip").forEach(snippet);
 
-// Keycaps press themselves, one shortcut after another.
-(async () => {
-  const keys = [...document.querySelectorAll(".key")];
-  if (!keys.length || reduce) return;
-  const box = keys[0].parentElement;
+// The tool switcher: the tabs under the stage pick the window shown above.
+// It moves on by itself (the bar on the tab shows when) until you pick one.
+(() => {
+  const tabs = [...document.querySelectorAll(".tab")], slides = [...document.querySelectorAll(".slide")];
+  if (!tabs.length) return;
+  const box = tabs[0].parentElement, every = 9000;
+  let current = 0, started = performance.now(), held = false;
+  const show = (i) => {
+    current = i; started = performance.now();
+    tabs.forEach((t, n) => { t.classList.toggle("on", n === i); t.setAttribute("aria-selected", n === i); });
+    slides.forEach((s, n) => s.classList.toggle("on", n === i));
+  };
+  tabs.forEach((t, i) => t.addEventListener("click", () => { held = true; tabs[current].style.setProperty("--p", 0); show(i); }));
+  if (reduce) return;
   io.observe(box);
-  for (let i = 0; ; i = (i + 1) % keys.length) {
-    await visible(box);
-    const caps = [...keys[i].querySelectorAll(".cap")];
-    for (const c of caps) { c.classList.add("down"); await sleep(140); }
-    await sleep(650);
-    caps.forEach((c) => c.classList.remove("down"));
-    await sleep(900);
-  }
+  const tick = (now) => {
+    if (!held && box.dataset.vis) {
+      const p = (now - started) / every;
+      tabs[current].style.setProperty("--p", Math.min(1, p));
+      if (p >= 1) { tabs[current].style.setProperty("--p", 0); show((current + 1) % tabs.length); }
+    } else if (!box.dataset.vis) started = now - ((parseFloat(tabs[current].style.getPropertyValue("--p")) || 0) * every);
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 })();
 
-// The pointer lights the card it's over.
-document.querySelectorAll(".cell").forEach((cell) => cell.addEventListener("pointermove", (e) => {
-  const r = cell.getBoundingClientRect();
-  cell.style.setProperty("--mx", `${e.clientX - r.left}px`); cell.style.setProperty("--my", `${e.clientY - r.top}px`);
-}));
-
-// A link counting down to its end.
-document.querySelectorAll(".c-link").forEach((card) => {
-  const t = card.querySelector(".t"), bar = card.querySelector(".bar2 i"), total = +t.dataset.left;
-  let left = total;
-  const tick = () => {
-    const h = Math.floor(left / 3600), m = Math.floor(left / 60) % 60, s = left % 60;
-    t.textContent = `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-    bar.style.transform = `scaleX(${left / total})`;
-    left = left > 0 ? left - 1 : total;
-  };
-  tick(); if (!reduce) setInterval(tick, 1000);
-});
-
-// "Try it": drag across the card to take a shot, as in the app. If nobody
-// tries for a while, a pointer shows how once.
-document.querySelectorAll(".c-pick .field").forEach((field) => {
-  const flash = field.querySelector(".flash"), count = field.querySelector(".count");
-  let sel = null, start = null, shots = 0, tried = false;
-  const at = (e) => { const r = field.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
-  const draw = (a, b) => {
-    const box = { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(a.x - b.x), h: Math.abs(a.y - b.y) };
-    Object.assign(sel.style, { left: box.x + "px", top: box.y + "px", width: box.w + "px", height: box.h + "px" });
-    sel.firstChild.textContent = `${Math.round(box.w * devicePixelRatio)} × ${Math.round(box.h * devicePixelRatio)}`;
-    return box;
-  };
-  const begin = (p) => { sel = document.createElement("div"); sel.className = "sel"; sel.append(document.createElement("span")); field.append(sel); start = p; draw(p, p); };
-  const finish = (p) => {
-    const box = draw(start, p); sel.remove(); sel = null;
-    if (box.w < 16 || box.h < 16) return;
-    flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
-    count.innerHTML = `<b>${++shots}</b> ${field.dataset.done}`;
-  };
-  field.addEventListener("pointerdown", (e) => {
-    if (e.pointerType === "touch" || e.button !== 0) return;
-    tried = true; field.setPointerCapture(e.pointerId); begin(at(e));
-  });
-  field.addEventListener("pointermove", (e) => { if (sel && start) draw(start, at(e)); });
-  field.addEventListener("pointerup", (e) => { if (sel) finish(at(e)); else if (e.pointerType === "touch") demo(); });
-
-  let demoing = false;
-  async function demo() {
-    if (demoing || sel) return;
-    demoing = true;
-    const w = field.offsetWidth, h = field.offsetHeight;
-    const a = { x: w * 0.2, y: h * 0.2 }, b = { x: w * 0.78, y: h * 0.62 }, rest = { x: w * 0.9, y: h * 0.9 };
-    const pointer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    pointer.setAttribute("class", "fake"); pointer.setAttribute("viewBox", "0 0 20 28"); pointer.innerHTML = '<use href="#cur"/>';
-    field.append(pointer);
-    const put = (p) => Object.assign(pointer.style, { left: p.x + "px", top: p.y + "px" });
-    const glide = (from, to, ms, each) => new Promise((done) => {
-      const t0 = performance.now();
-      const step = (now) => {
-        const t = Math.min(1, (now - t0) / ms), k = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
-        const p = { x: from.x + (to.x - from.x) * k, y: from.y + (to.y - from.y) * k };
-        put(p); each?.(p); t < 1 ? requestAnimationFrame(step) : done();
-      };
-      requestAnimationFrame(step);
-    });
-    put(rest); await glide(rest, a, 600);
-    begin(a); await glide(a, b, 1100, (p) => draw(start, p));
-    await sleep(200); finish(b);
-    await glide(b, rest, 500); pointer.remove(); demoing = false;
+// Text completion: a sentence is typed, a grey suggestion appears, Tab takes a word, ⌥Tab the rest.
+document.querySelectorAll(".m-type").forEach(async (m) => {
+  const typed = m.querySelector(".typed"), ghost = m.querySelector(".ghost"), tab = m.querySelector(".k-tab"), all = m.querySelector(".k-all");
+  const text = m.dataset.text, rest = m.dataset.ghost;
+  if (reduce) { typed.textContent = text; ghost.textContent = rest; return; }
+  const press = async (key) => { key.classList.add("hit"); await sleep(160); key.classList.remove("hit"); };
+  for (;;) {
+    typed.textContent = ""; ghost.textContent = "";
+    await visible(m); await sleep(700);
+    for (const ch of text) { typed.textContent += ch; await sleep(ch === " " ? 70 : 45 + Math.random() * 40); }
+    await sleep(450);
+    ghost.textContent = rest; await sleep(1300);
+    const first = rest.match(/^\S+\s?/)[0];
+    await press(tab); typed.textContent += first; ghost.textContent = rest.slice(first.length); await sleep(1100);
+    await press(all); typed.textContent += ghost.textContent; ghost.textContent = ""; await sleep(3200);
   }
-  if (!reduce) new IntersectionObserver((entries, o) => {
-    if (!entries[0].isIntersecting) return;
-    o.disconnect(); setTimeout(() => { if (!tried) demo(); }, 1800);
-  }, { threshold: 0.7 }).observe(field);
 });

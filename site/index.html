@@ -44,8 +44,8 @@
   </div>
   <p class="req">For macOS 15 and later on Apple silicon.</p>
 
-  <div class="stage">
-    <div class="mock m-edit">
+  <div class="slides">
+    <div class="slide on" data-tab="shot"><div class="mock m-edit">
       <div class="win">
         <div class="win-head">
           <svg class="logo"><use href="#logo"/></svg>
@@ -77,55 +77,8 @@
         </div>
       </div>
       <svg class="cursor" style="left:78%;top:76%"><use href="#cur"/></svg>
-    </div>
-  </div>
-</section>
-
-<section class="wrap keys" aria-label="Shortcuts">
-  <div class="key" data-keys="⌘ ⇧ 2"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">2</span></div><b>Screenshot</b><span>An area, a window or the whole screen</span></div>
-  <div class="key"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">3</span></div><b>Scrolling screenshot</b><span>A long page as one image</span></div>
-  <div class="key"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">1</span></div><b>Text from screen</b><span>Copy text that can’t be selected</span></div>
-  <div class="key"><div class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">V</span></div><b>Clipboard</b><span>Everything you copied, searchable</span></div>
-</section>
-
-<section class="wrap" id="features">
-  <div class="head">
-    <h2>What Shotleaf does</h2>
-    <p>Every tool opens with a keyboard shortcut.</p>
-  </div>
-
-  <div class="bento">
-    <div class="cell c-clip">
-      <div class="txt"><h3>Clipboard history</h3><p>Type a few letters to find something you copied earlier, then press <kbd>↩</kbd> to paste it. Passwords from password managers aren’t saved.</p></div>
-      <div class="show crop"><div class="mock m-clip" data-q="imax" data-chars="characters">
-        <div class="win">
-          <div class="win-head">
-            <svg class="logo"><use href="#logo"/></svg>
-            <div class="win-title" style="margin-right:1cqw">Clipboard</div>
-            <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg><span class="q"></span><span class="caret"></span><span class="ph">Search the clipboard</span></div>
-          </div>
-          <div class="panel">
-            <div class="list">
-              <div class="row sel" data-text="IMAX on Sunday — 2 seats, row G"><span class="k">1</span><span class="t">IMAX on Sunday — 2 seats, row G</span><span class="w">now</span></div>
-              <div class="row" data-text="https://cinema.example/imax/schedule"><span class="k">2</span><span class="t">https://cinema.example/imax/schedule</span><span class="w">2 min</span></div>
-              <div class="row" data-text="#7CB342"><span class="k">3</span><span class="t"><span style="display:inline-block;width:1.4cqw;height:1.4cqw;border-radius:.3cqw;background:#7cb342;vertical-align:middle;margin-right:.6cqw"></span>#7CB342</span><span class="w">9 min</span></div>
-              <div class="row" data-text="Notes from the call — Q3 plan"><span class="k">4</span><span class="t">Notes from the call — Q3 plan</span><span class="w">1 h</span></div>
-              <div class="row" data-text="invoice-0142.pdf"><span class="k">5</span><span class="t">invoice-0142.pdf</span><span class="w">3 h</span></div>
-            </div>
-            <div class="prev"><span class="p">IMAX on Sunday — 2 seats, row G</span><small class="pm"></small></div>
-          </div>
-          <div class="bar"><span class="b go">Paste <i>↩</i></span><span class="b">Plain text <i>⌥↩</i></span><span class="b">Actions <i>⌘K</i></span><span class="sp"></span><span class="b">Close <i>esc</i></span></div>
-        </div>
-        <div class="dest"><span class="who"></span><span class="d"></span><span class="caret" style="background:#222"></span></div>
-      </div></div>
-    </div>
-    <div class="cell c-pick">
-      <div class="txt"><h3>Try it: drag here</h3><p>Select an area by dragging. The screen pauses while you select, and the size is shown in pixels.</p></div>
-      <div class="field" data-done="shots taken"><div class="dots"></div><div class="flash"></div><div class="count"></div></div>
-    </div>
-    <div class="cell c-scroll">
-      <div class="txt"><h3>Scrolling screenshots</h3><p>Capture a long page, chat or table as one image.</p></div>
-      <div class="show crop"><div class="mock m-scroll">
+    </div></div>
+    <div class="slide" data-tab="scroll"><div class="mock m-scroll">
         <div class="stage">
           <div class="view">
             <div class="sticky"><i></i><i></i></div>
@@ -160,28 +113,7 @@
         </div>
         <div class="rbar"><span class="dot"></span><span>Scroll down slowly · <span class="n"></span></span><span class="b ghost">Cancel <i>esc</i></span><span class="b go">Done <i>↩</i></span></div>
       </div></div>
-    </div>
-    <div class="cell c-snip">
-      <div class="txt"><h3>Text templates</h3><p>Save replies you send often. Type a short code like “;reply” and it’s replaced with the full text, today’s date included.</p></div>
-      <div class="show crop"><div class="mock m-snip" data-abbr=";reply" data-answer="Anna"
-           data-tpl="Hello, {name}!\nThanks for reaching out — I’ll send the invoice by {date}.\n{cursor}\n\nBest,\nOksana">
-        <div class="mail">
-          <div class="mail-top"><i></i><i></i><i></i></div>
-          <div class="field">To: <b>anna@studio.example</b></div>
-          <div class="field">Subject: <b>Invoice</b></div>
-          <div class="body"></div>
-        </div>
-        <div class="ask hide">
-          <div class="win">
-            <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title">Snippet<small>;reply</small></div></div>
-            <div class="q">Name<span class="ans"></span></div>
-          </div>
-        </div>
-      </div></div>
-    </div>
-    <div class="cell c-ocr">
-      <div class="txt"><h3>Text from images</h3><p>Copy text from a slide, a photo or an error message. Works with Ukrainian, English and other languages.</p></div>
-      <div class="show"><div class="mock m-ocr">
+    <div class="slide" data-tab="ocr"><div class="mock m-ocr">
         <div class="stage">
           <div class="paper">Meeting at 3 pm by the office<br>Agenda: Q3 report, budget<div class="scan"></div></div>
           <div class="win">
@@ -191,20 +123,75 @@
           </div>
         </div>
       </div></div>
-    </div>
-    <div class="cell c-mark">
-      <div class="txt"><h3>Backgrounds and watermarks</h3><p>Add a background to a screenshot in one click. Add a watermark to many photos at once.</p></div>
-      <div class="art"><i></i><em>© Studio</em></div>
-    </div>
-    <div class="cell c-link">
-      <div class="txt"><h3>Links that expire</h3><p>Share a screenshot as a link that stops working after an hour or a day.</p></div>
-      <div class="linkpill"><code>s.syvyj.dev/k3Fq9xLm</code><span class="t" data-left="21600"></span></div>
-      <div class="bar2"><i></i></div>
-    </div>
-    <div class="cell c-lock">
-      <div class="txt"><h3>Your data stays on your Mac</h3><p>No account and no tracking. Screenshots, clipboard history and templates are stored only on this Mac.</p></div>
-      <div class="seal"><svg><use href="#logo"/></svg></div>
-    </div>
+    <div class="slide" data-tab="clip"><div class="mock m-clip" data-q="imax" data-chars="characters">
+        <div class="win">
+          <div class="win-head">
+            <svg class="logo"><use href="#logo"/></svg>
+            <div class="win-title" style="margin-right:1cqw">Clipboard</div>
+            <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg><span class="q"></span><span class="caret"></span><span class="ph">Search the clipboard</span></div>
+          </div>
+          <div class="panel">
+            <div class="list">
+              <div class="row sel" data-text="IMAX on Sunday — 2 seats, row G"><span class="k">1</span><span class="t">IMAX on Sunday — 2 seats, row G</span><span class="w">now</span></div>
+              <div class="row" data-text="https://cinema.example/imax/schedule"><span class="k">2</span><span class="t">https://cinema.example/imax/schedule</span><span class="w">2 min</span></div>
+              <div class="row" data-text="#7CB342"><span class="k">3</span><span class="t"><span style="display:inline-block;width:1.4cqw;height:1.4cqw;border-radius:.3cqw;background:#7cb342;vertical-align:middle;margin-right:.6cqw"></span>#7CB342</span><span class="w">9 min</span></div>
+              <div class="row" data-text="Notes from the call — Q3 plan"><span class="k">4</span><span class="t">Notes from the call — Q3 plan</span><span class="w">1 h</span></div>
+              <div class="row" data-text="invoice-0142.pdf"><span class="k">5</span><span class="t">invoice-0142.pdf</span><span class="w">3 h</span></div>
+            </div>
+            <div class="prev"><span class="p">IMAX on Sunday — 2 seats, row G</span><small class="pm"></small></div>
+          </div>
+          <div class="bar"><span class="b go">Paste <i>↩</i></span><span class="b">Plain text <i>⌥↩</i></span><span class="b">Actions <i>⌘K</i></span><span class="sp"></span><span class="b">Close <i>esc</i></span></div>
+        </div>
+        <div class="dest"><span class="who"></span><span class="d"></span><span class="caret" style="background:#222"></span></div>
+      </div></div>
+    <div class="slide" data-tab="type"><div class="mock m-type" data-text="Hi Anna, thanks for the update. Let’s meet " data-ghost="tomorrow at 3 by the entrance.">
+        <div class="win">
+          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Messages<small>Anna</small></div></div>
+          <div class="note"><span class="typed"></span><span class="caret"></span><span class="ghost"></span></div>
+          <div class="bar"><span class="b k-tab">Tab <i>next word</i></span><span class="b k-all">⌥Tab <i>all</i></span><span class="sp"></span><span class="b">esc <i>hide</i></span></div>
+        </div>
+      </div></div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab on" data-tab="shot" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">2</span></span><b>Screenshot</b><span>Area, window or full screen</span><i class="prog"></i></button>
+    <button class="tab" data-tab="scroll" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">3</span></span><b>Scrolling screenshot</b><span>A long page as one image</span><i class="prog"></i></button>
+    <button class="tab" data-tab="ocr" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">1</span></span><b>Text from screen</b><span>Copies text that can’t be selected</span><i class="prog"></i></button>
+    <button class="tab" data-tab="clip" type="button"><span class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">V</span></span><b>Clipboard</b><span>Everything you copied, with search</span><i class="prog"></i></button>
+    <button class="tab" data-tab="type" type="button"><span class="caps"><span class="cap">Tab</span></span><b>Text completion</b><span>Suggests how to finish a sentence</span><i class="prog"></i></button>
+  </div>
+</section>
+
+<section class="wrap" id="features">
+  <div class="head">
+    <h2>Everything Shotleaf can do</h2>
+    <p>Six tools, each one a shortcut away.</p>
+  </div>
+  <div class="tool" id="screenshots">
+    <div class="about"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">2</span></div><h3>Screenshots</h3><p>Pick an area, a window or the whole screen. The screenshot opens in an editor where you mark it up and decide what to do with it.</p></div>
+    <div class="feats"><div class="feat"><b>Arrows, boxes, ovals, text</b><span>Callouts with a pointer, a pen and a highlighter. Each tool has its own key.</span></div><div class="feat"><b>Numbered steps</b><span>Click to drop 1, 2, 3 for instructions.</span></div><div class="feat"><b>Blur and focus</b><span>Hide private details or dim everything except what matters.</span></div><div class="feat"><b>Ruler and crop</b><span>Measure in pixels, cut to the part you need.</span></div><div class="feat"><b>Background and watermark</b><span>Put the shot on a background, remove the background of a photo, sign it with text or a logo.</span></div><div class="feat"><b>Copy, save, drag</b><span><kbd>⌘C</kbd> to copy, PNG, JPEG, HEIC or PDF to save, or drag it straight into a chat.</span></div><div class="feat"><b>Pin on top</b><span>Keep a screenshot floating over your windows while you work.</span></div><div class="feat"><b>Picker details</b><span>Pixel magnifier, colour picker, repeat the last area, a timer.</span></div><div class="feat"><b>Edit again</b><span>Reopen the last screenshot or any image from the clipboard.</span></div><div class="feat"><b>Recent screenshots</b><span>The last ten stay in the menu, even after a restart.</span></div></div>
+  </div>
+  <div class="tool" id="scrolling">
+    <div class="about"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">3</span></div><h3>Scrolling screenshots</h3><p>For anything longer than the screen: a web page, a chat, a table, a document.</p></div>
+    <div class="feats"><div class="feat"><b>Scroll at your own pace</b><span>Shotleaf matches each step, even small or uneven ones.</span></div><div class="feat"><b>No repeated headers</b><span>Sticky headers and footers appear once in the result.</span></div><div class="feat"><b>Opens in the editor</b><span>Mark up the long screenshot like any other.</span></div></div>
+  </div>
+  <div class="tool" id="text">
+    <div class="about"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">1</span></div><h3>Text from screen</h3><p>Select any area and get its text, even from an image, a video or a dialog you can’t copy from.</p></div>
+    <div class="feats"><div class="feat"><b>Recognised on your Mac</b><span>Nothing is sent anywhere, and it works offline.</span></div><div class="feat"><b>Many languages</b><span>Ukrainian, English and other languages macOS supports.</span></div><div class="feat"><b>Fix before copying</b><span>The text opens in a window where you can edit it; <kbd>⌘↩</kbd> copies it all.</span></div></div>
+  </div>
+  <div class="tool" id="clipboard">
+    <div class="about"><div class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">V</span></div><h3>Clipboard history</h3><p>Everything you copy is kept, so you can paste it again later. The panel opens next to your pointer.</p></div>
+    <div class="feats"><div class="feat"><b>Text, links, images, files</b><span>And colours, shown as a swatch.</span></div><div class="feat"><b>Search</b><span>By any word, including words inside images.</span></div><div class="feat"><b>One click to paste</b><span>Or <kbd>↩</kbd>; <kbd>⌥↩</kbd> pastes as plain text.</span></div><div class="feat"><b>Several at once</b><span>Pick several and paste them together, or one after another.</span></div><div class="feat"><b>Quick actions</b><span><kbd>⌘K</kbd>: remove trackers from links, change case, join lines, format JSON.</span></div><div class="feat"><b>Private by default</b><span>Passwords aren’t saved, and you can exclude any app.</span></div><div class="feat"><b>Pin what you need</b><span>Pinned items stay when the history is cleared.</span></div></div>
+  </div>
+  <div class="tool" id="snippets">
+    <div class="about"><div class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">B</span></div><h3>Snippets</h3><p>Text you type often, saved once: replies, signatures, addresses, bank details. They live next to the clipboard history; <kbd>Tab</kbd> switches between them.</p></div>
+    <div class="feats"><div class="feat"><b>Abbreviations</b><span>Type “;reply” in any app and it turns into the full text.</span></div><div class="feat"><b>Folders</b><span>Coloured folders on the left, snippets on the right.</span></div><div class="feat"><b>Fill-ins</b><span>Today’s date, the time, what you copied, where the cursor ends up.</span></div><div class="feat"><b>Questions</b><span>A snippet can ask for a name or a number before it’s pasted.</span></div></div>
+  </div>
+  <div class="tool" id="completion">
+    <div class="about"><div class="caps"><span class="cap">Tab</span></div><h3>Text completion</h3><p>As you type in any app, a grey suggestion appears after the cursor. Take it with Tab or keep typing.</p></div>
+    <div class="feats"><div class="feat"><b>Word by word</b><span><kbd>Tab</kbd> takes the next word, <kbd>⌥Tab</kbd> the whole suggestion, <kbd>esc</kbd> hides it.</span></div><div class="feat"><b>Works offline</b><span>A language model runs on your Mac; nothing you type is sent anywhere.</span></div><div class="feat"><b>Knows the context</b><span>Can take into account the chat on screen and what you just copied.</span></div><div class="feat"><b>Sounds like you</b><span>Learns from your own texts, on this Mac only. Forget them in one click.</span></div><div class="feat"><b>Emoji by name</b><span>Type <kbd>:</kbd> and a word, like :fire for 🔥.</span></div><div class="feat"><b>Typo fixes</b><span>A misspelled word gets a fix you take with Tab.</span></div></div>
+  </div>
+  <div class="tool more" id="photos">
+    <div class="about"><h3>Watermark photos</h3><p>Add your watermark to a whole folder of photos at once. Place it the same way on every photo or move it by hand on each one. Photos keep their full quality and details; the originals aren’t changed.</p></div>
   </div>
 </section>
 

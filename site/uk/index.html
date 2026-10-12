@@ -44,8 +44,8 @@
   </div>
   <p class="req">Для macOS 15 і новіших на Apple silicon.</p>
 
-  <div class="stage">
-    <div class="mock m-edit">
+  <div class="slides">
+    <div class="slide on" data-tab="shot"><div class="mock m-edit">
       <div class="win">
         <div class="win-head">
           <svg class="logo"><use href="#logo"/></svg>
@@ -77,55 +77,8 @@
         </div>
       </div>
       <svg class="cursor" style="left:78%;top:76%"><use href="#cur"/></svg>
-    </div>
-  </div>
-</section>
-
-<section class="wrap keys" aria-label="Сполучення клавіш">
-  <div class="key" data-keys="⌘ ⇧ 2"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">2</span></div><b>Скріншот</b><span>Область, вікно або весь екран</span></div>
-  <div class="key"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">3</span></div><b>Довгий скріншот</b><span>Уся сторінка одним зображенням</span></div>
-  <div class="key"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">1</span></div><b>Текст з екрана</b><span>Копіює текст, який не виділяється</span></div>
-  <div class="key"><div class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">V</span></div><b>Буфер обміну</b><span>Усе скопійоване, з пошуком</span></div>
-</section>
-
-<section class="wrap" id="features">
-  <div class="head">
-    <h2>Що вміє Shotleaf</h2>
-    <p>Кожен інструмент відкривається сполученням клавіш.</p>
-  </div>
-
-  <div class="bento">
-    <div class="cell c-clip">
-      <div class="txt"><h3>Історія буфера обміну</h3><p>Наберіть кілька літер, щоб знайти скопійоване раніше, і натисніть <kbd>↩</kbd>, щоб вставити. Паролі з менеджерів паролів не зберігаються.</p></div>
-      <div class="show crop"><div class="mock m-clip" data-q="imax" data-chars="символів">
-        <div class="win">
-          <div class="win-head">
-            <svg class="logo"><use href="#logo"/></svg>
-            <div class="win-title" style="margin-right:1cqw">Буфер обміну</div>
-            <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg><span class="q"></span><span class="caret"></span><span class="ph">Пошук у буфері</span></div>
-          </div>
-          <div class="panel">
-            <div class="list">
-              <div class="row sel" data-text="IMAX у неділю — 2 місця, ряд G"><span class="k">1</span><span class="t">IMAX у неділю — 2 місця, ряд G</span><span class="w">щойно</span></div>
-              <div class="row" data-text="https://cinema.example/imax/schedule"><span class="k">2</span><span class="t">https://cinema.example/imax/schedule</span><span class="w">2 хв</span></div>
-              <div class="row" data-text="#7CB342"><span class="k">3</span><span class="t"><span style="display:inline-block;width:1.4cqw;height:1.4cqw;border-radius:.3cqw;background:#7cb342;vertical-align:middle;margin-right:.6cqw"></span>#7CB342</span><span class="w">9 хв</span></div>
-              <div class="row" data-text="Нотатки з дзвінка — план на Q3"><span class="k">4</span><span class="t">Нотатки з дзвінка — план на Q3</span><span class="w">1 год</span></div>
-              <div class="row" data-text="рахунок-0142.pdf"><span class="k">5</span><span class="t">рахунок-0142.pdf</span><span class="w">3 год</span></div>
-            </div>
-            <div class="prev"><span class="p">IMAX у неділю — 2 місця, ряд G</span><small class="pm"></small></div>
-          </div>
-          <div class="bar"><span class="b go">Вставити <i>↩</i></span><span class="b">Без форматування <i>⌥↩</i></span><span class="b">Дії <i>⌘K</i></span><span class="sp"></span><span class="b">Закрити <i>esc</i></span></div>
-        </div>
-        <div class="dest"><span class="who"></span><span class="d"></span><span class="caret" style="background:#222"></span></div>
-      </div></div>
-    </div>
-    <div class="cell c-pick">
-      <div class="txt"><h3>Спробуйте: виділіть тут</h3><p>Виділіть область мишкою. Поки ви виділяєте, екран стоїть на паузі, а розмір видно в пікселях.</p></div>
-      <div class="field" data-done="знімків зроблено"><div class="dots"></div><div class="flash"></div><div class="count"></div></div>
-    </div>
-    <div class="cell c-scroll">
-      <div class="txt"><h3>Довгі скріншоти</h3><p>Знімайте довгу сторінку, чат чи таблицю одним зображенням.</p></div>
-      <div class="show crop"><div class="mock m-scroll">
+    </div></div>
+    <div class="slide" data-tab="scroll"><div class="mock m-scroll">
         <div class="stage">
           <div class="view">
             <div class="sticky"><i></i><i></i></div>
@@ -160,28 +113,7 @@
         </div>
         <div class="rbar"><span class="dot"></span><span>Повільно прокручуйте вниз · <span class="n"></span></span><span class="b ghost">Скасувати <i>esc</i></span><span class="b go">Готово <i>↩</i></span></div>
       </div></div>
-    </div>
-    <div class="cell c-snip">
-      <div class="txt"><h3>Шаблони тексту</h3><p>Збережіть відповіді, які часто надсилаєте. Наберіть короткий код, наприклад «;відп», і він заміниться повним текстом разом із сьогоднішньою датою.</p></div>
-      <div class="show crop"><div class="mock m-snip" data-abbr=";відп" data-answer="пане Андрію"
-           data-tpl="Добрий день, {name}!\nДякую за звернення, надішлю рахунок до {date}.\n{cursor}\n\nЗ повагою,\nОксана">
-        <div class="mail">
-          <div class="mail-top"><i></i><i></i><i></i></div>
-          <div class="field">Кому: <b>andrii@studio.example</b></div>
-          <div class="field">Тема: <b>Рахунок</b></div>
-          <div class="body"></div>
-        </div>
-        <div class="ask hide">
-          <div class="win">
-            <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title">Сніпет<small>;відп</small></div></div>
-            <div class="q">Ім’я<span class="ans"></span></div>
-          </div>
-        </div>
-      </div></div>
-    </div>
-    <div class="cell c-ocr">
-      <div class="txt"><h3>Текст із зображень</h3><p>Копіюйте текст зі слайда, фото чи повідомлення про помилку. Українська, англійська та інші мови.</p></div>
-      <div class="show"><div class="mock m-ocr">
+    <div class="slide" data-tab="ocr"><div class="mock m-ocr">
         <div class="stage">
           <div class="paper">Зустріч о 15:00 біля офісу<br>Agenda: Q3 report, budget<div class="scan"></div></div>
           <div class="win">
@@ -191,20 +123,75 @@
           </div>
         </div>
       </div></div>
-    </div>
-    <div class="cell c-mark">
-      <div class="txt"><h3>Фони й водяні знаки</h3><p>Додайте фон до скріншота одним кліком. Поставте водяний знак на багато фото одразу.</p></div>
-      <div class="art"><i></i><em>© Studio</em></div>
-    </div>
-    <div class="cell c-link">
-      <div class="txt"><h3>Тимчасові посилання</h3><p>Надішліть скріншот посиланням, яке перестане працювати через годину чи добу.</p></div>
-      <div class="linkpill"><code>s.syvyj.dev/k3Fq9xLm</code><span class="t" data-left="21600"></span></div>
-      <div class="bar2"><i></i></div>
-    </div>
-    <div class="cell c-lock">
-      <div class="txt"><h3>Ваші дані лишаються на вашому Mac</h3><p>Без акаунта й без стеження. Скріншоти, історія буфера й шаблони зберігаються лише на цьому Mac.</p></div>
-      <div class="seal"><svg><use href="#logo"/></svg></div>
-    </div>
+    <div class="slide" data-tab="clip"><div class="mock m-clip" data-q="imax" data-chars="символів">
+        <div class="win">
+          <div class="win-head">
+            <svg class="logo"><use href="#logo"/></svg>
+            <div class="win-title" style="margin-right:1cqw">Буфер обміну</div>
+            <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg><span class="q"></span><span class="caret"></span><span class="ph">Пошук у буфері</span></div>
+          </div>
+          <div class="panel">
+            <div class="list">
+              <div class="row sel" data-text="IMAX у неділю — 2 місця, ряд G"><span class="k">1</span><span class="t">IMAX у неділю — 2 місця, ряд G</span><span class="w">щойно</span></div>
+              <div class="row" data-text="https://cinema.example/imax/schedule"><span class="k">2</span><span class="t">https://cinema.example/imax/schedule</span><span class="w">2 хв</span></div>
+              <div class="row" data-text="#7CB342"><span class="k">3</span><span class="t"><span style="display:inline-block;width:1.4cqw;height:1.4cqw;border-radius:.3cqw;background:#7cb342;vertical-align:middle;margin-right:.6cqw"></span>#7CB342</span><span class="w">9 хв</span></div>
+              <div class="row" data-text="Нотатки з дзвінка — план на Q3"><span class="k">4</span><span class="t">Нотатки з дзвінка — план на Q3</span><span class="w">1 год</span></div>
+              <div class="row" data-text="рахунок-0142.pdf"><span class="k">5</span><span class="t">рахунок-0142.pdf</span><span class="w">3 год</span></div>
+            </div>
+            <div class="prev"><span class="p">IMAX у неділю — 2 місця, ряд G</span><small class="pm"></small></div>
+          </div>
+          <div class="bar"><span class="b go">Вставити <i>↩</i></span><span class="b">Без форматування <i>⌥↩</i></span><span class="b">Дії <i>⌘K</i></span><span class="sp"></span><span class="b">Закрити <i>esc</i></span></div>
+        </div>
+        <div class="dest"><span class="who"></span><span class="d"></span><span class="caret" style="background:#222"></span></div>
+      </div></div>
+    <div class="slide" data-tab="type"><div class="mock m-type" data-text="Привіт, Ганно! Дякую за новини. Давай зустрінемось " data-ghost="завтра о третій біля входу.">
+        <div class="win">
+          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Повідомлення<small>Ганна</small></div></div>
+          <div class="note"><span class="typed"></span><span class="caret"></span><span class="ghost"></span></div>
+          <div class="bar"><span class="b k-tab">Tab <i>наступне слово</i></span><span class="b k-all">⌥Tab <i>усе</i></span><span class="sp"></span><span class="b">esc <i>сховати</i></span></div>
+        </div>
+      </div></div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab on" data-tab="shot" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">2</span></span><b>Скріншот</b><span>Область, вікно або весь екран</span><i class="prog"></i></button>
+    <button class="tab" data-tab="scroll" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">3</span></span><b>Довгий скріншот</b><span>Уся сторінка одним зображенням</span><i class="prog"></i></button>
+    <button class="tab" data-tab="ocr" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">1</span></span><b>Текст з екрана</b><span>Копіює текст, який не виділяється</span><i class="prog"></i></button>
+    <button class="tab" data-tab="clip" type="button"><span class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">V</span></span><b>Буфер обміну</b><span>Усе скопійоване, з пошуком</span><i class="prog"></i></button>
+    <button class="tab" data-tab="type" type="button"><span class="caps"><span class="cap">Tab</span></span><b>Дописування тексту</b><span>Підказує, як закінчити речення</span><i class="prog"></i></button>
+  </div>
+</section>
+
+<section class="wrap" id="features">
+  <div class="head">
+    <h2>Усе, що вміє Shotleaf</h2>
+    <p>Шість інструментів, кожен за одним сполученням клавіш.</p>
+  </div>
+  <div class="tool" id="screenshots">
+    <div class="about"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">2</span></div><h3>Скріншоти</h3><p>Виділіть область, вікно або весь екран. Знімок відкривається в редакторі, де його можна позначити й вирішити, що з ним робити.</p></div>
+    <div class="feats"><div class="feat"><b>Стрілки, рамки, овали, текст</b><span>Виноски з хвостиком, перо й маркер. Кожен інструмент має свою клавішу.</span></div><div class="feat"><b>Номери кроків</b><span>Клацайте, щоб поставити 1, 2, 3 для інструкцій.</span></div><div class="feat"><b>Розмиття й фокус</b><span>Сховайте особисте або притіньте все, крім головного.</span></div><div class="feat"><b>Лінійка й обрізка</b><span>Міряйте в пікселях, обрізайте до потрібного.</span></div><div class="feat"><b>Фон і водяний знак</b><span>Покладіть знімок на фон, приберіть фон із фото, підпишіть текстом чи логотипом.</span></div><div class="feat"><b>Копіювати, зберегти, перетягнути</b><span><kbd>⌘C</kbd>, щоб скопіювати, PNG, JPEG, HEIC чи PDF, щоб зберегти, або перетягніть одразу в чат.</span></div><div class="feat"><b>Закріпити поверх</b><span>Тримайте знімок поверх вікон, поки працюєте.</span></div><div class="feat"><b>Зручний вибір</b><span>Лупа пікселів, піпетка кольору, повтор останньої області, таймер.</span></div><div class="feat"><b>Редагувати знову</b><span>Відкрийте останній знімок або будь-яке зображення з буфера.</span></div><div class="feat"><b>Недавні скріншоти</b><span>Останні десять лишаються в меню навіть після перезапуску.</span></div></div>
+  </div>
+  <div class="tool" id="scrolling">
+    <div class="about"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">3</span></div><h3>Довгі скріншоти</h3><p>Для всього, що довше за екран: сторінки, чату, таблиці, документа.</p></div>
+    <div class="feats"><div class="feat"><b>Прокручуйте у своєму темпі</b><span>Shotleaf зіставляє кожен крок, навіть дрібний чи нерівний.</span></div><div class="feat"><b>Без повторів шапки</b><span>Закріплені шапки й підвали з’являються в результаті один раз.</span></div><div class="feat"><b>Відкривається в редакторі</b><span>Позначайте довгий знімок, як будь-який інший.</span></div></div>
+  </div>
+  <div class="tool" id="text">
+    <div class="about"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">1</span></div><h3>Текст з екрана</h3><p>Виділіть будь-яку область і отримайте з неї текст, навіть із картинки, відео чи вікна, де копіювати не можна.</p></div>
+    <div class="feats"><div class="feat"><b>Розпізнається на вашому Mac</b><span>Нічого нікуди не надсилається, працює без інтернету.</span></div><div class="feat"><b>Багато мов</b><span>Українська, англійська та інші мови, які підтримує macOS.</span></div><div class="feat"><b>Виправте перед копіюванням</b><span>Текст відкривається у вікні, де його можна виправити; <kbd>⌘↩</kbd> копіює все.</span></div></div>
+  </div>
+  <div class="tool" id="clipboard">
+    <div class="about"><div class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">V</span></div><h3>Історія буфера обміну</h3><p>Усе, що ви копіюєте, зберігається, і це можна вставити знову пізніше. Панель відкривається біля курсора.</p></div>
+    <div class="feats"><div class="feat"><b>Текст, посилання, картинки, файли</b><span>А ще кольори, з образцем кольору.</span></div><div class="feat"><b>Пошук</b><span>За будь-яким словом, зокрема словами на картинках.</span></div><div class="feat"><b>Вставка одним кліком</b><span>Або <kbd>↩</kbd>; <kbd>⌥↩</kbd> вставляє без форматування.</span></div><div class="feat"><b>Кілька одразу</b><span>Виберіть кілька й вставте разом або по черзі.</span></div><div class="feat"><b>Швидкі дії</b><span><kbd>⌘K</kbd>: прибрати трекери з посилань, змінити регістр, з’єднати рядки, відформатувати JSON.</span></div><div class="feat"><b>Приватність за замовчуванням</b><span>Паролі не зберігаються, і будь-яку програму можна виключити.</span></div><div class="feat"><b>Закріплюйте потрібне</b><span>Закріплене лишається, коли історія очищується.</span></div></div>
+  </div>
+  <div class="tool" id="snippets">
+    <div class="about"><div class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">B</span></div><h3>Сніпети</h3><p>Текст, який ви часто набираєте, збережений один раз: відповіді, підписи, адреси, реквізити. Вони поруч з історією буфера; <kbd>Tab</kbd> перемикає між ними.</p></div>
+    <div class="feats"><div class="feat"><b>Скорочення</b><span>Наберіть «;відп» у будь-якій програмі, і воно розгорнеться в повний текст.</span></div><div class="feat"><b>Папки</b><span>Кольорові папки ліворуч, сніпети праворуч.</span></div><div class="feat"><b>Підстановки</b><span>Сьогоднішня дата, час, скопійоване, місце курсора.</span></div><div class="feat"><b>Запитання</b><span>Сніпет може спитати ім’я чи число перед вставкою.</span></div></div>
+  </div>
+  <div class="tool" id="completion">
+    <div class="about"><div class="caps"><span class="cap">Tab</span></div><h3>Дописування тексту</h3><p>Поки ви пишете в будь-якій програмі, після курсора з’являється сіра підказка. Прийміть її клавішею Tab або пишіть далі.</p></div>
+    <div class="feats"><div class="feat"><b>По слову</b><span><kbd>Tab</kbd> бере наступне слово, <kbd>⌥Tab</kbd> усю підказку, <kbd>esc</kbd> ховає її.</span></div><div class="feat"><b>Працює без інтернету</b><span>Мовна модель працює на вашому Mac; нічого з набраного нікуди не надсилається.</span></div><div class="feat"><b>Розуміє контекст</b><span>Може враховувати переписку на екрані й те, що ви щойно скопіювали.</span></div><div class="feat"><b>Пише як ви</b><span>Вчиться на ваших текстах, лише на цьому Mac. Забути — одним кліком.</span></div><div class="feat"><b>Емодзі за назвою</b><span>Наберіть <kbd>:</kbd> і слово, наприклад :fire для 🔥.</span></div><div class="feat"><b>Виправлення одруківок</b><span>Слово з помилкою отримує виправлення, яке береться клавішею Tab.</span></div></div>
+  </div>
+  <div class="tool more" id="photos">
+    <div class="about"><h3>Водяні знаки на фото</h3><p>Додайте водяний знак одразу на цілу папку фото. Розмістіть його однаково на всіх або пересуньте вручну на кожному. Фото зберігають повну якість і дані про зйомку; оригінали не змінюються.</p></div>
   </div>
 </section>
 
