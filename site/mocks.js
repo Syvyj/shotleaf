@@ -78,3 +78,92 @@ async function snippet(m) {
 
 document.querySelectorAll(".m-clip").forEach(clipboard);
 document.querySelectorAll(".m-snip").forEach(snippet);
+
+// The print at the top: drag across it to take a shot, as in the app. The
+// shot "develops" and lands on a pile under the print. If nobody tries within
+// a few seconds, a pointer shows how once.
+(() => {
+  const print = document.getElementById("print");
+  if (!print) return;
+  const tray = document.querySelector(".tray"), flash = print.querySelector(".flash");
+  let sel = null, start = null, shots = 0, tried = false;
+  const at = (e) => { const r = print.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const draw = (a, b) => {
+    const box = { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), w: Math.abs(a.x - b.x), h: Math.abs(a.y - b.y) };
+    Object.assign(sel.style, { left: box.x + "px", top: box.y + "px", width: box.w + "px", height: box.h + "px" });
+    sel.firstChild.textContent = `${Math.round(box.w * devicePixelRatio)} × ${Math.round(box.h * devicePixelRatio)}`;
+    return box;
+  };
+  const begin = (p) => {
+    sel = document.createElement("div"); sel.className = "sel"; sel.append(document.createElement("span"));
+    print.append(sel); start = p; draw(p, p);
+  };
+  const finish = (p) => {
+    const box = draw(start, p); sel.remove(); sel = null;
+    if (box.w < 24 || box.h < 24) return;
+    flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
+    keep(box);
+  };
+  const keep = (box) => {
+    let pile = tray.querySelector(".pile");
+    if (!pile) { tray.innerHTML = '<div class="pile"></div><span></span>'; pile = tray.firstChild; }
+    const card = document.createElement("div"), copy = print.cloneNode(true), scale = Math.max(104 / box.w, 70 / box.h);
+    copy.removeAttribute("id");
+    copy.querySelectorAll(".hint, .flash, .sel, .intro").forEach((n) => n.remove());
+    Object.assign(copy.style, { position: "absolute", left: "0", top: "0", transformOrigin: "0 0", width: print.offsetWidth + "px", height: print.offsetHeight + "px", minHeight: "0", transform: `scale(${scale}) translate(${-box.x}px, ${-box.y}px)` });
+    const holder = document.createElement("div"); holder.append(copy);
+    card.append(holder); card.style.setProperty("--r", `${(Math.random() * 10 - 5).toFixed(1)}deg`);
+    pile.append(card);
+    while (pile.children.length > 5) pile.firstChild.remove();
+    tray.lastChild.textContent = print.dataset.shots.replace("%n", ++shots);
+  };
+
+  print.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "touch" || e.button !== 0 || e.target.closest("a")) return;
+    tried = true; print.setPointerCapture(e.pointerId); begin(at(e));
+  });
+  print.addEventListener("pointermove", (e) => { if (sel && start) draw(start, at(e)); });
+  print.addEventListener("pointerup", (e) => {
+    if (sel) finish(at(e));
+    else if (e.pointerType === "touch" && !e.target.closest("a")) demo();
+  });
+
+  // A pointer draws one selection, for people who haven't tried yet (and for touch).
+  let demoing = false;
+  async function demo() {
+    if (demoing || sel) return;
+    demoing = true;
+    const w = print.offsetWidth, h = print.offsetHeight, wide = w > 700;
+    const a = { x: w * (wide ? 0.58 : 0.2), y: h * (wide ? 0.16 : 0.5) }, b = { x: w * (wide ? 0.82 : 0.8), y: h * (wide ? 0.6 : 0.78) };
+    const pointer = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    pointer.setAttribute("class", "fake"); pointer.setAttribute("viewBox", "0 0 20 28");
+    pointer.innerHTML = '<use href="#cur"/>'; print.append(pointer);
+    const put = (p) => Object.assign(pointer.style, { left: p.x + "px", top: p.y + "px" });
+    const glide = (from, to, ms, each) => new Promise((done) => {
+      const t0 = performance.now();
+      const step = (now) => {
+        const t = Math.min(1, (now - t0) / ms), k = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+        const p = { x: from.x + (to.x - from.x) * k, y: from.y + (to.y - from.y) * k };
+        put(p); each?.(p);
+        t < 1 ? requestAnimationFrame(step) : done();
+      };
+      requestAnimationFrame(step);
+    });
+    const rest = { x: w * 0.92, y: h * 0.9 };
+    put(rest);
+    await glide(rest, a, 700);
+    begin(a);
+    await glide(a, b, 1300, (p) => draw(start, p));
+    await sleep(250);
+    finish(b);
+    await glide(b, rest, 600);
+    pointer.remove(); demoing = false;
+  }
+  if (!reduce) {
+    new IntersectionObserver((entries, io) => {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect();
+      setTimeout(() => { if (!tried) demo(); }, 2600);
+    }, { threshold: 0.6 }).observe(print);
+  }
+})();

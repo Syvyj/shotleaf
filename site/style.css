@@ -1,169 +1,133 @@
-/* Shotleaf — a herbarium for a Mac app. Paper, pressed leaves, specimen labels, pencil notes. */
+/* Shotleaf — a cyanotype. The first photographs of plants were contact prints:
+   a leaf on blue paper, left white where it blocked the sun. A screenshot is the same idea. */
 :root {
-  --paper: #f2ecdc;
-  --paper-2: #e9e1cc;
-  --sheet: #fbf8ef;
-  --ink: #26261d;
-  --ink-soft: #5b5948;
-  --sepia: #8a6a3a;
-  --pencil: #a8492a;
-  --leaf: #4d7a28;
-  --leaf-deep: #2d4a19;
+  --paper: #f6f7f3;
+  --ink: #14213a;
+  --ink-soft: #4f5b6e;
+  --blue: #1f4683;
+  --blue-deep: #13305f;
+  --leaf: #7cb342;
   --lime: #c6e86b;
-  --forest: #121a12;
-  --rule: rgba(60, 50, 30, .18);
-  --shadow: 0 1px 0 rgba(255, 255, 255, .6) inset, 0 18px 40px -18px rgba(60, 45, 20, .45);
-  --serif: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
-  --sans: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
-  --hand: "Caveat", "Bradley Hand", cursive;
-  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --line: rgba(20, 33, 58, .14);
+  --display: "Unbounded", "Avenir Next", sans-serif;
+  --text: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --hand: "Bradley Hand", "Segoe Print", cursive;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #17180f;
-    --paper-2: #1f2116;
-    --sheet: #22241a;
-    --ink: #ece6d2;
-    --ink-soft: #b3ad95;
-    --sepia: #c9a66b;
-    --pencil: #e08a5f;
-    --leaf: #9ccc5a;
-    --leaf-deep: #c6e86b;
-    --rule: rgba(236, 230, 210, .14);
-    --shadow: 0 18px 40px -18px rgba(0, 0, 0, .7);
+    --paper: #0e1626;
+    --ink: #e8edf5;
+    --ink-soft: #9fabbe;
+    --blue: #24518f;
+    --line: rgba(232, 237, 245, .14);
   }
 }
-
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body {
-  margin: 0;
-  color: var(--ink);
-  background-color: var(--paper);
-  /* paper grain */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .15 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
-  font: 17px/1.6 var(--sans);
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+body { margin: 0; background: var(--paper); color: var(--ink); font: 18px/1.62 var(--text); -webkit-font-smoothing: antialiased; }
+main { overflow-x: clip; }
+a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+:focus-visible { outline: 2px solid var(--leaf); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+kbd { font: 500 .78em/1 var(--text); padding: .25em .5em; border-radius: 6px; border: 1px solid var(--line); border-bottom-width: 2px; white-space: nowrap; }
+
+/* header */
+.top { display: flex; align-items: center; gap: 28px; padding-top: 20px; padding-bottom: 20px; font-size: 16px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 600 19px/1 var(--display); text-decoration: none; margin-right: auto; }
+.brand img { width: 30px; height: 30px; border-radius: 7px; }
+.top a:not(.brand) { text-decoration: none; color: var(--ink-soft); }
+.top a:not(.brand):hover { color: var(--ink); }
+
+/* ——— the print ——— */
+.print {
+  position: relative; height: min(80vh, 720px); min-height: 520px; color: #fff; overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 20% 10%, rgba(255, 255, 255, .10), transparent 60%),
+    radial-gradient(90% 80% at 85% 90%, rgba(5, 15, 40, .35), transparent 70%),
+    var(--blue);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 600' preserveAspectRatio='none'%3E%3Cpath d='M12.4 16.0 L26.1 15.9 L45.5 15.9 L54.5 15.8 L72.2 15.8 L83.5 15.7 L93.3 15.7 L109.8 15.6 L118.5 15.5 L135.7 15.5 L146.7 15.4 L161.8 15.4 L180.1 15.3 L199.0 15.3 L207.4 15.2 L222.5 15.1 L239.5 15.1 L255.2 15.0 L264.4 15.0 L275.3 14.9 L293.5 14.9 L298.8 14.8 L320.5 14.7 L330.4 14.7 L344.4 14.6 L359.3 14.6 L375.8 14.5 L394.4 14.5 L402.1 14.4 L418.4 14.3 L431.4 14.3 L441.6 14.2 L456.2 14.2 L465.6 14.1 L480.1 14.1 L496.4 14.0 L516.0 13.9 L528.9 13.9 L542.5 13.8 L559.0 13.8 L571.0 13.7 L582.4 13.7 L599.3 13.6 L611.1 13.5 L620.1 13.5 L636.9 13.4 L651.0 13.4 L669.2 13.3 L683.2 13.3 L694.4 13.2 L715.2 13.1 L721.3 13.1 L737.2 13.0 L753.0 13.0 L760.0 12.9 L775.7 12.9 L784.8 12.8 L804.4 12.7 L819.9 12.7 L833.3 12.6 L851.3 12.6 L861.3 12.5 L879.3 12.5 L892.2 12.4 L905.2 12.3 L916.7 12.3 L932.6 12.2 L946.3 12.2 L955.3 12.1 L971.0 12.1 L982.0 12.0 L990.1 26.4 L990.1 40.7 L991.7 55.0 L987.9 69.4 L981.9 83.8 L983.8 98.1 L988.7 112.4 L984.9 126.8 L989.0 141.2 L984.5 155.5 L981.8 169.9 L980.5 184.2 L988.3 198.6 L985.1 212.9 L987.8 227.2 L988.7 241.6 L991.0 255.9 L981.8 270.3 L984.9 284.6 L987.5 299.0 L993.0 313.4 L993.8 327.7 L993.3 342.0 L985.8 356.4 L985.3 370.8 L984.9 385.1 L991.7 399.5 L994.8 413.8 L988.4 428.1 L987.4 442.5 L985.6 456.9 L984.2 471.2 L987.1 485.5 L990.3 499.9 L989.6 514.2 L987.7 528.6 L989.9 543.0 L987.1 557.3 L987.8 571.6 L994.1 586.0 L979.1 586.1 L964.5 586.1 L951.8 586.2 L938.0 586.2 L917.4 586.3 L909.7 586.3 L893.3 586.4 L879.2 586.5 L864.2 586.5 L847.0 586.6 L834.2 586.6 L818.9 586.7 L811.1 586.7 L792.9 586.8 L779.2 586.9 L766.1 586.9 L750.6 587.0 L736.8 587.0 L719.0 587.1 L703.6 587.1 L690.8 587.2 L676.9 587.3 L666.4 587.3 L650.7 587.4 L645.7 587.4 L630.3 587.5 L612.3 587.5 L598.7 587.6 L584.5 587.7 L569.2 587.7 L551.8 587.8 L543.5 587.8 L530.7 587.9 L512.6 587.9 L499.9 588.0 L483.8 588.1 L471.2 588.1 L460.2 588.2 L445.6 588.2 L436.1 588.3 L415.0 588.3 L398.3 588.4 L391.5 588.5 L372.9 588.5 L355.5 588.6 L345.7 588.6 L328.3 588.7 L320.3 588.7 L311.6 588.8 L297.3 588.9 L281.8 588.9 L263.3 589.0 L249.0 589.0 L231.8 589.1 L222.1 589.1 L205.3 589.2 L193.5 589.3 L176.3 589.3 L162.6 589.4 L155.3 589.4 L144.1 589.5 L129.6 589.5 L115.1 589.6 L100.5 589.7 L84.6 589.7 L64.6 589.8 L52.0 589.8 L36.0 589.9 L19.2 589.9 L7.8 590.0 L12.2 575.6 L12.5 561.3 L14.9 547.0 L14.9 532.6 L9.1 518.2 L14.4 503.9 L17.3 489.6 L18.9 475.2 L13.6 460.9 L10.5 446.5 L8.3 432.1 L7.2 417.8 L8.6 403.4 L14.8 389.1 L19.0 374.8 L18.0 360.4 L12.6 346.1 L12.1 331.7 L13.1 317.4 L8.3 303.0 L16.0 288.6 L19.5 274.3 L17.5 260.0 L14.9 245.6 L10.6 231.2 L8.0 216.9 L15.5 202.5 L13.8 188.2 L18.8 173.9 L19.1 159.5 L11.6 145.1 L10.1 130.8 L15.6 116.5 L15.8 102.1 L13.0 87.8 L13.0 73.4 L11.6 59.0 L16.0 44.7 L14.0 30.4Z' fill='black'/%3E%3C/svg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 600' preserveAspectRatio='none'%3E%3Cpath d='M12.4 16.0 L26.1 15.9 L45.5 15.9 L54.5 15.8 L72.2 15.8 L83.5 15.7 L93.3 15.7 L109.8 15.6 L118.5 15.5 L135.7 15.5 L146.7 15.4 L161.8 15.4 L180.1 15.3 L199.0 15.3 L207.4 15.2 L222.5 15.1 L239.5 15.1 L255.2 15.0 L264.4 15.0 L275.3 14.9 L293.5 14.9 L298.8 14.8 L320.5 14.7 L330.4 14.7 L344.4 14.6 L359.3 14.6 L375.8 14.5 L394.4 14.5 L402.1 14.4 L418.4 14.3 L431.4 14.3 L441.6 14.2 L456.2 14.2 L465.6 14.1 L480.1 14.1 L496.4 14.0 L516.0 13.9 L528.9 13.9 L542.5 13.8 L559.0 13.8 L571.0 13.7 L582.4 13.7 L599.3 13.6 L611.1 13.5 L620.1 13.5 L636.9 13.4 L651.0 13.4 L669.2 13.3 L683.2 13.3 L694.4 13.2 L715.2 13.1 L721.3 13.1 L737.2 13.0 L753.0 13.0 L760.0 12.9 L775.7 12.9 L784.8 12.8 L804.4 12.7 L819.9 12.7 L833.3 12.6 L851.3 12.6 L861.3 12.5 L879.3 12.5 L892.2 12.4 L905.2 12.3 L916.7 12.3 L932.6 12.2 L946.3 12.2 L955.3 12.1 L971.0 12.1 L982.0 12.0 L990.1 26.4 L990.1 40.7 L991.7 55.0 L987.9 69.4 L981.9 83.8 L983.8 98.1 L988.7 112.4 L984.9 126.8 L989.0 141.2 L984.5 155.5 L981.8 169.9 L980.5 184.2 L988.3 198.6 L985.1 212.9 L987.8 227.2 L988.7 241.6 L991.0 255.9 L981.8 270.3 L984.9 284.6 L987.5 299.0 L993.0 313.4 L993.8 327.7 L993.3 342.0 L985.8 356.4 L985.3 370.8 L984.9 385.1 L991.7 399.5 L994.8 413.8 L988.4 428.1 L987.4 442.5 L985.6 456.9 L984.2 471.2 L987.1 485.5 L990.3 499.9 L989.6 514.2 L987.7 528.6 L989.9 543.0 L987.1 557.3 L987.8 571.6 L994.1 586.0 L979.1 586.1 L964.5 586.1 L951.8 586.2 L938.0 586.2 L917.4 586.3 L909.7 586.3 L893.3 586.4 L879.2 586.5 L864.2 586.5 L847.0 586.6 L834.2 586.6 L818.9 586.7 L811.1 586.7 L792.9 586.8 L779.2 586.9 L766.1 586.9 L750.6 587.0 L736.8 587.0 L719.0 587.1 L703.6 587.1 L690.8 587.2 L676.9 587.3 L666.4 587.3 L650.7 587.4 L645.7 587.4 L630.3 587.5 L612.3 587.5 L598.7 587.6 L584.5 587.7 L569.2 587.7 L551.8 587.8 L543.5 587.8 L530.7 587.9 L512.6 587.9 L499.9 588.0 L483.8 588.1 L471.2 588.1 L460.2 588.2 L445.6 588.2 L436.1 588.3 L415.0 588.3 L398.3 588.4 L391.5 588.5 L372.9 588.5 L355.5 588.6 L345.7 588.6 L328.3 588.7 L320.3 588.7 L311.6 588.8 L297.3 588.9 L281.8 588.9 L263.3 589.0 L249.0 589.0 L231.8 589.1 L222.1 589.1 L205.3 589.2 L193.5 589.3 L176.3 589.3 L162.6 589.4 L155.3 589.4 L144.1 589.5 L129.6 589.5 L115.1 589.6 L100.5 589.7 L84.6 589.7 L64.6 589.8 L52.0 589.8 L36.0 589.9 L19.2 589.9 L7.8 590.0 L12.2 575.6 L12.5 561.3 L14.9 547.0 L14.9 532.6 L9.1 518.2 L14.4 503.9 L17.3 489.6 L18.9 475.2 L13.6 460.9 L10.5 446.5 L8.3 432.1 L7.2 417.8 L8.6 403.4 L14.8 389.1 L19.0 374.8 L18.0 360.4 L12.6 346.1 L12.1 331.7 L13.1 317.4 L8.3 303.0 L16.0 288.6 L19.5 274.3 L17.5 260.0 L14.9 245.6 L10.6 231.2 L8.0 216.9 L15.5 202.5 L13.8 188.2 L18.8 173.9 L19.1 159.5 L11.6 145.1 L10.1 130.8 L15.6 116.5 L15.8 102.1 L13.0 87.8 L13.0 73.4 L11.6 59.0 L16.0 44.7 L14.0 30.4Z' fill='black'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  cursor: crosshair; user-select: none; -webkit-user-select: none; touch-action: pan-y;
 }
-a { color: var(--leaf-deep); text-underline-offset: 3px; }
-img { max-width: 100%; display: block; }
-.wrap { max-width: 1160px; margin: 0 auto; padding-left: 20px; padding-right: 20px; }
-kbd {
-  font: 500 .8em/1 var(--sans); padding: .22em .45em; border-radius: 6px; white-space: nowrap;
-  background: var(--sheet); border: 1px solid var(--rule); border-bottom-width: 2px; color: var(--ink);
+.print::after { /* paper fibre */
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-
-/* ——— header ——— */
-.top { display: flex; align-items: center; justify-content: space-between; padding-top: 22px; padding-bottom: 22px; gap: 16px; }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
-.brand img { width: 34px; height: 34px; border-radius: 8px; }
-.brand span { font: italic 600 30px/1 var(--serif); letter-spacing: -.01em; }
-.top nav { display: flex; align-items: center; gap: 22px; font-size: 15px; }
-.top nav a { color: var(--ink-soft); text-decoration: none; }
-.top nav a:hover { color: var(--ink); }
-.top nav a.pill { color: var(--ink); border: 1px solid var(--rule); padding: 6px 14px; border-radius: 99px; background: var(--sheet); }
-
-/* ——— hero ——— */
-.hero { display: grid; grid-template-columns: 1fr 1.25fr; gap: 56px; align-items: center; padding-top: 40px; padding-bottom: 40px; }
-.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--sepia); }
-.hero h1 { font: 500 clamp(46px, 6.4vw, 84px)/.96 var(--serif); letter-spacing: -.02em; margin: 18px 0 22px; }
-.hero h1 em { color: var(--leaf); font-weight: 500; }
-.hero .lead { font-size: 19px; color: var(--ink-soft); max-width: 470px; margin: 0 0 30px; }
-.cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-.btn {
-  display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 99px; font-weight: 600; font-size: 16px;
-  text-decoration: none; color: var(--ink); border: 1px solid var(--rule); background: var(--sheet);
-  transition: transform .15s ease, box-shadow .15s ease;
+.print .plant { position: absolute; color: #f4f8ff; pointer-events: none; filter: blur(.5px) drop-shadow(0 0 6px rgba(255, 255, 255, .25)); }
+.print .plant.faint { opacity: .45; filter: blur(1.4px); }
+.print h1 {
+  position: absolute; left: 3.5%; bottom: 7%; margin: 0; pointer-events: none;
+  font: 700 clamp(50px, 15vw, 216px)/.86 var(--display); letter-spacing: -.045em;
+  text-shadow: 0 0 2px rgba(255, 255, 255, .7), 0 0 26px rgba(255, 255, 255, .28);
 }
-.btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px -10px rgba(60, 45, 20, .5); }
-.btn.primary { background: linear-gradient(135deg, #7cb342, var(--lime)); color: var(--forest); border-color: transparent; }
-.meta { margin-top: 18px; font: 13px/1.4 var(--mono); color: var(--ink-soft); }
+.print .intro { position: absolute; left: 4%; top: 7%; max-width: 360px; font-size: 19px; line-height: 1.45; color: #e7eefb; }
+.print .intro p { margin: 0 0 20px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 99px; font: 600 16px/1 var(--text); text-decoration: none; cursor: pointer; }
+.btn.light { background: #fff; color: var(--blue-deep); }
+.btn.ghost { color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .6); }
+.print .intro .btn { margin: 0 8px 8px 0; }
+.print .hint { position: absolute; right: 3%; top: 6%; font-size: 15px; color: #e7eefb; background: rgba(8, 22, 50, .5); padding: 8px 10px 8px 16px; border-radius: 99px; backdrop-filter: blur(6px); display: flex; gap: 10px; align-items: center; pointer-events: none; }
+.print .hint kbd { border-color: rgba(255, 255, 255, .4); color: #fff; }
+/* the selection, as in the app */
+.print .sel { position: absolute; border: 2px solid var(--leaf); border-radius: 4px; background: rgba(255, 255, 255, .08); box-shadow: 0 0 0 9999px rgba(8, 20, 45, .32); pointer-events: none; }
+.print .sel span { position: absolute; left: -2px; top: -34px; background: #1d231b; color: #fff; font: 700 13px/1 -apple-system, sans-serif; padding: 7px 10px; border-radius: 99px; white-space: nowrap; }
+.print .flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.print .flash.go { animation: flash .5s ease-out; }
+@keyframes flash { 10% { opacity: .5; } 100% { opacity: 0; } }
+.print .fake { position: absolute; width: 22px; pointer-events: none; z-index: 5; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .4)); }
 
-/* specimen sheet: a paper card holding a mockup, taped down */
-.sheet { position: relative; background: var(--sheet); padding: 22px; border-radius: 4px; box-shadow: var(--shadow); }
-.sheet.tilt-l { transform: rotate(-1.2deg); }
-.sheet.tilt-r { transform: rotate(1deg); }
-.tape {
-  position: absolute; width: 96px; height: 28px; background: rgba(222, 205, 150, .62); z-index: 3;
-  clip-path: polygon(0 8%, 6% 0, 12% 10%, 20% 2%, 30% 9%, 42% 0, 55% 8%, 68% 1%, 80% 9%, 92% 0, 100% 7%, 100% 92%, 93% 100%, 82% 91%, 70% 99%, 58% 92%, 45% 100%, 33% 91%, 21% 99%, 10% 90%, 0 98%);
-}
-.tape.tl { top: -12px; left: 28px; transform: rotate(-8deg); }
-.tape.tr { top: -10px; right: 34px; transform: rotate(6deg); }
-.tape.br { bottom: -12px; right: 40px; transform: rotate(-4deg); }
+/* the shots you took, stacked below the print */
+.tray { display: flex; align-items: center; gap: 18px; min-height: 92px; padding-top: 14px; color: var(--ink-soft); font-size: 15px; }
+.tray .pile { display: flex; }
+.tray .pile > div { width: 104px; height: 70px; border-radius: 4px; overflow: hidden; position: relative; background: var(--blue); border: 3px solid #fff; box-shadow: 0 6px 14px -6px rgba(10, 25, 50, .5); margin-right: -54px; transform: rotate(var(--r)); animation: drop .5s cubic-bezier(.2, .9, .3, 1.2); }
+.tray .pile > div > div { position: absolute; inset: 0; }
+@keyframes drop { from { transform: translateY(-80px) scale(1.4) rotate(0); opacity: 0; } }
+.tray .pile + span { margin-left: 64px; }
 
-/* pencil notes */
-.note { position: absolute; font: 600 24px/1.1 var(--hand); color: var(--pencil); white-space: nowrap; z-index: 4; pointer-events: none; }
-.note svg { position: absolute; overflow: visible; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+/* ——— sections ——— */
+.lede { font: 400 clamp(22px, 2.4vw, 30px)/1.4 var(--text); max-width: 34em; margin: 70px 0 30px; letter-spacing: -.005em; }
+.lede strong { font-weight: 600; }
+section.f { padding-top: 110px; }
+.f h2 { font: 500 clamp(30px, 3.6vw, 46px)/1.05 var(--display); letter-spacing: -.03em; margin: 0 0 16px; }
+.f p { color: var(--ink-soft); max-width: 36em; margin: 0 0 14px; }
+.f ul { margin: 18px 0 0; padding: 0 0 0 20px; color: var(--ink-soft); max-width: 36em; }
+.f li { margin: 6px 0; }
+.f li::marker { color: var(--leaf); }
+.f .keys { font-size: 16px; color: var(--ink-soft); }
+.wide .mock { margin-top: 40px; }
+.side { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 64px; align-items: center; }
+.side.rev > :first-child { order: 2; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; }
+.pair h3 { font: 500 24px/1.15 var(--display); letter-spacing: -.02em; margin: 30px 0 10px; }
 
-/* pressed leaves */
-.leafdeco { position: absolute; pointer-events: none; z-index: 0; opacity: .8; }
-.leafdeco use { color: var(--leaf); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .leafdeco { opacity: .35; } }
+.more { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 30px; }
+.more h3 { font: 600 19px/1.3 var(--text); margin: 0 0 6px; }
+.more p { font-size: 16px; }
+.more .chip { width: 46px; height: 46px; border-radius: 8px; background: var(--blue); color: #f4f8ff; display: grid; place-items: center; margin-bottom: 16px; }
+.more .chip svg { width: 30px; height: 30px; }
 
-/* ——— plates ——— */
-.plate { position: relative; padding-top: 90px; padding-bottom: 30px; }
-.plate-head { display: flex; align-items: baseline; gap: 18px; border-bottom: 1px solid var(--rule); padding-bottom: 14px; margin-bottom: 44px; }
-.plate-head .num { font: italic 500 22px/1 var(--serif); color: var(--sepia); }
-.plate-head h2 { font: 500 clamp(36px, 4.6vw, 58px)/1 var(--serif); margin: 0; letter-spacing: -.015em; }
-.plate-head p { margin: 0 0 0 auto; color: var(--ink-soft); max-width: 380px; text-align: right; font-size: 15px; }
+.private { font: 500 clamp(26px, 3.2vw, 40px)/1.2 var(--display); letter-spacing: -.03em; max-width: 22em; margin: 0; }
+.private + p { margin-top: 18px; }
 
-.specimen { display: grid; grid-template-columns: 1.35fr 1fr; gap: 48px; align-items: center; margin-bottom: 84px; position: relative; }
-.specimen.flip { grid-template-columns: 1fr 1.35fr; }
-.specimen.flip > .sheet { order: 2; }
-.specimen h3 { font: 500 34px/1.05 var(--serif); margin: 14px 0 12px; }
-.specimen p { color: var(--ink-soft); margin: 0 0 14px; }
-.specimen ul { margin: 0; padding: 0; list-style: none; }
-.specimen li { padding: 7px 0 7px 26px; border-top: 1px dashed var(--rule); position: relative; font-size: 15.5px; }
-.specimen li::before { content: ""; position: absolute; left: 2px; top: 13px; width: 13px; height: 9px; border-radius: 0 100% 0 100%; background: var(--leaf); opacity: .8; }
+/* support: a seedling that grows when you reach for a button */
+.support { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: end; }
+.give { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.give a, .give span { display: inline-flex; flex-direction: column; gap: 2px; padding: 14px 20px; border-radius: 14px; border: 1.5px solid var(--line); text-decoration: none; min-width: 190px; }
+.give a { border-color: var(--leaf); }
+.give a:hover { background: rgba(124, 179, 66, .12); }
+.give b { font-weight: 600; }
+.give small { color: var(--ink-soft); font-size: 14px; }
+.give span { color: var(--ink-soft); }
+.give span small::after { content: " — " attr(data-soon); }
+.seedling { position: relative; height: 330px; border-radius: 6px; overflow: hidden; background: var(--blue); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 600' preserveAspectRatio='none'%3E%3Cpath d='M12.4 16.0 L26.1 15.9 L45.5 15.9 L54.5 15.8 L72.2 15.8 L83.5 15.7 L93.3 15.7 L109.8 15.6 L118.5 15.5 L135.7 15.5 L146.7 15.4 L161.8 15.4 L180.1 15.3 L199.0 15.3 L207.4 15.2 L222.5 15.1 L239.5 15.1 L255.2 15.0 L264.4 15.0 L275.3 14.9 L293.5 14.9 L298.8 14.8 L320.5 14.7 L330.4 14.7 L344.4 14.6 L359.3 14.6 L375.8 14.5 L394.4 14.5 L402.1 14.4 L418.4 14.3 L431.4 14.3 L441.6 14.2 L456.2 14.2 L465.6 14.1 L480.1 14.1 L496.4 14.0 L516.0 13.9 L528.9 13.9 L542.5 13.8 L559.0 13.8 L571.0 13.7 L582.4 13.7 L599.3 13.6 L611.1 13.5 L620.1 13.5 L636.9 13.4 L651.0 13.4 L669.2 13.3 L683.2 13.3 L694.4 13.2 L715.2 13.1 L721.3 13.1 L737.2 13.0 L753.0 13.0 L760.0 12.9 L775.7 12.9 L784.8 12.8 L804.4 12.7 L819.9 12.7 L833.3 12.6 L851.3 12.6 L861.3 12.5 L879.3 12.5 L892.2 12.4 L905.2 12.3 L916.7 12.3 L932.6 12.2 L946.3 12.2 L955.3 12.1 L971.0 12.1 L982.0 12.0 L990.1 26.4 L990.1 40.7 L991.7 55.0 L987.9 69.4 L981.9 83.8 L983.8 98.1 L988.7 112.4 L984.9 126.8 L989.0 141.2 L984.5 155.5 L981.8 169.9 L980.5 184.2 L988.3 198.6 L985.1 212.9 L987.8 227.2 L988.7 241.6 L991.0 255.9 L981.8 270.3 L984.9 284.6 L987.5 299.0 L993.0 313.4 L993.8 327.7 L993.3 342.0 L985.8 356.4 L985.3 370.8 L984.9 385.1 L991.7 399.5 L994.8 413.8 L988.4 428.1 L987.4 442.5 L985.6 456.9 L984.2 471.2 L987.1 485.5 L990.3 499.9 L989.6 514.2 L987.7 528.6 L989.9 543.0 L987.1 557.3 L987.8 571.6 L994.1 586.0 L979.1 586.1 L964.5 586.1 L951.8 586.2 L938.0 586.2 L917.4 586.3 L909.7 586.3 L893.3 586.4 L879.2 586.5 L864.2 586.5 L847.0 586.6 L834.2 586.6 L818.9 586.7 L811.1 586.7 L792.9 586.8 L779.2 586.9 L766.1 586.9 L750.6 587.0 L736.8 587.0 L719.0 587.1 L703.6 587.1 L690.8 587.2 L676.9 587.3 L666.4 587.3 L650.7 587.4 L645.7 587.4 L630.3 587.5 L612.3 587.5 L598.7 587.6 L584.5 587.7 L569.2 587.7 L551.8 587.8 L543.5 587.8 L530.7 587.9 L512.6 587.9 L499.9 588.0 L483.8 588.1 L471.2 588.1 L460.2 588.2 L445.6 588.2 L436.1 588.3 L415.0 588.3 L398.3 588.4 L391.5 588.5 L372.9 588.5 L355.5 588.6 L345.7 588.6 L328.3 588.7 L320.3 588.7 L311.6 588.8 L297.3 588.9 L281.8 588.9 L263.3 589.0 L249.0 589.0 L231.8 589.1 L222.1 589.1 L205.3 589.2 L193.5 589.3 L176.3 589.3 L162.6 589.4 L155.3 589.4 L144.1 589.5 L129.6 589.5 L115.1 589.6 L100.5 589.7 L84.6 589.7 L64.6 589.8 L52.0 589.8 L36.0 589.9 L19.2 589.9 L7.8 590.0 L12.2 575.6 L12.5 561.3 L14.9 547.0 L14.9 532.6 L9.1 518.2 L14.4 503.9 L17.3 489.6 L18.9 475.2 L13.6 460.9 L10.5 446.5 L8.3 432.1 L7.2 417.8 L8.6 403.4 L14.8 389.1 L19.0 374.8 L18.0 360.4 L12.6 346.1 L12.1 331.7 L13.1 317.4 L8.3 303.0 L16.0 288.6 L19.5 274.3 L17.5 260.0 L14.9 245.6 L10.6 231.2 L8.0 216.9 L15.5 202.5 L13.8 188.2 L18.8 173.9 L19.1 159.5 L11.6 145.1 L10.1 130.8 L15.6 116.5 L15.8 102.1 L13.0 87.8 L13.0 73.4 L11.6 59.0 L16.0 44.7 L14.0 30.4Z' fill='black'/%3E%3C/svg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 600' preserveAspectRatio='none'%3E%3Cpath d='M12.4 16.0 L26.1 15.9 L45.5 15.9 L54.5 15.8 L72.2 15.8 L83.5 15.7 L93.3 15.7 L109.8 15.6 L118.5 15.5 L135.7 15.5 L146.7 15.4 L161.8 15.4 L180.1 15.3 L199.0 15.3 L207.4 15.2 L222.5 15.1 L239.5 15.1 L255.2 15.0 L264.4 15.0 L275.3 14.9 L293.5 14.9 L298.8 14.8 L320.5 14.7 L330.4 14.7 L344.4 14.6 L359.3 14.6 L375.8 14.5 L394.4 14.5 L402.1 14.4 L418.4 14.3 L431.4 14.3 L441.6 14.2 L456.2 14.2 L465.6 14.1 L480.1 14.1 L496.4 14.0 L516.0 13.9 L528.9 13.9 L542.5 13.8 L559.0 13.8 L571.0 13.7 L582.4 13.7 L599.3 13.6 L611.1 13.5 L620.1 13.5 L636.9 13.4 L651.0 13.4 L669.2 13.3 L683.2 13.3 L694.4 13.2 L715.2 13.1 L721.3 13.1 L737.2 13.0 L753.0 13.0 L760.0 12.9 L775.7 12.9 L784.8 12.8 L804.4 12.7 L819.9 12.7 L833.3 12.6 L851.3 12.6 L861.3 12.5 L879.3 12.5 L892.2 12.4 L905.2 12.3 L916.7 12.3 L932.6 12.2 L946.3 12.2 L955.3 12.1 L971.0 12.1 L982.0 12.0 L990.1 26.4 L990.1 40.7 L991.7 55.0 L987.9 69.4 L981.9 83.8 L983.8 98.1 L988.7 112.4 L984.9 126.8 L989.0 141.2 L984.5 155.5 L981.8 169.9 L980.5 184.2 L988.3 198.6 L985.1 212.9 L987.8 227.2 L988.7 241.6 L991.0 255.9 L981.8 270.3 L984.9 284.6 L987.5 299.0 L993.0 313.4 L993.8 327.7 L993.3 342.0 L985.8 356.4 L985.3 370.8 L984.9 385.1 L991.7 399.5 L994.8 413.8 L988.4 428.1 L987.4 442.5 L985.6 456.9 L984.2 471.2 L987.1 485.5 L990.3 499.9 L989.6 514.2 L987.7 528.6 L989.9 543.0 L987.1 557.3 L987.8 571.6 L994.1 586.0 L979.1 586.1 L964.5 586.1 L951.8 586.2 L938.0 586.2 L917.4 586.3 L909.7 586.3 L893.3 586.4 L879.2 586.5 L864.2 586.5 L847.0 586.6 L834.2 586.6 L818.9 586.7 L811.1 586.7 L792.9 586.8 L779.2 586.9 L766.1 586.9 L750.6 587.0 L736.8 587.0 L719.0 587.1 L703.6 587.1 L690.8 587.2 L676.9 587.3 L666.4 587.3 L650.7 587.4 L645.7 587.4 L630.3 587.5 L612.3 587.5 L598.7 587.6 L584.5 587.7 L569.2 587.7 L551.8 587.8 L543.5 587.8 L530.7 587.9 L512.6 587.9 L499.9 588.0 L483.8 588.1 L471.2 588.1 L460.2 588.2 L445.6 588.2 L436.1 588.3 L415.0 588.3 L398.3 588.4 L391.5 588.5 L372.9 588.5 L355.5 588.6 L345.7 588.6 L328.3 588.7 L320.3 588.7 L311.6 588.8 L297.3 588.9 L281.8 588.9 L263.3 589.0 L249.0 589.0 L231.8 589.1 L222.1 589.1 L205.3 589.2 L193.5 589.3 L176.3 589.3 L162.6 589.4 L155.3 589.4 L144.1 589.5 L129.6 589.5 L115.1 589.6 L100.5 589.7 L84.6 589.7 L64.6 589.8 L52.0 589.8 L36.0 589.9 L19.2 589.9 L7.8 590.0 L12.2 575.6 L12.5 561.3 L14.9 547.0 L14.9 532.6 L9.1 518.2 L14.4 503.9 L17.3 489.6 L18.9 475.2 L13.6 460.9 L10.5 446.5 L8.3 432.1 L7.2 417.8 L8.6 403.4 L14.8 389.1 L19.0 374.8 L18.0 360.4 L12.6 346.1 L12.1 331.7 L13.1 317.4 L8.3 303.0 L16.0 288.6 L19.5 274.3 L17.5 260.0 L14.9 245.6 L10.6 231.2 L8.0 216.9 L15.5 202.5 L13.8 188.2 L18.8 173.9 L19.1 159.5 L11.6 145.1 L10.1 130.8 L15.6 116.5 L15.8 102.1 L13.0 87.8 L13.0 73.4 L11.6 59.0 L16.0 44.7 L14.0 30.4Z' fill='black'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+.seedling svg { position: absolute; left: 50%; bottom: 0; width: 220px; transform: translateX(-50%) scale(.72); transform-origin: 50% 100%; color: #f4f8ff; transition: transform 1.2s cubic-bezier(.2, .8, .2, 1); filter: blur(.4px) drop-shadow(0 0 5px rgba(255, 255, 255, .3)); }
+.support:has(.give a:hover, .give a:focus-visible) .seedling svg { transform: translateX(-50%) scale(1.02); }
 
-/* the herbarium label */
-.label { font: 12px/1.55 var(--mono); color: var(--ink-soft); border: 1px solid var(--rule); background: var(--sheet); padding: 10px 14px; display: inline-block; position: relative; }
-.label b { display: block; font: italic 600 19px/1.2 var(--serif); color: var(--ink); letter-spacing: 0; margin: 2px 0 4px; }
-.label .no { color: var(--sepia); letter-spacing: .1em; text-transform: uppercase; }
+ol.plant-steps { padding-left: 22px; max-width: 40em; color: var(--ink-soft); }
+ol.plant-steps li { margin: 10px 0; padding-left: 6px; }
+ol.plant-steps b { color: var(--ink); font-weight: 600; }
 
-/* small specimens */
-.seeds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-.seed { background: var(--sheet); padding: 22px 22px 20px; box-shadow: var(--shadow); border-radius: 3px; position: relative; }
-.seed:nth-child(1) { transform: rotate(-.8deg); }
-.seed:nth-child(3) { transform: rotate(.7deg); }
-.seed h4 { font: 500 25px/1.1 var(--serif); margin: 10px 0 8px; }
-.seed p { margin: 0; color: var(--ink-soft); font-size: 15px; }
-.seed svg { width: 34px; height: 34px; color: var(--leaf); }
-
-/* privacy */
-.ledger { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
-.ledger > div { padding: 26px 24px; }
-.ledger > div + div { border-left: 1px solid var(--rule); }
-.ledger h4 { font: italic 500 26px/1.1 var(--serif); margin: 0 0 6px; }
-.ledger p { margin: 0; color: var(--ink-soft); font-size: 15px; }
-
-/* support */
-.support { background: var(--forest); color: #ece6d2; border-radius: 6px; padding: 54px 48px; position: relative; overflow: hidden; }
-.support h2 { font: 500 clamp(36px, 4.4vw, 54px)/1 var(--serif); margin: 0 0 12px; }
-.support h2 em { color: var(--lime); }
-.support > p { color: #b9b39c; max-width: 560px; margin: 0 0 30px; }
-.donate { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; position: relative; z-index: 1; }
-.donate a, .donate span {
-  display: block; padding: 18px; border-radius: 10px; text-decoration: none; color: #ece6d2;
-  background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .1); transition: background .15s ease, transform .15s ease;
-}
-.donate a:hover { background: rgba(198, 232, 107, .14); transform: translateY(-2px); }
-.donate b { display: block; font-size: 17px; margin-bottom: 4px; }
-.donate small { color: #a39d86; font-size: 13.5px; }
-.donate span { opacity: .55; }
-.donate span small::after { content: " · " attr(data-soon); color: var(--lime); }
-.support .leafdeco { opacity: .18; }
-.support .leafdeco use { color: var(--lime); }
-
-/* install */
-.steps { counter-reset: s; display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; padding: 0; list-style: none; }
-.steps li { counter-increment: s; color: var(--ink-soft); font-size: 15.5px; }
-.steps li::before { content: counter(s, lower-roman) "."; display: block; font: italic 500 40px/1 var(--serif); color: var(--sepia); margin-bottom: 8px; }
-.steps b { color: var(--ink); }
-
-footer { margin-top: 110px; border-top: 1px solid var(--rule); padding-top: 26px; padding-bottom: 48px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; font: 13px/1.5 var(--mono); color: var(--ink-soft); }
-footer a { color: var(--ink-soft); }
+footer { margin-top: 130px; padding-top: 24px; padding-bottom: 48px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 12px 28px; font-size: 15px; color: var(--ink-soft); }
+footer span:first-child { margin-right: auto; }
 
 /* ======================================================================
    Mockups — the app's own windows, drawn in HTML. Sized by container width.
@@ -351,28 +315,19 @@ footer a { color: var(--ink-soft); }
   .m-edit .cursor, .m-pick .cursor, .m-pick .loupe { display: none; }
 }
 
+
+.mock .win { box-shadow: 0 30px 60px -30px rgba(10, 25, 50, .45); }
+
 /* ——— small screens ——— */
 @media (max-width: 900px) {
-  .hero, .specimen, .specimen.flip { grid-template-columns: 1fr; gap: 34px; }
-  .specimen.flip > .sheet { order: 0; }
-  .seeds, .ledger, .steps { grid-template-columns: 1fr; }
-  .ledger > div + div { border-left: 0; border-top: 1px solid var(--rule); }
-  .donate { grid-template-columns: 1fr 1fr; }
-  .plate-head { flex-wrap: wrap; }
-  .plate-head p { margin: 0; text-align: left; }
-  .top nav a:not(.pill):not(.lang) { display: none; }
-  .note { display: none; }
-  .support { padding: 40px 22px; }
-  .sheet { padding: 12px; }
+  .side, .pair, .more, .support { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .side.rev > :first-child { order: 0; }
+  .top a.hide-s { display: none; }
+  .print { height: auto; min-height: 640px; }
+  .print .intro { left: 6%; right: 6%; top: 6%; max-width: none; }
+  .print .hint { left: 6%; right: auto; top: auto; bottom: 30%; }
+  section.f { padding-top: 80px; }
 }
-@media (max-width: 520px) { .donate { grid-template-columns: 1fr; } }
 
-/* grid children may shrink below their content (mockups scale with their width) */
-.hero > *, .specimen > *, .stage > * { min-width: 0; }
-@media (max-width: 520px) {
-  .top nav { gap: 12px; }
-  .brand span { font-size: 26px; }
-  .m-pick .hint span:nth-child(n+4) { display: none; }
-}
-/* pressed leaves may hang off the page edge, but never widen it */
-main { overflow-x: clip; }
+.print .hint .coarse { display: none; }
+@media (pointer: coarse) { .print .hint .fine { display: none; } .print .hint .coarse { display: inline; } }

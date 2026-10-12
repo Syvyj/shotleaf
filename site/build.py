@@ -24,7 +24,7 @@ def donate_block():
             cards.append(f'<a href="{html.escape(base + handle)}" target="_blank" rel="noopener"><b>{name}</b><small>{note}</small></a>')
         else:
             cards.append(f'<span><b>{name}</b><small data-soon="[[soon||скоро]]">{note}</small></span>')
-    return '<div class="donate">\n      ' + "\n      ".join(cards) + "\n    </div>"
+    return '<div class="give">\n        ' + "\n        ".join(cards) + "\n      </div>"
 
 
 def render(template, lang):
