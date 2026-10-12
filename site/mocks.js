@@ -79,17 +79,6 @@ async function snippet(m) {
 document.querySelectorAll(".m-clip").forEach(clipboard);
 document.querySelectorAll(".m-snip").forEach(snippet);
 
-// The editor stands up out of the page as you scroll to it.
-const tilt = document.querySelector(".tilt");
-if (tilt && !reduce) {
-  const update = () => {
-    const r = tilt.getBoundingClientRect(), k = Math.min(1, Math.max(0, (innerHeight - r.top) / (innerHeight * 0.9)));
-    tilt.style.setProperty("--tilt", `${22 * (1 - k)}deg`);
-    tilt.style.setProperty("--zoom", (0.94 + 0.06 * k).toFixed(3));
-  };
-  addEventListener("scroll", update, { passive: true }); addEventListener("resize", update); update();
-}
-
 // Keycaps press themselves, one shortcut after another.
 (async () => {
   const keys = [...document.querySelectorAll(".key")];

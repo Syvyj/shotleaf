@@ -14,6 +14,10 @@ DONATE = [
     ("[[Monobank jar||Банка Monobank]]", "https://send.monobank.ua/jar/", "", "[[Ukrainian cards, Apple Pay||Українські картки, Apple Pay]]"),
 ]
 
+# Where "Download" points. ponytail: a relative zip for now; the 96 MB app is over Cloudflare
+# Pages' 25 MB file limit, so it will live wherever we host releases (R2 or the home server).
+DOWNLOAD = "https://shotleaf.syvyj.dev/download/Shotleaf.zip"
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -31,7 +35,7 @@ def render(template, lang):
     side = 0 if lang == "en" else 1
     page = template.replace("{{donate}}", donate_block())
     page = re.sub(r"\[\[(.*?)\|\|(.*?)\]\]", lambda m: m.group(1 + side), page, flags=re.S)
-    values = {"lang": lang, "root": "" if lang == "en" else "../",
+    values = {"download": DOWNLOAD, "lang": lang, "root": "" if lang == "en" else "../",
               "other": "uk/" if lang == "en" else "../", "other_lang": "uk" if lang == "en" else "en"}
     page = re.sub(r"\{\{(\w+)\}\}", lambda m: values[m.group(1)], page)
     assert "[[" not in page and "{{" not in page, f"unfilled placeholder in {lang}"
