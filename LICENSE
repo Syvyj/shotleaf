@@ -1,0 +1,10 @@
+Shotleaf
+Copyright © 2026 Oleksii Ziuzin (Syvyj) — https://syvyj.dev
+All rights reserved.
+
+This software and its source code are proprietary. No part of it may be copied,
+modified, distributed, sublicensed or used to create derivative works without
+the prior written permission of the copyright holder.
+
+Shotleaf includes open-source components under their own licences (MIT,
+Apache-2.0 and others); see ShotleafKit/Sources/AppFeature/Resources/ThirdPartyNotices.txt.

@@ -1,17 +1,17 @@
-# ARCHITECTURE_DECISIONS.md — APILA
+# ARCHITECTURE_DECISIONS.md — Shotleaf
 
-Журнал архітектурних рішень (ADR) для APILA — нативного macOS AI Productivity Suite.
+Журнал архітектурних рішень (ADR) для Shotleaf — нативного macOS AI Productivity Suite.
 Кожен запис: **що вирішили**, **чому**, **які альтернативи розглядали**.
 
 > Статуси: ✅ ПРИЙНЯТО · 🟡 ЗАПРОПОНОВАНО · ⏳ ОЧІКУЄ ПІДТВЕРДЖЕННЯ · ❌ ВІДХИЛЕНО · ⛔ СКАСОВАНО
 
-> **Поточний стан (2026-10-07).** Працює вертикальний зріз Kerlig-частини: ⌘⇧Space → плаваюча панель → Rewrite/Explain/Translate/Summarize/Custom → стрімінг → Copy/Replace/Insert. Провайдер обирається в Settings (LM Studio / Ollama / OpenAI / OpenRouter / custom; ключ у Keychain), Mock — запасний варіант. Скріншоти + OCR працюють (етап 5). MLX та inline-дописування — ще не почато. Xcode 26 встановлено: `swift test` і `xcodebuild` працюють. Дорожня карта — `PLAN.md`.
+> **Поточний стан (2026-10-07).** Працює вертикальний зріз першої частини (ШІ-панелі): ⌘⇧Space → плаваюча панель → Rewrite/Explain/Translate/Summarize/Custom → стрімінг → Copy/Replace/Insert. Провайдер обирається в Settings (LM Studio / Ollama / OpenAI / OpenRouter / custom; ключ у Keychain), Mock — запасний варіант. Скріншоти + OCR працюють (етап 5). MLX та inline-дописування — ще не почато. Xcode 26 встановлено: `swift test` і `xcodebuild` працюють. Дорожня карта — `PLAN.md`.
 
 ---
 
 ## Контекст продукту
 
-Один нативний macOS-застосунок, що об'єднує ідеї Kerlig (глобальний хоткей, floating UI поверх будь-якої програми, AI-дії над виділеним текстом), Shottr (швидкі скріншоти, OCR, анотації — не MVP) та Cotypist (inline completion — не MVP, локальна модель у процесі). Не клон. Одне ядро, один UI, модульна архітектура.
+Один нативний macOS-застосунок, що об'єднує глобальний хоткей і floating UI поверх будь-якої програми, швидкі скріншоти з OCR і анотаціями, та inline-дописування локальною моделлю. Одне ядро, один UI, модульна архітектура.
 
 Принципи: SwiftUI · сучасні Apple API · local-first · privacy-first · keyboard-first · plugin-friendly · модульність · мінімум сторонніх залежностей.
 
@@ -132,7 +132,7 @@
 **Альтернативи.** Дозволити платформні типи в Core (зручніше зараз, але протікання залежностей і втрата чистоти контрактів).
 
 ## ADR-0022 — Тести на Swift Testing ✅
-**Оновлення (2026-10-07).** Повний Xcode тепер є — `swift test --package-path APILAKit` виконується локально; примітка про CLT нижче застаріла.
+**Оновлення (2026-10-07).** Повний Xcode тепер є — `swift test --package-path ShotleafKit` виконується локально; примітка про CLT нижче застаріла.
 **Рішення.** Юніт-тести на Swift Testing (`import Testing`), не XCTest.
 **Чому.** Сучасний фреймворк, кращий синтаксис. Примітка: у headless CLI-toolchain (без повного Xcode) ні XCTest, ні Testing недоступні — `swift test` виконується в Xcode/CI; критерій етапу 1 — зелений `swift build`.
 **Альтернативи.** XCTest (старіший; теж недоступний у цьому середовищі).
@@ -203,14 +203,14 @@
 # Етап App Shell ✅
 
 ## ADR-0033 — .xcodeproj + локальний SPM-пакет у підтеці (не workspace) ✅
-**Рішення.** Один `APILA.xcodeproj` (app-таргет у корені, App/) лінкує локальний SPM-пакет із підтеки `APILAKit/` через `XCLocalSwiftPackageReference` (relativePath "APILAKit"). Без `.xcworkspace`.
-**Уточнення (first-run).** Спочатку пакет був у корені (relativePath ".") поряд із .xcodeproj — це відомий проблемний кейс для Xcode (пакет у теці проєкту). Перенесено у `APILAKit/` — стандартний надійний layout «app + local package». Білд пакета: `swift build --package-path APILAKit` (через `DEVELOPER_DIR=/Library/Developer/CommandLineTools`).
+**Рішення.** Один `Shotleaf.xcodeproj` (app-таргет у корені, App/) лінкує локальний SPM-пакет із підтеки `ShotleafKit/` через `XCLocalSwiftPackageReference` (relativePath "ShotleafKit"). Без `.xcworkspace`.
+**Уточнення (first-run).** Спочатку пакет був у корені (relativePath ".") поряд із .xcodeproj — це відомий проблемний кейс для Xcode (пакет у теці проєкту). Перенесено у `ShotleafKit/` — стандартний надійний layout «app + local package». Білд пакета: `swift build --package-path ShotleafKit` (через `DEVELOPER_DIR=/Library/Developer/CommandLineTools`).
 **Чому.** Потрібен підписаний `.app`-бандл зі стабільним bundle ID для TCC-дозволів (Accessibility/Screen Recording/Input Monitoring); SPM-executable цього не дає. Модулі лишаються SPM-таргетами → межі (ADR-0015) збережено, `swift build` працює.
 **Альтернативи.** SPM + скрипт .app + ad-hoc підпис (дев-дружньо, але не те, що обрав користувач); повністю нативний .xcodeproj з framework-таргетами (втрата `swift build`/CLI-demo).
 **Застереження.** Повного Xcode в дев-середовищі немає (`xcodebuild` блокується ліцензією) → pbxproj згенеровано вручну за стандартною схемою і провалідовано `plutil -lint`; фінальна збірка/підпис — у Xcode користувача (прийняти ліцензію: `sudo xcodebuild -license accept`, виставити Team).
 
 ## ADR-0034 — Логіка App Shell у бібліотеці AppFeature ✅
-**Рішення.** Уся логіка (AppContainer, AppCoordinator, PermissionManager, hotkey, NSPanel, menu/settings views) — у SPM-бібліотеці `AppFeature`. У `.xcodeproj` лишається тільки `@main App` (App/APILAApp.swift).
+**Рішення.** Уся логіка (AppContainer, AppCoordinator, PermissionManager, hotkey, NSPanel, menu/settings views) — у SPM-бібліотеці `AppFeature`. У `.xcodeproj` лишається тільки `@main App` (App/ShotleafApp.swift).
 **Чому.** `swift build` верифікує App Shell headless; xcodeproj додає лише signable shell. App-таргет залежить лише від продукту `AppFeature` (мінімальний pbxproj).
 **Альтернативи.** Уся логіка в app-таргеті xcodeproj (не компілюється headless, не тестується через SPM).
 
@@ -222,7 +222,7 @@
 
 ## ADR-0036 — Floating UI: non-activating NSPanel ✅
 **Рішення.** `FloatingPanelController` (@MainActor) керує `NSPanel` зі стилем `.nonactivatingPanel`, `level=.floating`, `collectionBehavior=[.canJoinAllSpaces,.fullScreenAuxiliary]`, показ через `orderFrontRegardless()`.
-**Чому.** Панель поверх будь-якого застосунку без крадіжки фокуса → виділення в активній програмі зберігається (Kerlig-стиль). Реалізує ADR-0008.
+**Чому.** Панель поверх будь-якого застосунку без крадіжки фокуса → виділення в активній програмі зберігається. Реалізує ADR-0008.
 
 ## ADR-0037 — PermissionManager (TCC) ✅
 **Рішення.** `PermissionService` (Core) + `PermissionManager` (AppFeature): Accessibility (`AXIsProcessTrusted`/`...WithOptions`), Screen Recording (`CGPreflight/RequestScreenCaptureAccess`), Input Monitoring (`IOHIDCheckAccess/RequestAccess`); deep-link у System Settings. Видача `permissionGranted` у Event Bus.
@@ -232,15 +232,15 @@
 ## ADR-0040 — Etap C: перший повний вертикальний зріз ✅
 **Рішення.** Замкнуто сценарій: виділення → ⌥Space → Floating Panel (keyboard-first) → дія → стрімінг → Copy/Replace/Insert.
 - **Захоплення контексту — раз, на хоткеї** (доки джерело у фокусі). Додано `ActionRunner.run(action, snapshot:)` — виконання з готовим знімком без повторного збору (панель потім стає key і повторний AX/⌘C дав би порожнечу).
-- **Floating Panel**: `FloatingPanel: NSPanel` (override `canBecomeKey=true`) + `.nonactivatingPanel` → отримує клавіатуру, не активуючи APILA; translucent (`.ultraThinMaterial`), позиція біля курсора. UI-стейт-машина — `PanelViewModel` (actions→customPrompt→generating→result), keyboard-first (↑↓/⏎/esc, ⌘C/⌘R/⌘I через `keyboardShortcut`).
+- **Floating Panel**: `FloatingPanel: NSPanel` (override `canBecomeKey=true`) + `.nonactivatingPanel` → отримує клавіатуру, не активуючи Shotleaf; translucent (`.ultraThinMaterial`), позиція біля курсора. UI-стейт-машина — `PanelViewModel` (actions→customPrompt→generating→result), keyboard-first (↑↓/⏎/esc, ⌘C/⌘R/⌘I через `keyboardShortcut`).
 - **Streaming** реальний: `ActionOutput.token` додається в `output` наживо.
 - **Replace/Insert (простий шлях, без AX-вставки)**: `ResultInserter` — запам'ятати `frontmostApplication` на хоткеї → write clipboard → re-activate джерело → `⌘V` (Insert: →, Return, ⌘V).
 - **Mock Mode**: `bootstrap` реєструє local (LM Studio) + Mock; якщо health local не healthy → `setCurrent(mock)`. UI працює без локальної моделі.
 - **Custom Prompt**: `CustomPromptAction(prompt:)` (ActionKit) будується з введеного тексту.
-- **App**: agent-only (LSUIElement=YES); `MenuBarExtra` (Open APILA / Permissions / Provider / Quit) + `Settings`; старт через `NSApplicationDelegateAdaptor`. Debug-вікно прибрано.
+- **App**: agent-only (LSUIElement=YES); `MenuBarExtra` (Open Shotleaf / Permissions / Provider / Quit) + `Settings`; старт через `NSApplicationDelegateAdaptor`. Debug-вікно прибрано.
 **Архітектура збережена.** Core чистий; AppFeature → лише ContextKit/ActionKit/InferenceKit/AppUI; Kit-модулі не залежать один від одного; зв'язок через Core-протоколи. `Coordinator` — лише оркестрація.
-**Перевірено.** `swift build --package-path APILAKit` ✓, pbxproj `plutil` OK. Запуск .app — у Xcode користувача.
-**Відомий ризик (перевірити на запуску).** Чи отримує non-activating key-панель клавіатуру в accessory-режимі (LSUIElement) без `NSApp.activate`. Якщо ні — фолбек: активувати APILA при show (контекст уже захоплено, тож focus-steal не шкодить; Replace і так реактивує джерело).
+**Перевірено.** `swift build --package-path ShotleafKit` ✓, pbxproj `plutil` OK. Запуск .app — у Xcode користувача.
+**Відомий ризик (перевірити на запуску).** Чи отримує non-activating key-панель клавіатуру в accessory-режимі (LSUIElement) без `NSApp.activate`. Якщо ні — фолбек: активувати Shotleaf при show (контекст уже захоплено, тож focus-steal не шкодить; Replace і так реактивує джерело).
 **Правки після першого запуску (підтверджено користувачем: панель + клавіатура працюють).**
 - Хоткей за замовчуванням ⌥Space → **⌘⇧Space** (⌥Space/⌃Space часто зайняті перемиканням розкладок). Carbon RegisterEventHotKey не потребує TCC.
 - Панель: `.titled` → **`.borderless`** (+ `.nonactivatingPanel`, `canBecomeKey` override). Прибрано «світлофор» (close/minimize), що висів у прозорому titlebar поза заокругленим контентом. Закриття — Esc / кнопка Close.
@@ -264,7 +264,7 @@
 **Рішення.** Для верифікації ContextKit app тимчасово РЕГУЛЯРНИЙ (LSUIElement = NO → Dock + видиме вікно), головна сцена — `DebugView`: live passive AX-виділення + clipboard (таймер 0.5с) і захоплення по ⌥Space (AX→⌘C). Запитуємо лише **Accessibility** (потрібен для AX-читання та ⌘C; Screen Recording для ContextKit НЕ треба). Carbon-хоткей працює без TCC.
 **Чому.** Користувач має власноруч запустити й перевірити SelectedTextReader обома шляхами. Видиме вікно + Dock-іконка роблять «запустилось?» очевидним.
 **Тимчасово.** LSUIElement повернемо в YES (agent-only), коли panel-UX буде готовий.
-**Перевірено.** `swift build --package-path APILAKit` ✓; pbxproj `plutil -lint` OK. Збірку .app робить користувач у Xcode (немає повного Xcode/ліцензії тут).
+**Перевірено.** `swift build --package-path ShotleafKit` ✓; pbxproj `plutil -lint` OK. Збірку .app робить користувач у Xcode (немає повного Xcode/ліцензії тут).
 
 ---
 
@@ -277,7 +277,7 @@
 
 ## ADR-0042 — Провайдер перевіряється на кожному показі панелі ✅
 **Рішення.** `AppContainer.refreshProvider()` після показу панелі (окремою задачею, щоб повільний endpoint не гальмував UI). Mock явно позначений у панелі.
-**Чому.** LM Studio, запущений після APILA, раніше не підхоплювався до перезапуску, а Mock тихо віддавав фейкову відповідь.
+**Чому.** LM Studio, запущений після Shotleaf, раніше не підхоплювався до перезапуску, а Mock тихо віддавав фейкову відповідь.
 
 ## ADR-0043 — Прибрано модуль AppUI ✅
 **Рішення.** Видалено `AppUI` (лише заглушки; справжні view — `AppFeature/Views`). `CaptureKit` лишається таргетом, але не підключений до `AppFeature`, доки порожній.
@@ -339,16 +339,16 @@
 
 ---
 
-# Етап 6 — скріншоти рівня Shottr
+# Етап 6 — повноцінні скріншоти
 
 ## ADR-0054 — Власний екран вибору замість `screencapture -i` (замінює ADR-0051) ✅
-**Рішення.** `RegionPicker` (CaptureKit): спершу заморожує кожен дисплей (`SCScreenshotManager`, без курсора, без вікон APILA), потім показує на кожному екрані `OverlayWindow` (.screenSaver) з `SelectionView` (AppKit, flipped): затемнення поза виділенням, градієнтна рамка, розмір у пікселях, кругла лупа 11×11 px ×12 з кольором, перехрестя, вибір вікна кліком (`CGWindowListCopyWindowInfo`, front-to-back), ↩/F — весь екран, R — повтор останньої області, Esc/ПКМ — скасувати. Обрізка — із замороженого знімка. Вся математика координат — `CaptureGeometry` (тести).
-**Чому.** Shottr-рівень потребує лупи й подальших інструментів у самому виборі; системний picker цього не дає.
+**Рішення.** `RegionPicker` (CaptureKit): спершу заморожує кожен дисплей (`SCScreenshotManager`, без курсора, без вікон Shotleaf), потім показує на кожному екрані `OverlayWindow` (.screenSaver) з `SelectionView` (AppKit, flipped): затемнення поза виділенням, градієнтна рамка, розмір у пікселях, кругла лупа 11×11 px ×12 з кольором, перехрестя, вибір вікна кліком (`CGWindowListCopyWindowInfo`, front-to-back), ↩/F — весь екран, R — повтор останньої області, Esc/ПКМ — скасувати. Обрізка — із замороженого знімка. Вся математика координат — `CaptureGeometry` (тести).
+**Чому.** Повноцінні скріншоти потребують лупи й подальших інструментів у самому виборі; системний picker цього не дає.
 **Стиль.** `CaptureStyle`: власний фіолетово-бірюзовий акцент, скляні капсули, rounded-шрифт; без системної «скріншотної» іконографії (побажання користувача).
 **Обмеження.** Виділення в межах одного дисплея; повтор області — лише в пам'яті.
 
 ## ADR-0055 — Айдентика «Листя»: іконка, значок меню, акцент, Dock ✅
-**Рішення.** Палітра з референс-фото користувача: глибокий лісовий `#121A12`, мох `#2E4A24`, листя `#4F7F2A`, свіжа зелень `#8FBF3A`, лайм `#C9E86A`. Знак — кутики виділення + м'яка чотирипроменева іскра («виділив — APILA діє»).
+**Рішення.** Палітра з референс-фото користувача: глибокий лісовий `#121A12`, мох `#2E4A24`, листя `#4F7F2A`, свіжа зелень `#8FBF3A`, лайм `#C9E86A`. Знак — кутики виділення + м'яка чотирипроменева іскра («виділив — Shotleaf діє»).
 - Іконка генерується `scripts/make-icon.swift` → `App/Assets.xcassets/AppIcon` (усі розміри macOS).
 - `AccentColor` в asset catalog — глобальний акцент SwiftUI (світла/темна версії).
 - Значок меню-бару — template-зображення `BrandMark.menuBarIcon` (той самий знак, macOS сама фарбує).
@@ -360,10 +360,10 @@
 
 ## ADR-0057 — Екран вибору як non-activating NSPanel ✅
 **Рішення.** `OverlayWindow` — `NSPanel` з `.nonactivatingPanel`, `canBecomeKey`, `hidesOnDeactivate = false`; без `NSApp.activate()`.
-**Чому.** Кооперативна активація macOS 14+ могла не активувати APILA → вікно не ставало key → Esc/↩ потрапляли в програму під ним (скасування «не працювало»). Той самий прийом, що й у плаваючої панелі (ADR-0036).
+**Чому.** Кооперативна активація macOS 14+ могла не активувати Shotleaf → вікно не ставало key → Esc/↩ потрапляли в програму під ним (скасування «не працювало»). Той самий прийом, що й у плаваючої панелі (ADR-0036).
 
 ## ADR-0058 — Вікно після знімка + дії з хоткеями ✅
-**Рішення.** `HotkeyAction` (capture ⌘⇧1, screenshot-text ⌘⇧2) — необов'язкові хоткеї одним списком (налаштування: `hotkeyID(for:)`, "off" = вимкнено). `ScreenshotWindows` відкриває для кожного знімка окрему non-activating панель (`ScreenshotView` у стилі «Листя», спільний `leafPanelChrome()`): Copy (PNG+TIFF у буфер), Save (Desktop, `APILA yyyy-MM-dd at HH.mm.ss.png`), drag-and-drop файлу в інші програми, Pin (окрема плаваюча панель лише з картинкою), Text/Ask → панель через `PanelViewModel.useScreenshot`.
+**Рішення.** `HotkeyAction` (capture ⌘⇧1, screenshot-text ⌘⇧2) — необов'язкові хоткеї одним списком (налаштування: `hotkeyID(for:)`, "off" = вимкнено). `ScreenshotWindows` відкриває для кожного знімка окрему non-activating панель (`ScreenshotView` у стилі «Листя», спільний `leafPanelChrome()`): Copy (PNG+TIFF у буфер), Save (Desktop, `Shotleaf yyyy-MM-dd at HH.mm.ss.png`), drag-and-drop файлу в інші програми, Pin (окрема плаваюча панель лише з картинкою), Text/Ask → панель через `PanelViewModel.useScreenshot`.
 **Прев'ю дизайну** рендеряться через справжній `NSHostingView` (`renderPreview`), бо `ImageRenderer` не малює AppKit-частини.
 
 ## ADR-0059 — Розмір вікна знімка + полотно навколо ✅
@@ -377,11 +377,11 @@
 **Що з чим:** Copy/Save/Pin/drag/Ask — з мітками; Text (OCR) — з чистого оригіналу.
 
 ## ADR-0061 — Редагування міток, фокус, власні іконки ✅
-**Рішення.** Геометрія редагування — чисті функції `AnnotationEditing` (hit-test із допуском, ручки: кінці стрілки / 4 кути областей; переміщення; зміна розміру з фіксованим протилежним кутом і «перевертанням» замість від'ємних розмірів). Будь-який клік по мітці виділяє її (і нова мітка одразу виділена); тягнення під час руху — живий прев'ю, у документ — один крок undo по відпусканню. ⌫ видаляє; колір/товщина з панелі застосовуються до виділеної. Перетягування знімка в інші програми — як у Shottr (див. ADR-0062).
+**Рішення.** Геометрія редагування — чисті функції `AnnotationEditing` (hit-test із допуском, ручки: кінці стрілки / 4 кути областей; переміщення; зміна розміру з фіксованим протилежним кутом і «перевертанням» замість від'ємних розмірів). Будь-який клік по мітці виділяє її (і нова мітка одразу виділена); тягнення під час руху — живий прев'ю, у документ — один крок undo по відпусканню. ⌫ видаляє; колір/товщина з панелі застосовуються до виділеної. Перетягування знімка в інші програми — див. ADR-0062.
 **Фокус** — `.focus(rect)`: затемнення знімка поза областями. Порядок малювання: мітки, що змінюють сам знімок (blur/erase/cut) → затемнення фокусу → накладні мітки (стрілки, рамки, текст…), щоб вони ніколи не тьмяніли.
 **Іконки** — власні (`ToolIcons.swift`, Canvas, 18-pt сітка, заокруглені штрихи), без SF Symbols.
 
-## ADR-0062 — Перетягування знімка як у Shottr ✅
+## ADR-0062 — Перетягування знімка цілим ✅
 **Рішення.** `DragOutView` (AppKit, `NSDraggingSource`) лежить над знімком і через `hitTest` бере натискання лише в режимі Select і коли під курсором немає мітки; тоді тягнення стартує системну drag-сесію файлу з усім результатом (мітки включно), курсор — «рука». Над міткою або з інструментом клік проходить до полотна анотацій. Чип «Drag» прибрано (він не працював: над заголовком лежала зона перетягування вікна).
 
 ## ADR-0063 — Овал, обрізка у двох режимах, редагування тексту ✅
@@ -394,12 +394,12 @@
 
 ## ADR-0065 — Дописування на базовій моделі, не на інструктивній ✅
 **Рішення.** Inline completion бере окрему модель `mlx-community/gemma-4-e2b-4bit` (база, без instruct), завантажену лише мовною частиною через `LLMModelFactory`. Промпт — сам текст перед курсором (кінцеві пробіли зрізано), жадібна генерація до 14 токенів, `repetitionPenalty` 1.15, до кінця рядка; повтори пар слів відрізаються. Затримка перед запитом 150 мс.
-**Чому.** Instruct-модель на сирому тексті зациклювалась, а з інструкцією (чат-шаблон + «повтори останнє слово») — повільна й менш природна. Так роблять Cotabby/KeyType (base-модель як «продовжувач тексту»).
+**Чому.** Instruct-модель на сирому тексті зациклювалась, а з інструкцією (чат-шаблон + «повтори останнє слово») — повільна й менш природна. Так роблять подібні інструменти (base-модель як «продовжувач тексту»).
 **Далі.** Повторне використання KV-кешу між натисканнями (префікс майже не змінюється) — основний резерв швидкості; token healing для дописування слова.
 
 ## ADR-0066 — Швидкість дописування: Release-збірка й повторне використання KV-кешу ✅
 **Рішення.** `scripts/run.sh` збирає Release (MLX у Debug помітно повільніший). Модель дописування тримає свій KV-кеш між запитами: новий промпт, що починається так само (≥ половини і ≥ 16 токенів), перемотує кеш до спільного початку й дочитує лише нові токени; інакше — новий кеш (зокрема коли кеш уже вийшов за sliding window 512 і точна перемотка неможлива). Контекст скорочено: 600 знаків тексту + 400 знаків з екрана.
-**Як перевірено.** `APILA --completion-eval` (власні приклади, не текст користувача): друк у довгій нотатці — перший токен 0.04 с замість ~0.3 с; відповіді з кешем і без (`APILA_NO_PROMPT_CACHE=1`, `APILA_NO_PENALTY=1`) збігаються до числового шуму.
+**Як перевірено.** `Shotleaf --completion-eval` (власні приклади, не текст користувача): друк у довгій нотатці — перший токен 0.04 с замість ~0.3 с; відповіді з кешем і без (`SHOTLEAF_NO_PROMPT_CACHE=1`, `SHOTLEAF_NO_PENALTY=1`) збігаються до числового шуму.
 
 ## ADR-0067 — Фокус: скріншоти, текст зі скріншотів, дописування; без ШІ-панелі ✅
 **Рішення.** Прибрано ШІ-панель (Переписати / Пояснити / Перекласти / Підсумувати / Свій запит / Запитати про скріншот), кнопку «Запитати ШІ» у вікні скріншоту, вбудовану чат-модель (Gemma 4 E2B it, VLM) і провайдерів (OpenAI-сумісні, LM Studio, Mock), налаштування ключів і перекладу, «Останні результати». Видалено модулі InferenceKit, ActionKit, ContextKit, InferenceDemo; Core звужено до скріншотів, OCR, дозволів і хоткеїв. ⌘⇧1 (текст зі скріншоту) тепер — OCR на Mac і віконце з редагованим текстом (⌘↩ копіює все).
@@ -408,9 +408,10 @@
 
 ## ADR-0068: Renamed to Shotleaf (2026-10-12)
 
-"APILA" is taken (apila.io, an AI life-balance app; APiLA salon apps). The app is now **Shotleaf**,
+The working name (APILA) was taken by other apps. The app is now **Shotleaf**,
 bundle `dev.syvyj.shotleaf`, under the developer domain syvyj.dev (site and links on subdomains).
-Internal names (APILAKit, the Xcode project/target) stay — users never see them. `AppInfo` (Core) holds
-the name and the support folder; on the first launch it moves Application Support/APILA → Shotleaf and
+Everything is Shotleaf now: the Xcode project/target, the ShotleafKit package, identifiers (Keychain item,
+pasteboard type, the link server's service). `AppInfo` (Core) holds the name and the support folder; on the
+first launch it moves Application Support/APILA → Shotleaf, moves the Keychain key, and
 copies the old `app.apila.APILA` defaults once (not the Keychain flag, and the setup guide shows again:
 macOS treats the new bundle as a new app, so permissions must be granted again).

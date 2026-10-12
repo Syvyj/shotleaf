@@ -1,34 +1,34 @@
-# Тимчасові посилання на скріншоти (APILA)
+# Тимчасові посилання на скріншоти (Shotleaf)
 
-Маленький сервіс: APILA завантажує сюди скріншот і отримує коротке посилання, яке саме зникає за 1 / 6 / 24 години.
+Маленький сервіс: Shotleaf завантажує сюди скріншот і отримує коротке посилання, яке саме зникає за 1 / 6 / 24 години.
 Один файл `shots.py`, лише Python 3 (без сторонніх бібліотек). Слухає `127.0.0.1:8787` (або адресу з `SHOTS_HOST`), назовні — через Cloudflare Tunnel.
 
-Якщо `cloudflared` працює в Docker, він не бачить `127.0.0.1` сервера: додайте в `/etc/apila-shots.env` рядок
+Якщо `cloudflared` працює в Docker, він не бачить `127.0.0.1` сервера: додайте в `/etc/shotleaf-links.env` рядок
 `SHOTS_HOST=<шлюз його docker-мережі>` (напр. `172.17.0.1`, див. `docker network inspect <мережа>`), а в тунелі вкажіть `http://172.17.0.1:8787`.
 
 ## Встановлення (на сервері)
 
 ```bash
-sudo mkdir -p /opt/apila-shots
-sudo cp shots.py /opt/apila-shots/
-sudo cp apila-shots.service /etc/systemd/system/
+sudo mkdir -p /opt/shotleaf-links
+sudo cp shots.py /opt/shotleaf-links/
+sudo cp shotleaf-links.service /etc/systemd/system/
 ```
 
-Секретний ключ і адреса (ключ потім вставите в APILA → Налаштування → Посилання):
+Секретний ключ і адреса (ключ потім вставите в Shotleaf → Налаштування → Посилання):
 
 ```bash
-echo "SHOTS_TOKEN=$(openssl rand -hex 24)" | sudo tee /etc/apila-shots.env
-echo "SHOTS_PUBLIC_URL=https://shot.ВАШ-ДОМЕН" | sudo tee -a /etc/apila-shots.env
-sudo chmod 600 /etc/apila-shots.env
-sudo cat /etc/apila-shots.env
+echo "SHOTS_TOKEN=$(openssl rand -hex 24)" | sudo tee /etc/shotleaf-links.env
+echo "SHOTS_PUBLIC_URL=https://shot.ВАШ-ДОМЕН" | sudo tee -a /etc/shotleaf-links.env
+sudo chmod 600 /etc/shotleaf-links.env
+sudo cat /etc/shotleaf-links.env
 ```
 
 Запуск:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now apila-shots
-systemctl status apila-shots --no-pager
+sudo systemctl enable --now shotleaf-links
+systemctl status shotleaf-links --no-pager
 ```
 
 ## Cloudflare Tunnel

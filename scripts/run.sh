@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build Shotleaf, sign it with the local "APILA Local Signing" certificate, install
+# Build Shotleaf, sign it with the local signing certificate, install
 # it to ~/Applications and (re)start it. A stable signature + one fixed place is
 # what makes macOS permissions (Accessibility, Screen Recording) stick across
 # rebuilds — an ad-hoc signature changes with every build.
@@ -11,23 +11,27 @@ BUILD_DIR=build/DerivedData
 CONFIG="${CONFIG:-Release}"
 DEST="$HOME/Applications/Shotleaf.app"
 
-xcodebuild -project APILA.xcodeproj -scheme APILA -configuration "$CONFIG" \
+xcodebuild -project Shotleaf.xcodeproj -scheme Shotleaf -configuration "$CONFIG" \
   -derivedDataPath "$BUILD_DIR" -quiet -skipMacroValidation ENABLE_DEBUG_DYLIB=NO build
 
 pkill -x Shotleaf || true
-pkill -x APILA || true # the app's old name: its hotkeys would clash
 # Wait until the old copy is really gone: a new one that still sees it running
 # quits itself (single-instance guard).
-for _ in $(seq 50); do pgrep -x Shotleaf >/dev/null || pgrep -x APILA >/dev/null || break; sleep 0.1; done
-rm -rf "$HOME/Applications/APILA.app" # renamed to Shotleaf (Oct 2026)
+for _ in $(seq 50); do pgrep -x Shotleaf >/dev/null || break; sleep 0.1; done
 mkdir -p "$HOME/Applications"
 rm -rf "$DEST"
 cp -R "$BUILD_DIR/Build/Products/$CONFIG/Shotleaf.app" "$DEST"
-if security find-identity -p codesigning | grep -q "APILA Local Signing"; then
-  codesign --force --options runtime --entitlements App/APILA.entitlements \
-    -s "APILA Local Signing" "$DEST"
+# The local signing certificate: "Shotleaf Local Signing", or the one made
+# when the app was still called APILA (switching certificates resets the
+# macOS permissions, so the old one stays until Developer ID signing).
+IDENTITY=""
+for name in "Shotleaf Local Signing" "APILA Local Signing"; do
+  if security find-identity -p codesigning | grep -q "$name"; then IDENTITY="$name"; break; fi
+done
+if [ -n "$IDENTITY" ]; then
+  codesign --force --options runtime --entitlements App/Shotleaf.entitlements -s "$IDENTITY" "$DEST"
 else
-  echo "warning: 'APILA Local Signing' certificate not found — ad-hoc build, permissions reset on rebuild" >&2
+  echo "warning: no local signing certificate — ad-hoc build, permissions reset on rebuild" >&2
 fi
 open -g "$DEST" # in the background: keep the user's focus where it is
 echo "Shotleaf started from $DEST"

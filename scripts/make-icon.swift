@@ -1,8 +1,8 @@
-// Generates APILA's app icon set (all macOS sizes) into App/Assets.xcassets.
+// Generates Shotleaf's app icon set (all macOS sizes) into App/Assets.xcassets.
 // Run: swift scripts/make-icon.swift [preview.png]
 //
 // The mark: selection-corner brackets with an AI spark inside — "select, and
-// APILA acts". Same mark as the menu bar icon (AppFeature/BrandMark.swift).
+// Shotleaf acts". Same mark as the menu bar icon (AppFeature/BrandMark.swift).
 import AppKit
 
 // "Leaves" palette: deep forest → leaf → lime (from the user's reference photo).

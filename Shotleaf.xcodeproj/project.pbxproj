@@ -1,0 +1,271 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1A1A0000000000000000AA21 /* ShotleafApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA20 /* ShotleafApp.swift */; };
+		1A1A0000000000000000AA23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA24 /* Assets.xcassets */; };
+		1A1A0000000000000000AA25 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA26 /* Localizable.xcstrings */; };
+		1A1A0000000000000000AA61 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 1A1A0000000000000000AA51 /* AppFeature */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1A1A0000000000000000AA11 /* Shotleaf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shotleaf.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1A1A0000000000000000AA20 /* ShotleafApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotleafApp.swift; sourceTree = "<group>"; };
+		1A1A0000000000000000AA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1A1A0000000000000000AA26 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		1A1A0000000000000000AA22 /* Shotleaf.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Shotleaf.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1A1A0000000000000000AA31 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A1A0000000000000000AA61 /* AppFeature in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1A1A0000000000000000AA02 = {
+			isa = PBXGroup;
+			children = (
+				1A1A0000000000000000AA04 /* App */,
+				1A1A0000000000000000AA03 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1A1A0000000000000000AA03 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1A1A0000000000000000AA11 /* Shotleaf.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1A1A0000000000000000AA04 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				1A1A0000000000000000AA20 /* ShotleafApp.swift */,
+				1A1A0000000000000000AA22 /* Shotleaf.entitlements */,
+				1A1A0000000000000000AA24 /* Assets.xcassets */,
+				1A1A0000000000000000AA26 /* Localizable.xcstrings */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1A1A0000000000000000AA10 /* Shotleaf */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1A1A0000000000000000AA40 /* Build configuration list for PBXNativeTarget "Shotleaf" */;
+			buildPhases = (
+				1A1A0000000000000000AA30 /* Sources */,
+				1A1A0000000000000000AA31 /* Frameworks */,
+				1A1A0000000000000000AA32 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Shotleaf;
+			packageProductDependencies = (
+				1A1A0000000000000000AA51 /* AppFeature */,
+			);
+			productName = Shotleaf;
+			productReference = 1A1A0000000000000000AA11 /* Shotleaf.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1A1A0000000000000000AA01 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					1A1A0000000000000000AA10 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = 1A1A0000000000000000AA45 /* Build configuration list for PBXProject "Shotleaf" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				uk,
+				Base,
+			);
+			mainGroup = 1A1A0000000000000000AA02;
+			packageReferences = (
+				1A1A0000000000000000AA50 /* XCLocalSwiftPackageReference "ShotleafKit" */,
+			);
+			productRefGroup = 1A1A0000000000000000AA03 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1A1A0000000000000000AA10 /* Shotleaf */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1A1A0000000000000000AA32 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A1A0000000000000000AA23 /* Assets.xcassets in Resources */,
+				1A1A0000000000000000AA25 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1A1A0000000000000000AA30 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A1A0000000000000000AA21 /* ShotleafApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1A1A0000000000000000AA43 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		1A1A0000000000000000AA44 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		1A1A0000000000000000AA41 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/Shotleaf.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Shotleaf;
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Oleksii Ziuzin (Syvyj)";
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.syvyj.shotleaf;
+				PRODUCT_NAME = Shotleaf;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		1A1A0000000000000000AA42 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/Shotleaf.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Shotleaf;
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Oleksii Ziuzin (Syvyj)";
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.syvyj.shotleaf;
+				PRODUCT_NAME = Shotleaf;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1A1A0000000000000000AA45 /* Build configuration list for PBXProject "Shotleaf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A1A0000000000000000AA43 /* Debug */,
+				1A1A0000000000000000AA44 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1A1A0000000000000000AA40 /* Build configuration list for PBXNativeTarget "Shotleaf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A1A0000000000000000AA41 /* Debug */,
+				1A1A0000000000000000AA42 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		1A1A0000000000000000AA50 /* XCLocalSwiftPackageReference "ShotleafKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ShotleafKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1A1A0000000000000000AA51 /* AppFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppFeature;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 1A1A0000000000000000AA01 /* Project object */;
+}
