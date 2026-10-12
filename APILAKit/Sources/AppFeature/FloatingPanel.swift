@@ -25,7 +25,7 @@ final class FloatingPanel: NSPanel {
     /// out of the window.
     override func setFrame(_ frame: NSRect, display: Bool) {
         if frame.size != self.frame.size, minimumSize != .zero {
-            Logger(subsystem: "app.apila.APILA", category: "resize")
+            Logger(subsystem: "dev.syvyj.shotleaf", category: "resize")
                 .notice("resize to \(String(describing: frame.size), privacy: .public) min \(String(describing: self.contentMinSize), privacy: .public)")
         }
         var f = frame

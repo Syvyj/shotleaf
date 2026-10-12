@@ -25,7 +25,7 @@ public enum CompletionLiveTest {
         let file: URL
         let documentName: String
         if chrome {
-            documentName = "APILA live test \(id)"
+            documentName = "Shotleaf live test \(id)"
             file = FileManager.default.temporaryDirectory.appendingPathComponent("apila-live-test-\(id).html")
             let page = """
                 <!doctype html><meta charset="utf-8"><title>\(documentName)</title>

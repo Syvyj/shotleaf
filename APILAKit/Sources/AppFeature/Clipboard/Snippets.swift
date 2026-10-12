@@ -1,3 +1,4 @@
+import Core
 import AppKit
 
 /// A saved text to paste again, with optional variables and an abbreviation.
@@ -43,7 +44,7 @@ final class SnippetStore {
     }
 
     static var defaultFile: URL {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("APILA/snippets.json")
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("\(AppInfo.name)/snippets.json")
     }
 
     private struct Saved: Codable {

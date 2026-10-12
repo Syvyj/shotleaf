@@ -7,7 +7,7 @@ struct Watermark: Codable, Equatable {
     enum Kind: String, Codable { case text, image }
 
     var kind: Kind = .text
-    var text = "APILA"
+    var text = "©"
     var imagePath: String?
     /// 0…8, row by row from the top-left; 8 = bottom-right.
     var position = 8

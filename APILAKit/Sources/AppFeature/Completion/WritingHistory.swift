@@ -1,3 +1,4 @@
+import Core
 import Foundation
 
 /// The user's own finished texts, a few per app, so suggestions sound like
@@ -21,7 +22,7 @@ final class WritingHistory {
 
     static var defaultURL: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("APILA", isDirectory: true).appendingPathComponent("writing-history.json")
+            .appendingPathComponent(AppInfo.name, isDirectory: true).appendingPathComponent("writing-history.json")
     }
 
     func remember(_ text: String, app: String) {

@@ -33,7 +33,7 @@ public struct SettingsRootView: View {
                 HStack(spacing: 12) {
                     Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 40, height: 40)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("APILA").font(Leaf.font(16, .bold))
+                        Text(verbatim: AppInfo.name).font(Leaf.font(16, .bold))
                         Text(Self.version).font(Leaf.font(11)).foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -135,7 +135,7 @@ public struct SettingsRootView: View {
     private func report(_ ok: Bool, _ shortcut: HotkeyShortcut?, kept: String) {
         hotkeyError = ok || shortcut == nil
             ? nil
-            : String(localized: "\(shortcut!.title) is taken (by another app or another APILA shortcut) — kept \(kept).")
+            : String(localized: "\(shortcut!.title) is taken (by another app or another Shotleaf shortcut) — kept \(kept).")
     }
 
     // MARK: General
@@ -147,7 +147,7 @@ public struct SettingsRootView: View {
                 set: { coordinator.setShowInDock($0) }
             ))
             Toggle("Sounds", isOn: $sounds)
-            Toggle("Open APILA at login", isOn: Binding(
+            Toggle("Open Shotleaf at login", isOn: Binding(
                 get: { coordinator.launchAtLogin },
                 set: { coordinator.setLaunchAtLogin($0) }
             ))
@@ -224,7 +224,7 @@ public struct SettingsRootView: View {
         } header: {
             Text("Screenshot Links")
         } footer: {
-            Text("Your own server (server/shots in the APILA repo). The screenshot window's link button uploads the shot and copies a link that stops working after the chosen time. The key is kept in the Keychain.")
+            Text("Your own server (server/shots in the Shotleaf repo). The screenshot window's link button uploads the shot and copies a link that stops working after the chosen time. The key is kept in the Keychain.")
                 .font(.caption).foregroundStyle(.secondary)
         }
     }
@@ -410,7 +410,7 @@ public struct SettingsRootView: View {
         } header: {
             Text("Permissions")
         } footer: {
-            Text("Accessibility is required for reading the selection and pasting the result; Screen Recording — for screenshots. After granting, fully restart APILA.")
+            Text("Accessibility is required for reading the selection and pasting the result; Screen Recording — for screenshots. After granting, fully restart Shotleaf.")
         }
     }
 

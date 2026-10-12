@@ -92,7 +92,7 @@ final class ScreenshotWindows {
     func showProblem(_ error: Error) {
         let message: String = switch error {
         case AppError.permissionDenied:
-            String(localized: "APILA needs the Screen Recording permission. Allow it in System Settings → Privacy & Security, then restart APILA.")
+            String(localized: "Shotleaf needs the Screen Recording permission. Allow it in System Settings → Privacy & Security, then restart Shotleaf.")
         default: error.localizedDescription
         }
         showText(message, title: "Couldn’t take the screenshot", sound: false)
@@ -242,7 +242,7 @@ final class ScreenshotWindows {
         let name = template.replacingOccurrences(of: "{date}", with: day).replacingOccurrences(of: "{time}", with: f.string(from: date))
             .replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: ".")
             .trimmingCharacters(in: .whitespaces)
-        return (name.isEmpty ? "APILA \(day) at \(f.string(from: date))" : name) + ".png"
+        return (name.isEmpty ? "\(AppInfo.name) \(day) at \(f.string(from: date))" : name) + ".png"
     }
 
     /// A Retina PNG scaled down to one pixel per point.
@@ -263,7 +263,7 @@ final class ScreenshotWindows {
     /// The newest captures, as taken (Application Support/APILA/Recent).
     static var recentFolder: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("APILA/Recent", isDirectory: true)
+            .appendingPathComponent("\(AppInfo.name)/Recent", isDirectory: true)
     }
     static let recentLimit = 10
 

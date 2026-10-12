@@ -85,7 +85,7 @@ public final class SettingsStore: @unchecked Sendable {
     }
 
     /// File name without extension; {date} and {time} are filled in.
-    public static let defaultFileName = "APILA {date} at {time}"
+    public static let defaultFileName = "Shotleaf {date} at {time}"
     public var fileNameTemplate: String {
         get { defaults.string(forKey: "fileNameTemplate") ?? Self.defaultFileName }
         set { defaults.set(newValue, forKey: "fileNameTemplate") }

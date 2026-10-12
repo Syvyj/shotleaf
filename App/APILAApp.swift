@@ -1,5 +1,6 @@
 import SwiftUI
 import AppFeature
+import Core
 
 /// Thin entry point. All logic lives in the AppFeature package; this target only
 /// provides the `@main`, the scenes, and the signable bundle for TCC permissions.
@@ -25,7 +26,13 @@ struct APILAApp: App {
 /// Boots the coordinator at launch (reliable, vs. lazy scene `.task`).
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    let coordinator = AppCoordinator()
+    let coordinator: AppCoordinator
+
+    override init() {
+        AppInfo.migrateFromAPILA() // before anything reads the settings or the files
+        coordinator = AppCoordinator()
+        super.init()
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let i = CommandLine.arguments.firstIndex(of: "--ax-watch") { // developer run, read-only

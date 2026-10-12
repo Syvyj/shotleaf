@@ -18,8 +18,8 @@ struct OnboardingView: View {
                     .resizable()
                     .frame(width: 56, height: 56)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Welcome to APILA").font(Leaf.font(20, .bold))
-                    Text("A few quick steps and APILA works in any app.")
+                    Text("Welcome to Shotleaf").font(Leaf.font(20, .bold))
+                    Text("A few quick steps and Shotleaf works in any app.")
                         .font(Leaf.font(13))
                         .foregroundStyle(.secondary)
                 }
@@ -31,7 +31,7 @@ struct OnboardingView: View {
             }
 
             step(2, "Allow Accessibility", done: accessibilityGranted) {
-                Text("For completing your text as you type: APILA reads the field you type in and types the words you accept.")
+                Text("For completing your text as you type: Shotleaf reads the field you type in and types the words you accept.")
                 permissionButtons(.accessibility, granted: accessibilityGranted)
             }
 
@@ -79,7 +79,7 @@ struct OnboardingView: View {
                 .buttonStyle(LeafButtonStyle())
         }
         if !granted {
-            Text("After enabling APILA in the list, quit and reopen APILA.")
+            Text("After enabling Shotleaf in the list, quit and reopen Shotleaf.")
                 .font(.caption).foregroundStyle(.secondary)
         }
     }

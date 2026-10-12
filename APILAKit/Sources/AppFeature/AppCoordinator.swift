@@ -384,7 +384,7 @@ public final class AppCoordinator {
         }
     }
 
-    private static let log = Logger(subsystem: "app.apila.APILA", category: "permissions")
+    private static let log = Logger(subsystem: "dev.syvyj.shotleaf", category: "permissions")
 
     public func request(_ kind: PermissionKind) async {
         await container.permissions.request(kind)

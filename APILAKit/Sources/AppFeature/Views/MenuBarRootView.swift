@@ -78,7 +78,7 @@ public struct MenuBarRootView: View {
 
         Divider()
 
-        Button("Quit APILA") { NSApplication.shared.terminate(nil) }
+        Button("Quit Shotleaf") { NSApplication.shared.terminate(nil) }
             .keyboardShortcut("q")
     }
 

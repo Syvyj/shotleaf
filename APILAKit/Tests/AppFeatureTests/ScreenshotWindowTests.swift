@@ -15,9 +15,9 @@ struct ScreenshotWindowTests {
     func fileName() {
         var c = DateComponents(); c.year = 2026; c.month = 10; c.day = 8; c.hour = 16; c.minute = 5; c.second = 9
         let date = Calendar.current.date(from: c)!
-        #expect(ScreenshotWindows.fileName(date) == "APILA 2026-10-08 at 16.05.09.png")
+        #expect(ScreenshotWindows.fileName(date) == "Shotleaf 2026-10-08 at 16.05.09.png")
         #expect(ScreenshotWindows.fileName(date, template: "shot {date}/{time}") == "shot 2026-10-08-16.05.09.png")
-        #expect(ScreenshotWindows.fileName(date, template: "  ") == "APILA 2026-10-08 at 16.05.09.png")
+        #expect(ScreenshotWindows.fileName(date, template: "  ") == "Shotleaf 2026-10-08 at 16.05.09.png")
     }
 
     @Test("Preview scales big captures down to the room, never up")

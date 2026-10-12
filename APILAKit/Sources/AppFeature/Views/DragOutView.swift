@@ -2,7 +2,7 @@ import AppKit
 import OSLog
 import SwiftUI
 
-private let log = Logger(subsystem: "app.apila.APILA", category: "drag")
+private let log = Logger(subsystem: "dev.syvyj.shotleaf", category: "drag")
 
 /// Shottr-style drag-out: lies over the shot and, when `wantsDrag(point)` says
 /// so (Select mode, nothing under the pointer), turns a mouse drag into a

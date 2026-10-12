@@ -405,3 +405,12 @@
 **Рішення.** Прибрано ШІ-панель (Переписати / Пояснити / Перекласти / Підсумувати / Свій запит / Запитати про скріншот), кнопку «Запитати ШІ» у вікні скріншоту, вбудовану чат-модель (Gemma 4 E2B it, VLM) і провайдерів (OpenAI-сумісні, LM Studio, Mock), налаштування ключів і перекладу, «Останні результати». Видалено модулі InferenceKit, ActionKit, ContextKit, InferenceDemo; Core звужено до скріншотів, OCR, дозволів і хоткеїв. ⌘⇧1 (текст зі скріншоту) тепер — OCR на Mac і віконце з редагованим текстом (⌘↩ копіює все).
 **Чому.** Вбудована 2B-модель слабка для переписування й перекладу, а API (GPT, Claude) — дорого для власника; без якісної моделі панель не варта місця. Дописуванню ж потрібні саме локальність і швидкість — воно лишається на базовій Gemma (ADR-0065/0066).
 **Наслідки.** Мінус ~3.6 ГБ на диску й ~2.5 ГБ пам'яті; менше коду й налаштувань. Код панелі — в історії git (коміт перед цим ADR), якщо колись повернемо з сильною моделлю. ADR-0007, 0023/0024 та інші про провайдерів — історичні.
+
+## ADR-0068: Renamed to Shotleaf (2026-10-12)
+
+"APILA" is taken (apila.io, an AI life-balance app; APiLA salon apps). The app is now **Shotleaf**,
+bundle `dev.syvyj.shotleaf`, under the developer domain syvyj.dev (site and links on subdomains).
+Internal names (APILAKit, the Xcode project/target) stay — users never see them. `AppInfo` (Core) holds
+the name and the support folder; on the first launch it moves Application Support/APILA → Shotleaf and
+copies the old `app.apila.APILA` defaults once (not the Keychain flag, and the setup guide shows again:
+macOS treats the new bundle as a new app, so permissions must be granted again).

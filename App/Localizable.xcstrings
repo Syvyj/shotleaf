@@ -1,932 +1,28 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "Set up the link server in Settings → Screenshot Links": {
+    "%@ is taken (by another app or another Shotleaf shortcut) — kept %@.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Налаштуйте сервер у Налаштуваннях → Посилання на скріншоти"
+            "value": "%@ уже зайнято (іншою програмою або іншою дією Shotleaf) — лишаю %@."
           }
         }
       }
     },
-    "The server said no: %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сервер відмовив: %@"
-          }
-        }
-      }
-    },
-    "The server didn't answer as expected": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сервер відповів не так, як треба"
-          }
-        }
-      }
-    },
-    "Link for %lld h": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Посилання на %lld год"
-          }
-        }
-      }
-    },
-    "For %lld h": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "На %lld год"
-          }
-        }
-      }
-    },
-    "Link copied · works %lld h": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Посилання скопійовано · діє %lld год"
-          }
-        }
-      }
-    },
-    "Server": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сервер"
-          }
-        }
-      }
-    },
-    "Key": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ключ"
-          }
-        }
-      }
-    },
-    "Links work for": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Посилання діють"
-          }
-        }
-      }
-    },
-    "%lld h": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld год"
-          }
-        }
-      }
-    },
-    "Check": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Перевірити"
-          }
-        }
-      }
-    },
-    "Checking…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Перевіряю…"
-          }
-        }
-      }
-    },
-    "Works: %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Працює: %@"
-          }
-        }
-      }
-    },
-    "Screenshot Links": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Посилання на скріншоти"
-          }
-        }
-      }
-    },
-    "Your own server (server/shots in the APILA repo). The screenshot window's link button uploads the shot and copies a link that stops working after the chosen time. The key is kept in the Keychain.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ваш власний сервер (server/shots у репозиторії APILA). Кнопка посилання у вікні скріншоту завантажує знімок і копіює посилання, яке перестає працювати через вибраний час. Ключ зберігається в Связці ключів."
-          }
-        }
-      }
-    },
-    "Clean links of trackers": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Очистити посилання від трекерів"
-          }
-        }
-      }
-    },
-    "UPPERCASE": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ВЕЛИКІ ЛІТЕРИ"
-          }
-        }
-      }
-    },
-    "lowercase": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "малі літери"
-          }
-        }
-      }
-    },
-    "Capitalize Words": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кожне Слово З Великої"
-          }
-        }
-      }
-    },
-    "Join into one line": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зібрати в один рядок"
-          }
-        }
-      }
-    },
-    "Trim spaces": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Прибрати зайві пробіли"
-          }
-        }
-      }
-    },
-    "Format JSON": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відформатувати JSON"
-          }
-        }
-      }
-    },
-    "Save as snippet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зберегти як сніпет"
-          }
-        }
-      }
-    },
-    "Paste it…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вставити так…"
-          }
-        }
-      }
-    },
-    "↩ or 1–8 · esc goes back": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "↩ або 1–8 · esc — назад"
-          }
-        }
-      }
-    },
-    "Actions": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дії"
-          }
-        }
-      }
-    },
-    "Paste Together": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вставити разом"
-          }
-        }
-      }
-    },
-    "Paste One by One": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вставляти по черзі"
-          }
-        }
-      }
-    },
-    "%lld picked": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вибрано: %lld"
-          }
-        }
-      }
-    },
-    "Clear Selection": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зняти вибір"
-          }
-        }
-      }
-    },
-    "Queue done: %lld of %lld": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Черга завершена: %lld з %lld"
-          }
-        }
-      }
-    },
-    "Pasted %lld of %lld · ⇧⌘V — the next one": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вставлено %lld з %lld · ⇧⌘V — наступне"
-          }
-        }
-      }
-    },
-    "Saved as a snippet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Збережено як сніпет"
-          }
-        }
-      }
-    },
-    "Queue: %lld of %lld pasted": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Черга: вставлено %lld з %lld"
-          }
-        }
-      }
-    },
-    "Cancel Queue": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Скасувати чергу"
-          }
-        }
-      }
-    },
-    "Searching all folders": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пошук по всіх папках"
-          }
-        }
-      }
-    },
-    "← → folders": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "← → папки"
-          }
-        }
-      }
-    },
-    "Snippets…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сніпети…"
-          }
-        }
-      }
-    },
-    "Snippets": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сніпети"
-          }
-        }
-      }
-    },
-    "Edit Snippets…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Редагувати сніпети…"
-          }
-        }
-      }
-    },
-    "No snippets yet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сніпетів ще немає"
-          }
-        }
-      }
-    },
-    "Create a snippet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Створити сніпет"
-          }
-        }
-      }
-    },
-    "↩ pastes · esc goes back": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "↩ вставляє · esc — назад"
-          }
-        }
-      }
-    },
-    "All Snippets": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Усі сніпети"
-          }
-        }
-      }
-    },
-    "Change colour": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Змінити колір"
-          }
-        }
-      }
-    },
-    "Delete the folder (its snippets stay)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Видалити папку (сніпети лишаться)"
-          }
-        }
-      }
-    },
-    "No snippets here yet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Тут ще немає сніпетів"
-          }
-        }
-      }
-    },
-    "Untitled": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Без назви"
-          }
-        }
-      }
-    },
-    "Name": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Назва"
-          }
-        }
-      }
-    },
-    "Abbreviation": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Скорочення"
-          }
-        }
-      }
-    },
-    "Folder": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Папка"
-          }
-        }
-      }
-    },
-    "“%@” already uses this abbreviation": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Це скорочення вже має «%@»"
-          }
-        }
-      }
-    },
-    "Insert:": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вставити:"
-          }
-        }
-      }
-    },
-    "{?Name} asks before pasting; {cursor} is where the caret ends up.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{?Name} спитає перед вставкою; {cursor} — де стане курсор."
-          }
-        }
-      }
-    },
-    "Pastes as": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вставиться так"
-          }
-        }
-      }
-    },
-    "(clipboard)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "(буфер)"
-          }
-        }
-      }
-    },
-    "Delete Snippet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Видалити сніпет"
-          }
-        }
-      }
-    },
-    "Pick a snippet or create one": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Виберіть сніпет або створіть новий"
-          }
-        }
-      }
-    },
-    "New Snippet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Новий сніпет"
-          }
-        }
-      }
-    },
-    "New Folder": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова папка"
-          }
-        }
-      }
-    },
-    "New snippet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Новий сніпет"
-          }
-        }
-      }
-    },
-    "New folder": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нова папка"
-          }
-        }
-      }
-    },
-    "Search": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пошук"
-          }
-        }
-      }
-    },
-    "Paste": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вставити"
-          }
-        }
-      }
-    },
-    "Plain text": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Без форматування"
-          }
-        }
-      }
-    },
-    "Unpin": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відкріпити"
-          }
-        }
-      }
-    },
-    "Search the clipboard": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пошук у буфері"
-          }
-        }
-      }
-    },
-    "Paused": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пауза"
-          }
-        }
-      }
-    },
-    "Copy something — it shows up here": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Скопіюйте щось — воно з'явиться тут"
-          }
-        }
-      }
-    },
-    "Nothing found": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Нічого не знайдено"
-          }
-        }
-      }
-    },
-    "paste": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "вставити"
-          }
-        }
-      }
-    },
-    "plain text": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "без форматування"
-          }
-        }
-      }
-    },
-    "copy only": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "лише скопіювати"
-          }
-        }
-      }
-    },
-    "pin": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "закріпити"
-          }
-        }
-      }
-    },
-    "delete": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "видалити"
-          }
-        }
-      }
-    },
-    "type": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "тип"
-          }
-        }
-      }
-    },
-    "edit": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "редагувати"
-          }
-        }
-      }
-    },
-    "All": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Усе"
-          }
-        }
-      }
-    },
-    "Links": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Посилання"
-          }
-        }
-      }
-    },
-    "Images": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Картинки"
-          }
-        }
-      }
-    },
-    "Colors": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кольори"
-          }
-        }
-      }
-    },
-    "Files": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Файли"
-          }
-        }
-      }
-    },
-    "now": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "щойно"
-          }
-        }
-      }
-    },
-    "Clipboard History": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Історія буфера"
-          }
-        }
-      }
-    },
-    "Open Clipboard…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відкрити буфер…"
-          }
-        }
-      }
-    },
-    "Nothing copied yet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ще нічого не скопійовано"
-          }
-        }
-      }
-    },
-    "Resume Recording": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відновити запис"
-          }
-        }
-      }
-    },
-    "Pause for 5 Minutes": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пауза на 5 хвилин"
-          }
-        }
-      }
-    },
-    "Clear History": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Очистити історію"
-          }
-        }
-      }
-    },
-    "Keep clipboard history": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зберігати історію буфера"
-          }
-        }
-      }
-    },
-    "Only on this Mac. Passwords from password managers are never kept; card numbers and tokens are dropped after a minute.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Лише на цьому Mac. Паролі з менеджерів паролів не зберігаються ніколи; номери карток і токени зникають за хвилину."
-          }
-        }
-      }
+    "%@: %@": {
+      "shouldTranslate": false
     },
-    "Keep": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зберігати"
-          }
-        }
-      }
+    "%lld": {
+      "shouldTranslate": false
     },
-    "%lld entries": {
+    "%lld characters": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld записів"
+            "value": "Символів: %lld"
           }
         }
       }
@@ -941,72 +37,22 @@
         }
       }
     },
-    "Never keep copies from": {
+    "%lld entries": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Не зберігати скопійоване з"
+            "value": "%lld записів"
           }
         }
       }
     },
-    "Add App…": {
+    "%lld h": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Додати застосунок…"
-          }
-        }
-      }
-    },
-    "Watermark Photos": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Водяний знак на фото"
-          }
-        }
-      }
-    },
-    "Watermark Photos…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Водяний знак на фото…"
-          }
-        }
-      }
-    },
-    "Drop photos here": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Перетягніть фото сюди"
-          }
-        }
-      }
-    },
-    "Choose photos…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вибрати фото…"
-          }
-        }
-      }
-    },
-    "Add photos": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додати фото"
+            "value": "%lld год"
           }
         }
       }
@@ -1021,541 +67,35 @@
         }
       }
     },
-    "All photos": {
+    "%lld picked": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Усі фото"
+            "value": "Вибрано: %lld"
           }
         }
       }
     },
-    "This photo": {
+    "(clipboard)": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Це фото"
+            "value": "(буфер)"
           }
         }
       }
     },
-    "Or drag the watermark on the photo.": {
+    "A few quick steps and Shotleaf works in any app.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Або перетягніть знак прямо на фото."
+            "value": "Кілька коротких кроків — і Shotleaf працює в будь-якій програмі."
           }
         }
       }
-    },
-    "Same as the others": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Як в усіх"
-          }
-        }
-      }
-    },
-    "Format": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Формат"
-          }
-        }
-      }
-    },
-    "As the original": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Як в оригіналу"
-          }
-        }
-      }
-    },
-    "Another image…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Інше зображення…"
-          }
-        }
-      }
-    },
-    "Photos keep their size, colour profile and metadata. PNG is lossless; JPEG and HEIC are written at maximum quality. The originals stay untouched.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Фото зберігають розмір, колірний профіль і метадані. PNG — без втрат, JPEG і HEIC — з максимальною якістю. Оригінали не змінюються."
-          }
-        }
-      }
-    },
-    "Apply to %lld photos": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Застосувати до %lld фото"
-          }
-        }
-      }
-    },
-    "Done: %lld photos in “%@”": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Готово: %lld фото в «%@»"
-          }
-        }
-      }
-    },
-    "Done with %lld errors — those photos couldn’t be read or written": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Готово, але %lld з помилками — ці фото не вдалося прочитати чи записати"
-          }
-        }
-      }
-    },
-    "Watermark": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Водяний знак"
-          }
-        }
-      }
-    },
-    "None": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Немає"
-          }
-        }
-      }
-    },
-    "Image": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зображення"
-          }
-        }
-      }
-    },
-    "Watermark text": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Текст знака"
-          }
-        }
-      }
-    },
-    "Choose image…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вибрати зображення…"
-          }
-        }
-      }
-    },
-    "Position": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Позиція"
-          }
-        }
-      }
-    },
-    "Size": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Розмір"
-          }
-        }
-      }
-    },
-    "Opacity": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Непрозорість"
-          }
-        }
-      }
-    },
-    "Rotation": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Обертання"
-          }
-        }
-      }
-    },
-    "Editor tools": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Інструменти редактора"
-          }
-        }
-      }
-    },
-    "Reset keys and order": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Скинути клавіші й порядок"
-          }
-        }
-      }
-    },
-    "Type a key for a tool; a tool already on it gives it up. Empty — no key. Arrow, box and oval share one button.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Введіть клавішу для інструмента; якщо вона вже зайнята, інший інструмент її втратить. Порожньо — без клавіші. Стрілка, рамка й овал ділять одну кнопку."
-          }
-        }
-      }
-    },
-    "P, T and 0 are taken by the editor itself.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "P, T і 0 зайняті самим редактором."
-          }
-        }
-      }
-    },
-    "Recent Screenshots": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Недавні знімки"
-          }
-        }
-      }
-    },
-    "No screenshots yet": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Знімків ще немає"
-          }
-        }
-      }
-    },
-    "Show in Finder": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Показати у Finder"
-          }
-        }
-      }
-    },
-    "Edit Last Screenshot": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Редагувати останній знімок"
-          }
-        }
-      }
-    },
-    "Edit Image from Clipboard": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Редагувати картинку з буфера"
-          }
-        }
-      }
-    },
-    "After a screenshot": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Після знімка"
-          }
-        }
-      }
-    },
-    "Open the editor": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Відкрити редактор"
-          }
-        }
-      }
-    },
-    "Copy and save": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Копіювати й зберегти"
-          }
-        }
-      }
-    },
-    "Save to": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зберігати в"
-          }
-        }
-      }
-    },
-    "Desktop": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Робочий стіл"
-          }
-        }
-      }
-    },
-    "Choose…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вибрати…"
-          }
-        }
-      }
-    },
-    "File name": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ім'я файлу"
-          }
-        }
-      }
-    },
-    "{date} and {time} are filled in: %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{date} і {time} підставляються: %@"
-          }
-        }
-      }
-    },
-    "Save at 1x": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зберігати в розмірі 1x"
-          }
-        }
-      }
-    },
-    "Retina shots are saved at half the pixels — smaller files.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Знімки Retina зберігаються з удвічі меншою кількістю пікселів — файли менші."
-          }
-        }
-      }
-    },
-    "Delay": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Затримка"
-          }
-        }
-      }
-    },
-    "Include the pointer": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Додавати вказівник миші"
-          }
-        }
-      }
-    },
-    "Screenshots": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Скріншоти"
-          }
-        }
-      }
-    },
-    "Pen": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ручка"
-          }
-        }
-      }
-    },
-    "Background": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Фон"
-          }
-        }
-      }
-    },
-    "Background, padding, corners · remove the background": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Фон, поле, кути · прибрати фон"
-          }
-        }
-      }
-    },
-    "Padding": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поле"
-          }
-        }
-      }
-    },
-    "Corners": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кути"
-          }
-        }
-      }
-    },
-    "Remove background": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Прибрати фон"
-          }
-        }
-      }
-    },
-    "Background removed · ⌘Z brings it back": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Фон прибрано · ⌘Z поверне"
-          }
-        }
-      }
-    },
-    "No subject found to keep": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не знайшов, що залишити"
-          }
-        }
-      }
-    },
-    "Save as…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зберегти як…"
-          }
-        }
-      }
-    },
-    "Share": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поширити"
-          }
-        }
-      }
-    },
-    "%@ is taken (by another app or another APILA shortcut) — kept %@.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ уже зайнято (іншою програмою або іншою дією APILA) — лишаю %@."
-          }
-        }
-      }
-    },
-    "%@: %@": {
-      "shouldTranslate": false
-    },
-    "%lld": {
-      "shouldTranslate": false
     },
     "API key": {
       "localizations": {
@@ -1567,31 +107,28 @@
         }
       }
     },
-    "API keys are stored in the macOS Keychain. If the provider is unreachable, APILA falls back to Mock. Without image support, screenshots are sent as on-device OCR text.": {
+    "API keys are stored in the macOS Keychain. If the provider is unreachable, Shotleaf falls back to Mock. Without image support, screenshots are sent as on-device OCR text.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ключі API зберігаються у Зв’язці ключів macOS. Якщо провайдер недоступний, APILA перемикається на Mock. Якщо модель не бачить зображень, скріншоти надсилаються як розпізнаний на Mac текст."
-          }
-        }
-      }
-    },
-    "APILA": {
-      "shouldTranslate": false
-    },
-    "APILA needs the %@ permission. Allow it in System Settings → Privacy & Security, then restart APILA.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "APILA потрібен дозвіл «%@». Увімкніть його в Системних параметрах → Конфіденційність і безпека, потім перезапустіть APILA."
+            "value": "Ключі API зберігаються у Зв’язці ключів macOS. Якщо провайдер недоступний, Shotleaf перемикається на Mock. Якщо модель не бачить зображень, скріншоти надсилаються як розпізнаний на Mac текст."
           }
         }
       }
     },
     "Aa": {
       "shouldTranslate": false
+    },
+    "Abbreviation": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скорочення"
+          }
+        }
+      }
     },
     "Accessibility": {
       "localizations": {
@@ -1608,17 +145,47 @@
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Універсальний доступ вимкнено — результат скопійовано. Вставте через ⌘V або увімкніть доступ у налаштуваннях, щоб APILA вставляла сама."
+            "value": "Універсальний доступ вимкнено — результат скопійовано. Вставте через ⌘V або увімкніть доступ у налаштуваннях, щоб Shotleaf вставляла сама."
           }
         }
       }
     },
-    "Accessibility is required for reading the selection and pasting the result; Screen Recording — for screenshots. After granting, fully restart APILA.": {
+    "Accessibility is required for reading the selection and pasting the result; Screen Recording — for screenshots. After granting, fully restart Shotleaf.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Універсальний доступ потрібен, щоб читати виділення і вставляти результат; запис екрана — для скріншотів. Після дозволу повністю перезапустіть APILA."
+            "value": "Універсальний доступ потрібен, щоб читати виділення і вставляти результат; запис екрана — для скріншотів. Після дозволу повністю перезапустіть Shotleaf."
+          }
+        }
+      }
+    },
+    "Actions": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дії"
+          }
+        }
+      }
+    },
+    "Add App…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати застосунок…"
+          }
+        }
+      }
+    },
+    "Add photos": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати фото"
           }
         }
       }
@@ -1633,12 +200,52 @@
         }
       }
     },
-    "After enabling APILA in the list, quit and reopen APILA.": {
+    "After a screenshot": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Після того як увімкнете APILA у списку, закрийте й знову відкрийте APILA."
+            "value": "Після знімка"
+          }
+        }
+      }
+    },
+    "After enabling Shotleaf in the list, quit and reopen Shotleaf.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Після того як увімкнете Shotleaf у списку, закрийте й знову відкрийте Shotleaf."
+          }
+        }
+      }
+    },
+    "All": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усе"
+          }
+        }
+      }
+    },
+    "All Snippets": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усі сніпети"
+          }
+        }
+      }
+    },
+    "All photos": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усі фото"
           }
         }
       }
@@ -1653,6 +260,26 @@
         }
       }
     },
+    "Allow Screen Recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дозвольте запис екрана"
+          }
+        }
+      }
+    },
+    "Another image…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Інше зображення…"
+          }
+        }
+      }
+    },
     "Apply crop": {
       "localizations": {
         "uk": {
@@ -1663,12 +290,32 @@
         }
       }
     },
+    "Apply to %lld photos": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Застосувати до %lld фото"
+          }
+        }
+      }
+    },
     "Arrow": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Стрілка"
+          }
+        }
+      }
+    },
+    "As the original": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Як в оригіналу"
           }
         }
       }
@@ -1713,6 +360,36 @@
         }
       }
     },
+    "Background": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фон"
+          }
+        }
+      }
+    },
+    "Background removed · ⌘Z brings it back": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фон прибрано · ⌘Z поверне"
+          }
+        }
+      }
+    },
+    "Background, padding, corners · remove the background": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фон, поле, кути · прибрати фон"
+          }
+        }
+      }
+    },
     "Base URL": {
       "localizations": {
         "uk": {
@@ -1729,6 +406,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Розмиття"
+          }
+        }
+      }
+    },
+    "Bold": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сміливо"
           }
         }
       }
@@ -1773,12 +460,72 @@
         }
       }
     },
+    "Cancel Queue": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасувати чергу"
+          }
+        }
+      }
+    },
     "Cancelled.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Скасовано."
+          }
+        }
+      }
+    },
+    "Capitalize Words": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кожне Слово З Великої"
+          }
+        }
+      }
+    },
+    "Cautious": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обережно"
+          }
+        }
+      }
+    },
+    "Cautious: only sure, short ones. Bold: more often and longer.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обережно — лише впевнені й короткі. Сміливо — частіше й довші."
+          }
+        }
+      }
+    },
+    "Change colour": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Змінити колір"
+          }
+        }
+      }
+    },
+    "Check": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевірити"
           }
         }
       }
@@ -1793,12 +540,62 @@
         }
       }
     },
+    "Checking…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевіряю…"
+          }
+        }
+      }
+    },
     "Choose": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Вибрати"
+          }
+        }
+      }
+    },
+    "Choose image…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрати зображення…"
+          }
+        }
+      }
+    },
+    "Choose photos…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрати фото…"
+          }
+        }
+      }
+    },
+    "Choose…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вибрати…"
+          }
+        }
+      }
+    },
+    "Clean links of trackers": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистити посилання від трекерів"
           }
         }
       }
@@ -1813,12 +610,42 @@
         }
       }
     },
+    "Clear History": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистити історію"
+          }
+        }
+      }
+    },
+    "Clear Selection": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зняти вибір"
+          }
+        }
+      }
+    },
     "Clipboard": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Буфер обміну"
+          }
+        }
+      }
+    },
+    "Clipboard History": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Історія буфера"
           }
         }
       }
@@ -1839,6 +666,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Колір і товщина"
+          }
+        }
+      }
+    },
+    "Colors": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кольори"
+          }
+        }
+      }
+    },
+    "Complete my text as I type": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дописувати текст, поки я друкую"
+          }
+        }
+      }
+    },
+    "Completion": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дописування"
+          }
+        }
+      }
+    },
+    "Completion model: Gemma 4 E2B base · about 3.6 GB, runs offline": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модель для дописування: Gemma 4 E2B base · близько 3,6 ГБ, працює без інтернету"
           }
         }
       }
@@ -1883,12 +750,82 @@
         }
       }
     },
+    "Copy all": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копіювати все"
+          }
+        }
+      }
+    },
+    "Copy and save": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копіювати й зберегти"
+          }
+        }
+      }
+    },
+    "Copy something — it shows up here": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопіюйте щось — воно з'явиться тут"
+          }
+        }
+      }
+    },
     "Copy text": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Копіювати текст"
+          }
+        }
+      }
+    },
+    "Corners": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кути"
+          }
+        }
+      }
+    },
+    "Couldn’t list models: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося отримати список моделей: %@"
+          }
+        }
+      }
+    },
+    "Couldn’t take the screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося зробити скріншот"
+          }
+        }
+      }
+    },
+    "Create a snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Створити сніпет"
           }
         }
       }
@@ -1933,12 +870,42 @@
         }
       }
     },
+    "Delay": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Затримка"
+          }
+        }
+      }
+    },
     "Delete": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Видалити"
+          }
+        }
+      }
+    },
+    "Delete Snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити сніпет"
+          }
+        }
+      }
+    },
+    "Delete the folder (its snippets stay)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити папку (сніпети лишаться)"
           }
         }
       }
@@ -1953,12 +920,42 @@
         }
       }
     },
+    "Desktop": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Робочий стіл"
+          }
+        }
+      }
+    },
     "Done": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Готово"
+          }
+        }
+      }
+    },
+    "Done with %lld errors — those photos couldn’t be read or written": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово, але %lld з помилками — ці фото не вдалося прочитати чи записати"
+          }
+        }
+      }
+    },
+    "Done: %lld photos in “%@”": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Готово: %lld фото в «%@»"
           }
         }
       }
@@ -1983,6 +980,16 @@
         }
       }
     },
+    "Download the completion model": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажте модель для дописування"
+          }
+        }
+      }
+    },
     "Downloaded · %@": {
       "localizations": {
         "uk": {
@@ -1999,6 +1006,66 @@
           "stringUnit": {
             "state": "translated",
             "value": "Завантаження… %lld%%"
+          }
+        }
+      }
+    },
+    "Drop photos here": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетягніть фото сюди"
+          }
+        }
+      }
+    },
+    "Edit Image from Clipboard": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Редагувати картинку з буфера"
+          }
+        }
+      }
+    },
+    "Edit Last Screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Редагувати останній знімок"
+          }
+        }
+      }
+    },
+    "Edit Snippets…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Редагувати сніпети…"
+          }
+        }
+      }
+    },
+    "Editor tools": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Інструменти редактора"
+          }
+        }
+      }
+    },
+    "Emoji and spelling fixes": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Емодзі та виправлення одруківок"
           }
         }
       }
@@ -2033,12 +1100,112 @@
         }
       }
     },
+    "File name": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ім'я файлу"
+          }
+        }
+      }
+    },
+    "Files": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Файли"
+          }
+        }
+      }
+    },
     "Focus": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Фокус"
+          }
+        }
+      }
+    },
+    "Folder": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Папка"
+          }
+        }
+      }
+    },
+    "For %lld h": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На %lld год"
+          }
+        }
+      }
+    },
+    "For completing your text as you type: Shotleaf reads the field you type in and types the words you accept.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для дописування: Shotleaf читає поле, де ви пишете, і вставляє слова, які ви приймаєте."
+          }
+        }
+      }
+    },
+    "For screenshots and text from screenshots.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для скріншотів і тексту зі скріншотів."
+          }
+        }
+      }
+    },
+    "Forget what I wrote": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Забути мої тексти"
+          }
+        }
+      }
+    },
+    "Format": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Формат"
+          }
+        }
+      }
+    },
+    "Format JSON": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відформатувати JSON"
+          }
+        }
+      }
+    },
+    "Gemma 4 E2B base, about 3.6 GB. Runs only on this Mac — what you type never leaves it.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemma 4 E2B base, близько 3,6 ГБ. Працює лише на цьому Mac — те, що ви пишете, нікуди не йде."
           }
         }
       }
@@ -2063,6 +1230,16 @@
         }
       }
     },
+    "Grey suggestion after the cursor in any app · Tab — next word, ⌥Tab — all, esc — hide. Uses only the built-in model, on this Mac.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сіра підказка після курсора в будь-якій програмі · Tab — наступне слово, ⌥Tab — усе, esc — сховати. Працює лише на вбудованій моделі, на цьому Mac."
+          }
+        }
+      }
+    },
     "How should the result change? (shorter, more formal…)": {
       "localizations": {
         "uk": {
@@ -2079,6 +1256,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Якщо текст уже цією мовою — на"
+          }
+        }
+      }
+    },
+    "Image": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зображення"
+          }
+        }
+      }
+    },
+    "Images": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Картинки"
           }
         }
       }
@@ -2113,6 +1310,16 @@
         }
       }
     },
+    "Include the pointer": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додавати вказівник миші"
+          }
+        }
+      }
+    },
     "Input Monitoring": {
       "localizations": {
         "uk": {
@@ -2133,12 +1340,112 @@
         }
       }
     },
+    "Insert:": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставити:"
+          }
+        }
+      }
+    },
+    "Join into one line": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зібрати в один рядок"
+          }
+        }
+      }
+    },
+    "Keep": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігати"
+          }
+        }
+      }
+    },
+    "Keep clipboard history": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігати історію буфера"
+          }
+        }
+      }
+    },
     "Keep only the cropped area — ⌘Z brings the rest back": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Залишити тільки вибрану область — ⌘Z поверне решту"
+          }
+        }
+      }
+    },
+    "Key": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ"
+          }
+        }
+      }
+    },
+    "Learn my style": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вчитися мого стилю"
+          }
+        }
+      }
+    },
+    "Link copied · works %lld h": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання скопійовано · діє %lld год"
+          }
+        }
+      }
+    },
+    "Link for %lld h": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання на %lld год"
+          }
+        }
+      }
+    },
+    "Links": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання"
+          }
+        }
+      }
+    },
+    "Links work for": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання діють"
           }
         }
       }
@@ -2253,12 +1560,72 @@
         }
       }
     },
+    "Name": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Назва"
+          }
+        }
+      }
+    },
     "Needed to read your selection and paste results back.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Потрібно, щоб читати виділений текст і вставляти результат."
+          }
+        }
+      }
+    },
+    "Never keep copies from": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не зберігати скопійоване з"
+          }
+        }
+      }
+    },
+    "New Folder": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нова папка"
+          }
+        }
+      }
+    },
+    "New Snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новий сніпет"
+          }
+        }
+      }
+    },
+    "New folder": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нова папка"
+          }
+        }
+      }
+    },
+    "New snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Новий сніпет"
           }
         }
       }
@@ -2283,6 +1650,46 @@
         }
       }
     },
+    "No screenshots yet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знімків ще немає"
+          }
+        }
+      }
+    },
+    "No snippets here yet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Тут ще немає сніпетів"
+          }
+        }
+      }
+    },
+    "No snippets yet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сніпетів ще немає"
+          }
+        }
+      }
+    },
+    "No subject found to keep": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не знайшов, що залишити"
+          }
+        }
+      }
+    },
     "No text captured — select text or copy it first. Screenshots work anyway.": {
       "localizations": {
         "uk": {
@@ -2303,12 +1710,22 @@
         }
       }
     },
-    "No text found. Select some text (or copy it), then open APILA again.": {
+    "No text found. Select some text (or copy it), then open Shotleaf again.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Текст не знайдено. Виділіть (або скопіюйте) текст і відкрийте APILA ще раз."
+            "value": "Текст не знайдено. Виділіть (або скопіюйте) текст і відкрийте Shotleaf ще раз."
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Немає"
           }
         }
       }
@@ -2323,6 +1740,26 @@
         }
       }
     },
+    "Nothing copied yet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ще нічого не скопійовано"
+          }
+        }
+      }
+    },
+    "Nothing found": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нічого не знайдено"
+          }
+        }
+      }
+    },
     "Off": {
       "localizations": {
         "uk": {
@@ -2333,32 +1770,32 @@
         }
       }
     },
-    "Open APILA": {
+    "Only on this Mac. Passwords from password managers are never kept; card numbers and tokens are dropped after a minute.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Відкрити APILA"
+            "value": "Лише на цьому Mac. Паролі з менеджерів паролів не зберігаються ніколи; номери карток і токени зникають за хвилину."
           }
         }
       }
     },
-    "Open APILA (%@)": {
+    "Opacity": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Відкрити APILA (%@)"
+            "value": "Непрозорість"
           }
         }
       }
     },
-    "Open APILA at login": {
+    "Open Clipboard…": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Відкривати APILA під час входу"
+            "value": "Відкрити буфер…"
           }
         }
       }
@@ -2383,12 +1820,62 @@
         }
       }
     },
+    "Open Shotleaf": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити Shotleaf"
+          }
+        }
+      }
+    },
+    "Open Shotleaf (%@)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити Shotleaf (%@)"
+          }
+        }
+      }
+    },
+    "Open Shotleaf at login": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкривати Shotleaf під час входу"
+          }
+        }
+      }
+    },
     "Open System Settings": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Відкрити Системні параметри"
+          }
+        }
+      }
+    },
+    "Open the editor": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити редактор"
+          }
+        }
+      }
+    },
+    "Or drag the watermark on the photo.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Або перетягніть знак прямо на фото."
           }
         }
       }
@@ -2403,6 +1890,116 @@
         }
       }
     },
+    "P, T and 0 are taken by the editor itself.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P, T і 0 зайняті самим редактором."
+          }
+        }
+      }
+    },
+    "Padding": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поле"
+          }
+        }
+      }
+    },
+    "Paste": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставити"
+          }
+        }
+      }
+    },
+    "Paste One by One": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставляти по черзі"
+          }
+        }
+      }
+    },
+    "Paste Together": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставити разом"
+          }
+        }
+      }
+    },
+    "Paste it…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставити так…"
+          }
+        }
+      }
+    },
+    "Pasted %lld of %lld · ⇧⌘V — the next one": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставлено %lld з %lld · ⇧⌘V — наступне"
+          }
+        }
+      }
+    },
+    "Pastes as": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставиться так"
+          }
+        }
+      }
+    },
+    "Pause for 5 Minutes": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пауза на 5 хвилин"
+          }
+        }
+      }
+    },
+    "Paused": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пауза"
+          }
+        }
+      }
+    },
+    "Pen": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ручка"
+          }
+        }
+      }
+    },
     "Permissions": {
       "localizations": {
         "uk": {
@@ -2413,12 +2010,52 @@
         }
       }
     },
+    "Photos keep their size, colour profile and metadata. PNG is lossless; JPEG and HEIC are written at maximum quality. The originals stay untouched.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фото зберігають розмір, колірний профіль і метадані. PNG — без втрат, JPEG і HEIC — з максимальною якістю. Оригінали не змінюються."
+          }
+        }
+      }
+    },
+    "Pick a snippet or create one": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виберіть сніпет або створіть новий"
+          }
+        }
+      }
+    },
     "Pin": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Закріпити"
+          }
+        }
+      }
+    },
+    "Plain text": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без форматування"
+          }
+        }
+      }
+    },
+    "Position": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Позиція"
           }
         }
       }
@@ -2453,12 +2090,42 @@
         }
       }
     },
-    "Quit APILA": {
+    "Queue done: %lld of %lld": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Вийти з APILA"
+            "value": "Черга завершена: %lld з %lld"
+          }
+        }
+      }
+    },
+    "Queue: %lld of %lld pasted": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Черга: вставлено %lld з %lld"
+          }
+        }
+      }
+    },
+    "Quit Shotleaf": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вийти з Shotleaf"
+          }
+        }
+      }
+    },
+    "Reads the window you type in (the chat, the page) so suggestions fit. On this Mac only; needs Screen Recording.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Читає вікно, де ви пишете (переписку, сторінку), щоб підказки були в тему. Тільки на цьому Mac; потрібен дозвіл на запис екрана."
           }
         }
       }
@@ -2469,6 +2136,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Останні результати"
+          }
+        }
+      }
+    },
+    "Recent Screenshots": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Недавні знімки"
           }
         }
       }
@@ -2503,6 +2180,26 @@
         }
       }
     },
+    "Remembers a few of your own texts per app, only on this Mac, so suggestions sound like you.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запам'ятовує кілька ваших текстів для кожної програми, лише на цьому Mac, щоб підказки звучали як ви."
+          }
+        }
+      }
+    },
+    "Remove background": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прибрати фон"
+          }
+        }
+      }
+    },
     "Replace": {
       "localizations": {
         "uk": {
@@ -2523,12 +2220,42 @@
         }
       }
     },
+    "Reset keys and order": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скинути клавіші й порядок"
+          }
+        }
+      }
+    },
     "Result": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Результат"
+          }
+        }
+      }
+    },
+    "Resume Recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відновити запис"
+          }
+        }
+      }
+    },
+    "Retina shots are saved at half the pixels — smaller files.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знімки Retina зберігаються з удвічі меншою кількістю пікселів — файли менші."
           }
         }
       }
@@ -2553,6 +2280,16 @@
         }
       }
     },
+    "Rotation": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обертання"
+          }
+        }
+      }
+    },
     "Ruler": {
       "localizations": {
         "uk": {
@@ -2563,12 +2300,72 @@
         }
       }
     },
+    "Same as the others": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Як в усіх"
+          }
+        }
+      }
+    },
     "Save": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Зберегти"
+          }
+        }
+      }
+    },
+    "Save as snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти як сніпет"
+          }
+        }
+      }
+    },
+    "Save as…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти як…"
+          }
+        }
+      }
+    },
+    "Save at 1x": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігати в розмірі 1x"
+          }
+        }
+      }
+    },
+    "Save to": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберігати в"
+          }
+        }
+      }
+    },
+    "Saved as a snippet": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережено як сніпет"
           }
         }
       }
@@ -2603,12 +2400,32 @@
         }
       }
     },
+    "Screenshot Links": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання на скріншоти"
+          }
+        }
+      }
+    },
     "Screenshot with Delay": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Скріншот із затримкою"
+          }
+        }
+      }
+    },
+    "Screenshots": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скріншоти"
           }
         }
       }
@@ -2673,6 +2490,36 @@
         }
       }
     },
+    "Search": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пошук"
+          }
+        }
+      }
+    },
+    "Search the clipboard": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пошук у буфері"
+          }
+        }
+      }
+    },
+    "Searching all folders": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пошук по всіх папках"
+          }
+        }
+      }
+    },
     "Select some text in any app and press %@.": {
       "localizations": {
         "uk": {
@@ -2723,6 +2570,26 @@
         }
       }
     },
+    "Server": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер"
+          }
+        }
+      }
+    },
+    "Set up the link server in Settings → Screenshot Links": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Налаштуйте сервер у Налаштуваннях → Посилання на скріншоти"
+          }
+        }
+      }
+    },
     "Settings…": {
       "localizations": {
         "uk": {
@@ -2743,12 +2610,45 @@
         }
       }
     },
+    "Share": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поширити"
+          }
+        }
+      }
+    },
     "Shortcuts": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Гарячі клавіші"
+          }
+        }
+      }
+    },
+    "Shotleaf": {
+      "shouldTranslate": false
+    },
+    "Shotleaf needs the %@ permission. Allow it in System Settings → Privacy & Security, then restart Shotleaf.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shotleaf потрібен дозвіл «%@». Увімкніть його в Системних параметрах → Конфіденційність і безпека, потім перезапустіть Shotleaf."
+          }
+        }
+      }
+    },
+    "Shotleaf needs the Screen Recording permission. Allow it in System Settings → Privacy & Security, then restart Shotleaf.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shotleaf потрібен дозвіл на запис екрана. Увімкніть його в Системних параметрах → Конфіденційність і безпека, потім перезапустіть Shotleaf."
           }
         }
       }
@@ -2763,12 +2663,42 @@
         }
       }
     },
-    "Sounds": {
+    "Show in Finder": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Звуки"
+            "value": "Показати у Finder"
+          }
+        }
+      }
+    },
+    "Size": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розмір"
+          }
+        }
+      }
+    },
+    "Snippets": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сніпети"
+          }
+        }
+      }
+    },
+    "Snippets…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сніпети…"
           }
         }
       }
@@ -2779,6 +2709,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Щось пішло не так"
+          }
+        }
+      }
+    },
+    "Sounds": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Звуки"
           }
         }
       }
@@ -2803,6 +2743,16 @@
         }
       }
     },
+    "Suggestions": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підказки"
+          }
+        }
+      }
+    },
     "Summarize": {
       "localizations": {
         "uk": {
@@ -2813,12 +2763,32 @@
         }
       }
     },
+    "Take a screenshot with %@, or start typing anywhere and press Tab when a grey suggestion appears.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зробіть скріншот через %@ або почніть писати будь-де й натисніть Tab, коли з'явиться сіра підказка."
+          }
+        }
+      }
+    },
     "Text": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Текст"
+          }
+        }
+      }
+    },
+    "Text copied in the last 5 minutes.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст, скопійований за останні 5 хвилин."
           }
         }
       }
@@ -2853,12 +2823,32 @@
         }
       }
     },
+    "The server didn't answer as expected": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер відповів не так, як треба"
+          }
+        }
+      }
+    },
     "The server returned no models.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Сервер не повернув жодної моделі."
+          }
+        }
+      }
+    },
+    "The server said no: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер відмовив: %@"
           }
         }
       }
@@ -2893,12 +2883,22 @@
         }
       }
     },
-    "Three quick steps and APILA works in any app.": {
+    "This photo": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Три короткі кроки — і APILA працює в будь-якій програмі."
+            "value": "Це фото"
+          }
+        }
+      }
+    },
+    "Three quick steps and Shotleaf works in any app.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Три короткі кроки — і Shotleaf працює в будь-якій програмі."
           }
         }
       }
@@ -2933,6 +2933,16 @@
         }
       }
     },
+    "Trim spaces": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прибрати зайві пробіли"
+          }
+        }
+      }
+    },
     "Try again": {
       "localizations": {
         "uk": {
@@ -2953,12 +2963,42 @@
         }
       }
     },
+    "Type : or ; for an emoji picker (1–9 or a click; letters filter, :fire → 🔥). A misspelled word gets a fix with Tab.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наберіть : або ; — з'явиться панель емодзі (1–9 або клік; літери фільтрують, :fire → 🔥). Слово з одруківкою виправляється по Tab."
+          }
+        }
+      }
+    },
+    "Type a key for a tool; a tool already on it gives it up. Empty — no key. Arrow, box and oval share one button.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Введіть клавішу для інструмента; якщо вона вже зайнята, інший інструмент її втратить. Порожньо — без клавіші. Стрілка, рамка й овал ділять одну кнопку."
+          }
+        }
+      }
+    },
     "Type, then ↩": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Пишіть, потім ↩"
+          }
+        }
+      }
+    },
+    "UPPERCASE": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ВЕЛИКІ ЛІТЕРИ"
           }
         }
       }
@@ -2983,6 +3023,46 @@
         }
       }
     },
+    "Unpin": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкріпити"
+          }
+        }
+      }
+    },
+    "Untitled": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без назви"
+          }
+        }
+      }
+    },
+    "Use text on screen": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Враховувати текст на екрані"
+          }
+        }
+      }
+    },
+    "Use what I just copied": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Враховувати щойно скопійоване"
+          }
+        }
+      }
+    },
     "Using %@.": {
       "localizations": {
         "uk": {
@@ -3003,12 +3083,52 @@
         }
       }
     },
-    "Welcome to APILA": {
+    "Watermark": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ласкаво просимо до APILA"
+            "value": "Водяний знак"
+          }
+        }
+      }
+    },
+    "Watermark Photos": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Водяний знак на фото"
+          }
+        }
+      }
+    },
+    "Watermark Photos…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Водяний знак на фото…"
+          }
+        }
+      }
+    },
+    "Watermark text": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текст знака"
+          }
+        }
+      }
+    },
+    "Welcome to Shotleaf": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ласкаво просимо до Shotleaf"
           }
         }
       }
@@ -3019,6 +3139,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Що ви хочете про це дізнатися?"
+          }
+        }
+      }
+    },
+    "Works: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Працює: %@"
+          }
+        }
+      }
+    },
+    "Your own server (server/shots in the Shotleaf repo). The screenshot window's link button uploads the shot and copies a link that stops working after the chosen time. The key is kept in the Keychain.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш власний сервер (server/shots у репозиторії Shotleaf). Кнопка посилання у вікні скріншоту завантажує знімок і копіює посилання, яке перестає працювати через вибраний час. Ключ зберігається в Связці ключів."
           }
         }
       }
@@ -3093,6 +3233,26 @@
         }
       }
     },
+    "copy only": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "лише скопіювати"
+          }
+        }
+      }
+    },
+    "delete": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "видалити"
+          }
+        }
+      }
+    },
     "denied": {
       "localizations": {
         "uk": {
@@ -3109,6 +3269,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "тягніть"
+          }
+        }
+      }
+    },
+    "edit": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "редагувати"
           }
         }
       }
@@ -3136,6 +3306,16 @@
         }
       }
     },
+    "lowercase": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "малі літери"
+          }
+        }
+      }
+    },
     "navigate": {
       "localizations": {
         "uk": {
@@ -3152,6 +3332,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "не визначено"
+          }
+        }
+      }
+    },
+    "now": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "щойно"
+          }
+        }
+      }
+    },
+    "paste": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "вставити"
+          }
+        }
+      }
+    },
+    "pin": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "закріпити"
+          }
+        }
+      }
+    },
+    "plain text": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "без форматування"
           }
         }
       }
@@ -3246,6 +3466,16 @@
         }
       }
     },
+    "type": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "тип"
+          }
+        }
+      }
+    },
     "window": {
       "localizations": {
         "uk": {
@@ -3256,8 +3486,68 @@
         }
       }
     },
+    "{?Name} asks before pasting; {cursor} is where the caret ends up.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{?Name} спитає перед вставкою; {cursor} — де стане курсор."
+          }
+        }
+      }
+    },
+    "{date} and {time} are filled in: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{date} і {time} підставляються: %@"
+          }
+        }
+      }
+    },
     "×": {
       "shouldTranslate": false
+    },
+    "“%@” already uses this abbreviation": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Це скорочення вже має «%@»"
+          }
+        }
+      }
+    },
+    "← → folders": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "← → папки"
+          }
+        }
+      }
+    },
+    "↩ or 1–8 · esc goes back": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↩ або 1–8 · esc — назад"
+          }
+        }
+      }
+    },
+    "↩ pastes · esc goes back": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "↩ вставляє · esc — назад"
+          }
+        }
+      }
     },
     "⚠︎ %@ is taken by another app": {
       "localizations": {
@@ -3265,296 +3555,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "⚠︎ %@ зайнято іншою програмою"
-          }
-        }
-      }
-    },
-    "Complete my text as I type": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дописувати текст, поки я друкую"
-          }
-        }
-      }
-    },
-    "Grey suggestion after the cursor in any app · Tab — next word, ⌥Tab — all, esc — hide. Uses only the built-in model, on this Mac.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сіра підказка після курсора в будь-якій програмі · Tab — наступне слово, ⌥Tab — усе, esc — сховати. Працює лише на вбудованій моделі, на цьому Mac."
-          }
-        }
-      }
-    },
-    "Couldn’t list models: %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не вдалося отримати список моделей: %@"
-          }
-        }
-      }
-    },
-    "Completion model: Gemma 4 E2B base · about 3.6 GB, runs offline": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Модель для дописування: Gemma 4 E2B base · близько 3,6 ГБ, працює без інтернету"
-          }
-        }
-      }
-    },
-    "Use text on screen": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Враховувати текст на екрані"
-          }
-        }
-      }
-    },
-    "Reads the window you type in (the chat, the page) so suggestions fit. On this Mac only; needs Screen Recording.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Читає вікно, де ви пишете (переписку, сторінку), щоб підказки були в тему. Тільки на цьому Mac; потрібен дозвіл на запис екрана."
-          }
-        }
-      }
-    },
-    "Use what I just copied": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Враховувати щойно скопійоване"
-          }
-        }
-      }
-    },
-    "Text copied in the last 5 minutes.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Текст, скопійований за останні 5 хвилин."
-          }
-        }
-      }
-    },
-    "Cautious": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Обережно"
-          }
-        }
-      }
-    },
-    "Bold": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сміливо"
-          }
-        }
-      }
-    },
-    "Suggestions": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Підказки"
-          }
-        }
-      }
-    },
-    "Cautious: only sure, short ones. Bold: more often and longer.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Обережно — лише впевнені й короткі. Сміливо — частіше й довші."
-          }
-        }
-      }
-    },
-    "Emoji and spelling fixes": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Емодзі та виправлення одруківок"
-          }
-        }
-      }
-    },
-    "Learn my style": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вчитися мого стилю"
-          }
-        }
-      }
-    },
-    "Remembers a few of your own texts per app, only on this Mac, so suggestions sound like you.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Запам'ятовує кілька ваших текстів для кожної програми, лише на цьому Mac, щоб підказки звучали як ви."
-          }
-        }
-      }
-    },
-    "Forget what I wrote": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Забути мої тексти"
-          }
-        }
-      }
-    },
-    "Type : or ; for an emoji picker (1–9 or a click; letters filter, :fire → 🔥). A misspelled word gets a fix with Tab.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Наберіть : або ; — з'явиться панель емодзі (1–9 або клік; літери фільтрують, :fire → 🔥). Слово з одруківкою виправляється по Tab."
-          }
-        }
-      }
-    },
-    "%lld characters": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Символів: %lld"
-          }
-        }
-      }
-    },
-    "Copy all": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Копіювати все"
-          }
-        }
-      }
-    },
-    "Couldn’t take the screenshot": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не вдалося зробити скріншот"
-          }
-        }
-      }
-    },
-    "APILA needs the Screen Recording permission. Allow it in System Settings → Privacy & Security, then restart APILA.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "APILA потрібен дозвіл на запис екрана. Увімкніть його в Системних параметрах → Конфіденційність і безпека, потім перезапустіть APILA."
-          }
-        }
-      }
-    },
-    "Completion": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дописування"
-          }
-        }
-      }
-    },
-    "Allow Screen Recording": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дозвольте запис екрана"
-          }
-        }
-      }
-    },
-    "For screenshots and text from screenshots.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Для скріншотів і тексту зі скріншотів."
-          }
-        }
-      }
-    },
-    "For completing your text as you type: APILA reads the field you type in and types the words you accept.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Для дописування: APILA читає поле, де ви пишете, і вставляє слова, які ви приймаєте."
-          }
-        }
-      }
-    },
-    "Download the completion model": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Завантажте модель для дописування"
-          }
-        }
-      }
-    },
-    "Gemma 4 E2B base, about 3.6 GB. Runs only on this Mac — what you type never leaves it.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gemma 4 E2B base, близько 3,6 ГБ. Працює лише на цьому Mac — те, що ви пишете, нікуди не йде."
-          }
-        }
-      }
-    },
-    "A few quick steps and APILA works in any app.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кілька коротких кроків — і APILA працює в будь-якій програмі."
-          }
-        }
-      }
-    },
-    "Take a screenshot with %@, or start typing anywhere and press Tab when a grey suggestion appears.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зробіть скріншот через %@ або почніть писати будь-де й натисніть Tab, коли з'явиться сіра підказка."
           }
         }
       }

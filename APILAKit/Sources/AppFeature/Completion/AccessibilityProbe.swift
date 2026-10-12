@@ -60,7 +60,7 @@ public enum AccessibilityProbe {
         let (_, size) = attribute(kAXSizeAttribute)
         line("frame: \(position.map { "\($0)" } ?? "—") \(size.map { "\($0)" } ?? "—")")
         let top = NSScreen.screens.first?.frame.maxY ?? 0
-        line("APILA reads it as: \(FocusedField.current(excluding: [], screenTop: top).map { "ok, caret \($0.caret)" } ?? "nil — no completion here")")
+        line("Shotleaf reads it as: \(FocusedField.current(excluding: [], screenTop: top).map { "ok, caret \($0.caret)" } ?? "nil — no completion here")")
         write(lines, out)
     }
 
@@ -98,12 +98,12 @@ public enum AccessibilityProbe {
                     }
                     let field = FocusedField.current(excluding: [], screenTop: top)
                     summary = "\(role as? String ?? "?") text \((value as? String)?.count ?? -1) chars, cursor \(range.location)+\(range.length), "
-                        + "caret box \(Int(bounds.width))×\(Int(bounds.height)) → APILA: \(field == nil ? "NO" : "ok")"
+                        + "caret box \(Int(bounds.width))×\(Int(bounds.height)) → Shotleaf: \(field == nil ? "NO" : "ok")"
                     if field == nil, (value as? String).map({ $0.count <= 1 }) ?? true { summary += "  [markers: " + FocusedField.markerDiagnosis(element) + "]" }
                 }
                 let key = app.bundleIdentifier ?? "?"
                 // One line per app: only when "can APILA work here" changes, not per keystroke.
-                let state = summary.contains("APILA: ok") ? "ok"
+                let state = summary.contains("Shotleaf: ok") ? "ok"
                     : summary.replacingOccurrences(of: "[0-9]+", with: "#", options: .regularExpression)
                 if seen[key] != state {
                     seen[key] = state

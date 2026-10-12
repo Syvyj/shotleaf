@@ -21,7 +21,7 @@ import OSLog
 /// ponytail: no app-specific fixes yet.
 @MainActor
 final class InlineCompletion {
-    private let log = Logger(subsystem: "app.apila.APILA", category: "completion")
+    private let log = Logger(subsystem: "dev.syvyj.shotleaf", category: "completion")
     /// Marks APILA's own synthetic key events so the tap lets them through.
     nonisolated fileprivate static let marker: Int64 = 0x4150_494C // "APIL"
     /// The model answers in ~50 ms now; waiting longer only feels slow.
@@ -453,7 +453,7 @@ private final class EventTapThread: Thread, @unchecked Sendable {
     init(state: TapState) {
         self.state = state
         super.init()
-        name = "APILA completion keys"
+        name = "Shotleaf completion keys"
         qualityOfService = .userInteractive
     }
 
