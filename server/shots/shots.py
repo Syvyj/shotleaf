@@ -10,7 +10,9 @@ Settings (environment):
     SHOTS_TOKEN       required; long random secret, the same one goes into APILA
     SHOTS_PUBLIC_URL  e.g. https://shot.example.com (what links start with)
     SHOTS_DIR         where images live (default ./data)
-    SHOTS_PORT        default 8787; listens on 127.0.0.1 only (put the tunnel / proxy in front)
+    SHOTS_PORT        default 8787
+    SHOTS_HOST        address to listen on, default 127.0.0.1 (a tunnel in Docker needs the
+                      bridge gateway, e.g. 172.17.0.1 — still not reachable from the LAN)
     SHOTS_MAX_MB      default 25
 """
 import hmac
@@ -27,6 +29,7 @@ TOKEN = os.environ.get("SHOTS_TOKEN", "")
 PUBLIC = os.environ.get("SHOTS_PUBLIC_URL", "").rstrip("/")
 DATA = os.path.abspath(os.environ.get("SHOTS_DIR", "data"))
 PORT = int(os.environ.get("SHOTS_PORT", "8787"))
+HOST = os.environ.get("SHOTS_HOST", "127.0.0.1")
 MAX_BYTES = int(os.environ.get("SHOTS_MAX_MB", "25")) * 1024 * 1024
 MAX_TTL = 7 * 24 * 3600
 ID = re.compile(r"^[A-Za-z0-9_-]{8,32}$")
@@ -148,8 +151,8 @@ def main():
         raise SystemExit("Set SHOTS_TOKEN (e.g. `openssl rand -hex 24`).")
     os.makedirs(DATA, exist_ok=True)
     threading.Thread(target=sweeper, daemon=True).start()
-    print(f"apila-shots on 127.0.0.1:{PORT}, files in {DATA}", flush=True)
-    ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
+    print(f"apila-shots on {HOST}:{PORT}, files in {DATA}", flush=True)
+    ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
 
 
 if __name__ == "__main__":

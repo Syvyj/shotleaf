@@ -1,6 +1,7 @@
 [Unit]
 Description=APILA expiring screenshot links
-After=network.target
+After=network-online.target docker.service
+Wants=network-online.target
 
 [Service]
 # The secret and the address live in /etc/apila-shots.env (see README.md).
@@ -10,6 +11,7 @@ ExecStart=/usr/bin/python3 /opt/apila-shots/shots.py
 DynamicUser=yes
 StateDirectory=apila-shots
 Restart=on-failure
+RestartSec=5
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes
