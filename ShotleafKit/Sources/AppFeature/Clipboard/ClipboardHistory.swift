@@ -302,8 +302,12 @@ final class ClipboardHistory {
     }
 
     func save() {
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        try? JSONEncoder().encode(items).write(to: file, options: .atomic)
+        do {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try JSONEncoder().encode(items).write(to: file, options: .atomic)
+        } catch {
+            SaveError.show(error, saving: String(localized: "the clipboard history"))
+        }
     }
 
     /// Over the limit, old images, and sensitive bits older than a minute go (never the pinned).

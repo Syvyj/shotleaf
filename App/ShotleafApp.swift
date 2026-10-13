@@ -35,6 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        #if DEBUG
         if let i = CommandLine.arguments.firstIndex(of: "--ax-watch") { // developer run, read-only
             let args = CommandLine.arguments
             let out = URL(fileURLWithPath: args.count > i + 1 ? args[i + 1] : NSTemporaryDirectory())
@@ -51,6 +52,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { await CompletionEval.run(); exit(0) }
             return
         }
+        #endif
         // One Shotleaf at a time: two copies fight over the global hotkeys.
         let me = NSRunningApplication.current
         let others = NSRunningApplication.runningApplications(withBundleIdentifier: Bundle.main.bundleIdentifier ?? "")
@@ -59,6 +61,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.terminate(nil)
             return
         }
+        #if DEBUG
         if let i = CommandLine.arguments.firstIndex(of: "--completion-live-test") { // developer run
             let args = CommandLine.arguments
             let text = args.count > i + 1 ? args[i + 1] : "Hi Anna, thanks for the update. I think we should"
@@ -70,6 +73,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             return
         }
+        #endif
         Task { await coordinator.start() }
     }
 

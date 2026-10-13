@@ -8,6 +8,8 @@ public enum AppInfo {
     public static let copyright = "© 2026 Oleksii Ziuzin (Syvyj)"
     public static let website = URL(string: "https://syvyj.dev")!
     public static let email = "shotleaf@syvyj.dev"
+    /// ponytail: opens the page; compare with the latest tag in the app if people miss updates.
+    public static let releases = URL(string: "https://github.com/Syvyj/shotleaf/releases")!
     /// The site's donation links (kept there, so they change without an app update).
     public static var supportPage: URL {
         let uk = Locale.preferredLanguages.first?.hasPrefix("uk") == true

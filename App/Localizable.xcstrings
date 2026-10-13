@@ -150,16 +150,6 @@
         }
       }
     },
-    "Accessibility is required for reading the selection and pasting the result; Screen Recording — for screenshots. After granting, fully restart Shotleaf.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Універсальний доступ потрібен, щоб читати виділення і вставляти результат; запис екрана — для скріншотів. Після дозволу повністю перезапустіть Shotleaf."
-          }
-        }
-      }
-    },
     "Actions": {
       "localizations": {
         "uk": {
@@ -1146,16 +1136,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "На %lld год"
-          }
-        }
-      }
-    },
-    "For completing your text as you type: Shotleaf reads the field you type in and types the words you accept.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Для дописування: Shotleaf читає поле, де ви пишете, і вставляє слова, які ви приймаєте."
           }
         }
       }
@@ -2730,6 +2710,126 @@
         }
       }
     },
+    "Version %@ (%@)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Версія %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "Accessibility lets Shotleaf complete text, expand snippets and paste from the clipboard history; Screen Recording — screenshots and text from the screen. Shotleaf restarts by itself once Accessibility is on.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Універсальний доступ потрібен, щоб дописувати текст, розгортати сніпети й вставляти з історії буфера обміну; запис екрана — для скріншотів і тексту з екрана. Коли увімкнете універсальний доступ, Shotleaf сам перезапуститься."
+          }
+        }
+      }
+    },
+    "For completing your text as you type, expanding snippets and pasting from the clipboard history.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Щоб дописувати текст, розгортати сніпети й вставляти з історії буфера обміну."
+          }
+        }
+      }
+    },
+    "After enabling Shotleaf in the list, it restarts by itself.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Після того як увімкнете Shotleaf у списку, він сам перезапуститься."
+          }
+        }
+      }
+    },
+    "⌘⇧3, ⇧⌘V and ⇧⌘B are also used by macOS (the full-screen screenshot) or by some apps. If a shortcut clashes with one you need, change it in Settings › Shortcuts.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘⇧3, ⇧⌘V і ⇧⌘B також використовує macOS (скріншот усього екрана) або деякі програми. Якщо сполучення заважає потрібному вам, змініть його в Налаштуваннях › Гарячі клавіші."
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спробувати ще раз"
+          }
+        }
+      }
+    },
+    "Couldn’t save %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося зберегти %@"
+          }
+        }
+      }
+    },
+    "the screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "скріншот"
+          }
+        }
+      }
+    },
+    "snippets": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "сніпети"
+          }
+        }
+      }
+    },
+    "the clipboard history": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "історію буфера обміну"
+          }
+        }
+      }
+    },
+    "Clear Recent Screenshots": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Очистити недавні скріншоти"
+          }
+        }
+      }
+    },
+    "Check for Updates…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевірити оновлення…"
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {
@@ -3199,16 +3299,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Використовую %@."
-          }
-        }
-      }
-    },
-    "Version %@": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Версія %@"
           }
         }
       }

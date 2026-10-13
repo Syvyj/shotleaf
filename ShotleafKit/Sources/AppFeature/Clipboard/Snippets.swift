@@ -60,8 +60,13 @@ final class SnippetStore {
 
     private func save() {
         guard !loading else { return }
-        try? FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try? JSONEncoder().encode(Saved(snippets: snippets, folders: folders)).write(to: file, options: .atomic)
+        do {
+            try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try JSONEncoder().encode(Saved(snippets: snippets, folders: folders)).write(to: file, options: .atomic)
+        } catch {
+            SaveError.show(error, saving: String(localized: "snippets"))
+            return // keep the pictures: the snippets on disk still use them
+        }
         // Pictures no snippet uses any more go. ponytail: a full sweep per save, fine for hundreds of files.
         let used = Set(snippets.flatMap { $0.images ?? [] })
         for name in (try? FileManager.default.contentsOfDirectory(atPath: imageFolder.path)) ?? [] where !used.contains(name) {

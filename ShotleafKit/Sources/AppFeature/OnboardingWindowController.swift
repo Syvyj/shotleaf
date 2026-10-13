@@ -23,6 +23,8 @@ final class OnboardingWindowController {
         window?.close()
     }
 
+    var isVisible: Bool { window?.isVisible == true }
+
     private func makeWindow() -> NSWindow {
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 480, height: 420),

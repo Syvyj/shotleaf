@@ -72,7 +72,7 @@ final class ScreenshotWindows {
                     let png = Self.settings.saveAt1x ? Self.oneX(result(), scale: scale) : result()
                     guard response == .OK, let url = ask.url,
                           let data = Self.encoded(png, as: type, scale: Self.settings.saveAt1x ? 1 : scale) else { return }
-                    try? data.write(to: url)
+                    do { try data.write(to: url) } catch { SaveError.show(error, saving: String(localized: "the screenshot")) }
                 }
             },
             link: { hours in try await ShotLinks.upload(result(), hours: hours) },
@@ -242,10 +242,16 @@ final class ScreenshotWindows {
     /// Settings), at 1x if asked; `scale` = pixels per point of the shot.
     static func save(_ png: Data, to folder: URL? = nil, now: Date = Date(), scale: CGFloat = 1) -> URL? {
         let folder = folder ?? saveFolder
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let url = folder.appendingPathComponent(fileName(now, template: settings.fileNameTemplate))
         let data = settings.saveAt1x ? oneX(png, scale: scale) : png
-        return (try? data.write(to: url)) != nil ? url : nil
+        do {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try data.write(to: url)
+            return url
+        } catch {
+            SaveError.show(error, saving: String(localized: "the screenshot"))
+            return nil
+        }
     }
 
     /// `template` with {date} and {time} filled in, made safe for Finder.

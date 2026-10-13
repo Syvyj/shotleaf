@@ -44,6 +44,8 @@ public struct MenuBarRootView: View {
             if coordinator.recentShots.isEmpty { Text("No screenshots yet") }
             Divider()
             Button("Show in Finder") { coordinator.showRecentFolder() }
+            Button("Clear Recent Screenshots") { coordinator.clearRecentShots() }
+                .disabled(coordinator.recentShots.isEmpty)
         }
 
         Divider()
@@ -76,6 +78,7 @@ public struct MenuBarRootView: View {
         ))
         SettingsLink { Text("Settings…") }
         Button("Setup Guide…") { coordinator.showOnboarding() }
+        Button("Check for Updates…") { NSWorkspace.shared.open(AppInfo.releases) }
         Button("Support the Author…") { NSWorkspace.shared.open(AppInfo.supportPage) }
 
         Divider()

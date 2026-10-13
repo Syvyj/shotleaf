@@ -67,7 +67,8 @@ public struct SettingsRootView: View {
     private static var version: String {
         let info = Bundle.main.infoDictionary
         let short = info?["CFBundleShortVersionString"] as? String ?? "dev"
-        return String(localized: "Version \(short)")
+        let build = info?["CFBundleVersion"] as? String ?? "0"
+        return String(localized: "Version \(short) (\(build))")
     }
 
     // MARK: Completion model
@@ -128,6 +129,8 @@ public struct SettingsRootView: View {
             }
         } header: {
             Text("Shortcuts")
+        } footer: {
+            Text(OnboardingView.shortcutsNote)
         }
     }
 
@@ -419,7 +422,7 @@ public struct SettingsRootView: View {
         } header: {
             Text("Permissions")
         } footer: {
-            Text("Accessibility is required for reading the selection and pasting the result; Screen Recording — for screenshots. After granting, fully restart Shotleaf.")
+            Text("Accessibility lets Shotleaf complete text, expand snippets and paste from the clipboard history; Screen Recording — screenshots and text from the screen. Shotleaf restarts by itself once Accessibility is on.")
         }
     }
 

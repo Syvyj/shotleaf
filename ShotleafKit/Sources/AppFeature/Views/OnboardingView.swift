@@ -31,15 +31,19 @@ struct OnboardingView: View {
             }
 
             step(2, "Allow Accessibility", done: accessibilityGranted) {
-                Text("For completing your text as you type: Shotleaf reads the field you type in and types the words you accept.")
+                Text("For completing your text as you type, expanding snippets and pasting from the clipboard history.")
                 permissionButtons(.accessibility, granted: accessibilityGranted)
             }
 
             step(3, "Download the completion model", done: modelReady) {
                 Text("Gemma 4 E2B base, about 3.6 GB. Runs only on this Mac — what you type never leaves it.")
                 switch coordinator.modelState {
-                case .notDownloaded, .failed:
+                case .notDownloaded:
                     Button("Download") { coordinator.downloadModel() }
+                        .buttonStyle(LeafButtonStyle(prominent: true))
+                case .failed(let message):
+                    Text(message).foregroundStyle(.orange)
+                    Button("Try Again") { coordinator.downloadModel() }
                         .buttonStyle(LeafButtonStyle(prominent: true))
                 case .downloading(let fraction):
                     ProgressView(value: fraction).frame(maxWidth: 260)
@@ -50,6 +54,7 @@ struct OnboardingView: View {
 
             step(4, "Try it", done: false) {
                 Text("Take a screenshot with \(coordinator.actionHotkeys[.capture]?.title ?? "⌘⇧2"), or start typing anywhere and press Tab when a grey suggestion appears.")
+                Text(Self.shortcutsNote).foregroundStyle(.secondary)
             }
 
             HStack {
@@ -79,10 +84,15 @@ struct OnboardingView: View {
                 .buttonStyle(LeafButtonStyle())
         }
         if !granted {
-            Text("After enabling Shotleaf in the list, quit and reopen Shotleaf.")
+            Text(kind == .accessibility
+                 ? "After enabling Shotleaf in the list, it restarts by itself."
+                 : "After enabling Shotleaf in the list, quit and reopen Shotleaf.")
                 .font(.caption).foregroundStyle(.secondary)
         }
     }
+
+    /// The defaults take keys that macOS or other apps also use; say so up front.
+    static let shortcutsNote: LocalizedStringKey = "⌘⇧3, ⇧⌘V and ⇧⌘B are also used by macOS (the full-screen screenshot) or by some apps. If a shortcut clashes with one you need, change it in Settings › Shortcuts."
 
     private func step<Content: View>(
         _ number: Int, _ title: String, done: Bool, @ViewBuilder content: () -> Content

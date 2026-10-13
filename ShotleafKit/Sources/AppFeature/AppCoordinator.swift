@@ -48,10 +48,14 @@ public final class AppCoordinator {
         }
 
         // Auto-shown once; afterwards it lives in the menu ("Setup Guide…").
-        if !container.settings.onboardingCompleted {
+        // Also back after the restart that follows granting Accessibility.
+        let reopenGuide = UserDefaults.standard.bool(forKey: Self.reopenGuideKey)
+        UserDefaults.standard.removeObject(forKey: Self.reopenGuideKey)
+        if !container.settings.onboardingCompleted || reopenGuide {
             container.settings.onboardingCompleted = true
             showOnboarding()
         }
+        restartWhenAccessibilityGranted()
         hotkeyTask = Task { [weak self] in
             guard let self else { return }
             for await event in self.container.hotkeys.events {
@@ -193,6 +197,11 @@ public final class AppCoordinator {
     public func openRecent(_ url: URL) {
         guard let shot = ScreenshotWindows.load(url) else { NSSound.beep(); return }
         screenshots.show(shot, sound: false)
+    }
+
+    public func clearRecentShots() {
+        try? FileManager.default.removeItem(at: ScreenshotWindows.recentFolder)
+        recentShots = []
     }
 
     public func showRecentFolder() {
@@ -395,6 +404,34 @@ public final class AppCoordinator {
     }
 
     private static let log = Logger(subsystem: "dev.syvyj.shotleaf", category: "permissions")
+    private static let reopenGuideKey = "reopenSetupGuide"
+
+    /// The keyboard taps (completion, snippets, pasting) only work in a process
+    /// that started with Accessibility on. So when it's off at launch, watch for
+    /// the user granting it and restart once it's there.
+    private func restartWhenAccessibilityGranted() {
+        guard permissions[.accessibility] != .granted else { return }
+        Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(2))
+                guard let self else { return }
+                guard self.container.permissions.status(.accessibility) == .granted else { continue }
+                Self.log.notice("Accessibility granted — restarting")
+                if self.onboarding?.isVisible == true { UserDefaults.standard.set(true, forKey: Self.reopenGuideKey) }
+                Self.relaunch()
+                return
+            }
+        }
+    }
+
+    /// Opens a fresh copy once this one has quit (two copies can't run at once).
+    static func relaunch() {
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/sh")
+        task.arguments = ["-c", "while kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.1; done; open \"$0\"", Bundle.main.bundlePath]
+        try? task.run()
+        NSApp.terminate(nil)
+    }
 
     public func request(_ kind: PermissionKind) async {
         await container.permissions.request(kind)

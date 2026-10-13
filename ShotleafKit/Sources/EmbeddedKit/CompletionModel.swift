@@ -14,8 +14,11 @@ import Tokenizers
 public actor EmbeddedModel {
     /// Gemma 4 E2B *base*: a plain text continuer for inline completion —
     /// instruct models answer instead of continuing, and need a slow prompt.
+    /// Pinned to one commit: a change upstream can't swap the weights under users.
     public static let completion = EmbeddedModel(
-        configuration: ModelConfiguration(id: "mlx-community/gemma-4-e2b-4bit"), displayName: "Gemma 4 E2B base")
+        configuration: ModelConfiguration(
+            id: "mlx-community/gemma-4-e2b-4bit", revision: "a280baf4aece348bd0f561ca43b9d47cc66d8498"),
+        displayName: "Gemma 4 E2B base")
 
     public nonisolated let configuration: ModelConfiguration
     public nonisolated let displayName: String
