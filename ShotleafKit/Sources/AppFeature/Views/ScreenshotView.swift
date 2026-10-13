@@ -838,26 +838,28 @@ struct ScreenshotView: View {
             Button { actions.share() } label: { Image(systemName: "square.and.arrow.up").frame(height: 17) }
                 .buttonStyle(LeafButtonStyle())
                 .instantTip("Share", above: true)
-            HStack(spacing: 2) {
-                Button { makeLink(ShotLinks.defaultHours) } label: {
-                    if linking { ProgressView().controlSize(.small).frame(height: 17) } else { Image(systemName: "link").frame(height: 17) }
+            if ShotLinks.isSetUp { // only with a link server set up (Settings → Screenshot Links)
+                HStack(spacing: 2) {
+                    Button { makeLink(ShotLinks.defaultHours) } label: {
+                        if linking { ProgressView().controlSize(.small).frame(height: 17) } else { Image(systemName: "link").frame(height: 17) }
+                    }
+                    .instantTip(String(localized: "Link for \(ShotLinks.defaultHours) h"), hidden: flyout == .link, above: true)
+                    Button { flyout = flyout == .link ? nil : .link } label: { chevron.frame(height: 17) }
                 }
-                .instantTip(String(localized: "Link for \(ShotLinks.defaultHours) h"), hidden: flyout == .link, above: true)
-                Button { flyout = flyout == .link ? nil : .link } label: { chevron.frame(height: 17) }
-            }
-            .buttonStyle(LeafButtonStyle())
-            .disabled(linking)
-            .overlay(alignment: .bottomLeading) {
-                if flyout == .link {
-                    flyoutCard(above: true) {
-                        ForEach(ShotLinks.choices, id: \.self) { hours in
-                            Button { flyout = nil; makeLink(hours) } label: {
-                                Text("For \(hours) h").font(Leaf.font(13, .medium))
-                                    .padding(.horizontal, 8).padding(.vertical, 4)
-                                    .frame(width: 120, alignment: .leading)
-                                    .contentShape(Rectangle())
+                .buttonStyle(LeafButtonStyle())
+                .disabled(linking)
+                .overlay(alignment: .bottomLeading) {
+                    if flyout == .link {
+                        flyoutCard(above: true) {
+                            ForEach(ShotLinks.choices, id: \.self) { hours in
+                                Button { flyout = nil; makeLink(hours) } label: {
+                                    Text("For \(hours) h").font(Leaf.font(13, .medium))
+                                        .padding(.horizontal, 8).padding(.vertical, 4)
+                                        .frame(width: 120, alignment: .leading)
+                                        .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
                 }
