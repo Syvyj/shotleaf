@@ -28,39 +28,106 @@ public struct SettingsRootView: View {
     /// Accessibility: read the field you type in, type suggestions. Screen Recording: screenshots.
     private let required: [PermissionKind] = [.accessibility, .screenRecording]
 
-    public var body: some View {
-        Form {
-            Section {
-                HStack(spacing: 12) {
-                    Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 40, height: 40)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(verbatim: AppInfo.name).font(Leaf.font(16, .bold))
-                        Text(Self.version).font(Leaf.font(11)).foregroundStyle(.secondary)
-                        Text(verbatim: AppInfo.copyright).font(Leaf.font(11)).foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Link("syvyj.dev", destination: AppInfo.website).font(Leaf.font(11))
-                        Link(AppInfo.email, destination: URL(string: "mailto:\(AppInfo.email)")!).font(Leaf.font(11))
-                        Link("Support the Author ♥", destination: AppInfo.supportPage).font(Leaf.font(11, .semibold))
-                        Button("Third-party licences") { showNotices = true }.buttonStyle(.link).font(Leaf.font(11))
-                    }
-                }
+    /// The sidebar's panes.
+    enum Pane: String, CaseIterable, Identifiable {
+        case general, shortcuts, screenshots, tools, clipboard, completion, permissions
+        var id: Self { self }
+
+        var title: LocalizedStringKey {
+            switch self {
+            case .general: "General"
+            case .shortcuts: "Shortcuts"
+            case .screenshots: "Screenshots"
+            case .tools: "Editor tools"
+            case .clipboard: "Clipboard"
+            case .completion: "Completion"
+            case .permissions: "Permissions"
             }
-            shortcutSection
-            screenshotSection
-            toolsSection
-            clipboardSection
-            linksSection
-            completionSection
-            generalSection
-            permissionsSection
         }
-        .formStyle(.grouped)
+
+        var icon: String {
+            switch self {
+            case .general: "gearshape"
+            case .shortcuts: "keyboard"
+            case .screenshots: "camera.viewfinder"
+            case .tools: "pencil.tip.crop.circle"
+            case .clipboard: "doc.on.clipboard"
+            case .completion: "text.cursor"
+            case .permissions: "lock.shield"
+            }
+        }
+    }
+
+    @AppStorage("settingsPane") private var pane: Pane = .general
+
+    private var permissionsMissing: Bool {
+        required.contains { coordinator.permissions[$0] != .granted }
+    }
+
+    public var body: some View {
+        NavigationSplitView {
+            List(Pane.allCases, selection: Binding(get: { pane }, set: { if let new = $0 { pane = new } })) { pane in
+                Label {
+                    HStack {
+                        Text(pane.title)
+                        if pane == .permissions && permissionsMissing {
+                            Spacer()
+                            Image(systemName: "exclamationmark.circle.fill").foregroundStyle(.orange)
+                        }
+                    }
+                } icon: {
+                    Image(systemName: pane.icon)
+                }
+                .tag(pane)
+            }
+            .navigationSplitViewColumnWidth(200)
+            .toolbar(removing: .sidebarToggle)
+        } detail: {
+            Form { content }
+                .formStyle(.grouped)
+                .navigationTitle(Text(pane.title))
+        }
         .sheet(isPresented: $showNotices) { ThirdPartyNoticesView { showNotices = false } }
-        .frame(width: 520)
+        .frame(width: 800, height: 600)
         .onAppear {
             coordinator.refreshPermissions()
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch pane {
+        case .general:
+            aboutSection
+            generalSection
+        case .shortcuts: shortcutSection
+        case .screenshots:
+            screenshotSection
+            linksSection
+        case .tools: toolsSection
+        case .clipboard: clipboardSection
+        case .completion: completionSection
+        case .permissions: permissionsSection
+        }
+    }
+
+    private var aboutSection: some View {
+        Section {
+            HStack(spacing: 14) {
+                Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 56, height: 56)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: AppInfo.name).font(Leaf.font(18, .bold))
+                    Text(Self.version).foregroundStyle(.secondary)
+                    Text(verbatim: AppInfo.copyright).foregroundStyle(.secondary)
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 4) {
+                    Link("syvyj.dev", destination: AppInfo.website)
+                    Link(AppInfo.email, destination: URL(string: "mailto:\(AppInfo.email)")!)
+                    Link("Support the Author ♥", destination: AppInfo.supportPage).fontWeight(.semibold)
+                    Button("Third-party licences") { showNotices = true }.buttonStyle(.link)
+                }
+            }
         }
     }
 

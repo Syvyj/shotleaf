@@ -20,8 +20,10 @@ macOS 15 or later on Apple silicon (M1 or newer).
 1. Download `Shotleaf.zip` from [Releases](https://github.com/Syvyj/shotleaf/releases/latest), unzip it and move **Shotleaf** to **Applications**.
 2. Open it. Shotleaf isn't notarised by Apple, so the first time macOS says it can't check the app. Open **System Settings › Privacy & Security**, scroll down and click **Open Anyway**.
 3. The setup guide asks for two permissions:
-   - **Screen Recording**: screenshots and text from the screen. macOS asks you to reopen Shotleaf after this one.
-   - **Accessibility**: text completion, snippets and pasting from the clipboard history. Shotleaf restarts by itself once it's on.
+   - **Screen Recording**: screenshots and text from the screen.
+   - **Accessibility**: text completion, snippets and pasting from the clipboard history.
+
+   Shotleaf restarts by itself after each one is turned on. Until both are on, the setup guide opens at every launch.
 4. Text completion needs its model, Gemma 4 E2B (about 3.6 GB). Download it from the setup guide or **Settings › Completion**. Everything else works without it.
 
 ### After an update

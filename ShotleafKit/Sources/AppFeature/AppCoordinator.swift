@@ -47,15 +47,16 @@ public final class AppCoordinator {
             actionHotkeys[action] = hotkeys.shortcut(for: action.rawValue)
         }
 
-        // Auto-shown once; afterwards it lives in the menu ("Setup Guide…").
-        // Also back after the restart that follows granting Accessibility.
+        // The setup guide: on first launch, whenever a permission is missing,
+        // and back after the restart that follows granting one.
         let reopenGuide = UserDefaults.standard.bool(forKey: Self.reopenGuideKey)
         UserDefaults.standard.removeObject(forKey: Self.reopenGuideKey)
-        if !container.settings.onboardingCompleted || reopenGuide {
+        let missing = Self.restartPermissions.filter { permissions[$0] != .granted }
+        if !container.settings.onboardingCompleted || reopenGuide || !missing.isEmpty {
             container.settings.onboardingCompleted = true
             showOnboarding()
         }
-        restartWhenAccessibilityGranted()
+        restartWhenGranted(missing)
         hotkeyTask = Task { [weak self] in
             guard let self else { return }
             for await event in self.container.hotkeys.events {
@@ -406,17 +407,20 @@ public final class AppCoordinator {
     private static let log = Logger(subsystem: "dev.syvyj.shotleaf", category: "permissions")
     private static let reopenGuideKey = "reopenSetupGuide"
 
-    /// The keyboard taps (completion, snippets, pasting) only work in a process
-    /// that started with Accessibility on. So when it's off at launch, watch for
-    /// the user granting it and restart once it's there.
-    private func restartWhenAccessibilityGranted() {
-        guard permissions[.accessibility] != .granted else { return }
+    /// What only works in a process that started with the permission on: the
+    /// keyboard taps (completion, snippets, pasting) and screen capture.
+    static let restartPermissions: [PermissionKind] = [.accessibility, .screenRecording]
+
+    /// Watches the permissions missing at launch; once the user grants one,
+    /// restarts so it takes effect (macOS doesn't always offer to).
+    private func restartWhenGranted(_ missing: [PermissionKind]) {
+        guard !missing.isEmpty else { return }
         Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(2))
                 guard let self else { return }
-                guard self.container.permissions.status(.accessibility) == .granted else { continue }
-                Self.log.notice("Accessibility granted — restarting")
+                guard let granted = missing.first(where: { self.container.permissions.status($0) == .granted }) else { continue }
+                Self.log.notice("\(String(describing: granted), privacy: .public) granted — restarting")
                 if self.onboarding?.isVisible == true { UserDefaults.standard.set(true, forKey: Self.reopenGuideKey) }
                 Self.relaunch()
                 return

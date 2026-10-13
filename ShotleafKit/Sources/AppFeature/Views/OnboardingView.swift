@@ -84,9 +84,7 @@ struct OnboardingView: View {
                 .buttonStyle(LeafButtonStyle())
         }
         if !granted {
-            Text(kind == .accessibility
-                 ? "After enabling Shotleaf in the list, it restarts by itself."
-                 : "After enabling Shotleaf in the list, quit and reopen Shotleaf.")
+            Text("After enabling Shotleaf in the list, it restarts by itself.")
                 .font(.caption).foregroundStyle(.secondary)
         }
     }
