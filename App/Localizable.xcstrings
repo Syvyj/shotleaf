@@ -2700,6 +2700,36 @@
         }
       }
     },
+    "Support the Author ♥": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтримати автора ♥"
+          }
+        }
+      }
+    },
+    "Support the Author…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтримати автора…"
+          }
+        }
+      }
+    },
+    "Third-party licences": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ліцензії сторонніх бібліотек"
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {

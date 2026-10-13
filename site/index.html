@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Shotleaf — screenshots and clipboard for Mac</title>
+<meta name="description" content="Screenshots with annotations, text from images and clipboard history for Mac. Everything is stored on your Mac.">
+<link rel="icon" href="assets/favicon.png">
+<link rel="alternate" hreflang="uk" href="uk/">
+<link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/geist-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css?v=b2d059c8">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo" viewBox="0 0 24 24"><path d="M3 9V4.6C3 3.7 3.7 3 4.6 3H9M21 15v4.4c0 .9-.7 1.6-1.6 1.6H15" fill="none" stroke="#7cb342" stroke-width="2.4" stroke-linecap="round"/><path d="M12 6.5c.5 3.7 1.3 4.5 5 5-3.7.5-4.5 1.3-5 5-.5-3.7-1.3-4.5-5-5 3.7-.5 4.5-1.3 5-5z" fill="#2d4a19"/></symbol>
+  <symbol id="spark" viewBox="0 0 24 24"><path d="M3 9V4.6C3 3.7 3.7 3 4.6 3H9M21 15v4.4c0 .9-.7 1.6-1.6 1.6H15" fill="none" stroke="#c6e86b" stroke-width="2" stroke-linecap="round"/><path d="M12 5.5c.6 4.2 1.4 5 5.6 5.6-4.2.6-5 1.4-5.6 5.6-.6-4.2-1.4-5-5.6-5.6 4.2-.6 5-1.4 5.6-5.6z" fill="#f4fae6"/></symbol>
+  <symbol id="cur" viewBox="0 0 20 28"><path d="M2 2v20l5.5-5 3.5 8.5 3.5-1.5-3.5-8.5H18z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="wrap nav">
+  <div class="bar-in">
+    <a class="brand" href="./"><img src="assets/icon.png" alt="">Shotleaf</a>
+    <a class="l" href="#features">Features</a>
+    <a class="l" href="#support">Support</a>
+    <a class="l" href="#install">Install</a>
+    <a class="l lang" href="uk/" lang="uk">UA</a>
+    <a class="btn primary" href="https://shotleaf.syvyj.dev/download/Shotleaf.zip">Download</a>
+  </div>
+</div>
+
+<main>
+<section class="wrap hero">
+  <img class="icon" src="assets/icon.png" alt="Shotleaf icon" width="128" height="128">
+  <h1>Screenshots and clipboard history for Mac</h1>
+  <p class="sub">Take a screenshot, mark it up and send it. Copy text from any image. Find anything you copied earlier. Shotleaf runs in the menu bar and stores everything on your Mac.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://shotleaf.syvyj.dev/download/Shotleaf.zip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Download for Mac</a>
+    <a class="btn quiet" href="#support">Support the author</a>
+  </div>
+  <p class="req">For macOS 15 and later on Apple silicon.</p>
+
+  <div class="slides">
+    <div class="slide on" data-tab="shot"><div class="mock m-edit">
+      <div class="win">
+        <div class="win-head">
+          <svg class="logo"><use href="#logo"/></svg>
+          <div class="win-title">Screenshot<small>2240 × 1200</small></div>
+          <div class="tiles">
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M6 3l12 8-5.5 1.5L10 18z"/></svg></span>
+            <span class="tile t-arrow on"><svg viewBox="0 0 24 24"><path d="M5 19 19 5M19 5h-8M19 5v8"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v14"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M4 18c4-7 7 3 10-3s4-7 6-8"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M10.5 9.5 12.5 8v8"/></svg></span>
+            <span class="tile"><svg viewBox="0 0 24 24"><path d="M7 3v14h14M3 7h14v14"/></svg></span>
+          </div>
+        </div>
+        <div class="canvas">
+          <div class="shot"><div class="word">Shotleaf</div><div class="lines"><i></i><i></i><i></i></div></div>
+          <svg class="ink" viewBox="0 0 160 86">
+            <path class="a-line" d="M120 22 88 38" pathLength="1" stroke-dasharray="1" stroke="#e5484d" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+            <path class="a-head" d="M88 38l7.8-1.2M88 38l4.6-6.2" stroke="#e5484d" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+            <rect class="a-rect" x="21" y="26.5" width="63" height="24.5" rx="2" pathLength="1" stroke-dasharray="1" stroke="#f5a524" fill="none" stroke-width="1.1"/>
+          </svg>
+          <svg class="ink" viewBox="0 0 160 86"><g class="a-step"><circle cx="21" cy="26.5" r="4.2" fill="#f5a524" stroke="#fff" stroke-width=".8"/><text x="21" y="28.4" font-size="5.4" font-weight="800" fill="#fff" text-anchor="middle" font-family="-apple-system, sans-serif">1</text></g></svg>
+          <div class="callout"><span>look here — the new name</span></div>
+          <div class="wm">© Shotleaf</div>
+          <div class="toast"><b>✓</b>Copied</div>
+        </div>
+        <div class="bar">
+          <span class="b go copy">Copy <i>⌘C</i></span><span class="b">Save <i>⌘S</i></span><span class="b">Pin <i>P</i></span>
+          <span class="sp"></span><span class="b">Undo <i>⌘Z</i></span><span class="b">Close <i>esc</i></span>
+        </div>
+      </div>
+      <svg class="cursor" style="left:78%;top:76%"><use href="#cur"/></svg>
+    </div></div>
+    <div class="slide" data-tab="scroll"><div class="mock m-scroll">
+        <div class="stage">
+          <div class="view">
+            <div class="sticky"><i></i><i></i></div>
+            <div class="page">
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#9b6bd8"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#2fb3a6"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+            </div>
+          </div>
+          <div class="strip"><div class="grow">
+            <div class="sticky"><i></i><i></i></div>
+            <div class="page">
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#9b6bd8"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#2fb3a6"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+            </div>
+          </div></div>
+        </div>
+        <div class="rbar"><span class="dot"></span><span>Scroll down slowly · <span class="n"></span></span><span class="b ghost">Cancel <i>esc</i></span><span class="b go">Done <i>↩</i></span></div>
+      </div></div>
+    <div class="slide" data-tab="ocr"><div class="mock m-ocr">
+        <div class="stage">
+          <div class="paper">Meeting at 3 pm by the office<br>Agenda: Q3 report, budget<div class="scan"></div></div>
+          <div class="win">
+            <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title">Text from Screenshot<small>52 characters</small></div></div>
+            <div class="text"><div>Meeting at 3 pm by the office</div><div>Agenda: Q3 report, budget</div></div>
+            <div class="bar"><span class="b go">Copy all <i>⌘↩</i></span><span class="sp"></span><span class="b">Close <i>esc</i></span></div>
+          </div>
+        </div>
+      </div></div>
+    <div class="slide" data-tab="clip"><div class="mock m-clip" data-q="imax" data-chars="characters">
+        <div class="win">
+          <div class="win-head">
+            <svg class="logo"><use href="#logo"/></svg>
+            <div class="win-title" style="margin-right:1cqw">Clipboard</div>
+            <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg><span class="q"></span><span class="caret"></span><span class="ph">Search the clipboard</span></div>
+          </div>
+          <div class="panel">
+            <div class="list">
+              <div class="row sel" data-text="IMAX on Sunday — 2 seats, row G"><span class="k">1</span><span class="t">IMAX on Sunday — 2 seats, row G</span><span class="w">now</span></div>
+              <div class="row" data-text="https://cinema.example/imax/schedule"><span class="k">2</span><span class="t">https://cinema.example/imax/schedule</span><span class="w">2 min</span></div>
+              <div class="row" data-text="#7CB342"><span class="k">3</span><span class="t"><span style="display:inline-block;width:1.4cqw;height:1.4cqw;border-radius:.3cqw;background:#7cb342;vertical-align:middle;margin-right:.6cqw"></span>#7CB342</span><span class="w">9 min</span></div>
+              <div class="row" data-text="Notes from the call — Q3 plan"><span class="k">4</span><span class="t">Notes from the call — Q3 plan</span><span class="w">1 h</span></div>
+              <div class="row" data-text="invoice-0142.pdf"><span class="k">5</span><span class="t">invoice-0142.pdf</span><span class="w">3 h</span></div>
+            </div>
+            <div class="prev"><span class="p">IMAX on Sunday — 2 seats, row G</span><small class="pm"></small></div>
+          </div>
+          <div class="bar"><span class="b go">Paste <i>↩</i></span><span class="b">Plain text <i>⌥↩</i></span><span class="b">Actions <i>⌘K</i></span><span class="sp"></span><span class="b">Close <i>esc</i></span></div>
+        </div>
+        <div class="dest"><span class="who"></span><span class="d"></span><span class="caret" style="background:#222"></span></div>
+      </div></div>
+    <div class="slide" data-tab="type"><div class="mock m-type" data-text="Hi Anna, thanks for the update. Let’s meet " data-ghost="tomorrow at 3 by the entrance.">
+        <div class="win">
+          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Messages<small>Anna</small></div></div>
+          <div class="note"><span class="typed"></span><span class="caret"></span><span class="ghost"></span></div>
+          <div class="bar"><span class="b k-tab">Tab <i>next word</i></span><span class="b k-all">⌥Tab <i>all</i></span><span class="sp"></span><span class="b">esc <i>hide</i></span></div>
+        </div>
+      </div></div>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab on" data-tab="shot" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">2</span></span><b>Screenshot</b><span>Area, window or full screen</span><i class="prog"></i></button>
+    <button class="tab" data-tab="scroll" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">3</span></span><b>Scrolling screenshot</b><span>A long page as one image</span><i class="prog"></i></button>
+    <button class="tab" data-tab="ocr" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">1</span></span><b>Text from screen</b><span>Copies text that can’t be selected</span><i class="prog"></i></button>
+    <button class="tab" data-tab="clip" type="button"><span class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">V</span></span><b>Clipboard</b><span>Everything you copied, with search</span><i class="prog"></i></button>
+    <button class="tab" data-tab="type" type="button"><span class="caps"><span class="cap">Tab</span></span><b>Text completion</b><span>Suggests how to finish a sentence</span><i class="prog"></i></button>
+  </div>
+</section>
+
+<section class="wrap" id="features">
+  <div class="head">
+    <h2>Everything Shotleaf can do</h2>
+    <p>Six tools, each one a shortcut away.</p>
+  </div>
+  <div class="tool" id="screenshots">
+    <div class="about"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">2</span></div><h3>Screenshots</h3><p>Pick an area, a window or the whole screen. The screenshot opens in an editor where you mark it up and decide what to do with it.</p></div>
+    <div class="stagebox"><div class="mock m-pick">
+        <div class="desk">
+          <div class="doc"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="sun"></div>
+          <div class="dim"></div>
+          <div class="sel"></div>
+          <div class="loupe" style="left:47%;top:42%"></div>
+          <div class="hint"><span><kbd>drag</kbd>area</span><span><kbd>click</kbd>window</span><span><kbd>↩</kbd>full screen</span><span><kbd>R</kbd>repeat</span><span><kbd>C</kbd>copy color</span><span><kbd>esc</kbd>cancel</span></div>
+          <div class="flash"></div>
+        </div>
+        <svg class="cursor" style="left:47%;top:42%"><use href="#cur"/></svg>
+      </div></div>
+    <div class="feats"><div class="feat"><b>Arrows, boxes, ovals, text</b><span>Callouts with a pointer, a pen and a highlighter. Each tool has its own key.</span></div><div class="feat"><b>Numbered steps</b><span>Click to drop 1, 2, 3 for instructions.</span></div><div class="feat"><b>Blur and focus</b><span>Hide private details or dim everything except what matters.</span></div><div class="feat"><b>Ruler and crop</b><span>Measure in pixels, cut to the part you need.</span></div><div class="feat"><b>Background and watermark</b><span>Put the shot on a background, remove the background of a photo, sign it with text or a logo.</span></div><div class="feat"><b>Copy, save, drag</b><span><kbd>⌘C</kbd> to copy, PNG, JPEG, HEIC or PDF to save, or drag it straight into a chat.</span></div><div class="feat"><b>Pin on top</b><span>Keep a screenshot floating over your windows while you work.</span></div><div class="feat"><b>Picker details</b><span>Pixel magnifier, colour picker, repeat the last area, a timer.</span></div><div class="feat"><b>Edit again</b><span>Reopen the last screenshot or any image from the clipboard.</span></div><div class="feat"><b>Recent screenshots</b><span>The last ten stay in the menu, even after a restart.</span></div></div><button class="more-feats" type="button" data-n="6">Show 6 more</button>
+  </div>
+  <div class="tool" id="scrolling">
+    <div class="about"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">3</span></div><h3>Scrolling screenshots</h3><p>For anything longer than the screen: a web page, a chat, a table, a document.</p></div>
+    <div class="stagebox"><div class="mock m-scroll chat">
+        <div class="stage">
+          <div class="view">
+            <div class="sticky"><i></i><i></i></div>
+            <div class="page">
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#9b6bd8"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#2fb3a6"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+            </div>
+          </div>
+          <div class="strip"><div class="grow">
+            <div class="sticky"><i></i><i></i></div>
+            <div class="page">
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#9b6bd8"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#2fb3a6"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#f3b562"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#7cb342"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#5b8def"></b><span><i></i><i></i></span></div>
+              <div class="card-i"><b style="background:#e5484d"></b><span><i></i><i></i></span></div>
+            </div>
+          </div></div>
+        </div>
+        <div class="rbar"><span class="dot"></span><span>Scroll down slowly · <span class="n"></span></span><span class="b ghost">Cancel <i>esc</i></span><span class="b go">Done <i>↩</i></span></div>
+      </div></div>
+    <div class="feats"><div class="feat"><b>Scroll at your own pace</b><span>Shotleaf matches each step, even small or uneven ones.</span></div><div class="feat"><b>No repeated headers</b><span>Sticky headers and footers appear once in the result.</span></div><div class="feat"><b>Opens in the editor</b><span>Mark up the long screenshot like any other.</span></div></div>
+  </div>
+  <div class="tool" id="text">
+    <div class="about"><div class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">1</span></div><h3>Text from screen</h3><p>Select any area and get its text, even from an image, a video or a dialog you can’t copy from.</p></div>
+    <div class="stagebox"><div class="mock m-ocr dialog">
+        <div class="stage">
+          <div class="paper"><b>The document couldn’t be saved</b>“Report.pages” is locked. Error code −36.<span class="ok">OK</span><div class="scan"></div></div>
+          <div class="win">
+            <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title">Text from Screenshot<small>52 characters</small></div></div>
+            <div class="text"><div>The document couldn’t be saved</div><div>“Report.pages” is locked. Error code −36.</div></div>
+            <div class="bar"><span class="b go">Copy all <i>⌘↩</i></span><span class="sp"></span><span class="b">Close <i>esc</i></span></div>
+          </div>
+        </div>
+      </div></div>
+    <div class="feats"><div class="feat"><b>Recognised on your Mac</b><span>Nothing is sent anywhere, and it works offline.</span></div><div class="feat"><b>Many languages</b><span>Ukrainian, English and other languages macOS supports.</span></div><div class="feat"><b>Fix before copying</b><span>The text opens in a window where you can edit it; <kbd>⌘↩</kbd> copies it all.</span></div></div>
+  </div>
+  <div class="tool" id="clipboard">
+    <div class="about"><div class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">V</span></div><h3>Clipboard history</h3><p>Everything you copy is kept, so you can paste it again later. The panel opens next to your pointer.</p></div>
+    <div class="stagebox"><div class="mock m-clip m-act" data-static="1">
+        <div class="win">
+          <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title" style="margin-right:1cqw">Clipboard</div><div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg><span class="ph">Search the clipboard</span></div></div>
+          <div class="panel">
+            <div class="list">
+              <div class="row sel"><span class="k">1</span><span class="t">https://shop.example/item?id=7&amp;utm_source=fb&amp;utm_campaign=autumn</span><span class="w">now</span></div>
+              <div class="row"><span class="k">2</span><span class="t">Oksana Petrenko</span><span class="w">4 min</span></div>
+              <div class="row"><span class="k">3</span><span class="t">{"name":"Shotleaf","build":42}</span><span class="w">1 h</span></div>
+            </div>
+            <div class="prev acts"><small>Paste it as…</small>
+              <div class="act on"><span class="k">1</span>Link without trackers</div>
+              <div class="act"><span class="k">2</span>UPPERCASE</div>
+              <div class="act"><span class="k">3</span>Capitalised Words</div>
+              <div class="act"><span class="k">4</span>One line</div>
+              <div class="act"><span class="k">5</span>Save as a snippet</div>
+            </div>
+          </div>
+          <div class="bar"><span class="b">Paste <i>↩</i></span><span class="b go">Actions <i>⌘K</i></span><span class="sp"></span><span class="b">Close <i>esc</i></span></div>
+        </div>
+        <div class="dest"><span class="who"></span><span class="d">https://shop.example/item?id=7</span><span class="caret" style="background:#222"></span></div>
+      </div></div>
+    <div class="feats"><div class="feat"><b>Text, links, images, files</b><span>And colours, shown as a swatch.</span></div><div class="feat"><b>Search</b><span>By any word, including words inside images.</span></div><div class="feat"><b>One click to paste</b><span>Or <kbd>↩</kbd>; <kbd>⌥↩</kbd> pastes as plain text.</span></div><div class="feat"><b>Several at once</b><span>Pick several and paste them together, or one after another.</span></div><div class="feat"><b>Quick actions</b><span><kbd>⌘K</kbd>: remove trackers from links, change case, join lines, format JSON.</span></div><div class="feat"><b>Private by default</b><span>Passwords aren’t saved, and you can exclude any app.</span></div><div class="feat"><b>Pin what you need</b><span>Pinned items stay when the history is cleared.</span></div></div><button class="more-feats" type="button" data-n="3">Show 3 more</button>
+  </div>
+  <div class="tool" id="snippets">
+    <div class="about"><div class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">B</span></div><h3>Snippets</h3><p>Text you type often, saved once: replies, signatures, addresses, bank details. They live next to the clipboard history; <kbd>Tab</kbd> switches between them.</p></div>
+    <div class="stagebox"><div class="mock m-snip" data-abbr=";reply" data-answer="Anna"
+           data-tpl="Hello, {name}!\nThanks for reaching out — I’ll send the invoice by {date}.\n{cursor}\n\nBest,\nOksana">
+        <div class="mail">
+          <div class="mail-top"><i></i><i></i><i></i></div>
+          <div class="field">To: <b>anna@studio.example</b></div>
+          <div class="field">Subject: <b>Invoice</b></div>
+          <div class="body"></div>
+        </div>
+        <div class="ask hide">
+          <div class="win">
+            <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title">Snippet<small>;reply</small></div></div>
+            <div class="q">Name<span class="ans"></span></div>
+          </div>
+        </div>
+      </div></div>
+    <div class="feats"><div class="feat"><b>Abbreviations</b><span>Type “;reply” in any app and it turns into the full text.</span></div><div class="feat"><b>Folders</b><span>Coloured folders on the left, snippets on the right.</span></div><div class="feat"><b>Fill-ins</b><span>Today’s date, the time, what you copied, where the cursor ends up.</span></div><div class="feat"><b>Questions</b><span>A snippet can ask for a name or a number before it’s pasted.</span></div></div>
+  </div>
+  <div class="tool" id="completion">
+    <div class="about"><div class="caps"><span class="cap">Tab</span></div><h3>Text completion</h3><p>As you type in any app, a grey suggestion appears after the cursor. Take it with Tab or keep typing.</p></div>
+    <div class="stagebox"><div class="mock m-emoji">
+        <div class="win">
+          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Messages<small>Team</small></div></div>
+          <div class="note">We launched the site today <span class="q">:fi</span><span class="caret"></span>
+            <div class="pick"><div class="e on"><span>🔥</span>fire<i>1</i></div><div class="e"><span>🎆</span>fireworks<i>2</i></div><div class="e"><span>🎇</span>sparkler<i>3</i></div><div class="e"><span>🧯</span>fire extinguisher<i>4</i></div></div>
+          </div>
+          <div class="bar"><span class="b go">Tab <i>first</i></span><span class="b">1–9 <i>pick</i></span><span class="sp"></span><span class="b">esc <i>close</i></span></div>
+        </div>
+      </div></div>
+    <div class="feats"><div class="feat"><b>Word by word</b><span><kbd>Tab</kbd> takes the next word, <kbd>⌥Tab</kbd> the whole suggestion, <kbd>esc</kbd> hides it.</span></div><div class="feat"><b>Works offline</b><span>A language model runs on your Mac; nothing you type is sent anywhere.</span></div><div class="feat"><b>Knows the context</b><span>Can take into account the chat on screen and what you just copied.</span></div><div class="feat"><b>Sounds like you</b><span>Learns from your own texts, on this Mac only. Forget them in one click.</span></div><div class="feat"><b>Emoji by name</b><span>Type <kbd>:</kbd> and a word, like :fire for 🔥.</span></div><div class="feat"><b>Typo fixes</b><span>A misspelled word gets a fix you take with Tab.</span></div></div><button class="more-feats" type="button" data-n="2">Show 2 more</button>
+  </div>
+  <div class="tool more" id="photos">
+    <div class="about"><h3>Watermark photos</h3><p>Add your watermark to a whole folder of photos at once. Place it the same way on every photo or move it by hand on each one. Photos keep their full quality and details; the originals aren’t changed.</p></div>
+    <div class="stagebox"><div class="mock m-batch">
+        <div class="win">
+          <div class="win-head"><svg class="logo"><use href="#logo"/></svg><div class="win-title">Watermark Photos</div></div>
+          <div class="body2">
+            <div class="grid"><div class="ph" style="background:linear-gradient(160deg,#f3c27a,#c76b4a)"><em>© Studio</em></div><div class="ph" style="background:linear-gradient(160deg,#9fd0e8,#4c7fa8)"><em>© Studio</em></div><div class="ph" style="background:linear-gradient(160deg,#b7d98a,#4f8a4a)"><em>© Studio</em></div><div class="ph" style="background:linear-gradient(160deg,#e8b8c8,#9a5a7a)"><em>© Studio</em></div><div class="ph" style="background:linear-gradient(160deg,#d6d0c4,#7d7468)"><em>© Studio</em></div><div class="ph" style="background:linear-gradient(160deg,#8fd1c0,#2f7f72)"><em>© Studio</em></div></div>
+            <div class="side"><small>Watermark</small><div class="field">© Studio</div><small>Position</small><div class="pos"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i></div><small>Save</small><div class="seg"><span class="on">As original</span><span>PNG</span><span>JPEG</span></div></div>
+          </div>
+          <div class="bar"><span class="b go">Apply to 6 photos <i>⌘↩</i></span><span class="b">Add photos</span><span class="sp"></span><span class="b">Close <i>esc</i></span></div>
+        </div>
+      </div></div>
+  </div>
+</section>
+
+<section class="wrap" id="support">
+  <div class="support">
+    <svg class="spark"><use href="#logo"/></svg>
+    <h2>Support Shotleaf</h2>
+    <p>I develop Shotleaf on my own. If you find it useful, you can support its development with a donation.</p>
+    <div class="give">
+        <span><b>Ko-fi</b><small data-soon="soon">Card or PayPal, no fees</small></span>
+        <span><b>Buy Me a Coffee</b><small data-soon="soon">A coffee, any amount</small></span>
+        <span><b>GitHub Sponsors</b><small data-soon="soon">Monthly, for developers</small></span>
+        <span><b>Monobank jar</b><small data-soon="soon">Ukrainian cards, Apple Pay</small></span>
+      </div>
+  </div>
+</section>
+
+<section class="wrap" id="install">
+  <div class="head">
+    <h2>Installation</h2>
+    <p>On first launch, macOS asks you to confirm opening the app.</p>
+  </div>
+  <ol class="install">
+    <li>Open the download and drag <b>Shotleaf</b> into <b>Applications</b>.</li>
+    <li>If macOS won’t open it, go to <b>System Settings › Privacy &amp; Security</b>, scroll down and click <b>Open Anyway</b>.</li>
+    <li>Turn on the two permissions Shotleaf asks for: one for screenshots and one for pasting text.</li>
+  </ol>
+</section>
+</main>
+
+<footer class="wrap">
+  <span>© 2026 Oleksii Ziuzin</span>
+  <a href="https://syvyj.dev">syvyj.dev</a>
+  <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a>
+  <a href="uk/" lang="uk">Українська</a>
+</footer>
+
+<script src="mocks.js?v=b2d059c8" defer></script>
+</body>
+</html>
