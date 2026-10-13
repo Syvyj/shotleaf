@@ -9,8 +9,12 @@ import UniformTypeIdentifiers
 @MainActor
 final class ScreenshotWindows {
     private(set) var open: [ObjectIdentifier: FloatingPanel] = [:] // internal for tests
+    /// "To Snippets": keeps a PNG as a snippet; the folder's name, if it went into one.
+    var toSnippets: (Data) -> String? = { _ in nil }
 
-    func show(_ payload: ImagePayload, sound: Bool = true) {
+    /// `edited` gets the shot as marked up — on copy and when the window closes —
+    /// so its clipboard-history entry shows what was actually made.
+    func show(_ payload: ImagePayload, sound: Bool = true, edited: ((Data) -> Void)? = nil) {
         guard let image = NSImage(data: payload.data) else { return }
         if sound { Sound.shutter() }
         let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
@@ -38,9 +42,18 @@ final class ScreenshotWindows {
         }
 
         var panel: FloatingPanel!
-        let close: () -> Void = { [weak self] in self?.close(panel) }
+        let report: () -> Void = {
+            guard let edited else { return }
+            let png = result()
+            if png != payload.data { edited(png) }
+        }
+        let close: () -> Void = { [weak self] in report(); self?.close(panel) }
         let actions = ScreenshotActions(
-            copy: { Self.copy(result()) },
+            copy: {
+                let png = result()
+                Self.copy(png, own: edited != nil) // already in the history: no second entry
+                if png != payload.data { edited?(png) }
+            },
             save: { Self.save(result(), scale: scale) },
             pin: { [weak self] in
                 let png = result()
@@ -68,7 +81,8 @@ final class ScreenshotWindows {
                 let at = view.convert(panel.mouseLocationOutsideOfEventStream, from: nil)
                 NSSharingServicePicker(items: [Self.writeTempPNG(result())])
                     .show(relativeTo: NSRect(origin: at, size: .zero), of: view, preferredEdge: .maxY)
-            }
+            },
+            toSnippets: { [weak self] in self?.toSnippets(result()) }
         )
         let width = max(display.width + margin, ScreenshotView.minContentWidth) + 28
         panel = Self.makePanel(ScreenshotView(image: image, cgImage: cgImage, pixelSize: pixels, displaySize: display, actions: actions, doc: doc),
@@ -186,11 +200,13 @@ final class ScreenshotWindows {
 
     // MARK: Files & clipboard
 
-    static func copy(_ png: Data) {
+    /// `own`: the shot is in the clipboard history already, so it isn't recorded again.
+    static func copy(_ png: Data, own: Bool = false) {
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.setData(png, forType: .png)
         if let tiff = NSImage(data: png)?.tiffRepresentation { pasteboard.setData(tiff, forType: .tiff) }
+        if own { pasteboard.setData(Data(), forType: ClipboardHistory.ownType) }
         Sound.copied()
     }
 

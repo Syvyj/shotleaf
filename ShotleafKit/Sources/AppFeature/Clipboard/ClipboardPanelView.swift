@@ -336,6 +336,9 @@ struct ClipboardPanelView: View {
                 Text(snippet.text.replacingOccurrences(of: "\n", with: " ")).font(Leaf.font(11)).opacity(0.5).lineLimit(1)
             }
             Spacer(minLength: 4)
+            if let count = snippet.images?.count, count > 0 {
+                Label("\(count)", systemImage: "photo").font(Leaf.font(11, .medium)).opacity(0.55)
+            }
             if !snippet.abbreviation.isEmpty { Keycap(key: snippet.abbreviation) }
         }
         .padding(.horizontal, 8).frame(height: 42)
@@ -369,6 +372,7 @@ struct ClipboardPanelView: View {
                     Text(SnippetText.expand(snippet.text, clipboard: "📋").text)
                         .font(Leaf.font(13)).textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                    SnippetImages(urls: model.snippets.imageURLs(snippet))
                 }
                 Spacer(minLength: 0)
                 Text([model.snippets.folder(snippet.folder)?.name, snippet.abbreviation.isEmpty ? nil : snippet.abbreviation]
@@ -472,7 +476,7 @@ struct ClipboardPanelView: View {
         case .image:
             let size = item.imageSize.map { "\(Int($0.width))×\(Int($0.height))" } ?? ""
             let words = item.imageText?.split(whereSeparator: \.isNewline).first.map(String.init) ?? ""
-            return [String(localized: "Image"), size, words.isEmpty ? "" : "«\(words.prefix(40))»"].filter { !$0.isEmpty }.joined(separator: " · ")
+            return [item.screenshot == true ? String(localized: "Screenshot") : String(localized: "Image"), size, words.isEmpty ? "" : "«\(words.prefix(40))»"].filter { !$0.isEmpty }.joined(separator: " · ")
         case .file: return item.fileURLs.map(\.lastPathComponent).joined(separator: ", ")
         default: return item.text.split(whereSeparator: \.isNewline).first.map { String($0).trimmingCharacters(in: .whitespaces) } ?? item.text
         }

@@ -1,7 +1,7 @@
 import Core
 import AppKit
 
-/// A saved text to paste again, with optional variables and an abbreviation.
+/// A saved text (and pictures) to paste again, with optional variables and an abbreviation.
 struct Snippet: Codable, Identifiable, Equatable {
     var id = UUID()
     var title: String
@@ -9,6 +9,9 @@ struct Snippet: Codable, Identifiable, Equatable {
     /// Typed anywhere, e.g. ";addr", it turns into the text.
     var abbreviation = ""
     var folder: UUID?
+    /// Pictures pasted along with the text: file names in the store's image folder.
+    /// Optional: snippets saved before pictures have no such field.
+    var images: [String]?
 }
 
 struct SnippetFolder: Codable, Identifiable, Equatable {
@@ -31,10 +34,13 @@ final class SnippetStore {
     var snippets: [Snippet] = [] { didSet { save() } }
     var folders: [SnippetFolder] = [] { didSet { save() } }
     let file: URL
+    /// Snippets' pictures, next to snippets.json.
+    let imageFolder: URL
     private var loading = false
 
     init(file: URL = SnippetStore.defaultFile) {
         self.file = file
+        imageFolder = file.deletingLastPathComponent().appendingPathComponent("Snippet Images", isDirectory: true)
         loading = true
         if let data = try? Data(contentsOf: file), let saved = try? JSONDecoder().decode(Saved.self, from: data) {
             snippets = saved.snippets
@@ -56,6 +62,64 @@ final class SnippetStore {
         guard !loading else { return }
         try? FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
         try? JSONEncoder().encode(Saved(snippets: snippets, folders: folders)).write(to: file, options: .atomic)
+        // Pictures no snippet uses any more go. ponytail: a full sweep per save, fine for hundreds of files.
+        let used = Set(snippets.flatMap { $0.images ?? [] })
+        for name in (try? FileManager.default.contentsOfDirectory(atPath: imageFolder.path)) ?? [] where !used.contains(name) {
+            try? FileManager.default.removeItem(at: imageURL(name))
+        }
+    }
+
+    // MARK: Sharing a folder
+
+    /// A folder's snippets as files in `dir`: each picture as "<title>.png"
+    /// ("<title> 2.png"…), and the texts together in "<folder>.txt". For the
+    /// share menu (AirDrop, Mail, Messages) or a copy in Finder.
+    func exportFiles(of folderID: UUID, into dir: URL) -> [URL] {
+        let fm = FileManager.default
+        try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
+        let clean = { (name: String) in name.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-") }
+        var urls: [URL] = [], used: Set<String> = []
+        let inFolder = snippets.filter { $0.folder == folderID }
+        for snippet in inFolder {
+            for source in imageURLs(snippet) {
+                let base = clean(snippet.title.isEmpty ? String(localized: "Image") : snippet.title)
+                var name = base + ".png", n = 2
+                while used.contains(name) { name = "\(base) \(n).png"; n += 1 }
+                used.insert(name)
+                let target = dir.appendingPathComponent(name)
+                try? fm.removeItem(at: target)
+                if (try? fm.copyItem(at: source, to: target)) != nil { urls.append(target) }
+            }
+        }
+        let texts = inFolder.filter { !$0.text.isEmpty }.map { "\($0.title)\n\($0.text)" }
+        if !texts.isEmpty {
+            let file = dir.appendingPathComponent(clean(folder(folderID)?.name ?? String(localized: "Snippets")) + ".txt")
+            if (try? texts.joined(separator: "\n\n———\n\n").write(to: file, atomically: true, encoding: .utf8)) != nil { urls.append(file) }
+        }
+        return urls
+    }
+
+    // MARK: Pictures
+
+    func imageURL(_ name: String) -> URL { imageFolder.appendingPathComponent(name) }
+
+    func imageURLs(_ snippet: Snippet) -> [URL] { (snippet.images ?? []).map(imageURL) }
+
+    /// Keeps a picture for a snippet; its file name, to put in `images`.
+    func addImage(_ png: Data) -> String? {
+        try? FileManager.default.createDirectory(at: imageFolder, withIntermediateDirectories: true)
+        let name = UUID().uuidString + ".png"
+        do { try png.write(to: imageURL(name)) } catch { return nil }
+        return name
+    }
+
+    /// A new snippet from what was copied or captured: text and pictures, into `folder`.
+    @discardableResult
+    func save(title: String, text: String, pngs: [Data], folder: UUID?) -> Snippet {
+        let names = pngs.compactMap(addImage)
+        let snippet = Snippet(title: title, text: text, folder: self.folder(folder) == nil ? nil : folder, images: names.isEmpty ? nil : names)
+        snippets.insert(snippet, at: 0)
+        return snippet
     }
 
     /// Every word of `query` in the title, text or abbreviation.

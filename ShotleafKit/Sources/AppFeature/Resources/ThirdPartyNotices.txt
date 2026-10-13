@@ -2166,3 +2166,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+================================================================================
+Gemma 4 E2B (mlx-community/gemma-4-e2b-4bit, from google/gemma-4-e2b) — model weights
+================================================================================
+Copyright Google LLC. Licensed under the Apache License, Version 2.0 (the full text is above).
+Downloaded by Shotleaf from Hugging Face on demand; not modified and not shipped inside the app.
+

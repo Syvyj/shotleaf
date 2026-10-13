@@ -40,18 +40,29 @@ final class SnippetExpander {
     }
 
     /// The snippet whose abbreviation the typing ends with (the longest wins).
+    /// One that starts with a letter ("mail") counts only as a whole word, so
+    /// typing "gmail" doesn't set it off; ";mail" style ones work anywhere.
     static func match(_ typed: String, in snippets: [Snippet]) -> Snippet? {
-        snippets.filter { !$0.abbreviation.isEmpty && typed.hasSuffix($0.abbreviation) }
-            .max { $0.abbreviation.count < $1.abbreviation.count }
+        snippets.filter { snippet in
+            let abbr = snippet.abbreviation
+            guard !abbr.isEmpty, typed.hasSuffix(abbr) else { return false }
+            guard abbr.first?.isLetter == true || abbr.first?.isNumber == true else { return true }
+            let before = typed.dropLast(abbr.count).last
+            return before.map { !$0.isLetter && !$0.isNumber } ?? true
+        }
+        .max { $0.abbreviation.count < $1.abbreviation.count }
     }
 
     private func expand(_ snippet: Snippet) {
         let saved = Paster.snapshot()
         let filled = SnippetText.expand(snippet.text, clipboard: NSPasteboard.general.string(forType: .string) ?? "")
-        Paster.pressDelete(snippet.abbreviation.count)
-        if !SnippetText.questions(in: snippet.text).isEmpty { ask(snippet); return }
-        Paster.put(filled.text)
+        let asks = !SnippetText.questions(in: snippet.text).isEmpty
         Task {
+            // We see the abbreviation's last key before the app has typed it: let it land, then erase.
+            try? await Task.sleep(for: .milliseconds(50))
+            await Paster.pressDelete(snippet.abbreviation.count)
+            if asks { ask(snippet); return }
+            Paster.put(filled.text, images: store.imageURLs(snippet))
             try? await Task.sleep(for: .milliseconds(40))
             Paster.pressCommandV()
             if filled.afterCursor > 0 {

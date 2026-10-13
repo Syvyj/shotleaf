@@ -30,6 +30,12 @@ public final class AppCoordinator {
         inlineCompletion.quickFixes = container.settings.completionQuickFixes
         inlineCompletion.history.enabled = container.settings.completionLearnsStyle
         if container.settings.completionEnabled { inlineCompletion.start() }
+        screenshots.toSnippets = { [weak self] png in
+            guard let self else { return nil }
+            let folder = UserDefaults.standard.string(forKey: "snippetFolder").flatMap(UUID.init) // the folder last opened in the panel
+            let saved = snippets.save(title: String(localized: "Screenshot"), text: "", pngs: [png], folder: folder)
+            return snippets.folder(saved.folder)?.name
+        }
         clipboard.start()
         expander.start()
         Self.log.notice("startup permissions: \(String(describing: self.permissions), privacy: .public) bundle: \(Bundle.main.bundlePath, privacy: .public)")
@@ -164,10 +170,14 @@ public final class AppCoordinator {
     /// (Settings → Screenshots). Kept for "Edit Last Screenshot" either way.
     private func deliver(_ shot: ImagePayload) {
         recentShots = ScreenshotWindows.remember(shot)
+        let entry = clipboard.addScreenshot(shot.data)
         let after = container.settings.afterCapture
-        if after == .editor { screenshots.show(shot); return }
+        if after == .editor {
+            screenshots.show(shot, edited: entry.map { id in { [weak self] png in self?.clipboard.updateImage(id, png: png) } })
+            return
+        }
         Sound.shutter()
-        if after == .copy || after == .copyAndSave { ScreenshotWindows.copy(shot.data) }
+        if after == .copy || after == .copyAndSave { ScreenshotWindows.copy(shot.data, own: entry != nil) }
         if after == .save || after == .copyAndSave { _ = ScreenshotWindows.save(shot.data, scale: NSScreen.main?.backingScaleFactor ?? 2) }
     }
 

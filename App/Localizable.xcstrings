@@ -2600,6 +2600,106 @@
         }
       }
     },
+    "Pictures": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Картинки"
+          }
+        }
+      }
+    },
+    "Add pictures": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Додати картинки"
+          }
+        }
+      }
+    },
+    "To Snippets": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У сніпети"
+          }
+        }
+      }
+    },
+    "Saved to “%@”": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Збережено в «%@»"
+          }
+        }
+      }
+    },
+    "Screenshots (%lld)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скріншоти (%lld)"
+          }
+        }
+      }
+    },
+    "Tip: start it with ; (like ;%@) so it never goes off while you type a normal word.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Порада: почніть із ; (як-от ;%@), щоб воно не спрацьовувало, коли пишете звичайне слово."
+          }
+        }
+      }
+    },
+    "Share…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поділитися…"
+          }
+        }
+      }
+    },
+    "Save to Finder…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти у Finder…"
+          }
+        }
+      }
+    },
+    "Share the folder: its pictures and texts as files": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поділитися папкою: її картинки й тексти як файли"
+          }
+        }
+      }
+    },
+    "Save Here": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зберегти тут"
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {

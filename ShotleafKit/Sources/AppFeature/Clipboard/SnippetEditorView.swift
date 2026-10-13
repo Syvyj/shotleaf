@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 /// The snippets editor, in the screenshot window's look: folders, the
 /// snippets in the chosen one, and the selected snippet with a live preview.
@@ -110,6 +111,12 @@ struct SnippetEditorView: View {
             Spacer(minLength: 4)
             Text("\(count)").font(Leaf.font(11)).opacity(0.45).monospacedDigit()
             if on, let id {
+                Menu {
+                    Button("Share…") { shareFolder(id) }
+                    Button("Save to Finder…") { saveFolder(id) }
+                } label: { Image(systemName: "square.and.arrow.up").font(.system(size: 11)) }
+                    .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().opacity(0.6)
+                    .help(String(localized: "Share the folder: its pictures and texts as files"))
                 Button { deleteFolder(id) } label: { Image(systemName: "trash").font(.system(size: 11)) }
                     .buttonStyle(.plain).opacity(0.6)
                     .help(String(localized: "Delete the folder (its snippets stay)"))
@@ -180,6 +187,10 @@ struct SnippetEditorView: View {
                     }
                     .frame(width: 150)
                 }
+                if store.snippets[i].abbreviation.first?.isLetter == true {
+                    Text("Tip: start it with ; (like ;\(store.snippets[i].abbreviation)) so it never goes off while you type a normal word.")
+                        .font(Leaf.font(11)).opacity(0.55)
+                }
                 if let clash = abbreviationClash(store.snippets[i]) {
                     Text("“\(clash)” already uses this abbreviation").font(Leaf.font(11)).foregroundStyle(.orange)
                 }
@@ -191,6 +202,23 @@ struct SnippetEditorView: View {
                         .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color(nsColor: .textBackgroundColor)))
                         .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(.primary.opacity(0.12)))
                         .frame(minHeight: 140)
+                }
+                field("Pictures") {
+                    HStack(alignment: .top, spacing: 8) {
+                        SnippetImages(urls: store.imageURLs(store.snippets[i]), remove: { url in
+                            store.snippets[i].images?.removeAll { $0 == url.lastPathComponent }
+                        })
+                        Button { addPictures(to: store.snippets[i].id) } label: {
+                            Image(systemName: "plus").frame(width: 56, height: 56)
+                                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(.primary.opacity(0.2), style: StrokeStyle(lineWidth: 1, dash: [4])))
+                        }
+                        .buttonStyle(.plain)
+                        .instantTip("Add pictures")
+                    }
+                }
+                .dropDestination(for: URL.self) { urls, _ in
+                    add(urls, to: store.snippets[i].id)
+                    return true
                 }
                 HStack(spacing: 6) {
                     Text("Insert:").font(Leaf.font(11, .medium)).opacity(0.6)
@@ -260,8 +288,82 @@ struct SnippetEditorView: View {
         folder = nil
     }
 
+    /// The folder's files through the system share menu (AirDrop, Mail, Messages…), by the pointer.
+    private func shareFolder(_ id: UUID) {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("Shotleaf Share/\(UUID().uuidString)/\(store.folder(id)?.name ?? "")")
+        let files = store.exportFiles(of: id, into: dir)
+        guard !files.isEmpty, let window = NSApp.keyWindow, let view = window.contentView else { NSSound.beep(); return }
+        let at = view.convert(window.mouseLocationOutsideOfEventStream, from: nil)
+        NSSharingServicePicker(items: files).show(relativeTo: NSRect(origin: at, size: .zero), of: view, preferredEdge: .maxY)
+    }
+
+    /// A copy of the folder (pictures + texts) where the user picks, shown in Finder.
+    private func saveFolder(_ id: UUID) {
+        let ask = NSOpenPanel()
+        ask.canChooseDirectories = true
+        ask.canChooseFiles = false
+        ask.canCreateDirectories = true
+        ask.prompt = String(localized: "Save Here")
+        ask.begin { response in
+            guard response == .OK, let base = ask.url else { return }
+            let files = store.exportFiles(of: id, into: base.appendingPathComponent(store.folder(id)?.name ?? String(localized: "Snippets")))
+            if files.isEmpty { NSSound.beep() } else { NSWorkspace.shared.activateFileViewerSelecting(files) }
+        }
+    }
+
+    private func addPictures(to id: UUID) {
+        let ask = NSOpenPanel()
+        ask.allowedContentTypes = [.image]
+        ask.allowsMultipleSelection = true
+        ask.begin { response in
+            guard response == .OK else { return }
+            add(ask.urls, to: id)
+        }
+    }
+
+    /// Image files become the snippet's pictures (kept as PNG in the store).
+    private func add(_ urls: [URL], to id: UUID) {
+        let names = urls.compactMap { url -> String? in
+            guard let data = try? Data(contentsOf: url), let rep = NSBitmapImageRep(data: data),
+                  let png = rep.representation(using: .png, properties: [:]) else { return nil }
+            return store.addImage(png)
+        }
+        guard !names.isEmpty, let i = store.snippets.firstIndex(where: { $0.id == id }) else { return }
+        store.snippets[i].images = (store.snippets[i].images ?? []) + names
+    }
+
     private func deleteSnippet(_ id: UUID) {
         store.snippets.removeAll { $0.id == id }
         selected = shown.first?.id
+    }
+}
+
+/// A snippet's pictures as small thumbnails (with × to remove, in the editor).
+struct SnippetImages: View {
+    let urls: [URL]
+    var remove: ((URL) -> Void)?
+
+    var body: some View {
+        if !urls.isEmpty {
+            HStack(spacing: 8) {
+                ForEach(urls, id: \.self) { url in
+                    Group {
+                        if let image = NSImage(contentsOf: url) { Image(nsImage: image).resizable().scaledToFill() } else { Color.secondary.opacity(0.2) }
+                    }
+                    .frame(width: 56, height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(.primary.opacity(0.12)))
+                    .overlay(alignment: .topTrailing) {
+                        if let remove {
+                            Button { remove(url) } label: {
+                                Image(systemName: "xmark.circle.fill").symbolRenderingMode(.palette).foregroundStyle(.white, .black.opacity(0.6))
+                            }
+                            .buttonStyle(.plain).padding(3)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 }

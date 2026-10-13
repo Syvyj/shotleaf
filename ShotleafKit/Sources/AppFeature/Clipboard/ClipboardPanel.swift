@@ -19,7 +19,9 @@ final class ClipboardPanelModel {
     var actionsShown = false { didSet { actionIndex = 0 } }
     var actionIndex = 0
     var actions: [ClipAction] {
-        guard let item = current, item.kind != .image, item.kind != .file else { return [] }
+        guard let item = current else { return [] }
+        if marked.count > 1 || item.kind == .image { return [.saveSnippet] } // pictures and several: into a snippet
+        guard item.kind != .file else { return [] }
         return ClipAction.available(for: item.text)
     }
     /// A snippet with {?questions}, waiting for the answers.
@@ -250,7 +252,7 @@ final class ClipboardPanelController {
 
     private func finish(_ snippet: Snippet, answers: [String: String], _ mode: Mode) {
         let filled = SnippetText.expand(snippet.text, answers: answers, clipboard: NSPasteboard.general.string(forType: .string) ?? "")
-        Paster.put(filled.text)
+        Paster.put(filled.text, images: snippets.imageURLs(snippet))
         close()
         pasteIntoTarget(mode, thenLeft: filled.afterCursor)
     }
@@ -259,9 +261,8 @@ final class ClipboardPanelController {
 
     /// The picked entries as one text, a line each (pictures left out).
     func pasteTogether(_ items: [ClipItem]) {
-        let text = items.filter { $0.kind != .image }.map(\.text).joined(separator: "\n")
-        guard !text.isEmpty else { return }
-        Paster.put(text)
+        guard !items.isEmpty else { return }
+        history.copyTogether(items)
         close()
         pasteIntoTarget(.paste)
     }
@@ -293,14 +294,21 @@ final class ClipboardPanelController {
     }
 
     fileprivate func run(_ action: ClipAction) {
-        guard let item = model?.current, let text = action.apply(item.text) else { return }
+        guard let model, let item = model.current else { return }
         if action == .saveSnippet {
-            let title = text.split(whereSeparator: \.isNewline).first.map { String($0.prefix(40)) } ?? String(localized: "New snippet")
-            snippets.snippets.insert(Snippet(title: title, text: text), at: 0)
-            model?.actionsShown = false
-            Toast.show(String(localized: "Saved as a snippet"))
+            // The picked entries (or the current one) become one snippet: texts and pictures, in the folder last opened.
+            let entries = model.marked.count > 1 ? model.markedItems : [item]
+            let text = entries.filter { $0.kind != .image }.map(\.text).joined(separator: "\n")
+            let pngs = entries.filter { $0.kind == .image }.compactMap { try? Data(contentsOf: history.imageURL($0)) }
+            let title = text.split(whereSeparator: \.isNewline).first.map { String($0.prefix(40)) }
+                ?? (pngs.count > 1 ? String(localized: "Screenshots (\(pngs.count))") : String(localized: "Screenshot"))
+            let saved = snippets.save(title: title, text: text, pngs: pngs, folder: model.snippetFolder)
+            model.actionsShown = false
+            model.marked = []
+            Toast.show(snippets.folder(saved.folder).map { String(localized: "Saved to “\($0.name)”") } ?? String(localized: "Saved as a snippet"))
             return
         }
+        guard let text = action.apply(item.text) else { return }
         Paster.put(text)
         close()
         pasteIntoTarget(.paste)
@@ -338,10 +346,36 @@ enum Paster {
     static let marker: Int64 = 0x4150_494C
 
     /// Text on the clipboard, marked as Shotleaf's so the history doesn't keep it.
-    static func put(_ text: String, on board: NSPasteboard = .general) {
+    /// With pictures or files, each is its own pasteboard item — a picture as PNG
+    /// plus a named file — so apps that take several get them all.
+    static func put(_ text: String, images: [URL] = [], files: [URL] = [], on board: NSPasteboard = .general) {
+        var objects: [NSPasteboardItem] = []
+        if !text.isEmpty {
+            let item = NSPasteboardItem()
+            item.setString(text, forType: .string)
+            objects.append(item)
+        }
+        if !images.isEmpty {
+            let folder = FileManager.default.temporaryDirectory.appendingPathComponent("Shotleaf Paste/\(UUID().uuidString)", isDirectory: true)
+            try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            for (n, url) in images.enumerated() {
+                guard let png = try? Data(contentsOf: url) else { continue }
+                let file = folder.appendingPathComponent(String(localized: "Image") + " \(n + 1).png")
+                try? png.write(to: file)
+                let item = NSPasteboardItem()
+                item.setData(png, forType: .png)
+                item.setString(file.absoluteString, forType: .fileURL)
+                objects.append(item)
+            }
+        }
+        for url in files {
+            let item = NSPasteboardItem()
+            item.setString(url.absoluteString, forType: .fileURL)
+            objects.append(item)
+        }
+        objects.forEach { $0.setData(Data(), forType: ClipboardHistory.ownType) }
         board.clearContents()
-        board.setString(text, forType: .string)
-        board.setData(Data(), forType: ClipboardHistory.ownType)
+        board.writeObjects(objects)
     }
 
     /// ⌘V as a real press: ⌘ down, V, ⌘ up — so ⌘ is never left held.
@@ -354,9 +388,13 @@ enum Paster {
         press(Array(repeating: [(123, true, CGEventFlags()), (123, false, CGEventFlags())], count: count).flatMap { $0 })
     }
 
-    /// ⌫ `count` times (to remove a typed abbreviation).
-    static func pressDelete(_ count: Int) {
-        press(Array(repeating: [(51, true, CGEventFlags()), (51, false, CGEventFlags())], count: count).flatMap { $0 })
+    /// ⌫ `count` times (to remove a typed abbreviation), one at a time: some apps
+    /// drop keys that arrive all at once, which left the abbreviation's first character behind.
+    static func pressDelete(_ count: Int) async {
+        for _ in 0..<count {
+            press([(51, true, CGEventFlags()), (51, false, CGEventFlags())])
+            try? await Task.sleep(for: .milliseconds(8))
+        }
     }
 
     private static func press(_ keys: [(Int, Bool, CGEventFlags)]) {
