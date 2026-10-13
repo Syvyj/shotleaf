@@ -1,0 +1,11 @@
+// Shotleaf's free screenshot links. Deploy: npx wrangler@4 deploy (from this folder).
+// The bucket keeps nothing past a day (lifecycle rule); the Worker stops serving at the link's own expiry.
+{
+  "name": "shotleaf-links",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-06",
+  "r2_buckets": [{ "binding": "SHOTS", "bucket_name": "shotleaf-links" }],
+  "ratelimits": [{ "name": "UPLOADS", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } }],
+  "routes": [{ "pattern": "s.syvyj.dev", "custom_domain": true }],
+  "workers_dev": false
+}

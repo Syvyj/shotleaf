@@ -2920,6 +2920,26 @@
         }
       }
     },
+    "Your own server": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Власний сервер"
+          }
+        }
+      }
+    },
+    "The screenshot window's link button uploads the shot and copies a link that stops working after the chosen time. Links go through Shotleaf's free service: the picture is kept on Cloudflare until the link expires, 12 hours at most. To use your own server instead (server/shots in the Shotleaf repo), enter its address and key; the key is kept in the Keychain.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кнопка посилання у вікні скріншота завантажує знімок і копіює посилання, яке перестає працювати через вибраний час. Посилання йдуть через безкоштовний сервіс Shotleaf: знімок зберігається на Cloudflare, доки посилання діє, щонайбільше 12 годин. Щоб натомість користуватися власним сервером (server/shots у репозиторії Shotleaf), впишіть його адресу й ключ; ключ зберігається у Зв'язці ключів."
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {
@@ -3459,16 +3479,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Працює: %@"
-          }
-        }
-      }
-    },
-    "Your own server (server/shots in the Shotleaf repo). The screenshot window's link button uploads the shot and copies a link that stops working after the chosen time. The key is kept in the Keychain.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ваш власний сервер (server/shots у репозиторії Shotleaf). Кнопка посилання у вікні скріншоту завантажує знімок і копіює посилання, яке перестає працювати через вибраний час. Ключ зберігається в Связці ключів."
           }
         }
       }

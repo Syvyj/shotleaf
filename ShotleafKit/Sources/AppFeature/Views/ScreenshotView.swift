@@ -838,7 +838,7 @@ struct ScreenshotView: View {
             Button { actions.share() } label: { Image(systemName: "square.and.arrow.up").frame(height: 17) }
                 .buttonStyle(LeafButtonStyle())
                 .instantTip("Share", above: true)
-            if ShotLinks.isSetUp { // only with a link server set up (Settings → Screenshot Links)
+            if ShotLinks.isSetUp { // the free service, or the user's own server (Settings → Screenshot Links)
                 HStack(spacing: 2) {
                     Button { makeLink(ShotLinks.defaultHours) } label: {
                         if linking { ProgressView().controlSize(.small).frame(height: 17) } else { Image(systemName: "link").frame(height: 17) }

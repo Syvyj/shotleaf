@@ -1,15 +1,24 @@
 import Foundation
 import Security
 
-/// Expiring links to screenshots, on the user's own server (server/shots).
-/// The address is a setting; the key lives in the Keychain.
+/// Expiring links to screenshots: Shotleaf's free service (server/links, on Cloudflare) unless the
+/// user sets their own server (server/shots), whose key lives in the Keychain.
 enum ShotLinks {
     static let serverKey = "shotsServer", hoursKey = "shotsHours"
-    static let choices = [1, 6, 24]
+    static let freeService = "https://s.syvyj.dev"
+    static let choices = [1, 6, 12]
 
-    static var server: String { UserDefaults.standard.string(forKey: serverKey) ?? "" }
-    static var defaultHours: Int { UserDefaults.standard.object(forKey: hoursKey) as? Int ?? 6 }
-    static var isSetUp: Bool { endpoint(server) != nil && !(token ?? "").isEmpty }
+    /// The user's own server, or the free service.
+    static var server: String {
+        let own = (UserDefaults.standard.string(forKey: serverKey) ?? "").trimmingCharacters(in: .whitespaces)
+        return own.isEmpty ? freeService : own
+    }
+    static var ownServer: Bool { server != freeService }
+    static var defaultHours: Int {
+        let saved = UserDefaults.standard.object(forKey: hoursKey) as? Int ?? 6
+        return choices.contains(saved) ? saved : 6
+    }
+    static var isSetUp: Bool { endpoint(server) != nil }
 
     enum Failure: LocalizedError {
         case notSetUp, rejected(String), noAnswer
@@ -33,21 +42,22 @@ enum ShotLinks {
         return parts.url
     }
 
-    static func request(_ image: Data, hours: Int, server: String, token: String) -> URLRequest? {
+    static func request(_ image: Data, hours: Int, server: String, token: String?) -> URLRequest? {
         guard let upload = endpoint(server), var parts = URLComponents(url: upload, resolvingAgainstBaseURL: false) else { return nil }
         parts.queryItems = [URLQueryItem(name: "ttl", value: String(hours * 3600))]
         guard let url = parts.url else { return nil }
         var request = URLRequest(url: url, timeoutInterval: 30)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        if let token, !token.isEmpty { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
         request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
         request.httpBody = image
         return request
     }
 
     /// Uploads a PNG/JPEG; the link it can be opened at until it expires.
-    static func upload(_ image: Data, hours: Int, server: String = server, token: String? = token) async throws -> URL {
-        guard let token, !token.isEmpty, let request = request(image, hours: hours, server: server, token: token) else { throw Failure.notSetUp }
+    /// The key goes only to the user's own server (the free service needs none, and reading it may ask for the password).
+    static func upload(_ image: Data, hours: Int, server: String = server, token: String? = ownServer ? token : nil) async throws -> URL {
+        guard let request = request(image, hours: hours, server: server, token: token) else { throw Failure.notSetUp }
         let (data, response) = try await URLSession.shared.data(for: request)
         let answer = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         guard let status = (response as? HTTPURLResponse)?.statusCode, status == 201 else {

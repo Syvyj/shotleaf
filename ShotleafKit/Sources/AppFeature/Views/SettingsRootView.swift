@@ -308,25 +308,27 @@ public struct SettingsRootView: View {
 
     private var linksSection: some View {
         Section {
-            TextField("Server", text: $linkServer, prompt: Text(verbatim: "https://shot.example.com"))
-            SecureField("Key", text: $linkKey)
-                .onAppear { if linkKey.isEmpty, !linkServer.isEmpty { linkKey = ShotLinks.token ?? "" } }
-                .onChange(of: linkKey) { _, key in
-                    let key = key.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if key != ShotLinks.token { ShotLinks.token = key }
-                }
+            TextField("Your own server", text: $linkServer, prompt: Text(verbatim: ShotLinks.freeService))
+            if ShotLinks.endpoint(linkServer) != nil && linkServer != ShotLinks.freeService {
+                SecureField("Key", text: $linkKey)
+                    .onAppear { if linkKey.isEmpty { linkKey = ShotLinks.token ?? "" } }
+                    .onChange(of: linkKey) { _, key in
+                        let key = key.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if key != ShotLinks.token { ShotLinks.token = key }
+                    }
+            }
             Picker("Links work for", selection: $linkHours) {
                 ForEach(ShotLinks.choices, id: \.self) { Text("\($0) h").tag($0) }
             }
             HStack {
                 Button("Check") { checkLinkServer() }
-                    .disabled(ShotLinks.endpoint(linkServer) == nil || linkKey.isEmpty)
+                    .disabled(!linkServer.isEmpty && ShotLinks.endpoint(linkServer) == nil)
                 if let linkCheck { Text(linkCheck).font(.caption).foregroundStyle(.secondary) }
             }
         } header: {
             Text("Screenshot Links")
         } footer: {
-            Text("Your own server (server/shots in the Shotleaf repo). The screenshot window's link button uploads the shot and copies a link that stops working after the chosen time. The key is kept in the Keychain.")
+            Text("The screenshot window's link button uploads the shot and copies a link that stops working after the chosen time. Links go through Shotleaf's free service: the picture is kept on Cloudflare until the link expires, 12 hours at most. To use your own server instead (server/shots in the Shotleaf repo), enter its address and key; the key is kept in the Keychain.")
                 .font(.caption).foregroundStyle(.secondary)
         }
     }
@@ -339,7 +341,8 @@ public struct SettingsRootView: View {
             .representation(using: .png, properties: [:]) ?? Data()
         Task {
             do {
-                let url = try await ShotLinks.upload(pixel, hours: 1, server: linkServer, token: linkKey)
+                let own = !linkServer.isEmpty && linkServer != ShotLinks.freeService
+                let url = try await ShotLinks.upload(pixel, hours: 1, server: own ? linkServer : ShotLinks.freeService, token: own ? linkKey : nil)
                 linkCheck = String(localized: "Works: \(url.host() ?? "")")
             } catch {
                 linkCheck = error.localizedDescription

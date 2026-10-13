@@ -14,6 +14,11 @@ struct ShotLinksTests {
         let r = try #require(ShotLinks.request(Data([1]), hours: 6, server: "https://shot.example.com", token: "k"))
         #expect(r.url?.absoluteString == "https://shot.example.com/upload?ttl=21600")
         #expect(r.value(forHTTPHeaderField: "Authorization") == "Bearer k" && r.httpMethod == "POST")
+        // The free service: no key sent, links up to 12 hours.
+        let free = try #require(ShotLinks.request(Data([1]), hours: 12, server: ShotLinks.freeService, token: nil))
+        #expect(free.url?.absoluteString == "https://s.syvyj.dev/upload?ttl=43200")
+        #expect(free.value(forHTTPHeaderField: "Authorization") == nil)
+        #expect(ShotLinks.choices.max() == 12)
     }
 
     @Test("End to end with server/shots/shots.py running on this Mac")
