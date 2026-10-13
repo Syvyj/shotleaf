@@ -21,5 +21,12 @@ mkdir -p "$(dirname "$OUT")"
     cat "$f"
     echo
   done
+  # Not built in: downloaded from Hugging Face when text completion is turned on.
+  echo "================================================================================"
+  echo "Gemma 4 E2B (mlx-community/gemma-4-e2b-4bit, from google/gemma-4-e2b) — model weights"
+  echo "================================================================================"
+  echo "Copyright Google LLC. Licensed under the Apache License, Version 2.0 (the full text is above)."
+  echo "Downloaded by Shotleaf from Hugging Face on demand; not modified and not shipped inside the app."
+  echo
 } > "$OUT"
 echo "wrote $(wc -c < "$OUT") bytes to $OUT"
