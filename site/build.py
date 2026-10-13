@@ -10,7 +10,7 @@ import re
 SITE = "https://shotleaf.syvyj.dev/"
 # Donation links: one without a handle isn't shown.
 DONATE = [
-    ("Ko-fi", "https://ko-fi.com/", "syvyj", "[[Card or PayPal, no fees||Картка чи PayPal, без комісій]]"),
+    ("Ko-fi", "https://ko-fi.com/", "syvyj", "[[Card or PayPal||Картка чи PayPal]]"),
     ("Buy Me a Coffee", "https://buymeacoffee.com/", "syvyj", "[[A coffee, any amount||Кава, будь-яка сума]]"),
     ("GitHub Sponsors", "https://github.com/sponsors/", "", "[[Monthly, for developers||Щомісяця, для розробників]]"),
     ("[[Monobank jar||Банка Monobank]]", "https://send.monobank.ua/jar/", "5juJPj142b", "[[Card, Apple Pay, Google Pay||Картка, Apple Pay, Google Pay]]"),
