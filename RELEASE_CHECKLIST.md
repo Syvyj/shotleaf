@@ -73,7 +73,7 @@
 - [x] `color-scheme` тепер `light`.
 - [x] Сторінка «Приватність» (`/privacy/`, `/uk/privacy/`), посилання з футера й з налаштувань додатка.
 - [x] Прев'ю для месенджерів (`assets/og-en.png`, `og-uk.png`), `robots.txt`, `404.html`.
-- [ ] Хостинг `shotleaf.syvyj.dev` (Cloudflare Pages) і публікація — після дозволу.
+- [x] Сайт опубліковано на `shotleaf.syvyj.dev` (Cloudflare Workers, статичні файли; `site/wrangler.jsonc`, деплой: `python3 build.py && npx wrangler@4 deploy`). Кнопка «Завантажити» запрацює з першим релізом на GitHub.
 
 Уже добре: 86 КБ разом зі шрифтами, жодних сторонніх запитів, усе, що обіцяє сайт, є в додатку (звірено з кодом).
 

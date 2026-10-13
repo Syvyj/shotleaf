@@ -1,0 +1,11 @@
+// The site on Cloudflare (static assets only). Deploy: python3 build.py && npx wrangler@4 deploy
+{
+  "name": "shotleaf",
+  "compatibility_date": "2026-10-06",
+  "assets": {
+    "directory": ".",
+    "not_found_handling": "404-page"
+  },
+  "routes": [{ "pattern": "shotleaf.syvyj.dev", "custom_domain": true }],
+  "workers_dev": false
+}
