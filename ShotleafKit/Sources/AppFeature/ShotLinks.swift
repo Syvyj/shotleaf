@@ -87,9 +87,9 @@ enum ShotLinks {
             let current = read(service)
             if let found = current.key {
                 cache = .some(found)
-                // A key put there by another tool (e.g. `security`) makes macOS ask every time; saved again by
-                // Shotleaf itself, it's Shotleaf's own and no longer asks.
-                if !UserDefaults.standard.bool(forKey: ownedKey) { token = found }
+                // macOS ties the item to the build that saved it (no Team ID to tie it to instead), so a new
+                // build or another tool's key makes it ask every time; saved again by this build, it stops asking.
+                if UserDefaults.standard.string(forKey: ownedKey) != buildHash { token = found }
                 return found
             }
             // Denied or locked: no answer yet, ask again next time instead of caching "no key".
@@ -108,7 +108,7 @@ enum ShotLinks {
             let query = query(service)
             SecItemDelete(query as CFDictionary)
             cache = .some(newValue)
-            UserDefaults.standard.set(true, forKey: ownedKey)
+            UserDefaults.standard.set(buildHash, forKey: ownedKey)
             guard let newValue, !newValue.isEmpty else { return }
             var add = query
             add[kSecAttrAccount as String] = "shotleaf"
@@ -118,5 +118,15 @@ enum ShotLinks {
         }
     }
 
-    private static let ownedKey = "shotsKeyOwned"
+    private static let ownedKey = "shotsKeyOwnedBy"
+
+    /// This build's code hash (what the Keychain item is tied to).
+    private static let buildHash: String? = {
+        var code: SecCode?, staticCode: SecStaticCode?, info: CFDictionary?
+        guard SecCodeCopySelf([], &code) == errSecSuccess, let code,
+              SecCodeCopyStaticCode(code, [], &staticCode) == errSecSuccess, let staticCode,
+              SecCodeCopySigningInformation(staticCode, [], &info) == errSecSuccess,
+              let hash = (info as? [String: Any])?[kSecCodeInfoUnique as String] as? Data else { return nil }
+        return hash.map { String(format: "%02x", $0) }.joined()
+    }()
 }

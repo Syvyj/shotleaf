@@ -303,14 +303,18 @@ public struct SettingsRootView: View {
 
     @AppStorage(ShotLinks.serverKey) private var linkServer = ""
     @AppStorage(ShotLinks.hoursKey) private var linkHours = 6
-    @State private var linkKey = ShotLinks.token ?? ""
+    @State private var linkKey = "" // read when the section shows: each Keychain read may ask for the password
     @State private var linkCheck: String?
 
     private var linksSection: some View {
         Section {
             TextField("Server", text: $linkServer, prompt: Text(verbatim: "https://shot.example.com"))
             SecureField("Key", text: $linkKey)
-                .onChange(of: linkKey) { _, key in ShotLinks.token = key.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .onAppear { if linkKey.isEmpty, !linkServer.isEmpty { linkKey = ShotLinks.token ?? "" } }
+                .onChange(of: linkKey) { _, key in
+                    let key = key.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if key != ShotLinks.token { ShotLinks.token = key }
+                }
             Picker("Links work for", selection: $linkHours) {
                 ForEach(ShotLinks.choices, id: \.self) { Text("\($0) h").tag($0) }
             }
