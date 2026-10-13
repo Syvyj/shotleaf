@@ -11,9 +11,13 @@ public enum AppInfo {
     /// ponytail: opens the page; compare with the latest tag in the app if people miss updates.
     public static let releases = URL(string: "https://github.com/Syvyj/shotleaf/releases")!
     /// The site's donation links (kept there, so they change without an app update).
-    public static var supportPage: URL {
+    public static var supportPage: URL { site("#support") }
+    public static var privacyPage: URL { site("privacy/") }
+
+    /// A page of the site, in Ukrainian when that's the user's language.
+    private static func site(_ path: String) -> URL {
         let uk = Locale.preferredLanguages.first?.hasPrefix("uk") == true
-        return URL(string: uk ? "https://shotleaf.syvyj.dev/uk/#support" : "https://shotleaf.syvyj.dev/#support")!
+        return URL(string: "https://shotleaf.syvyj.dev/" + (uk ? "uk/" : "") + path)!
     }
 
     /// ~/Library/Application Support/Shotleaf

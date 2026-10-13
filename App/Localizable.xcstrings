@@ -2860,6 +2860,16 @@
         }
       }
     },
+    "Privacy": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Приватність"
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {

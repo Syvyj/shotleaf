@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>[[Privacy — Shotleaf||Приватність — Shotleaf]]</title>
+<meta name="description" content="[[What Shotleaf keeps on your Mac and what it never sends anywhere.||Що Shotleaf зберігає на вашому Mac і чого нікуди не надсилає.]]">
+<link rel="icon" href="{{root}}assets/favicon.png">
+<link rel="alternate" hreflang="{{other_lang}}" href="{{other}}">
+<link rel="preload" href="{{root}}fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{root}}style.css?v={{ver}}">
+</head>
+<body>
+<div class="wrap nav">
+  <div class="bar-in">
+    <a class="brand" href="{{home}}"><img src="{{root}}assets/icon.png" alt="">Shotleaf</a>
+    <a class="l lang" href="{{other}}" lang="{{other_lang}}">[[UA||EN]]</a>
+    <a class="btn primary" href="{{download}}">[[Download||Завантажити]]</a>
+  </div>
+</div>
+
+<main class="wrap doc">
+<h1>[[Privacy||Приватність]]</h1>
+<p class="lead">[[Shotleaf has no account, no analytics and no ads. What it keeps stays on your Mac.||У Shotleaf немає акаунта, аналітики й реклами. Те, що він зберігає, лишається на вашому Mac.]]</p>
+
+<h2>[[What stays on your Mac||Що лишається на вашому Mac]]</h2>
+<ul>
+  <li>[[<b>Clipboard history</b>: the last 200 items you copied; pictures are kept for 30 days. You can change both, pin items, exclude apps, pause it or turn it off in Settings.||<b>Історія буфера обміну</b>: останні 200 скопійованих записів; картинки зберігаються 30 днів. Обидва числа можна змінити, а записи закріпити; можна виключити програми, призупинити історію або вимкнути її в налаштуваннях.]]</li>
+  <li>[[Passwords that password managers mark as private are never saved. Text that looks like a card number or an access token is removed after a minute.||Паролі, які менеджери паролів позначають як приватні, не зберігаються ніколи. Текст, схожий на номер картки чи токен доступу, видаляється через хвилину.]]</li>
+  <li>[[<b>Snippets</b> and their pictures.||<b>Сніпети</b> та їхні картинки.]]</li>
+  <li>[[<b>Recent screenshots</b>: the last 10, so you can open them again. Clear them from the menu.||<b>Недавні скріншоти</b>: останні 10, щоб їх можна було відкрити знову. Очистити можна з меню.]]</li>
+  <li>[[<b>Your writing style</b>, if you turn it on: a few of your own finished texts, so completions sound like you. “Forget” in Settings deletes them.||<b>Ваш стиль письма</b>, якщо ввімкнете: кілька ваших завершених текстів, щоб дописування звучало як ви. «Забути» в налаштуваннях їх видаляє.]]</li>
+</ul>
+<p>[[All of it is in <code>~/Library/Application Support/Shotleaf</code>. Text recognition and text completion run on your Mac.||Усе це лежить у <code>~/Library/Application Support/Shotleaf</code>. Розпізнавання тексту й дописування працюють на вашому Mac.]]</p>
+
+<h2>[[When Shotleaf goes online||Коли Shotleaf виходить в інтернет]]</h2>
+<ul>
+  <li>[[Downloading the completion model from Hugging Face, once, when you ask for it.||Завантаження моделі для дописування з Hugging Face, один раз, коли ви цього попросите.]]</li>
+  <li>[[Temporary links to screenshots, only if you set up your own link server.||Тимчасові посилання на скріншоти, лише якщо ви налаштуєте власний сервер посилань.]]</li>
+</ul>
+<p>[[Nothing else: no usage statistics, no crash reports sent on their own.||Більше нічого: ні статистики використання, ні звітів про падіння, які надсилалися б самі.]]</p>
+
+<h2>[[Permissions||Дозволи]]</h2>
+<p>[[<b>Screen Recording</b> is for screenshots and text from the screen. <b>Accessibility</b> lets Shotleaf complete your text, expand snippets and paste from the history: it reads the field you type in, but doesn't read password fields.||<b>Запис екрана</b> потрібен для скріншотів і тексту з екрана. <b>Універсальний доступ</b> дає змогу дописувати текст, розгортати сніпети й вставляти з історії: Shotleaf читає поле, в якому ви пишете, але не читає полів для паролів.]]</p>
+
+<h2>[[This website||Цей сайт]]</h2>
+<p>[[No cookies, no analytics, no third-party scripts; fonts are served from this site. It is hosted on Cloudflare, which handles the requests.||Без cookie, аналітики й сторонніх скриптів; шрифти завантажуються з цього ж сайту. Сайт розміщено на Cloudflare, який обробляє запити.]]</p>
+
+<h2>[[Questions||Питання]]</h2>
+<p>[[Write to <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a>. The code is open, so you can check all of this yourself.||Пишіть на <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a>. Код відкритий, тож усе це можна перевірити самостійно.]]</p>
+</main>
+
+<footer class="wrap">
+  <span>© 2026 [[Oleksii Ziuzin||Олексій Зюзін]]</span>
+  <a href="https://syvyj.dev">syvyj.dev</a>
+  <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a>
+  <a href="{{home}}privacy/">[[Privacy||Приватність]]</a>
+  <a href="{{other}}" lang="{{other_lang}}">[[Українська||English]]</a>
+</footer>
+
+</body>
+</html>

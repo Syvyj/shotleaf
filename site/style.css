@@ -407,3 +407,17 @@ footer a:hover { color: var(--text); }
   .hero .sub { font-size: 18px; }
 }
 @media (prefers-reduced-motion: reduce) { .cap { transition: none; } }
+
+/* Text pages: privacy, 404 */
+.doc { max-width: 760px; padding-top: 150px; }
+.doc h1 { font: 650 clamp(36px, 5vw, 56px)/1.05 var(--font); letter-spacing: -.04em; margin: 0 0 18px; }
+.doc h2 { font: 650 24px/1.2 var(--font); letter-spacing: -.02em; margin: 44px 0 12px; }
+.doc p, .doc li { font-size: 17px; line-height: 1.6; color: var(--text); }
+.doc .lead { font-size: 20px; color: var(--muted); }
+.doc ul { padding-left: 22px; }
+.doc li { margin: 8px 0; }
+.doc a { color: var(--deep); text-decoration: underline; text-underline-offset: 3px; }
+.doc code { font-size: .9em; background: rgba(0, 0, 0, .05); padding: 2px 6px; border-radius: 6px; }
+.missing { text-align: center; padding-top: 22vh; }
+.missing img { border-radius: 22px; }
+.missing h1 { font-size: clamp(28px, 4vw, 40px); }

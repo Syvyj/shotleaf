@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Приватність — Shotleaf</title>
+<meta name="description" content="Що Shotleaf зберігає на вашому Mac і чого нікуди не надсилає.">
+<link rel="icon" href="../../assets/favicon.png">
+<link rel="alternate" hreflang="en" href="../../privacy/">
+<link rel="preload" href="../../fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../style.css?v=8d25d011">
+</head>
+<body>
+<div class="wrap nav">
+  <div class="bar-in">
+    <a class="brand" href="../../uk/"><img src="../../assets/icon.png" alt="">Shotleaf</a>
+    <a class="l lang" href="../../privacy/" lang="en">EN</a>
+    <a class="btn primary" href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.zip">Завантажити</a>
+  </div>
+</div>
+
+<main class="wrap doc">
+<h1>Приватність</h1>
+<p class="lead">У Shotleaf немає акаунта, аналітики й реклами. Те, що він зберігає, лишається на вашому Mac.</p>
+
+<h2>Що лишається на вашому Mac</h2>
+<ul>
+  <li><b>Історія буфера обміну</b>: останні 200 скопійованих записів; картинки зберігаються 30 днів. Обидва числа можна змінити, а записи закріпити; можна виключити програми, призупинити історію або вимкнути її в налаштуваннях.</li>
+  <li>Паролі, які менеджери паролів позначають як приватні, не зберігаються ніколи. Текст, схожий на номер картки чи токен доступу, видаляється через хвилину.</li>
+  <li><b>Сніпети</b> та їхні картинки.</li>
+  <li><b>Недавні скріншоти</b>: останні 10, щоб їх можна було відкрити знову. Очистити можна з меню.</li>
+  <li><b>Ваш стиль письма</b>, якщо ввімкнете: кілька ваших завершених текстів, щоб дописування звучало як ви. «Забути» в налаштуваннях їх видаляє.</li>
+</ul>
+<p>Усе це лежить у <code>~/Library/Application Support/Shotleaf</code>. Розпізнавання тексту й дописування працюють на вашому Mac.</p>
+
+<h2>Коли Shotleaf виходить в інтернет</h2>
+<ul>
+  <li>Завантаження моделі для дописування з Hugging Face, один раз, коли ви цього попросите.</li>
+  <li>Тимчасові посилання на скріншоти, лише якщо ви налаштуєте власний сервер посилань.</li>
+</ul>
+<p>Більше нічого: ні статистики використання, ні звітів про падіння, які надсилалися б самі.</p>
+
+<h2>Дозволи</h2>
+<p><b>Запис екрана</b> потрібен для скріншотів і тексту з екрана. <b>Універсальний доступ</b> дає змогу дописувати текст, розгортати сніпети й вставляти з історії: Shotleaf читає поле, в якому ви пишете, але не читає полів для паролів.</p>
+
+<h2>Цей сайт</h2>
+<p>Без cookie, аналітики й сторонніх скриптів; шрифти завантажуються з цього ж сайту. Сайт розміщено на Cloudflare, який обробляє запити.</p>
+
+<h2>Питання</h2>
+<p>Пишіть на <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a>. Код відкритий, тож усе це можна перевірити самостійно.</p>
+</main>
+
+<footer class="wrap">
+  <span>© 2026 Олексій Зюзін</span>
+  <a href="https://syvyj.dev">syvyj.dev</a>
+  <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a>
+  <a href="../../uk/privacy/">Приватність</a>
+  <a href="../../privacy/" lang="en">English</a>
+</footer>
+
+</body>
+</html>

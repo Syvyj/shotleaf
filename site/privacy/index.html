@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Privacy — Shotleaf</title>
+<meta name="description" content="What Shotleaf keeps on your Mac and what it never sends anywhere.">
+<link rel="icon" href="../assets/favicon.png">
+<link rel="alternate" hreflang="uk" href="../uk/privacy/">
+<link rel="preload" href="../fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../style.css?v=8d25d011">
+</head>
+<body>
+<div class="wrap nav">
+  <div class="bar-in">
+    <a class="brand" href="../"><img src="../assets/icon.png" alt="">Shotleaf</a>
+    <a class="l lang" href="../uk/privacy/" lang="uk">UA</a>
+    <a class="btn primary" href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.zip">Download</a>
+  </div>
+</div>
+
+<main class="wrap doc">
+<h1>Privacy</h1>
+<p class="lead">Shotleaf has no account, no analytics and no ads. What it keeps stays on your Mac.</p>
+
+<h2>What stays on your Mac</h2>
+<ul>
+  <li><b>Clipboard history</b>: the last 200 items you copied; pictures are kept for 30 days. You can change both, pin items, exclude apps, pause it or turn it off in Settings.</li>
+  <li>Passwords that password managers mark as private are never saved. Text that looks like a card number or an access token is removed after a minute.</li>
+  <li><b>Snippets</b> and their pictures.</li>
+  <li><b>Recent screenshots</b>: the last 10, so you can open them again. Clear them from the menu.</li>
+  <li><b>Your writing style</b>, if you turn it on: a few of your own finished texts, so completions sound like you. “Forget” in Settings deletes them.</li>
+</ul>
+<p>All of it is in <code>~/Library/Application Support/Shotleaf</code>. Text recognition and text completion run on your Mac.</p>
+
+<h2>When Shotleaf goes online</h2>
+<ul>
+  <li>Downloading the completion model from Hugging Face, once, when you ask for it.</li>
+  <li>Temporary links to screenshots, only if you set up your own link server.</li>
+</ul>
+<p>Nothing else: no usage statistics, no crash reports sent on their own.</p>
+
+<h2>Permissions</h2>
+<p><b>Screen Recording</b> is for screenshots and text from the screen. <b>Accessibility</b> lets Shotleaf complete your text, expand snippets and paste from the history: it reads the field you type in, but doesn't read password fields.</p>
+
+<h2>This website</h2>
+<p>No cookies, no analytics, no third-party scripts; fonts are served from this site. It is hosted on Cloudflare, which handles the requests.</p>
+
+<h2>Questions</h2>
+<p>Write to <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a>. The code is open, so you can check all of this yourself.</p>
+</main>
+
+<footer class="wrap">
+  <span>© 2026 Oleksii Ziuzin</span>
+  <a href="https://syvyj.dev">syvyj.dev</a>
+  <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a>
+  <a href="../privacy/">Privacy</a>
+  <a href="../uk/privacy/" lang="uk">Українська</a>
+</footer>
+
+</body>
+</html>

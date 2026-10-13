@@ -125,6 +125,7 @@ public struct SettingsRootView: View {
                     Link("syvyj.dev", destination: AppInfo.website)
                     Link(AppInfo.email, destination: URL(string: "mailto:\(AppInfo.email)")!)
                     Link("Support the Author ♥", destination: AppInfo.supportPage).fontWeight(.semibold)
+                    Link("Privacy", destination: AppInfo.privacyPage)
                     Button("Third-party licences") { showNotices = true }.buttonStyle(.link)
                 }
             }
