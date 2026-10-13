@@ -2830,6 +2830,36 @@
         }
       }
     },
+    "Language": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мова"
+          }
+        }
+      }
+    },
+    "Same as macOS": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Як у macOS"
+          }
+        }
+      }
+    },
+    "Tools": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Інструменти"
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {

@@ -5,6 +5,7 @@ import Core
 /// The menu bar menu: screenshots, text from a screenshot, settings, quit.
 public struct MenuBarRootView: View {
     @Bindable private var coordinator: AppCoordinator
+    @Environment(\.openSettings) private var openSettings
 
     public init(coordinator: AppCoordinator) {
         self.coordinator = coordinator
@@ -76,7 +77,11 @@ public struct MenuBarRootView: View {
         Toggle("Complete my text as I type", isOn: Binding(
             get: { coordinator.completionEnabled }, set: { coordinator.setCompletion($0) }
         ))
-        SettingsLink { Text("Settings…") }
+        Button("Settings…") {
+            openSettings()
+            coordinator.raiseSettingsWindow()
+        }
+        .keyboardShortcut(",")
         Button("Setup Guide…") { coordinator.showOnboarding() }
         Button("Check for Updates…") { NSWorkspace.shared.open(AppInfo.releases) }
         Button("Support the Author…") { NSWorkspace.shared.open(AppInfo.supportPage) }

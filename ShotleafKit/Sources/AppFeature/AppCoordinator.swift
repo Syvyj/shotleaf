@@ -57,6 +57,10 @@ public final class AppCoordinator {
             showOnboarding()
         }
         restartWhenGranted(missing)
+        if UserDefaults.standard.bool(forKey: Self.reopenSettingsKey) {
+            UserDefaults.standard.removeObject(forKey: Self.reopenSettingsKey)
+            openSettingsWindow()
+        }
         hotkeyTask = Task { [weak self] in
             guard let self else { return }
             for await event in self.container.hotkeys.events {
@@ -360,9 +364,37 @@ public final class AppCoordinator {
 
     /// The SwiftUI Settings scene, opened from AppKit (Dock click).
     public func openSettingsWindow() {
-        NSApp.activate()
         NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        raiseSettingsWindow()
     }
+
+    /// A menu bar app isn't active, so its Settings window opens behind the
+    /// others; bring it up once SwiftUI has made it.
+    public func raiseSettingsWindow() {
+        Task {
+            try? await Task.sleep(for: .milliseconds(100))
+            NSApp.activate()
+            NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true }?.makeKeyAndOrderFront(nil)
+        }
+    }
+
+    // MARK: Language
+
+    /// The app's own language ("en", "uk"), or nil to follow macOS.
+    public var language: String? {
+        (UserDefaults.standard.persistentDomain(forName: AppInfo.bundleID)?["AppleLanguages"] as? [String])?.first
+    }
+
+    /// Takes effect on the next launch, so restart now and come back to Settings.
+    public func setLanguage(_ code: String?) {
+        guard code != language else { return }
+        if let code { UserDefaults.standard.set([code], forKey: "AppleLanguages") }
+        else { UserDefaults.standard.removeObject(forKey: "AppleLanguages") }
+        UserDefaults.standard.set(true, forKey: Self.reopenSettingsKey)
+        Self.relaunch()
+    }
+
+    private static let reopenSettingsKey = "reopenSettings"
 
     // MARK: Launch at login
 

@@ -38,7 +38,7 @@ public struct SettingsRootView: View {
             case .general: "General"
             case .shortcuts: "Shortcuts"
             case .screenshots: "Screenshots"
-            case .tools: "Editor tools"
+            case .tools: "Tools"
             case .clipboard: "Clipboard"
             case .completion: "Completion"
             case .permissions: "Permissions"
@@ -80,7 +80,7 @@ public struct SettingsRootView: View {
                 }
                 .tag(pane)
             }
-            .navigationSplitViewColumnWidth(200)
+            .navigationSplitViewColumnWidth(240)
             .toolbar(removing: .sidebarToggle)
         } detail: {
             Form { content }
@@ -225,6 +225,14 @@ public struct SettingsRootView: View {
                 get: { coordinator.showInDock },
                 set: { coordinator.setShowInDock($0) }
             ))
+            Picker("Language", selection: Binding(
+                get: { coordinator.language ?? "" },
+                set: { coordinator.setLanguage($0.isEmpty ? nil : $0) }
+            )) {
+                Text("Same as macOS").tag("")
+                Text(verbatim: "English").tag("en")
+                Text(verbatim: "Українська").tag("uk")
+            }
             Toggle("Sounds", isOn: $sounds)
             Toggle("Open Shotleaf at login", isOn: Binding(
                 get: { coordinator.launchAtLogin },
