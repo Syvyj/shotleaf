@@ -9,7 +9,7 @@
 - [x] Де лежить збірка: GitHub Releases (кнопка «Завантажити» веде на `releases/latest/download/Shotleaf.zip`)
 - [x] Підпис: поки без Developer ID; на сайті й у README інструкція «Усе одно відкрити» і як перевидати дозволи після оновлення
 - [x] Хоткеї: лишити `⌘⇧3` / `⇧⌘V` / `⇧⌘B`, але попередити про конфлікти (майстер першого запуску, налаштування, README) і підказати, де поставити свої
-- [?] Посилання на донати (Ko-fi, Buy Me a Coffee, GitHub Sponsors, Банка) → `site/build.py`, список `DONATE` — власник надішле посилання
+- [x] Донати: Buy Me a Coffee (`syvyj`); інші з'являться, коли власник дасть посилання (порожні не показуються) → `site/build.py`, `DONATE`
 - [?] Тимчасові посилання: лише для власника (як зараз: кнопка видна тільки з налаштованим сервером) чи сервіс для всіх
 - [x] Сертифікат «Shotleaf Local Signing» створено (`scripts/make-signing-cert.sh`), збірки підписуються ним
 - [x] Акаунт GitHub: `Syvyj`, репозиторій `Syvyj/shotleaf`
@@ -68,8 +68,8 @@
 
 ## 4. Сайт (`site/`, збірка `python3 site/build.py`)
 
-- [ ] Кнопка «Завантажити» → `https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.zip` (`DOWNLOAD` у `build.py`).
-- [ ] Донати: реальні посилання або прибрати заглушки «скоро».
+- [x] Кнопка «Завантажити» → `https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.zip` (`DOWNLOAD` у `build.py`).
+- [x] Донати: заглушок «скоро» немає, показуються лише ті, що мають посилання.
 - [ ] Прибрати `<meta name="color-scheme" content="dark">` (сайт світлий).
 - [ ] Сторінка «Приватність»: що зберігається на диску, що нічого не надсилається; посилання з додатка.
 - [ ] `og:image` + `og:title`/`og:description` (прев'ю в месенджерах), `robots.txt`, сторінка 404.

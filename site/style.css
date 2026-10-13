@@ -177,13 +177,11 @@ kbd { font: 500 .8em/1 var(--font); padding: .28em .5em; border-radius: 6px; bac
 .support:has(.give a:hover, .give a:focus-visible) .spark { transform: scale(1.18) rotate(12deg); filter: drop-shadow(0 0 26px rgba(140, 200, 70, .9)); }
 .support h2 { font: 650 clamp(34px, 4.6vw, 56px)/1.05 var(--font); letter-spacing: -.04em; margin: 0 0 14px; }
 .support > p { color: var(--muted); font-size: 18.5px; max-width: 32em; margin: 0 auto 34px; }
-.give { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; max-width: 980px; margin: 0 auto; }
-.give a, .give span { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 14px 18px; border-radius: 14px; text-align: left; background: #fff; border: 1px solid var(--edge); transition: background .2s, border-color .2s, transform .15s; }
+.give { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 980px; margin: 0 auto; }
+.give a { flex: 0 1 230px; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 14px 18px; border-radius: 14px; text-align: left; background: #fff; border: 1px solid var(--edge); transition: background .2s, border-color .2s, transform .15s; }
 .give a:hover { background: #f7fbec; border-color: rgba(124, 179, 66, .6); transform: translateY(-2px); }
 .give b { font-weight: 600; font-size: 15.5px; }
 .give small { color: var(--muted); font-size: 13.5px; }
-.give span { opacity: .6; }
-.give span small::after { content: " — " attr(data-soon); color: var(--deep); }
 
 .install { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; counter-reset: s; padding: 0; margin: 0; }
 .install li { list-style: none; counter-increment: s; padding: 22px 22px 24px; border-radius: 18px; background: var(--card); border: 1px solid var(--edge); color: var(--muted); font-size: 15.5px; }
@@ -393,7 +391,6 @@ footer a:hover { color: var(--text); }
   #scrolling .stagebox, #clipboard .stagebox, #completion .stagebox { order: 0; }
   .feats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
   .install { grid-template-columns: minmax(0, 1fr); }
-  .give { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .head { margin-top: 100px; }
   .support { margin-top: 110px; padding: 60px 20px 52px; }
 }
@@ -404,7 +401,8 @@ footer a:hover { color: var(--text); }
   .tool:not(.open) .feat:nth-child(n+5) { display: none; }
   .tool:not(.open) .more-feats { display: block; grid-column: 1 / -1; order: 4; justify-self: start; font: 600 15px/1 var(--font); color: var(--deep); background: #fff; border: 1px solid var(--edge); border-radius: 12px; padding: 12px 16px; cursor: pointer; }
   .tab { flex-basis: 78%; }
-  .feats, .give { grid-template-columns: minmax(0, 1fr); }
+  .feats { grid-template-columns: minmax(0, 1fr); }
+  .give a { flex-basis: 100%; }
   .tool h3 { font-size: 28px; }
   .hero .sub { font-size: 18px; }
 }

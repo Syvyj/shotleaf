@@ -10,14 +10,13 @@ import re
 # Donation links: fill in when the accounts exist; an empty one shows as "soon".
 DONATE = [
     ("Ko-fi", "https://ko-fi.com/", "", "[[Card or PayPal, no fees||Картка чи PayPal, без комісій]]"),
-    ("Buy Me a Coffee", "https://buymeacoffee.com/", "", "[[A coffee, any amount||Кава, будь-яка сума]]"),
+    ("Buy Me a Coffee", "https://buymeacoffee.com/", "syvyj", "[[A coffee, any amount||Кава, будь-яка сума]]"),
     ("GitHub Sponsors", "https://github.com/sponsors/", "", "[[Monthly, for developers||Щомісяця, для розробників]]"),
     ("[[Monobank jar||Банка Monobank]]", "https://send.monobank.ua/jar/", "", "[[Ukrainian cards, Apple Pay||Українські картки, Apple Pay]]"),
 ]
 
-# Where "Download" points. ponytail: a relative zip for now; the 96 MB app is over Cloudflare
-# Pages' 25 MB file limit, so it will live wherever we host releases (R2 or the home server).
-DOWNLOAD = "https://shotleaf.syvyj.dev/download/Shotleaf.zip"
+# Where "Download" points: the newest GitHub release (ADR-0069).
+DOWNLOAD = "https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.zip"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -25,10 +24,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def donate_block():
     cards = []
     for name, base, handle, note in DONATE:
-        if handle:
+        if handle:  # no handle yet: not shown
             cards.append(f'<a href="{html.escape(base + handle)}" target="_blank" rel="noopener"><b>{name}</b><small>{note}</small></a>')
-        else:
-            cards.append(f'<span><b>{name}</b><small data-soon="[[soon||скоро]]">{note}</small></span>')
     return '<div class="give">\n        ' + "\n        ".join(cards) + "\n      </div>"
 
 
