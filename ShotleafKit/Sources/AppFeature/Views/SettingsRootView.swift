@@ -9,6 +9,7 @@ public struct SettingsRootView: View {
 
     @State private var hotkeyError: String?
     @State private var showNotices = false
+    @State private var confirmDeleteAll = false
     @AppStorage(Sound.key) private var sounds = true
     // Screenshots (the same keys SettingsStore reads).
     @AppStorage("afterCapture") private var afterCapture: SettingsStore.AfterCapture = .editor
@@ -153,7 +154,10 @@ public struct SettingsRootView: View {
             }
         case .downloading(let fraction):
             VStack(alignment: .leading, spacing: 4) {
-                ProgressView(value: fraction)
+                HStack {
+                    ProgressView(value: fraction)
+                    Button("Cancel") { coordinator.cancelModelDownload() }
+                }
                 Text(fraction < 1 ? String(localized: "Downloading… \(Int(fraction * 100))%") : String(localized: "Loading the model…"))
                     .font(.caption).foregroundStyle(.secondary)
             }
@@ -242,6 +246,12 @@ public struct SettingsRootView: View {
             if let error = coordinator.launchAtLoginError {
                 Text(error).font(.caption).foregroundStyle(.red)
             }
+            Button("Delete All Shotleaf Data…", role: .destructive) { confirmDeleteAll = true }
+                .confirmationDialog("Delete all Shotleaf data?", isPresented: $confirmDeleteAll) {
+                    Button("Delete and Quit", role: .destructive) { coordinator.deleteAllData() }
+                } message: {
+                    Text("Clipboard history, snippets, recent screenshots, your writing style, settings, the link key and the completion model. Saved screenshots stay where you saved them. This can’t be undone.")
+                }
         } header: {
             Text("General")
         }

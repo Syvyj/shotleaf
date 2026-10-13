@@ -62,7 +62,7 @@ struct ClipboardHistoryTests {
         #expect(items.allSatisfy { $0.types.contains(ClipboardHistory.ownType) })
     }
 
-    @Test("Same text moves up, pins come first, search matches every word and image text, survives a restart")
+    @Test("Same text moves up, pins come first, search matches every word and image text, survives a restart (card numbers don't)")
     func history() {
         let dir = Self.temp()
         defer { try? FileManager.default.removeItem(at: dir) }
@@ -80,6 +80,11 @@ struct ClipboardHistoryTests {
         #expect(h.search("imax субота").count == 1)
         #expect(h.search("", kind: .link).count == 1)
         #expect(ClipboardHistory(folder: dir).items.count == 3)
+        var card = ClipItem(kind: .text, text: "4111 1111 1111 1111")
+        card.sensitive = true
+        h.add(card)
+        #expect(h.items.count == 4)
+        #expect(ClipboardHistory(folder: dir).items.count == 3) // in memory only, never on disk
         h.clear()
         #expect(h.items.count == 1 && h.items[0].pinned)
     }

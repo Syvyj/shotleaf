@@ -129,6 +129,12 @@ public actor EmbeddedModel {
     }
 
     /// Frees memory and disk.
+    /// Stops a download in progress (what's on disk stays for the next try).
+    public func cancel() {
+        loading?.cancel()
+        loading = nil
+    }
+
     public func delete() throws {
         container = nil
         if let directory, FileManager.default.fileExists(atPath: directory.path) {

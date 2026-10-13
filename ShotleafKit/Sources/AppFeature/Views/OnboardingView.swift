@@ -46,7 +46,10 @@ struct OnboardingView: View {
                     Button("Try Again") { coordinator.downloadModel() }
                         .buttonStyle(LeafButtonStyle(prominent: true))
                 case .downloading(let fraction):
-                    ProgressView(value: fraction).frame(maxWidth: 260)
+                    HStack {
+                        ProgressView(value: fraction).frame(maxWidth: 260)
+                        Button("Cancel") { coordinator.cancelModelDownload() }.buttonStyle(LeafButtonStyle())
+                    }
                 case .ready:
                     EmptyView()
                 }

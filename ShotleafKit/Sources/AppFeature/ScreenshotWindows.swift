@@ -325,13 +325,18 @@ final class ScreenshotWindows {
         return ImagePayload(data: png, width: rep.pixelsWide, height: rep.pixelsHigh)
     }
 
-    /// ponytail: temp files stay until macOS cleans the temp dir — a drop target
-    /// may read the file lazily, so deleting on close could break the drop.
+    /// A drop target may read the file lazily, so it stays until the next launch
+    /// clears `tempFolders`.
     private static func writeTempPNG(_ png: Data) -> URL {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName(Date()))
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("Shotleaf Drag/\(UUID().uuidString)", isDirectory: true)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let url = folder.appendingPathComponent(fileName(Date()))
         try? png.write(to: url)
         return url
     }
+
+    /// Where dragged, pasted and shared files wait for the app that takes them.
+    static let tempFolders = ["Shotleaf Drag", "Shotleaf Paste", "Shotleaf Share"]
 
     // MARK: Geometry
 

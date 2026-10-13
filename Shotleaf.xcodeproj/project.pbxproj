@@ -201,6 +201,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Shotleaf;
 				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "Shotleaf saves screenshots to your Desktop unless you choose another folder in Settings.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Oleksii Ziuzin (Syvyj)";
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.syvyj.shotleaf;
@@ -223,6 +224,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Shotleaf;
 				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSDesktopFolderUsageDescription = "Shotleaf saves screenshots to your Desktop unless you choose another folder in Settings.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Oleksii Ziuzin (Syvyj)";
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.syvyj.shotleaf;

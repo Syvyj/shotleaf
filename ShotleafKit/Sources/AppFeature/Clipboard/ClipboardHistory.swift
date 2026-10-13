@@ -304,7 +304,7 @@ final class ClipboardHistory {
     func save() {
         do {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-            try JSONEncoder().encode(items).write(to: file, options: .atomic)
+            try JSONEncoder().encode(items.filter { !$0.sensitive || $0.pinned }).write(to: file, options: .atomic) // card numbers, tokens: memory only
         } catch {
             SaveError.show(error, saving: String(localized: "the clipboard history"))
         }

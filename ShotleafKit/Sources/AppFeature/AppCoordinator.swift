@@ -22,6 +22,9 @@ public final class AppCoordinator {
     }
 
     public func start() async {
+        for name in ScreenshotWindows.tempFolders { // last run's drags, pastes and shares
+            try? FileManager.default.removeItem(at: FileManager.default.temporaryDirectory.appendingPathComponent(name))
+        }
         applyDockPolicy()
         refreshPermissions()
         inlineCompletion.context.useScreen = container.settings.completionUsesScreen
@@ -209,6 +212,19 @@ public final class AppCoordinator {
         recentShots = []
     }
 
+    /// Everything Shotleaf keeps, then quit (a running app would write some of it back).
+    public func deleteAllData() {
+        clipboard.stop()
+        try? FileManager.default.removeItem(at: AppInfo.supportFolder) // history, snippets, recent shots, style
+        ShotLinks.token = nil
+        try? SMAppService.mainApp.unregister()
+        Task {
+            try? await EmbeddedModel.completion.delete()
+            UserDefaults.standard.removePersistentDomain(forName: AppInfo.bundleID)
+            NSApp.terminate(nil)
+        }
+    }
+
     public func showRecentFolder() {
         NSWorkspace.shared.activateFileViewerSelecting(recentShots.isEmpty ? [ScreenshotWindows.recentFolder] : [recentShots[0]])
     }
@@ -280,8 +296,19 @@ public final class AppCoordinator {
         EmbeddedModel.completion.isDownloaded ? .ready(bytes: EmbeddedModel.completion.sizeOnDisk) : .notDownloaded
 
     /// Downloads (and loads) the completion model, reporting progress to Settings.
+    /// What the download needs on disk (the model is about 3.6 GB), with room to spare.
+    static let modelSpace: Int64 = 4_500_000_000
+
     public func downloadModel() {
         if case .downloading = modelState { return }
+        let home = URL(fileURLWithPath: NSHomeDirectory())
+        if let free = try? home.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage,
+           free < Self.modelSpace - EmbeddedModel.completion.sizeOnDisk {
+            let need = ByteCountFormatter.string(fromByteCount: Self.modelSpace, countStyle: .file)
+            let have = ByteCountFormatter.string(fromByteCount: free, countStyle: .file)
+            modelState = .failed(String(localized: "Not enough free space: the model needs about \(need), \(have) is free."))
+            return
+        }
         modelState = .downloading(0)
         Task {
             do {
@@ -292,9 +319,15 @@ public final class AppCoordinator {
                 }
                 modelState = .ready(bytes: EmbeddedModel.completion.sizeOnDisk)
             } catch {
+                guard case .downloading = modelState else { return } // cancelled
                 modelState = .failed(error.localizedDescription)
             }
         }
+    }
+
+    public func cancelModelDownload() {
+        modelState = .notDownloaded
+        Task { await EmbeddedModel.completion.cancel() }
     }
 
     public func deleteModel() {

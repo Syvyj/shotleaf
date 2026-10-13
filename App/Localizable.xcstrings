@@ -2870,6 +2870,56 @@
         }
       }
     },
+    "Not enough free space: the model needs about %@, %@ is free.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Замало вільного місця: моделі потрібно близько %1$@, вільно %2$@."
+          }
+        }
+      }
+    },
+    "Delete All Shotleaf Data…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити всі дані Shotleaf…"
+          }
+        }
+      }
+    },
+    "Delete all Shotleaf data?": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити всі дані Shotleaf?"
+          }
+        }
+      }
+    },
+    "Delete and Quit": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити й вийти"
+          }
+        }
+      }
+    },
+    "Clipboard history, snippets, recent screenshots, your writing style, settings, the link key and the completion model. Saved screenshots stay where you saved them. This can’t be undone.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Історію буфера обміну, сніпети, недавні скріншоти, ваш стиль письма, налаштування, ключ посилань і модель дописування. Збережені скріншоти лишаться там, куди ви їх зберегли. Скасувати це неможливо."
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {
