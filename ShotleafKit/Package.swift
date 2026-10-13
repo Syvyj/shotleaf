@@ -2,7 +2,7 @@
 import PackageDescription
 
 // Shotleaf — screenshots, text from screenshots, clipboard and inline completion for macOS.
-// © 2026 Oleksii Ziuzin (Syvyj). All rights reserved. See LICENSE.
+// © 2026 Oleksii Ziuzin (Syvyj). Licensed under GPL-3.0-or-later, see LICENSE.
 // Single package, many targets: the compiler enforces module boundaries
 // (a target sees only what it declares in `dependencies`) without the
 // ceremony of N separate packages. The macOS app itself lives in Shotleaf.xcodeproj

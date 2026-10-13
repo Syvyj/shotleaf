@@ -82,7 +82,7 @@
 **Альтернативи.** +Intel (ширша аудиторія, але embedded довелося б робити на llama.cpp/GGUF — C++-міст, повільніше, без переваг MLX).
 **Наслідок.** Підтверджує MLX у ADR-0006.
 
-## ADR-0013 — Розповсюдження: Developer ID, поза App Store ✅
+## ADR-0013 — Розповсюдження: Developer ID, поза App Store (Developer ID відкладено, див. ADR-0069)
 **Рішення.** Developer ID + нотаризація + hardened runtime; App Sandbox вимкнено.
 **Чому.** Accessibility + глобальні хоткеї + screen recording несумісні з повним App Sandbox Mac App Store. Цей шлях дає повний доступ без обрізання ключових функцій.
 **Альтернативи.** Mac App Store (ширша дистрибуція, але конфлікт із ключовими функціями), обидва шляхи (дві конфігурації прав — зайве на старті).
@@ -415,3 +415,16 @@ pasteboard type, the link server's service). `AppInfo` (Core) holds the name and
 first launch it moves Application Support/APILA → Shotleaf, moves the Keychain key, and
 copies the old `app.apila.APILA` defaults once (not the Keychain flag, and the setup guide shows again:
 macOS treats the new bundle as a new app, so permissions must be granted again).
+
+## ADR-0069: Open source under GPL-3.0, builds on GitHub Releases, no Developer ID yet (2026-10-13)
+
+There are many apps like Shotleaf, so closed code protects little; open code earns trust for an app that
+reads the clipboard and the keyboard, and fits donations. The code is **GPL-3.0-or-later** (all
+dependencies are MIT or Apache-2.0, which GPL-3.0 accepts). Builds are a zip on **GitHub Releases**
+(`Syvyj/shotleaf`); the site's download button points at `releases/latest`.
+
+No Developer ID for now ($99 a year): the first open needs "Open Anyway" in Privacy & Security, explained on
+the site and in the README. Releases are signed with the self-signed "Shotleaf Local Signing" certificate
+rather than ad hoc, so the designated requirement (bundle ID + certificate) stays the same across updates
+and macOS should keep the permissions; to be checked on a second Mac before the first release. Revisit
+Developer ID and notarisation if the install step puts people off.

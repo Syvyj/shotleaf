@@ -11,7 +11,7 @@
 - [x] Хоткеї: лишити `⌘⇧3` / `⇧⌘V` / `⇧⌘B`, але попередити про конфлікти (майстер першого запуску, налаштування, README) і підказати, де поставити свої
 - [?] Посилання на донати (Ko-fi, Buy Me a Coffee, GitHub Sponsors, Банка) → `site/build.py`, список `DONATE` — власник надішле посилання
 - [?] Тимчасові посилання: лише для власника (як зараз: кнопка видна тільки з налаштованим сервером) чи сервіс для всіх
-- [?] Сертифікат «Shotleaf Local Signing» замість «APILA Local Signing» (потрібен власник біля Mac: «Always Allow»)
+- [x] Сертифікат «Shotleaf Local Signing» створено (`scripts/make-signing-cert.sh`), збірки підписуються ним
 - [x] Акаунт GitHub: `Syvyj`, репозиторій `Syvyj/shotleaf`
 - [?] Дозвіл опублікувати сайт і репозиторій
 
@@ -26,17 +26,17 @@
 - [ ] Дрібне: `alpha-1234` у `ClipboardHistoryTests.swift`; адреса сервера коротких посилань у старому мокапі сайту; IP мосту Docker у `server/shots` (за бажання на `172.17.0.1`).
 - [ ] Перевірка після чистки: `git log --all -p | grep -E 'UA21|192\.168|homik'` порожньо.
 - [ ] Пушити тільки `main`. Гілку `backup/before-author-rewrite` на GitHub не пушити ніколи (там старий автор `Admin` і той самий IBAN).
-- [ ] `.gitignore`: додати `.env`, `*.pem`, `*.p12`, `*.key`, `*.xcarchive`, `*.dmg`, `*.zip`, `*.safetensors`, `.claude/`.
+- [x] `.gitignore`: додати `.env`, `*.pem`, `*.p12`, `*.key`, `*.xcarchive`, `*.dmg`, `*.zip`, `*.safetensors`, `.claude/`.
 
 Що вже перевірено й чисто: жодних токенів, ключів, `.env`, сертифікатів, баз даних, моделей чи `build/` в історії не було; адрес домашнього сервера, ID акаунта Cloudflare, робочої пошти теж немає. Залежності — MIT і Apache-2.0, сумісні з GPL-3.0.
 
 ## 2. Ліцензія й документи (блокери)
 
-- [ ] `LICENSE` → повний текст GPL-3.0; заголовок у `ShotleafKit/Package.swift` («All rights reserved») оновити.
-- [ ] `README.md` для людей: що це; вимоги (macOS 15+, Apple silicon); як відкрити непідписаний zip; які дозволи й навіщо, що після Accessibility треба перезапуск; модель дописування 3,6 ГБ і де вона лежить (`~/.cache/huggingface`); де дані (`~/Library/Application Support/Shotleaf`); як видалити все; як надіслати лог падіння.
-- [ ] `CHANGELOG.md` з першою версією.
-- [ ] `ARCHITECTURE_DECISIONS.md`: ADR про Developer ID / нотаризацію привести у відповідність із рішенням про підпис.
-- [ ] Перевірити: якщо BoringSSL зі swift-crypto реально лінкується в додаток — додати його ліцензію в `ThirdPartyNotices.txt`.
+- [x] `LICENSE` → повний текст GPL-3.0; заголовок у `ShotleafKit/Package.swift` («All rights reserved») оновити.
+- [x] `README.md` для людей: що це; вимоги (macOS 15+, Apple silicon); як відкрити непідписаний zip; які дозволи й навіщо, що після Accessibility треба перезапуск; модель дописування 3,6 ГБ і де вона лежить (`~/.cache/huggingface`); де дані (`~/Library/Application Support/Shotleaf`); як видалити все; як надіслати лог падіння.
+- [x] `CHANGELOG.md` з першою версією.
+- [x] `ARCHITECTURE_DECISIONS.md`: ADR-0069 (GPL-3.0, GitHub Releases, без Developer ID); ADR-0013 позначено відкладеним.
+- [x] BoringSSL у бінарнику немає (на macOS swift-crypto іде через CryptoKit) — ліцензія не потрібна.
 
 ## 3. Додаток
 
@@ -79,6 +79,8 @@
 
 ## 5. Реліз
 
-- [ ] `scripts/make-release.sh`: збірка Release (arm64) → перепідписати без `get-task-allow` → `ditto -c -k --keepParent` → `Shotleaf.zip` + SHA-256.
+- [ ] `scripts/make-release.sh`: збірка Release (arm64) → підняти build → підписати «Shotleaf Local Signing» (не ad hoc: тоді дозволи переживають оновлення) без `get-task-allow` → `ditto -c -k --keepParent` → `Shotleaf.zip` + SHA-256.
+- [ ] Перевірити на другому Mac / другому користувачі: «Усе одно відкрити», дозволи, оновлення поверх старої версії зберігає дозволи.
+- [ ] Зробити резервну копію сертифіката (Keychain Access → експорт .p12 у надійне місце, не в репозиторій): без нього наступне оновлення скине дозволи всім.
 - [ ] Публічний репозиторій на GitHub (після чистки історії), перший реліз `v0.1.0` з `Shotleaf.zip` і нотатками з `CHANGELOG.md`.
 - [ ] CI (GitHub Actions: `swift test`) — бажано.

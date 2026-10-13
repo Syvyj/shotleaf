@@ -6,3 +6,12 @@ DerivedData/
 *.xcuserstate
 .claude/settings.local.json
 build/
+.claude/
+.env
+*.pem
+*.p12
+*.key
+*.xcarchive
+*.dmg
+*.zip
+*.safetensors
