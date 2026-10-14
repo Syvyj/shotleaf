@@ -48,7 +48,7 @@ A shortcut doesn't fire? Another app may be using it. If your keyboard goes thro
 
 ## Privacy
 
-Shotleaf has no account and sends nothing anywhere. Text recognition and completion run on your Mac. The only network requests are the model download from Hugging Face (when you ask for it) and, if you set one up, uploads to your own link server (`server/shots`).
+Shotleaf has no account and sends nothing anywhere. Text recognition and completion run on your Mac. The only network requests are the model download from Hugging Face (when you ask for it) and screenshot links: when you press the link button, the picture goes to Shotleaf's link service on Cloudflare (`s.syvyj.dev`, code in `server/links`) and is deleted when the link expires, 12 hours at most. You can use your own server instead (`server/shots`).
 
 Passwords copied from password managers aren't kept in the history.
 
