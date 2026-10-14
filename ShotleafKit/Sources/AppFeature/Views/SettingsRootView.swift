@@ -18,6 +18,7 @@ public struct SettingsRootView: View {
     @AppStorage("saveAt1x") private var saveAt1x = false
     @AppStorage("captureDelay") private var captureDelay = 0
     @AppStorage(SettingsStore.showsCursorKey) private var showsCursor = false
+    @AppStorage(ScreenshotView.closeAfterCopyKey) private var closeAfterCopy = true
     /// Bumped after a tool key / order change, to redraw the list.
     @State private var toolsChanged = 0
     @State private var toolKeyError: String?
@@ -294,6 +295,7 @@ public struct SettingsRootView: View {
             }
             .pickerStyle(.segmented)
             Toggle("Include the pointer", isOn: $showsCursor)
+            Toggle("Close the editor after copying", isOn: $closeAfterCopy)
         } header: {
             Text("Screenshots")
         }

@@ -35,6 +35,8 @@ struct ScreenshotView: View {
     let displaySize: CGSize
     let actions: ScreenshotActions
     @Bindable var doc: AnnotationDocument
+    @AppStorage(Self.closeAfterCopyKey) private var closeAfterCopy = true
+    static let closeAfterCopyKey = "closeAfterCopy"
 
     /// What the current pointer drag is doing.
     private enum Drag {
@@ -943,12 +945,22 @@ struct ScreenshotView: View {
     /// The image — or, in Live Text mode, the selected text (all of it when
     /// nothing is selected).
     private func copy() {
-        guard let liveText else { actions.copy(); flash("Copied"); return }
+        guard let liveText else { actions.copy(); flash("Copied"); closeAfterCopying(); return }
         let text = liveText.selectedText.isEmpty ? liveText.analysis?.transcript ?? "" : liveText.selectedText
         guard !text.isEmpty else { flash("No text found"); return }
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
         flash(liveText.selectedText.isEmpty ? "Copied all text" : "Copied")
+        closeAfterCopying()
+    }
+
+    /// The job is done once it's copied (Settings → Screenshots can keep the window open).
+    private func closeAfterCopying() {
+        guard closeAfterCopy else { return }
+        Task {
+            try? await Task.sleep(for: .milliseconds(450)) // long enough to see "Copied"
+            actions.close()
+        }
     }
 
     /// Uploads, then puts the link on the clipboard.

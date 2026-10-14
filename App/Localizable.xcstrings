@@ -2940,6 +2940,16 @@
         }
       }
     },
+    "Close the editor after copying": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закривати редактор після копіювання"
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {
