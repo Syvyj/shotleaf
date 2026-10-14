@@ -12,66 +12,81 @@ public struct MenuBarRootView: View {
     }
 
     public var body: some View {
-        Button(Self.label(String(localized: "Screenshot…"), coordinator.actionHotkeys[.capture])) {
-            coordinator.takeScreenshot()
-        }
-        Button(Self.label(String(localized: "Scrolling Screenshot…"), coordinator.actionHotkeys[.scrolling])) {
-            coordinator.takeScrollingScreenshot()
-        }
-        Menu("Screenshot with Delay") {
-            Button("In 3 Seconds") { coordinator.takeScreenshot(delay: 3) }
-            Button("In 5 Seconds") { coordinator.takeScreenshot(delay: 5) }
-            Button("In 10 Seconds") { coordinator.takeScreenshot(delay: 10) }
-        }
-        Button(Self.label(String(localized: "Text from Screenshot…"), coordinator.actionHotkeys[.screenshotText])) {
-            coordinator.textFromScreenshot()
-        }
-        Button(Self.label(String(localized: "Edit Last Screenshot"), coordinator.actionHotkeys[.editLast])) {
-            coordinator.editLastScreenshot()
-        }
-        Button(Self.label(String(localized: "Edit Image from Clipboard"), coordinator.actionHotkeys[.editClipboard])) {
-            coordinator.editClipboardImage()
-        }
-        Button("Watermark Photos…") { coordinator.showBatchWatermark() }
-        Menu("Recent Screenshots") {
-            ForEach(coordinator.recentShots, id: \.self) { url in
-                Button {
-                    coordinator.openRecent(url)
-                } label: {
-                    if let thumb = Self.thumbnail(url) { Image(nsImage: thumb) }
-                    Text(Self.recentTitle(url))
-                }
+        if coordinator.isOn(.screenshots) {
+            Button(Self.label(String(localized: "Screenshot…"), coordinator.actionHotkeys[.capture])) {
+                coordinator.takeScreenshot()
             }
-            if coordinator.recentShots.isEmpty { Text("No screenshots yet") }
-            Divider()
-            Button("Show in Finder") { coordinator.showRecentFolder() }
-            Button("Clear Recent Screenshots") { coordinator.clearRecentShots() }
-                .disabled(coordinator.recentShots.isEmpty)
+            Button(Self.label(String(localized: "Scrolling Screenshot…"), coordinator.actionHotkeys[.scrolling])) {
+                coordinator.takeScrollingScreenshot()
+            }
+            Menu("Screenshot with Delay") {
+                Button("In 3 Seconds") { coordinator.takeScreenshot(delay: 3) }
+                Button("In 5 Seconds") { coordinator.takeScreenshot(delay: 5) }
+                Button("In 10 Seconds") { coordinator.takeScreenshot(delay: 10) }
+            }
         }
+        if coordinator.isOn(.screenText) {
+            Button(Self.label(String(localized: "Text from Screenshot…"), coordinator.actionHotkeys[.screenshotText])) {
+                coordinator.textFromScreenshot()
+            }
+        }
+        if coordinator.isOn(.screenshots) {
+            Button(Self.label(String(localized: "Edit Last Screenshot"), coordinator.actionHotkeys[.editLast])) {
+                coordinator.editLastScreenshot()
+            }
+            Button(Self.label(String(localized: "Edit Image from Clipboard"), coordinator.actionHotkeys[.editClipboard])) {
+                coordinator.editClipboardImage()
+            }
+            Button("Watermark Photos…") { coordinator.showBatchWatermark() }
+            Menu("Recent Screenshots") {
+                ForEach(coordinator.recentShots, id: \.self) { url in
+                    Button {
+                        coordinator.openRecent(url)
+                    } label: {
+                        if let thumb = Self.thumbnail(url) { Image(nsImage: thumb) }
+                        Text(Self.recentTitle(url))
+                    }
+                }
+                if coordinator.recentShots.isEmpty { Text("No screenshots yet") }
+                Divider()
+                Button("Show in Finder") { coordinator.showRecentFolder() }
+                Button("Clear Recent Screenshots") { coordinator.clearRecentShots() }
+                    .disabled(coordinator.recentShots.isEmpty)
+            }
 
+        }
         Divider()
 
-        Menu("Clipboard History") {
-            Button(Self.label(String(localized: "Open Clipboard…"), coordinator.actionHotkeys[.clipboard])) { coordinator.showClipboard() }
-            Button(Self.label(String(localized: "Snippets…"), coordinator.actionHotkeys[.snippets])) { coordinator.showClipboard(snippets: true) }
-            Button("Edit Snippets…") { coordinator.showSnippetEditor() }
-            if !coordinator.clipboard.queue.isEmpty {
+        if coordinator.isOn(.clipboard) {
+            Menu("Clipboard History") {
+                Button(Self.label(String(localized: "Open Clipboard…"), coordinator.actionHotkeys[.clipboard])) { coordinator.showClipboard() }
+                if coordinator.isOn(.snippets) {
+                    Button(Self.label(String(localized: "Snippets…"), coordinator.actionHotkeys[.snippets])) { coordinator.showClipboard(snippets: true) }
+                    Button("Edit Snippets…") { coordinator.showSnippetEditor() }
+                }
+                if !coordinator.clipboard.queue.isEmpty {
+                    Divider()
+                    Text("Queue: \(coordinator.clipboard.queueTotal - coordinator.clipboard.queue.count) of \(coordinator.clipboard.queueTotal) pasted")
+                    Button("Cancel Queue") { coordinator.cancelPasteQueue() }
+                }
                 Divider()
-                Text("Queue: \(coordinator.clipboard.queueTotal - coordinator.clipboard.queue.count) of \(coordinator.clipboard.queueTotal) pasted")
-                Button("Cancel Queue") { coordinator.cancelPasteQueue() }
+                ForEach(Array(coordinator.clipboard.items.prefix(10).enumerated()), id: \.element.id) { i, item in
+                    Button("\(i + 1). \(String(ClipboardPanelView.line(item).prefix(50)))") { coordinator.pasteFromHistory(item.id) }
+                }
+                if coordinator.clipboard.items.isEmpty { Text("Nothing copied yet") }
+                Divider()
+                if coordinator.clipboard.isPaused {
+                    Button("Resume Recording") { coordinator.pauseClipboard(minutes: nil) }
+                } else {
+                    Button("Pause for 5 Minutes") { coordinator.pauseClipboard(minutes: 5) }
+                }
+                Button("Clear History") { coordinator.clipboard.clear() }
             }
-            Divider()
-            ForEach(Array(coordinator.clipboard.items.prefix(10).enumerated()), id: \.element.id) { i, item in
-                Button("\(i + 1). \(String(ClipboardPanelView.line(item).prefix(50)))") { coordinator.pasteFromHistory(item.id) }
+        } else if coordinator.isOn(.snippets) {
+            Menu("Snippets") {
+                Button(Self.label(String(localized: "Snippets…"), coordinator.actionHotkeys[.snippets])) { coordinator.showClipboard(snippets: true) }
+                Button("Edit Snippets…") { coordinator.showSnippetEditor() }
             }
-            if coordinator.clipboard.items.isEmpty { Text("Nothing copied yet") }
-            Divider()
-            if coordinator.clipboard.isPaused {
-                Button("Resume Recording") { coordinator.pauseClipboard(minutes: nil) }
-            } else {
-                Button("Pause for 5 Minutes") { coordinator.pauseClipboard(minutes: 5) }
-            }
-            Button("Clear History") { coordinator.clipboard.clear() }
         }
 
         Toggle("Complete my text as I type", isOn: Binding(

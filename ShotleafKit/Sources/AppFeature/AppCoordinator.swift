@@ -39,15 +39,12 @@ public final class AppCoordinator {
             let saved = snippets.save(title: String(localized: "Screenshot"), text: "", pngs: [png], folder: folder)
             return snippets.folder(saved.folder)?.name
         }
-        clipboard.start()
-        expander.start()
+        if isOn(.clipboard) { clipboard.start() }
+        if isOn(.snippets) { expander.start() }
         Self.log.notice("startup permissions: \(String(describing: self.permissions), privacy: .public) bundle: \(Bundle.main.bundlePath, privacy: .public)")
 
-        let hotkeys = container.hotkeys
         for action in HotkeyAction.allCases {
-            let saved = Self.savedHotkey(container.settings.hotkeyID(for: action.rawValue), default: action.defaultShortcut)
-            hotkeys.setShortcut(saved, for: action.rawValue)
-            actionHotkeys[action] = hotkeys.shortcut(for: action.rawValue)
+            registerHotkey(action, on: Tool.owning(action).map(isOn) ?? true)
         }
 
         // The setup guide: on first launch, whenever a permission is missing,
@@ -276,6 +273,31 @@ public final class AppCoordinator {
         actionHotkeys[action] = hotkeys.shortcut(for: action.rawValue)
         hotkeys.start()
         return ok
+    }
+
+    // MARK: Tools
+
+    public private(set) var toolsOff: Set<Tool> = Tool.savedOff
+
+    public func isOn(_ tool: Tool) -> Bool { tool == .completion ? completionEnabled : !toolsOff.contains(tool) }
+
+    public func setTool(_ tool: Tool, on: Bool) {
+        if tool == .completion { setCompletion(on); return }
+        if on { toolsOff.remove(tool) } else { toolsOff.insert(tool) }
+        UserDefaults.standard.set(toolsOff.map(\.rawValue), forKey: Tool.offKey)
+        for action in tool.actions { registerHotkey(action, on: on) }
+        switch tool {
+        case .clipboard: if on { clipboard.start() } else { clipboard.stop() }
+        case .snippets: if on { expander.start() } else { expander.stop() }
+        default: break
+        }
+    }
+
+    /// The saved shortcut while the action's tool is on; none while it's off (the choice is kept).
+    private func registerHotkey(_ action: HotkeyAction, on: Bool) {
+        let saved = on ? Self.savedHotkey(container.settings.hotkeyID(for: action.rawValue), default: action.defaultShortcut) : nil
+        container.hotkeys.setShortcut(saved, for: action.rawValue)
+        actionHotkeys[action] = container.hotkeys.shortcut(for: action.rawValue)
     }
 
     /// While recording a new shortcut the current ones must not fire (Carbon

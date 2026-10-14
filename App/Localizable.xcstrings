@@ -2950,6 +2950,36 @@
         }
       }
     },
+    "Features": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Функції"
+          }
+        }
+      }
+    },
+    "Text completion": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дописування тексту"
+          }
+        }
+      }
+    },
+    "A tool you turn off leaves the menu, frees its shortcuts and stops working in the background. Its settings and data stay.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вимкнена функція зникає з меню, звільняє свої гарячі клавіші й перестає працювати у фоні. Її налаштування й дані лишаються."
+          }
+        }
+      }
+    },
     "Setup Guide…": {
       "localizations": {
         "uk": {

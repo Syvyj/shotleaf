@@ -28,6 +28,12 @@ final class SnippetExpander {
         }) { monitors.append(clicks) }
     }
 
+    func stop() {
+        monitors.forEach(NSEvent.removeMonitor)
+        monitors = []
+        reset()
+    }
+
     private func key(_ event: NSEvent) {
         if event.cgEvent?.getIntegerValueField(.eventSourceUserData) == Paster.marker { return } // our own keys
         let mods = event.modifierFlags.intersection([.command, .control, .option])

@@ -101,6 +101,7 @@ public struct SettingsRootView: View {
         switch pane {
         case .general:
             aboutSection
+            featuresSection
             generalSection
         case .shortcuts: shortcutSection
         case .screenshots:
@@ -110,6 +111,18 @@ public struct SettingsRootView: View {
         case .clipboard: clipboardSection
         case .completion: completionSection
         case .permissions: permissionsSection
+        }
+    }
+
+    private var featuresSection: some View {
+        Section {
+            ForEach(Tool.allCases) { tool in
+                Toggle(tool.title, isOn: Binding(get: { coordinator.isOn(tool) }, set: { coordinator.setTool(tool, on: $0) }))
+            }
+        } header: {
+            Text("Features")
+        } footer: {
+            Text("A tool you turn off leaves the menu, frees its shortcuts and stops working in the background. Its settings and data stay.")
         }
     }
 
@@ -182,7 +195,7 @@ public struct SettingsRootView: View {
 
     private var shortcutSection: some View {
         Section {
-            ForEach(HotkeyAction.allCases) { action in
+            ForEach(HotkeyAction.allCases.filter { Tool.owning($0).map(coordinator.isOn) ?? true }) { action in
                 Picker(action.title, selection: Binding(
                     get: { coordinator.actionHotkeys[action]?.id ?? "off" },
                     set: { applyAction($0 == "off" ? nil : HotkeyShortcut.with(id: $0), action) }
