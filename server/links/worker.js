@@ -49,10 +49,13 @@ async function show(env, url, id, raw) {
   const ext = object.httpMetadata.contentType === "image/png" ? "png" : "jpg"
   const image = `${base(url)}/${id}.${ext}`
   const page = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex"><title>Screenshot</title><meta property="og:image" content="${image}"><meta name="twitter:card" content="summary_large_image">
+<meta name="robots" content="noindex"><title>Screenshot · Shotleaf</title>
+<meta property="og:site_name" content="Shotleaf"><meta property="og:title" content="Screenshot">
+<meta property="og:description" content="Shared with Shotleaf, screenshots and clipboard history for Mac. The link expires in ${until(left)}.">
+<meta property="og:image" content="${image}"><meta name="twitter:card" content="summary_large_image">
 <style>body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#f6f7f2;font:14px system-ui;color:#5b6152}
 img{max-width:min(96vw,1600px);max-height:86vh;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.15)}a{color:#2d4a19}</style></head>
-<body><img src="${image}" alt="Screenshot"><div>Shared with <a href="${SITE}">Shotleaf</a> · gone in ${Math.max(1, Math.round(left / 60))} min · <a href="mailto:${REPORT}?subject=Report%20${id}">Report</a></div></body></html>`
+<body><img src="${image}" alt="Screenshot"><div>Shared with <a href="${SITE}">Shotleaf</a> · gone in ${until(left)} · <a href="mailto:${REPORT}?subject=Report%20${id}">Report</a></div></body></html>`
   return new Response(page, { headers: { ...headers, "Content-Type": "text/html; charset=utf-8" } })
 }
 
@@ -71,3 +74,4 @@ const json = (status, data) => new Response(JSON.stringify(data), { status, head
 const notFound = () => new Response("This link has expired or never existed.", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", "X-Robots-Tag": "noindex" } })
 // https on the real domain (a custom domain may hand the Worker http), http only for local runs.
 const base = (url) => (url.hostname === "localhost" || url.hostname === "127.0.0.1" ? url.origin : `https://${url.host}`)
+const until = (seconds) => (seconds >= 5400 ? `${Math.round(seconds / 3600)} h` : `${Math.max(1, Math.round(seconds / 60))} min`)
