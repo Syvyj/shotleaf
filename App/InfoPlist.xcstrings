@@ -1,0 +1,23 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSDesktopFolderUsageDescription" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Shotleaf saves screenshots to your Desktop unless you choose another folder in Settings."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shotleaf зберігає скріншоти на Робочий стіл, якщо в Налаштуваннях не вибрано іншу папку."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

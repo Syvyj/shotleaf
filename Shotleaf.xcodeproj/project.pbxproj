@@ -10,6 +10,7 @@
 		1A1A0000000000000000AA21 /* ShotleafApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA20 /* ShotleafApp.swift */; };
 		1A1A0000000000000000AA23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA24 /* Assets.xcassets */; };
 		1A1A0000000000000000AA25 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA26 /* Localizable.xcstrings */; };
+		1A1A0000000000000000AA27 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA28 /* InfoPlist.xcstrings */; };
 		1A1A0000000000000000AA61 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 1A1A0000000000000000AA51 /* AppFeature */; };
 /* End PBXBuildFile section */
 
@@ -18,6 +19,7 @@
 		1A1A0000000000000000AA20 /* ShotleafApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotleafApp.swift; sourceTree = "<group>"; };
 		1A1A0000000000000000AA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1A1A0000000000000000AA26 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		1A1A0000000000000000AA28 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		1A1A0000000000000000AA22 /* Shotleaf.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Shotleaf.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -56,6 +58,7 @@
 				1A1A0000000000000000AA22 /* Shotleaf.entitlements */,
 				1A1A0000000000000000AA24 /* Assets.xcassets */,
 				1A1A0000000000000000AA26 /* Localizable.xcstrings */,
+				1A1A0000000000000000AA28 /* InfoPlist.xcstrings */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -127,6 +130,7 @@
 			files = (
 				1A1A0000000000000000AA23 /* Assets.xcassets in Resources */,
 				1A1A0000000000000000AA25 /* Localizable.xcstrings in Resources */,
+				1A1A0000000000000000AA27 /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
