@@ -17,8 +17,11 @@
 <link rel="preload" href="{{root}}fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{root}}fonts/geist-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{root}}style.css?v={{ver}}">
+<!-- Motion is an extra: without JS (or if it fails to start) the page shows as is. -->
+<script>document.documentElement.classList.add("js"); setTimeout(() => document.documentElement.classList.add("ready"), 2500);</script>
 </head>
 <body>
+{{icons}}
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="logo" viewBox="0 0 24 24"><path d="M3 9V4.6C3 3.7 3.7 3 4.6 3H9M21 15v4.4c0 .9-.7 1.6-1.6 1.6H15" fill="none" stroke="#7cb342" stroke-width="2.4" stroke-linecap="round"/><path d="M12 6.5c.5 3.7 1.3 4.5 5 5-3.7.5-4.5 1.3-5 5-.5-3.7-1.3-4.5-5-5 3.7-.5 4.5-1.3 5-5z" fill="#2d4a19"/></symbol>
@@ -30,6 +33,7 @@
   <div class="bar-in">
     <a class="brand" href="./"><img src="{{root}}assets/icon.png" alt="">Shotleaf</a>
     <a class="l" href="#features">[[Features||Можливості]]</a>
+    <a class="l" href="#private">[[Privacy||Приватність]]</a>
     <a class="l" href="#support">[[Support||Підтримати]]</a>
     <a class="l" href="#install">[[Install||Встановити]]</a>
     <a class="l lang" href="{{other}}" lang="{{other_lang}}">[[UA||EN]]</a>
@@ -39,14 +43,23 @@
 
 <main>
 <section class="wrap hero">
-  <img class="icon" src="{{root}}assets/icon.png" alt="[[Shotleaf icon||Іконка Shotleaf]]" width="128" height="128">
-  <h1>[[Screenshots and clipboard history for Mac||Скріншоти та історія буфера обміну для Mac]]</h1>
-  <p class="sub">[[Take a screenshot, mark it up and send it. Copy text from any image. Find anything you copied earlier. Shotleaf runs in the menu bar and stores everything on your Mac.||Робіть скріншоти, позначайте на них потрібне й надсилайте. Копіюйте текст із будь-якого зображення. Знаходьте все, що копіювали раніше. Shotleaf працює з рядка меню й зберігає все на вашому Mac.]]</p>
-  <div class="cta">
-    <a class="btn primary" href="{{download}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>[[Download for Mac||Завантажити для Mac]]</a>
-    <a class="btn quiet" href="#support">[[Support the author||Підтримати автора]]</a>
+  <div class="hero-top">
+    <div>
+      <p class="eyebrow">[[A menu-bar app for macOS · free and open source||Додаток у рядку меню macOS · безкоштовний і відкритий]]</p>
+      <h1 data-split>[[<span class="frame fc"><i></i><i></i><i></i><i></i><b class="dim" aria-hidden="true"></b>Screenshots</span> and clipboard history for Mac||<span class="frame fc"><i></i><i></i><i></i><i></i><b class="dim" aria-hidden="true"></b>Скріншоти</span> та історія буфера обміну для Mac]]</h1>
+    </div>
+    <img class="icon" src="{{root}}assets/icon.png" alt="[[Shotleaf icon||Іконка Shotleaf]]" width="168" height="168">
   </div>
-  <p class="req">[[For macOS 15 and later on Apple silicon.||Для macOS 15 і новіших на Apple silicon.]]</p>
+  <div class="hero-row">
+    <p class="sub">[[Take a screenshot, mark it up and send it. Copy text from any image. Find anything you copied earlier. Shotleaf runs in the menu bar and stores everything on your Mac.||Робіть скріншоти, позначайте на них потрібне й надсилайте. Копіюйте текст із будь-якого зображення. Знаходьте все, що копіювали раніше. Shotleaf працює з рядка меню й зберігає все на вашому Mac.]]</p>
+    <div class="cta-col">
+      <div class="cta">
+        <a class="btn primary" href="{{download}}"><svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg>[[Download for Mac||Завантажити для Mac]]</a>
+        <a class="btn quiet" href="#support">[[Support the author||Підтримати автора]]</a>
+      </div>
+      <p class="req">[[For macOS 15 and later on Apple silicon.||Для macOS 15 і новіших на Apple silicon.]]</p>
+    </div>
+  </div>
 
   <div class="slides">
     <div class="slide on" data-tab="shot"><div class="mock m-edit">
@@ -167,7 +180,8 @@
 
 <section class="wrap" id="features">
   <div class="head">
-    <h2>[[Everything Shotleaf can do||Усе, що вміє Shotleaf]]</h2>
+    <p class="eyebrow">[[The tools||Інструменти]]</p>
+    <h2 data-split>[[Everything Shotleaf can do||Усе, що вміє Shotleaf]]</h2>
     <p>[[Six tools, each one a shortcut away.||Шість інструментів, кожен за одним сполученням клавіш.]]</p>
   </div>
   <div class="tool" id="screenshots">
@@ -311,10 +325,28 @@
   </div>
 </section>
 
+<section class="band" id="private">
+  <div class="wrap">
+    <div class="head">
+      <p class="eyebrow">[[Private by design||Приватний за задумом]]</p>
+      <h2 data-split>[[It stays on your Mac||Усе лишається на вашому Mac]]</h2>
+      <p>[[Shotleaf sees your screen and your clipboard, so it keeps them to itself.||Shotleaf бачить ваш екран і буфер обміну, тому тримає їх при собі.]]</p>
+    </div>
+    <ul class="facts">
+      <li><svg aria-hidden="true"><use href="#i-user-cross-rounded"/></svg><b>[[No account||Без акаунта]]</b><span>[[No sign-in, no analytics, no ads.||Ні входу, ні аналітики, ні реклами.]]</span></li>
+      <li><svg aria-hidden="true"><use href="#i-cpu-bolt"/></svg><b>[[Runs on your Mac||Працює на вашому Mac]]</b><span>[[Text recognition and text completion work offline.||Розпізнавання й дописування тексту працюють без інтернету.]]</span></li>
+      <li><svg aria-hidden="true"><use href="#i-shield-check"/></svg><b>[[Passwords left out||Паролі не потрапляють]]</b><span>[[Passwords from password managers never enter the history; card numbers and tokens never reach the disk.||Паролі з менеджерів паролів не потрапляють в історію; номери карток і токени не записуються на диск.]]</span></li>
+      <li><svg aria-hidden="true"><use href="#i-link-round"/></svg><b>[[Links that expire||Посилання, що зникають]]</b><span>[[A screenshot you share by link is deleted after 12 hours at most.||Скріншот, яким ви поділилися посиланням, видаляється щонайпізніше через 12 годин.]]</span></li>
+      <li><svg aria-hidden="true"><use href="#i-code-square"/></svg><b>[[Open source||Відкритий код]]</b><span>[[GPL-3.0: every line is on <a href="https://github.com/Syvyj/shotleaf">GitHub</a>.||GPL-3.0: кожен рядок є на <a href="https://github.com/Syvyj/shotleaf">GitHub</a>.]]</span></li>
+    </ul>
+    <a class="more" href="{{home}}privacy/">[[Read the privacy page||Сторінка приватності]]<svg aria-hidden="true"><use href="#i-arrow-right-up"/></svg></a>
+  </div>
+</section>
+
 <section class="wrap" id="support">
   <div class="support">
-    <svg class="spark"><use href="#logo"/></svg>
-    <h2>[[Support Shotleaf||Підтримайте Shotleaf]]</h2>
+    <svg class="spark" aria-hidden="true"><use href="#logo"/></svg>
+    <h2 data-split>[[Support Shotleaf||Підтримайте Shotleaf]]</h2>
     <p>[[I develop Shotleaf on my own. If you find it useful, you can support its development with a donation.||Я розробляю Shotleaf сам. Якщо він вам корисний, можете підтримати розробку донатом.]]</p>
     {{donate}}
   </div>
@@ -322,7 +354,8 @@
 
 <section class="wrap" id="install">
   <div class="head">
-    <h2>[[Installation||Встановлення]]</h2>
+    <p class="eyebrow">[[Three steps||Три кроки]]</p>
+    <h2 data-split>[[Installation||Встановлення]]</h2>
     <p>[[On first launch, macOS asks you to confirm opening the app.||Під час першого запуску macOS попросить підтвердити відкриття додатка.]]</p>
   </div>
   <ol class="install">
@@ -330,6 +363,14 @@
     <li>[[If macOS won’t open it, go to <b>System Settings › Privacy &amp; Security</b>, scroll down and click <b>Open Anyway</b>.||Якщо macOS не відкриває його, зайдіть у <b>Системні параметри › Приватність і безпека</b>, прогорніть униз і натисніть <b>Усе одно відкрити</b>.]]</li>
     <li>[[Turn on the two permissions Shotleaf asks for: one for screenshots and one for pasting text.||Увімкніть два дозволи, які попросить Shotleaf: для скріншотів і для вставки тексту.]]</li>
   </ol>
+</section>
+
+<section class="wrap final">
+  <div class="final-box fc"><i></i><i></i><i></i><i></i>
+    <h2 data-split>[[Everything you copy, one shortcut away||Усе скопійоване за одним сполученням клавіш]]</h2>
+    <p>[[Free and open source. For macOS 15 and later on Apple silicon.||Безкоштовний і з відкритим кодом. Для macOS 15 і новіших на Apple silicon.]]</p>
+    <a class="btn primary big" href="{{download}}"><svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg>[[Download for Mac||Завантажити для Mac]]</a>
+  </div>
 </section>
 </main>
 
@@ -339,8 +380,14 @@
   <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a>
   <a href="{{home}}privacy/">[[Privacy||Приватність]]</a>
   <a href="{{other}}" lang="{{other_lang}}">[[Українська||English]]</a>
+  <small>[[Icons||Іконки]]: <a href="https://icon-sets.iconify.design/solar/">Solar</a>, CC BY 4.0 · [[Font||Шрифт]]: Geist, OFL</small>
 </footer>
 
+<!-- GSAP 3.13 (standard no-charge licence) and Lenis 1.3 (MIT), served from this site. -->
+<script src="{{root}}vendor/gsap.min.js" defer></script>
+<script src="{{root}}vendor/ScrollTrigger.min.js" defer></script>
+<script src="{{root}}vendor/lenis.min.js" defer></script>
+<script src="{{root}}motion.js?v={{ver}}" defer></script>
 <script src="{{root}}mocks.js?v={{ver}}" defer></script>
 </body>
 </html>

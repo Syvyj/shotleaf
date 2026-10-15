@@ -33,13 +33,13 @@ def donate_block():
 def render(template, lang, folder=""):
     """`folder` is where the English page lives ("" or "privacy/"); the Ukrainian one is under uk/."""
     side = 0 if lang == "en" else 1
-    page = template.replace("{{donate}}", donate_block())
+    page = template.replace("{{donate}}", donate_block()).replace("{{icons}}", open(os.path.join(HERE, "src/icons.svg"), encoding="utf-8").read())
     page = re.sub(r"\[\[(.*?)\|\|(.*?)\]\]", lambda m: m.group(1 + side), page, flags=re.S)
     here = folder if lang == "en" else "uk/" + folder
     there = "uk/" + folder if lang == "en" else folder
     root = "../" * here.count("/")
     # A new version of the CSS/JS gets a new URL, so browsers don't keep the old one.
-    ver = hashlib.sha1(b"".join(open(os.path.join(HERE, f), "rb").read() for f in ("style.css", "mocks.js"))).hexdigest()[:8]
+    ver = hashlib.sha1(b"".join(open(os.path.join(HERE, f), "rb").read() for f in ("style.css", "mocks.js", "motion.js"))).hexdigest()[:8]
     values = {"ver": ver, "download": DOWNLOAD, "lang": lang, "root": root, "home": root + ("" if lang == "en" else "uk/"),
               "other": root + there, "other_lang": "uk" if lang == "en" else "en",
               "url": SITE + here, "og": f"{SITE}assets/og-{lang}.png"}
