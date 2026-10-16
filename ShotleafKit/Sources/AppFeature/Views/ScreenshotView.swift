@@ -51,6 +51,8 @@ struct ScreenshotView: View {
     @State private var dragNow: CGPoint?
     /// The pen line being drawn.
     @State private var penPoints: [CGPoint] = []
+    /// While Shift is held, the pen points kept from before it; the last one starts the straight line.
+    @State private var penStraightFrom: Int?
     @State private var drag: Drag?
     @State private var textDraft: (origin: CGPoint, string: String, width: CGFloat?, size: CGFloat)?
     /// The text mark being re-edited (double-click), hidden while its field is open.
@@ -646,9 +648,7 @@ struct ScreenshotView: View {
             .onChanged { value in
                 let p = CGPoint(x: value.location.x - origin.x, y: value.location.y - origin.y)
                 if dragStart == nil { begin(at: p) }
-                if case .draw = drag, doc.tool == .pen, penPoints.last.map({ hypot($0.x - p.x, $0.y - p.y) > 1.5 }) ?? true {
-                    penPoints.append(p)
-                }
+                if case .draw = drag, doc.tool == .pen { addPenPoint(p) }
                 dragNow = p
             }
             .onEnded { _ in
@@ -657,7 +657,22 @@ struct ScreenshotView: View {
                 dragNow = nil
                 drag = nil
                 penPoints = []
+                penStraightFrom = nil
             }
+    }
+
+    /// Freehand, or with Shift a straight line (level, plumb or at 45°) on from
+    /// where Shift was pressed; what was drawn before stays.
+    private func addPenPoint(_ p: CGPoint) {
+        guard NSEvent.modifierFlags.contains(.shift) else {
+            penStraightFrom = nil
+            if penPoints.last.map({ hypot($0.x - p.x, $0.y - p.y) > 1.5 }) ?? true { penPoints.append(p) }
+            return
+        }
+        if penPoints.isEmpty { penPoints.append(p) }
+        let kept = penStraightFrom ?? penPoints.count
+        penStraightFrom = kept
+        penPoints = Array(penPoints.prefix(kept)) + [AnnotationEditing.angleSnapped(penPoints[kept - 1], p)]
     }
 
     /// Decide what this drag is: a handle of the selected mark, a mark (select
@@ -757,10 +772,7 @@ struct ScreenshotView: View {
         case .cut:
             guard big else { return nil }
             return final ? .piece(source: rect, offset: .zero, fill: sampled()) : .rectangle(rect) // outline while selecting
-        case .pen:
-            // Shift: a straight line from where the stroke began, level, plumb or at 45°.
-            if NSEvent.modifierFlags.contains(.shift) { return hypot(b.x - a.x, b.y - a.y) > 4 ? .pen([a, AnnotationEditing.angleSnapped(a, b)]) : nil }
-            return penPoints.isEmpty ? nil : .pen(penPoints)
+        case .pen: return penPoints.isEmpty ? nil : .pen(penPoints)
         case .text, .step: return nil
         }
     }
