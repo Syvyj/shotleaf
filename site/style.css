@@ -112,7 +112,7 @@ kbd { font: 500 .8em/1 var(--font); padding: .28em .5em; border-radius: 6px; bac
 .hero .frame .dim { position: absolute; left: 0; top: -8px; transform: translateY(-100%); font: 600 clamp(10.5px, .9vw, 13px)/1 var(--mono); letter-spacing: 0; color: #fff; background: #1d231b; padding: .5em .75em; border-radius: 99px; white-space: nowrap; }
 .hero .eyebrow { margin-bottom: 44px; }
 .hero .frame .dim:empty { display: none; }
-.hero .icon { width: clamp(110px, 13vw, 176px); height: auto; margin-bottom: .4em; filter: drop-shadow(0 24px 40px rgba(70, 120, 30, .36)) drop-shadow(0 6px 12px rgba(20, 40, 10, .22)); }
+.hero .icon { width: clamp(110px, 13vw, 176px); height: auto; margin-bottom: .4em; filter: drop-shadow(0 10px 24px rgba(70, 120, 30, .25)); }
 .hero-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px 64px; align-items: end; margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--edge); }
 .hero .sub { font-size: 20px; color: var(--muted); max-width: 32em; margin: 0; line-height: 1.5; }
 .hero .cta { display: flex; gap: 12px; flex-wrap: wrap; }
