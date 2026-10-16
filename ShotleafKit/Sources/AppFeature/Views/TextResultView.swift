@@ -1,14 +1,22 @@
 import SwiftUI
 
 /// Text read off a screenshot: editable, so a word the OCR got wrong can be
-/// fixed before copying. ⌘↩ copies it all and closes, esc closes; ⌘C copies
-/// just the selection, as in any text field.
+/// fixed before copying. ⌘C copies it all and closes, as in the screenshot
+/// editor; with some text selected it copies just that and stays. esc closes.
 struct TextResultView: View {
     @State var text: String
     let title: LocalizedStringKey
     let copy: (String) -> Void
     let close: () -> Void
     @State private var copied = false
+    @State private var selection: TextSelection?
+
+    /// The selected text, if any (a stale range after an edit counts as none).
+    private var selected: String? {
+        guard case .selection(let range)? = selection?.indices, !range.isEmpty,
+              range.lowerBound >= text.startIndex, range.upperBound <= text.endIndex else { return nil }
+        return String(text[range])
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -25,7 +33,7 @@ struct TextResultView: View {
             }
             .overlay(WindowDragArea())
 
-            TextEditor(text: $text)
+            TextEditor(text: $text, selection: $selection)
                 .font(Leaf.font(14))
                 .scrollContentBackground(.hidden)
                 .padding(8)
@@ -39,17 +47,21 @@ struct TextResultView: View {
 
             HStack(spacing: 6) {
                 Button {
-                    copy(text)
-                    withAnimation { copied = true }
-                    close()
+                    if let selected {
+                        copy(selected)
+                        withAnimation { copied = true }
+                    } else {
+                        copy(text)
+                        close()
+                    }
                 } label: {
                     HStack(spacing: 5) {
-                        Text("Copy all")
-                        Text(verbatim: "⌘↩").font(Leaf.font(10.5, .semibold)).opacity(0.5)
+                        Text(selected == nil ? "Copy all" : "Copy selection")
+                        Text(verbatim: "⌘C").font(Leaf.font(10.5, .semibold)).opacity(0.5)
                     }
                 }
                 .buttonStyle(LeafButtonStyle(prominent: true))
-                .keyboardShortcut(.return, modifiers: .command)
+                .keyboardShortcut("c", modifiers: .command)
                 .disabled(text.isEmpty)
                 Spacer()
                 Button {

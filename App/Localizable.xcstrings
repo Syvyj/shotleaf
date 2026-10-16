@@ -4068,6 +4068,16 @@
           }
         }
       }
+    },
+    "Copy selection": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копіювати виділене"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
