@@ -112,7 +112,7 @@ public final class AppCoordinator {
             window = ScreenshotWindows.makePanel(SnippetEditorView(store: snippets, close: { window?.orderOut(nil) }),
                                                  proposedWidth: 1000, resizable: true)
             window.level = .normal
-            window.setContentSize(NSSize(width: 1000, height: max(window.frame.height, 620)))
+            window.setContentSize(NSSize(width: 1000, height: max(window.frame.height, 680))) // room for the bottom bar in longer languages
             window.center()
             snippetWindow = window
         }

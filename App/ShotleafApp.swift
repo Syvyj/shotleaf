@@ -48,6 +48,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { await AccessibilityProbe.run(out: out); exit(0) }
             return
         }
+        if let i = CommandLine.arguments.firstIndex(of: "--guide-shots") { // developer run: PNGs of the windows for the site's guide
+            let out = URL(fileURLWithPath: CommandLine.arguments.count > i + 1 ? CommandLine.arguments[i + 1] : NSTemporaryDirectory())
+            Task { await GuideShots.run(coordinator, out: out); exit(0) }
+            return
+        }
         if CommandLine.arguments.contains("--completion-eval") { // developer run, see CompletionEval
             Task { await CompletionEval.run(); exit(0) }
             return

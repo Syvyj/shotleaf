@@ -69,6 +69,7 @@ struct OnboardingView: View {
         }
         .padding(24)
         .frame(width: 480)
+        .fixedSize(horizontal: false, vertical: true) // the window takes the wrapped height (it cut the lines short)
         // Live status: permissions can change in System Settings at any moment.
         .task {
             while !Task.isCancelled {

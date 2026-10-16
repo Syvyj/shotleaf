@@ -82,6 +82,7 @@ public struct SettingsRootView: View {
                 }
                 .tag(pane)
             }
+            .frame(minWidth: 220) // the Settings window ignores the column width below and opened it at 144 pt, cutting the names
             .navigationSplitViewColumnWidth(240)
             .toolbar(removing: .sidebarToggle)
         } detail: {
