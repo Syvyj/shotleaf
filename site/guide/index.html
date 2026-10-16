@@ -16,7 +16,7 @@
 <link rel="alternate" hreflang="uk" href="../uk/guide/">
 <link rel="preload" href="../fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/geist-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../style.css?v=5a3393d3">
+<link rel="stylesheet" href="../style.css?v=813b9c56">
 <script>document.documentElement.classList.add("js"); setTimeout(() => document.documentElement.classList.add("ready"), 2500);</script>
 </head>
 <body>
@@ -217,6 +217,13 @@
 <section id="completion">
   <h2>Text completion</h2>
   <p>As you type in any app, a grey suggestion appears after the cursor. Take it or ignore it and keep typing. <b>Complete my text as I type</b> in the menu bar turns it on and off.</p>
+  <figure class="mockfig" aria-label="A sentence being typed, a grey suggestion, Tab takes a word"><div class="mock m-type" data-text="Hi Anna, thanks for the update. Let’s meet " data-ghost="tomorrow at 3 by the entrance.">
+        <div class="win">
+          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Messages<small>Anna</small></div></div>
+          <div class="note"><span class="typed"></span><span class="caret"></span><span class="ghost"></span></div>
+          <div class="bar"><span class="b k-tab">Tab <i>next word</i></span><span class="b k-all">⌥Tab <i>all</i></span><span class="sp"></span><span class="b">esc <i>hide</i></span></div>
+        </div>
+      </div></figure>
   <table class="keys">
     <tr><td><kbd>Tab</kbd></td><td>take the next word</td></tr>
     <tr><td><kbd>⌥Tab</kbd></td><td>take the whole suggestion</td></tr>
@@ -224,6 +231,15 @@
     <tr><td><kbd>:</kbd>word</td><td>emoji by name: <code>:fire</code> offers 🔥; more letters narrow the list, <kbd>1</kbd>–<kbd>9</kbd> or a click picks</td></tr>
   </table>
   <p>A misspelled word gets a fix you take with <kbd>Tab</kbd> too. The model runs on your Mac: nothing you type is sent anywhere.</p>
+  <figure class="mockfig" aria-label="Emoji by name: “:fi” offers fire, fireworks and more"><div class="mock m-emoji">
+        <div class="win">
+          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Messages<small>Team</small></div></div>
+          <div class="note">We launched the site today <span class="q">:fi</span><span class="caret"></span>
+            <div class="pick"><div class="e on"><span>🔥</span>fire<i>1</i></div><div class="e"><span>🎆</span>fireworks<i>2</i></div><div class="e"><span>🎇</span>sparkler<i>3</i></div><div class="e"><span>🧯</span>fire extinguisher<i>4</i></div></div>
+          </div>
+          <div class="bar"><span class="b go">Tab <i>first</i></span><span class="b">1–9 <i>pick</i></span><span class="sp"></span><span class="b">esc <i>close</i></span></div>
+        </div>
+      </div></figure>
   <p>In <b>Settings › Completion</b>: <b>Suggestions</b> from cautious (only sure, short ones) to bold; <b>Use text on screen</b>, so suggestions fit the chat or page you’re answering; <b>Use what I just copied</b>; and <b>Learn my style</b>: a few of your own texts, kept on this Mac only, so suggestions sound like you. <b>Forget what I wrote</b> deletes them.</p>
   <figure><img src="../assets/guide/settings-completion-en.webp" width="1600" height="1264" loading="lazy" decoding="async" alt="Settings › Completion"></figure>
 </section>
@@ -287,6 +303,7 @@
 <script src="../vendor/gsap.min.js" defer></script>
 <script src="../vendor/ScrollTrigger.min.js" defer></script>
 <script src="../vendor/lenis.min.js" defer></script>
-<script src="../motion.js?v=5a3393d3" defer></script>
+<script src="../motion.js?v=813b9c56" defer></script>
+<script src="../mocks.js?v=813b9c56" defer></script>
 </body>
 </html>

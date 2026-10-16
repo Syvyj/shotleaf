@@ -16,7 +16,7 @@
 <link rel="alternate" hreflang="en" href="../../guide/">
 <link rel="preload" href="../../fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../fonts/geist-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../../style.css?v=5a3393d3">
+<link rel="stylesheet" href="../../style.css?v=813b9c56">
 <script>document.documentElement.classList.add("js"); setTimeout(() => document.documentElement.classList.add("ready"), 2500);</script>
 </head>
 <body>
@@ -217,6 +217,13 @@
 <section id="completion">
   <h2>Дописування тексту</h2>
   <p>Поки ви пишете в будь-якій програмі, після курсора з’являється сіра підказка. Прийміть її або не зважайте й пишіть далі. <b>Дописувати текст, поки я друкую</b> в рядку меню вмикає й вимикає її.</p>
+  <figure class="mockfig" aria-label="Речення набирається, сіра підказка, Tab бере слово"><div class="mock m-type" data-text="Привіт, Ганно! Дякую за новини. Давай зустрінемось " data-ghost="завтра о третій біля входу.">
+        <div class="win">
+          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Повідомлення<small>Ганна</small></div></div>
+          <div class="note"><span class="typed"></span><span class="caret"></span><span class="ghost"></span></div>
+          <div class="bar"><span class="b k-tab">Tab <i>наступне слово</i></span><span class="b k-all">⌥Tab <i>усе</i></span><span class="sp"></span><span class="b">esc <i>сховати</i></span></div>
+        </div>
+      </div></figure>
   <table class="keys">
     <tr><td><kbd>Tab</kbd></td><td>взяти наступне слово</td></tr>
     <tr><td><kbd>⌥Tab</kbd></td><td>взяти всю підказку</td></tr>
@@ -224,6 +231,15 @@
     <tr><td><kbd>:</kbd>слово</td><td>емодзі за назвою: <code>:fire</code> пропонує 🔥; наступні літери звужують список, <kbd>1</kbd>–<kbd>9</kbd> або клік вибирає</td></tr>
   </table>
   <p>Слово з помилкою отримує виправлення, яке теж береться клавішею <kbd>Tab</kbd>. Модель працює на вашому Mac: нічого з набраного нікуди не надсилається.</p>
+  <figure class="mockfig" aria-label="Емодзі за назвою: «:fi» пропонує вогонь, феєрверк та інше"><div class="mock m-emoji">
+        <div class="win">
+          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Повідомлення<small>Команда</small></div></div>
+          <div class="note">Ми сьогодні запустили сайт <span class="q">:fi</span><span class="caret"></span>
+            <div class="pick"><div class="e on"><span>🔥</span>fire<i>1</i></div><div class="e"><span>🎆</span>fireworks<i>2</i></div><div class="e"><span>🎇</span>sparkler<i>3</i></div><div class="e"><span>🧯</span>fire extinguisher<i>4</i></div></div>
+          </div>
+          <div class="bar"><span class="b go">Tab <i>перше</i></span><span class="b">1–9 <i>вибрати</i></span><span class="sp"></span><span class="b">esc <i>закрити</i></span></div>
+        </div>
+      </div></figure>
   <p>У <b>Налаштуваннях › Дописування</b>: <b>Підказки</b> від обережних (лише певні й короткі) до сміливих; <b>Враховувати текст на екрані</b>, щоб підказки пасували до переписки чи сторінки, на яку ви відповідаєте; <b>Враховувати щойно скопійоване</b>; і <b>Вчитися мого стилю</b>: кілька ваших текстів, лише на цьому Mac, щоб підказки звучали як ви. <b>Забути мої тексти</b> їх видаляє.</p>
   <figure><img src="../../assets/guide/settings-completion-uk.webp" width="1600" height="1264" loading="lazy" decoding="async" alt="Налаштування › Дописування"></figure>
 </section>
@@ -287,6 +303,7 @@
 <script src="../../vendor/gsap.min.js" defer></script>
 <script src="../../vendor/ScrollTrigger.min.js" defer></script>
 <script src="../../vendor/lenis.min.js" defer></script>
-<script src="../../motion.js?v=5a3393d3" defer></script>
+<script src="../../motion.js?v=813b9c56" defer></script>
+<script src="../../mocks.js?v=813b9c56" defer></script>
 </body>
 </html>

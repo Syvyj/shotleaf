@@ -528,6 +528,7 @@ footer small a { text-decoration: underline; text-underline-offset: 2px; }
 .guide-body figure { margin: 26px 0 30px; }
 .guide-body figure img { display: block; width: 100%; height: auto; border-radius: 14px; filter: drop-shadow(0 22px 34px rgba(30, 50, 20, .22)) drop-shadow(0 4px 10px rgba(30, 50, 20, .12)); }
 .guide-body figure.small img { width: min(100%, 420px); }
+.guide-body figure.mockfig .win { box-shadow: 0 0 0 1px var(--edge), 0 30px 60px -30px rgba(30, 50, 20, .4), 0 10px 24px -14px rgba(30, 50, 20, .2); }
 .guide-body figure.menu img { width: min(100%, 360px); border-radius: 10px; }
 .note { padding: 14px 18px; border-radius: 12px; background: #f7fbec; border: 1px solid rgba(124, 179, 66, .35); color: var(--text); }
 details { border-top: 1px solid var(--edge); padding: 4px 0; }
