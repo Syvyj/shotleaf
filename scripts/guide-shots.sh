@@ -18,8 +18,8 @@ for lang in en uk; do
   open -n -W "$APP" --args --guide-shots "$RAW" -AppleLanguages "($lang)"
 done
 
-OUT=site/assets/guide
-rm -rf "$OUT"; mkdir -p "$OUT"
+OUT=site/assets/guide # also holds pictures shot by hand (picker-*), so only these are replaced
+mkdir -p "$OUT"
 for png in "$RAW"/*.png; do
   # Shot at 2×; 1600 px wide at most is plenty for the page.
   cwebp -quiet -q 86 -resize "$(( $(sips -g pixelWidth "$png" | awk '/pixelWidth/ {print $2}') > 1600 ? 1600 : 0 ))" 0 "$png" -o "$OUT/$(basename "${png%.png}").webp"

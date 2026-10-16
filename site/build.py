@@ -45,6 +45,8 @@ def shots(page, lang, root):
     """<img data-shot="editor"> → that guide picture in this language, with its size (no jump while it loads)."""
     def one(m):
         rel = f"assets/guide/{m.group(1)}-{lang}.webp"
+        if not os.path.exists(os.path.join(HERE, rel)):  # shot by hand in one language so far
+            rel = f"assets/guide/{m.group(1)}-{'uk' if lang == 'en' else 'en'}.webp"
         w, h = webp_size(os.path.join(HERE, rel))
         return f'src="{root}{rel}" width="{w}" height="{h}" loading="lazy" decoding="async"'
     return re.sub(r'data-shot="([\w-]+)"', one, page)
