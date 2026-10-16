@@ -420,7 +420,7 @@ macOS treats the new bundle as a new app, so permissions must be granted again).
 
 There are many apps like Shotleaf, so closed code protects little; open code earns trust for an app that
 reads the clipboard and the keyboard, and fits donations. The code is **GPL-3.0-or-later** (all
-dependencies are MIT or Apache-2.0, which GPL-3.0 accepts). Builds are a zip on **GitHub Releases**
+dependencies are MIT or Apache-2.0, which GPL-3.0 accepts). Builds are a DMG on **GitHub Releases**
 (`Syvyj/shotleaf`); the site's download button points at `releases/latest`.
 
 No Developer ID for now ($99 a year): the first open needs "Open Anyway" in Privacy & Security, explained on

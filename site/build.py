@@ -17,7 +17,7 @@ DONATE = [
 ]
 
 # Where "Download" points: the newest GitHub release (ADR-0069).
-DOWNLOAD = "https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.zip"
+DOWNLOAD = "https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

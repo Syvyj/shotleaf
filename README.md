@@ -17,7 +17,7 @@ macOS 15 or later on Apple silicon (M1 or newer).
 
 ## Install
 
-1. Download `Shotleaf.zip` from [Releases](https://github.com/Syvyj/shotleaf/releases/latest), unzip it and move **Shotleaf** to **Applications**.
+1. Download `Shotleaf.dmg` from [Releases](https://github.com/Syvyj/shotleaf/releases/latest), open it and drag **Shotleaf** onto **Applications**.
 2. Open it. Shotleaf isn't notarised by Apple, so the first time macOS says it can't check the app. Open **System Settings › Privacy & Security**, scroll down and click **Open Anyway**.
 3. The setup guide asks for two permissions:
    - **Screen Recording**: screenshots and text from the screen.

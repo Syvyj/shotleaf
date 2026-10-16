@@ -6,7 +6,7 @@
 ## Рішення власника
 
 - [x] Ліцензія: GPL-3.0
-- [x] Де лежить збірка: GitHub Releases (кнопка «Завантажити» веде на `releases/latest/download/Shotleaf.zip`)
+- [x] Де лежить збірка: GitHub Releases (кнопка «Завантажити» веде на `releases/latest/download/Shotleaf.dmg`)
 - [x] Підпис: поки без Developer ID; на сайті й у README інструкція «Усе одно відкрити» і як перевидати дозволи після оновлення
 - [x] Хоткеї: лишити `⌘⇧3` / `⇧⌘V` / `⇧⌘B`, але попередити про конфлікти (майстер першого запуску, налаштування, README) і підказати, де поставити свої
 - [x] Донати: Buy Me a Coffee (`syvyj`); інші з'являться, коли власник дасть посилання (порожні не показуються) → `site/build.py`, `DONATE`
@@ -27,7 +27,7 @@
 ## 2. Ліцензія й документи (блокери)
 
 - [x] `LICENSE` → повний текст GPL-3.0; заголовок у `ShotleafKit/Package.swift` («All rights reserved») оновити.
-- [x] `README.md` для людей: що це; вимоги (macOS 15+, Apple silicon); як відкрити непідписаний zip; які дозволи й навіщо, що після Accessibility треба перезапуск; модель дописування 3,6 ГБ і де вона лежить (`~/.cache/huggingface`); де дані (`~/Library/Application Support/Shotleaf`); як видалити все; як надіслати лог падіння.
+- [x] `README.md` для людей: що це; вимоги (macOS 15+, Apple silicon); як відкрити непідписану збірку; які дозволи й навіщо, що після Accessibility треба перезапуск; модель дописування 3,6 ГБ і де вона лежить (`~/.cache/huggingface`); де дані (`~/Library/Application Support/Shotleaf`); як видалити все; як надіслати лог падіння.
 - [x] `CHANGELOG.md` з першою версією.
 - [x] `ARCHITECTURE_DECISIONS.md`: ADR-0069 (GPL-3.0, GitHub Releases, без Developer ID); ADR-0013 позначено відкладеним.
 - [x] BoringSSL у бінарнику немає (на macOS swift-crypto іде через CryptoKit) — ліцензія не потрібна.
@@ -62,7 +62,7 @@
 
 ## 4. Сайт (`site/`, збірка `python3 site/build.py`)
 
-- [x] Кнопка «Завантажити» → `https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.zip` (`DOWNLOAD` у `build.py`).
+- [x] Кнопка «Завантажити» → `https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg` (`DOWNLOAD` у `build.py`).
 - [x] Донати: заглушок «скоро» немає, показуються лише ті, що мають посилання.
 - [x] `color-scheme` тепер `light`.
 - [x] Сторінка «Приватність» (`/privacy/`, `/uk/privacy/`), посилання з футера й з налаштувань додатка.
@@ -73,8 +73,8 @@
 
 ## 5. Реліз
 
-- [x] `scripts/make-release.sh`: збірка Release (arm64) → підняти build → підписати «Shotleaf Local Signing» (не ad hoc: тоді дозволи переживають оновлення) без `get-task-allow` → `ditto -c -k --keepParent` → `Shotleaf.zip` + SHA-256.
+- [x] `scripts/make-release.sh`: збірка Release (arm64) → підняти build → підписати «Shotleaf Local Signing» (не ad hoc: тоді дозволи переживають оновлення) без `get-task-allow` → `Shotleaf.dmg` (застосунок і ярлик «Програми», підписаний) + SHA-256.
 - [ ] Перевірити на другому Mac / другому користувачі: «Усе одно відкрити», дозволи, оновлення поверх старої версії зберігає дозволи.
 - [x] Зробити резервну копію сертифіката (Keychain Access → експорт .p12 у надійне місце, не в репозиторій): без нього наступне оновлення скине дозволи всім.
-- [ ] Публічний репозиторій на GitHub (після чистки історії), перший реліз `v0.1.0` з `Shotleaf.zip` і нотатками з `CHANGELOG.md`.
+- [ ] Публічний репозиторій на GitHub (після чистки історії), перший реліз `v0.1.0` з `Shotleaf.dmg` і нотатками з `CHANGELOG.md`.
 - [ ] CI (GitHub Actions: `swift test`) — бажано.
