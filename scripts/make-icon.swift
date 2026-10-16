@@ -5,10 +5,10 @@
 // Shotleaf acts". Same mark as the menu bar icon (AppFeature/BrandMark.swift).
 import AppKit
 
-// "Leaves" palette: deep forest → leaf → lime (from the user's reference photo).
-let forest = NSColor(srgbRed: 0x12 / 255.0, green: 0x1A / 255.0, blue: 0x12 / 255.0, alpha: 1)
-let moss = NSColor(srgbRed: 0x2E / 255.0, green: 0x4A / 255.0, blue: 0x24 / 255.0, alpha: 1)
+// "Leaves" palette on the site's paper.
 let leaf = NSColor(srgbRed: 0x4F / 255.0, green: 0x7F / 255.0, blue: 0x2A / 255.0, alpha: 1)
+let fresh = NSColor(srgbRed: 0x8F / 255.0, green: 0xBF / 255.0, blue: 0x3A / 255.0, alpha: 1)
+let paper = NSColor(srgbRed: 0xF3 / 255.0, green: 0xF4 / 255.0, blue: 0xEE / 255.0, alpha: 1)
 let lime = NSColor(srgbRed: 0xC9 / 255.0, green: 0xE8 / 255.0, blue: 0x6A / 255.0, alpha: 1)
 
 /// Four-point spark centered at `c` with tip radius `r`: four tips joined by
@@ -57,35 +57,41 @@ func drawIcon(size: CGFloat) -> NSBitmapImageRep {
     let body = CGRect(x: 100 * s, y: 100 * s, width: 824 * s, height: 824 * s)
     let shape = NSBezierPath(roundedRect: body, xRadius: 185 * s, yRadius: 185 * s)
 
+    // A light tile, like the site's paper: the mark reads as it does in the app's
+    // window headers (macOS puts every icon on a tile, so it can't go without one).
     NSGraphicsContext.saveGraphicsState()
     let shadow = NSShadow()
-    shadow.shadowColor = NSColor.black.withAlphaComponent(0.30)
+    shadow.shadowColor = NSColor.black.withAlphaComponent(0.18)
     shadow.shadowBlurRadius = 24 * s
     shadow.shadowOffset = NSSize(width: 0, height: -10 * s)
     shadow.set()
-    forest.setFill()
+    paper.setFill()
     shape.fill()
     NSGraphicsContext.restoreGraphicsState()
 
     NSGraphicsContext.saveGraphicsState()
     shape.addClip()
-    NSGradient(colors: [forest, moss, leaf], atLocations: [0, 0.5, 1], colorSpace: .sRGB)!
-        .draw(in: body, angle: 55)
-    // A glow of fresh light behind the spark, like sun through leaves.
-    NSGradient(starting: lime.withAlphaComponent(0.55), ending: lime.withAlphaComponent(0))!
+    NSGradient(starting: .white, ending: paper)!.draw(in: body, angle: -90)
+    // A faint fresh glow behind the spark.
+    NSGradient(starting: lime.withAlphaComponent(0.28), ending: lime.withAlphaComponent(0))!
         .draw(fromCenter: CGPoint(x: body.midX, y: body.midY), radius: 0,
               toCenter: CGPoint(x: body.midX, y: body.midY), radius: 330 * s, options: [])
-    // Soft light from the top for depth.
-    NSGradient(starting: NSColor.white.withAlphaComponent(0.10), ending: NSColor.white.withAlphaComponent(0))!
-        .draw(in: CGRect(x: body.minX, y: body.midY, width: body.width, height: body.height / 2), angle: -90)
     NSGraphicsContext.restoreGraphicsState()
+    // A hairline edge, so the tile holds on a light Dock.
+    NSColor.black.withAlphaComponent(0.07).setStroke()
+    let edge = NSBezierPath(roundedRect: body.insetBy(dx: 1.5 * s, dy: 1.5 * s), xRadius: 184 * s, yRadius: 184 * s)
+    edge.lineWidth = 3 * s
+    edge.stroke()
 
-    // The mark: lime corners, white spark.
+    // The mark: leaf corners, a leaf-to-fresh spark (Leaf.ink and Leaf.markGradient).
     let markRect = body.insetBy(dx: 210 * s, dy: 210 * s)
-    lime.setStroke()
+    leaf.setStroke()
     corners(in: markRect, arm: 120 * s, width: 46 * s).stroke()
-    NSColor.white.setFill()
-    spark(center: CGPoint(x: body.midX, y: body.midY), radius: 168 * s).fill()
+    NSGraphicsContext.saveGraphicsState()
+    let spk = spark(center: CGPoint(x: body.midX, y: body.midY), radius: 168 * s)
+    spk.addClip()
+    NSGradient(starting: leaf, ending: fresh)!.draw(in: spk.bounds, angle: 45)
+    NSGraphicsContext.restoreGraphicsState()
 
     NSGraphicsContext.restoreGraphicsState()
     return rep
