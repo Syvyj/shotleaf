@@ -33,6 +33,7 @@ public final class AppCoordinator {
         inlineCompletion.quickFixes = container.settings.completionQuickFixes
         inlineCompletion.history.enabled = container.settings.completionLearnsStyle
         if container.settings.completionEnabled { inlineCompletion.start() }
+        screenshots.allClosed = { SupportAsk.askIfDue() }
         screenshots.toSnippets = { [weak self] png in
             guard let self else { return nil }
             let folder = UserDefaults.standard.string(forKey: "snippetFolder").flatMap(UUID.init) // the folder last opened in the panel
@@ -179,6 +180,7 @@ public final class AppCoordinator {
     /// (Settings → Screenshots). Kept for "Edit Last Screenshot" either way.
     private func deliver(_ shot: ImagePayload) {
         recentShots = ScreenshotWindows.remember(shot)
+        SupportAsk.countShot()
         let entry = clipboard.addScreenshot(shot.data)
         let after = container.settings.afterCapture
         if after == .editor {
@@ -188,6 +190,7 @@ public final class AppCoordinator {
         Sound.shutter()
         if after == .copy || after == .copyAndSave { ScreenshotWindows.copy(shot.data, own: entry != nil) }
         if after == .save || after == .copyAndSave { _ = ScreenshotWindows.save(shot.data, scale: NSScreen.main?.backingScaleFactor ?? 2) }
+        SupportAsk.askIfDue()
     }
 
     /// The last screenshot back in the editor (as it was taken).
@@ -411,6 +414,7 @@ public final class AppCoordinator {
     public func setShowInDock(_ show: Bool) {
         container.settings.showInDock = show
         applyDockPolicy()
+        raiseSettingsWindow() // switching the policy sends the app's windows behind the others
     }
 
     private func applyDockPolicy() {
@@ -424,12 +428,19 @@ public final class AppCoordinator {
     }
 
     /// A menu bar app isn't active, so its Settings window opens behind the
-    /// others; bring it up once SwiftUI has made it.
+    /// others; bring it up once SwiftUI has made it (after a relaunch that takes a while).
     public func raiseSettingsWindow() {
         Task {
-            try? await Task.sleep(for: .milliseconds(100))
-            NSApp.activate()
-            NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true }?.makeKeyAndOrderFront(nil)
+            for _ in 0..<30 {
+                try? await Task.sleep(for: .milliseconds(100))
+                guard let window = NSApp.windows.first(where: { $0.identifier?.rawValue.contains("Settings") == true })
+                else { continue }
+                // Not the polite activate(): after a relaunch macOS turns that down and the window stays behind.
+                NSApp.activate(ignoringOtherApps: true)
+                window.makeKeyAndOrderFront(nil)
+                window.orderFrontRegardless()
+                return
+            }
         }
     }
 

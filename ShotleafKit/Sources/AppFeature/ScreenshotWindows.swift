@@ -11,6 +11,8 @@ final class ScreenshotWindows {
     private(set) var open: [ObjectIdentifier: FloatingPanel] = [:] // internal for tests
     /// "To Snippets": keeps a PNG as a snippet; the folder's name, if it went into one.
     var toSnippets: (Data) -> String? = { _ in nil }
+    /// The last window closed and none came back (a pinned one replaces its editor).
+    var allClosed: () -> Void = {}
 
     /// `edited` gets the shot as marked up — on copy and when the window closes —
     /// so its clipboard-history entry shows what was actually made.
@@ -196,6 +198,10 @@ final class ScreenshotWindows {
         guard let panel else { return }
         panel.orderOut(nil)
         open[ObjectIdentifier(panel)] = nil
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(1))
+            if let self, self.open.isEmpty { self.allClosed() }
+        }
     }
 
     // MARK: Files & clipboard

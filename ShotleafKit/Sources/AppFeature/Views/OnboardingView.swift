@@ -61,6 +61,7 @@ struct OnboardingView: View {
             }
 
             HStack {
+                Link("Shotleaf is free. Support the author ♥", destination: AppInfo.supportPage).font(.callout)
                 Spacer()
                 Button("Done") { coordinator.closeOnboarding() }
                     .buttonStyle(LeafButtonStyle(prominent: true))

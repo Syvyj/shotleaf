@@ -1060,6 +1060,16 @@
         }
       }
     },
+    "Enjoying Shotleaf?": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подобається Shotleaf?"
+          }
+        }
+      }
+    },
     "Erase": {
       "localizations": {
         "uk": {
@@ -1236,6 +1246,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Якщо текст уже цією мовою — на"
+          }
+        }
+      }
+    },
+    "If it helps you, support its development.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Якщо він вам допомагає, підтримайте розробку."
           }
         }
       }
@@ -1696,6 +1716,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Текст не знайдено. Виділіть (або скопіюйте) текст і відкрийте Shotleaf ще раз."
+          }
+        }
+      }
+    },
+    "No, Thanks": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ні, дякую"
           }
         }
       }
@@ -2600,6 +2630,46 @@
         }
       }
     },
+    "Shotleaf is free and open source": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shotleaf безкоштовний і з відкритим кодом"
+          }
+        }
+      }
+    },
+    "Shotleaf is free and open source. If it saves you time, you can support its development. Shotleaf asks this only once.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shotleaf безкоштовний і з відкритим кодом. Якщо він заощаджує вам час, можете підтримати розробку. Shotleaf питає про це лише раз."
+          }
+        }
+      }
+    },
+    "Shotleaf is free. Support the author ♥": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shotleaf безкоштовний. Підтримати автора ♥"
+          }
+        }
+      }
+    },
+    "Support the Author": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Підтримати автора"
+          }
+        }
+      }
+    },
     "To Snippets": {
       "localizations": {
         "uk": {
@@ -2676,16 +2746,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Зберегти тут"
-          }
-        }
-      }
-    },
-    "Support the Author ♥": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Підтримати автора ♥"
           }
         }
       }

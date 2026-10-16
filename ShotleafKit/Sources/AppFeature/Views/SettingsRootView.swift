@@ -102,6 +102,7 @@ public struct SettingsRootView: View {
         switch pane {
         case .general:
             aboutSection
+            supportSection
             featuresSection
             generalSection
         case .shortcuts: shortcutSection
@@ -140,10 +141,24 @@ public struct SettingsRootView: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Link("syvyj.dev", destination: AppInfo.website)
                     Link(AppInfo.email, destination: URL(string: "mailto:\(AppInfo.email)")!)
-                    Link("Support the Author ♥", destination: AppInfo.supportPage).fontWeight(.semibold)
                     Link("Privacy", destination: AppInfo.privacyPage)
                     Button("Third-party licences") { showNotices = true }.buttonStyle(.link)
                 }
+            }
+        }
+    }
+
+    private var supportSection: some View {
+        Section {
+            HStack(spacing: 12) {
+                Image(systemName: "heart.fill").font(.title2).foregroundStyle(Leaf.leaf)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Shotleaf is free and open source").fontWeight(.semibold)
+                    Text("If it helps you, support its development.").foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button("Support the Author") { NSWorkspace.shared.open(AppInfo.supportPage) }
+                    .buttonStyle(LeafButtonStyle(prominent: true))
             }
         }
     }
