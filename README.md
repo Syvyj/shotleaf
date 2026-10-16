@@ -1,7 +1,7 @@
 <a name="en"></a>
 <p align="center"><img src="App/Assets.xcassets/AppIcon.appiconset/icon_256x256@2x.png" width="128" height="128" alt="Shotleaf icon"></p>
 <h1 align="center">Shotleaf</h1>
-<p align="center"><b>Screenshots, clipboard history, snippets and text completion for the Mac.</b><br>Free, open source, everything stays on your Mac.</p>
+<p align="center"><b>Screenshots, clipboard history, snippets and text completion for the Mac.</b><br>Free and open source. No account, no tracking.</p>
 <p align="center"><a href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><b>Download for Mac</b></a> · <a href="https://shotleaf.syvyj.dev">Website</a> · <a href="https://shotleaf.syvyj.dev/guide/">Guide</a> · <a href="#uk">Українська ↓</a></p>
 
 Screenshots and clipboard history for the Mac. Shotleaf lives in the menu bar:
@@ -112,7 +112,7 @@ If Shotleaf saves you time, you can [support the author](https://shotleaf.syvyj.
 <a name="uk"></a>
 <p align="center"><img src="App/Assets.xcassets/AppIcon.appiconset/icon_256x256@2x.png" width="128" height="128" alt="Іконка Shotleaf"></p>
 <h1 align="center">Shotleaf</h1>
-<p align="center"><b>Скріншоти, історія буфера обміну, сніпети й дописування тексту для Mac.</b><br>Безкоштовний, з відкритим кодом, усе лишається на вашому Mac.</p>
+<p align="center"><b>Скріншоти, історія буфера обміну, сніпети й дописування тексту для Mac.</b><br>Безкоштовний і з відкритим кодом. Без акаунта й стеження.</p>
 <p align="center"><a href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><b>Завантажити для Mac</b></a> · <a href="https://shotleaf.syvyj.dev/uk/">Сайт</a> · <a href="https://shotleaf.syvyj.dev/uk/guide/">Посібник</a> · <a href="#en">↑ English</a></p>
 
 Скріншоти та історія буфера обміну для Mac. Shotleaf живе в рядку меню:
