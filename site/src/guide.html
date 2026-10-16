@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>[[Guide — Shotleaf||Посібник — Shotleaf]]</title>
+<meta name="description" content="[[How to use Shotleaf: screenshots, text from the screen, clipboard history, snippets, text completion and settings, step by step.||Як користуватися Shotleaf: скріншоти, текст з екрана, історія буфера обміну, сніпети, дописування тексту й налаштування, крок за кроком.]]">
+<meta property="og:type" content="article">
+<meta property="og:url" content="{{url}}">
+<meta property="og:title" content="[[Shotleaf guide||Посібник Shotleaf]]">
+<meta property="og:description" content="[[Everything Shotleaf does and how, step by step.||Усе, що вміє Shotleaf, і як цим користуватися, крок за кроком.]]">
+<meta property="og:image" content="{{og}}">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="{{root}}assets/favicon.png">
+<link rel="alternate" hreflang="{{other_lang}}" href="{{other}}">
+<link rel="preload" href="{{root}}fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{root}}fonts/geist-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{root}}style.css?v={{ver}}">
+<script>document.documentElement.classList.add("js"); setTimeout(() => document.documentElement.classList.add("ready"), 2500);</script>
+</head>
+<body>
+{{icons}}
+
+<div class="wrap nav">
+  <div class="bar-in">
+    <a class="brand" href="{{home}}"><img src="{{root}}assets/icon.png" alt="">Shotleaf</a>
+    <a class="l" href="{{home}}#features">[[Features||Можливості]]</a>
+    <a class="l on" href="{{home}}guide/" aria-current="page">[[Guide||Посібник]]</a>
+    <a class="l" href="{{home}}privacy/">[[Privacy||Приватність]]</a>
+    <a class="l lang" href="{{other}}" lang="{{other_lang}}">[[UA||EN]]</a>
+    <a class="btn primary" href="{{download}}">[[Download||Завантажити]]</a>
+  </div>
+</div>
+
+<main class="wrap guide">
+  <header class="guide-head">
+    <p class="eyebrow">[[Guide||Посібник]]</p>
+    <h1 data-split>[[How Shotleaf works||Як працює Shotleaf]]</h1>
+    <p class="lead">[[Everything it does, step by step: what to press, what you’ll see and what to do if something doesn’t work. The pictures are Shotleaf’s own windows.||Усе, що він уміє, крок за кроком: що натиснути, що ви побачите і що робити, якщо щось не працює. На картинках справжні вікна Shotleaf.]]</p>
+  </header>
+
+  <div class="guide-layout">
+    <nav class="toc" aria-label="[[Contents||Зміст]]">
+      <p>[[Contents||Зміст]]</p>
+      <ol>
+        <li><a href="#start">[[First launch||Перший запуск]]</a></li>
+        <li><a href="#screenshots">[[Screenshots||Скріншоти]]</a></li>
+        <li><a href="#editor">[[The editor||Редактор]]</a></li>
+        <li><a href="#scrolling">[[Scrolling screenshots||Довгі скріншоти]]</a></li>
+        <li><a href="#text">[[Text from the screen||Текст з екрана]]</a></li>
+        <li><a href="#clipboard">[[Clipboard history||Історія буфера]]</a></li>
+        <li><a href="#snippets">[[Snippets||Сніпети]]</a></li>
+        <li><a href="#completion">[[Text completion||Дописування тексту]]</a></li>
+        <li><a href="#photos">[[Watermark photos||Водяні знаки на фото]]</a></li>
+        <li><a href="#settings">[[Settings||Налаштування]]</a></li>
+        <li><a href="#help">[[If something doesn’t work||Якщо щось не працює]]</a></li>
+      </ol>
+    </nav>
+
+    <div class="guide-body">
+
+<section id="start">
+  <h2>[[First launch||Перший запуск]]</h2>
+  <ol class="steps">
+    <li>[[Download <code>Shotleaf.zip</code>, open it and drag <b>Shotleaf</b> into <b>Applications</b>.||Завантажте <code>Shotleaf.zip</code>, відкрийте його й перетягніть <b>Shotleaf</b> у <b>Програми</b>.]]</li>
+    <li>[[Open Shotleaf. The first time, macOS says it can’t check the app: Shotleaf isn’t notarised by Apple yet. Open <b>System Settings › Privacy &amp; Security</b>, scroll down and click <b>Open Anyway</b>. You do this once.||Відкрийте Shotleaf. Першого разу macOS скаже, що не може перевірити програму: Shotleaf поки не нотаризований Apple. Відкрийте <b>Системні параметри › Приватність і безпека</b>, прогорніть униз і натисніть <b>Усе одно відкрити</b>. Це потрібно зробити один раз.]]</li>
+    <li>[[The setup guide opens. Allow the two permissions it asks for. After you turn one on in System Settings, Shotleaf restarts by itself.||Відкриється майстер налаштування. Дайте два дозволи, які він просить. Щойно ви ввімкнете дозвіл у Системних параметрах, Shotleaf сам перезапуститься.]]</li>
+  </ol>
+  <figure><img data-shot="setup" alt="[[The setup guide with both permissions on||Майстер налаштування з обома дозволами]]"></figure>
+  <dl class="defs">
+    <dt>[[Screen Recording||Запис екрана]]</dt><dd>[[For screenshots and for text from the screen. Without it a screenshot shows only the desktop picture.||Для скріншотів і тексту з екрана. Без нього на знімку видно лише шпалери.]]</dd>
+    <dt>[[Accessibility||Універсальний доступ]]</dt><dd>[[To paste from the clipboard history into the app you were in, to expand snippets as you type, and for text completion.||Щоб вставляти з історії буфера в програму, де ви були, розгортати сніпети під час набору і дописувати текст.]]</dd>
+  </dl>
+  <p>[[Text completion also needs its language model, Gemma 4 E2B (about 3.6 GB). Download it from the setup guide or later in <b>Settings › Completion</b>. Everything else works without it.||Дописуванню тексту ще потрібна мовна модель Gemma 4 E2B (близько 3,6 ГБ). Завантажте її з майстра або пізніше в <b>Налаштуваннях › Дописування</b>. Усе інше працює і без неї.]]</p>
+  <p>[[Shotleaf lives in the menu bar: the leaf icon at the top of the screen. Every tool is also on a shortcut.||Shotleaf живе в рядку меню: значок листка вгорі екрана. Кожен інструмент має й сполучення клавіш.]]</p>
+</section>
+
+<section id="screenshots">
+  <h2>[[Screenshots||Скріншоти]]</h2>
+  <p>[[Press <kbd>⌘⇧2</kbd>. The screen dims, and a magnifier follows the pointer so you can aim to the pixel.||Натисніть <kbd>⌘⇧2</kbd>. Екран притіниться, а за вказівником ходитиме лупа, щоб цілитися з точністю до пікселя.]]</p>
+  <table class="keys">
+    <tr><td>[[Drag||Тягніть]]</td><td>[[an area; its size shows next to it||область; поруч видно її розмір]]</td></tr>
+    <tr><td>[[Click||Клік]]</td><td>[[the window under the pointer||вікно під вказівником]]</td></tr>
+    <tr><td><kbd>↩</kbd> [[or||або]] <kbd>F</kbd></td><td>[[the whole screen||увесь екран]]</td></tr>
+    <tr><td><kbd>R</kbd></td><td>[[the same area as last time||та сама область, що й минулого разу]]</td></tr>
+    <tr><td><kbd>S</kbd></td><td>[[switch to a scrolling screenshot||перемкнутися на довгий скріншот]]</td></tr>
+    <tr><td><kbd>C</kbd></td><td>[[copy the colour under the pointer as HEX, like #7CB342||скопіювати колір під вказівником як HEX, наприклад #7CB342]]</td></tr>
+    <tr><td><kbd>esc</kbd> [[or right click||або правий клік]]</td><td>[[cancel||скасувати]]</td></tr>
+  </table>
+  <p>[[The shot opens in the editor. To skip it, choose in <b>Settings › Screenshots › After a screenshot</b>: copy, save, or both.||Знімок відкривається в редакторі. Щоб обійтися без нього, виберіть у <b>Налаштуваннях › Скріншоти › Після знімка</b>: копіювати, зберегти або обидва.]]</p>
+  <h3>[[With a delay||Із затримкою]]</h3>
+  <p>[[To catch an open menu or a tooltip, take the screenshot from the menu bar: <b>Screenshot with Delay</b>, 3, 5 or 10 seconds. A countdown shows at the top of the screen; it never gets into the shot. A delay for every shot is in <b>Settings › Screenshots</b>.||Щоб зняти відкрите меню чи підказку, зробіть знімок із рядка меню: <b>Скріншот із затримкою</b>, 3, 5 чи 10 секунд. Угорі екрана йде зворотний відлік; на знімок він не потрапляє. Затримку для всіх знімків можна поставити в <b>Налаштуваннях › Скріншоти</b>.]]</p>
+  <h3>[[Back to an earlier shot||Повернутися до попереднього знімка]]</h3>
+  <p>[[<kbd>⌃⌥⌘E</kbd> opens the last screenshot in the editor again, as it was taken. The menu bar keeps the last ten under <b>Recent Screenshots</b>, even after a restart. <kbd>⌃⌥⌘V</kbd> opens any picture from the clipboard in the editor, to mark it up like a screenshot.||<kbd>⌃⌥⌘E</kbd> знову відкриває останній знімок у редакторі, таким, яким він був зроблений. У рядку меню в <b>Недавніх знімках</b> лишаються останні десять, навіть після перезапуску. <kbd>⌃⌥⌘V</kbd> відкриває в редакторі будь-яку картинку з буфера, щоб позначити її, як скріншот.]]</p>
+</section>
+
+<section id="editor">
+  <h2>[[The editor||Редактор]]</h2>
+  <p>[[Tools are along the top, what to do with the result along the bottom. Each tool has a key, so you rarely need the mouse to switch.||Угорі інструменти, внизу дії з результатом. Кожен інструмент має клавішу, тож мишка для перемикання майже не потрібна.]]</p>
+  <figure><img data-shot="editor" alt="[[The editor with a box, an arrow, a step number, a callout and a blurred line||Редактор із рамкою, стрілкою, номером кроку, виноскою й розмитим рядком]]"></figure>
+  <table class="keys">
+    <tr><td><kbd>1</kbd></td><td>[[Arrow. The arrow button’s menu also has the box and the oval.||Стрілка. У меню кнопки стрілки ще рамка й овал.]]</td></tr>
+    <tr><td><kbd>2</kbd> · <kbd>O</kbd></td><td>[[Box · Oval||Рамка · Овал]]</td></tr>
+    <tr><td><kbd>3</kbd></td><td>[[Text: a callout on a bubble||Текст: виноска на плашці]]</td></tr>
+    <tr><td><kbd>4</kbd> · <kbd>D</kbd></td><td>[[Marker · Pen||Маркер · Перо]]</td></tr>
+    <tr><td><kbd>5</kbd></td><td>[[Blur: hides names, numbers, faces||Розмиття: ховає імена, номери, обличчя]]</td></tr>
+    <tr><td><kbd>6</kbd></td><td>[[Steps: each click drops the next number, 1, 2, 3||Кроки: кожен клік ставить наступний номер, 1, 2, 3]]</td></tr>
+    <tr><td><kbd>7</kbd></td><td>[[Erase: paints over with the colour around, wipes text off a plain background||Гумка: зафарбовує кольором довкола, стирає текст із рівного фону]]</td></tr>
+    <tr><td><kbd>8</kbd></td><td>[[Cut: moves a piece of the picture||Вирізати: переносить шматок картинки]]</td></tr>
+    <tr><td><kbd>9</kbd></td><td>[[Focus: dims everything except the area||Фокус: притіняє все, крім області]]</td></tr>
+    <tr><td><kbd>C</kbd> · <kbd>M</kbd></td><td>[[Crop · Ruler (length in pixels)||Обрізати · Лінійка (довжина в пікселях)]]</td></tr>
+    <tr><td><kbd>0</kbd></td><td>[[Select: click a mark to move, resize or delete it (<kbd>⌫</kbd>)||Вибір: клацніть позначку, щоб пересунути, змінити розмір чи видалити (<kbd>⌫</kbd>)]]</td></tr>
+  </table>
+  <p>[[The colour, line width and text size are next to the tools. <kbd>⌘Z</kbd> undoes, <kbd>⇧⌘Z</kbd> redoes. You can change the keys or hide tools you don’t use in <b>Settings › Tools</b>.||Колір, товщина лінії й розмір тексту поруч з інструментами. <kbd>⌘Z</kbd> скасовує, <kbd>⇧⌘Z</kbd> повертає. Клавіші можна змінити, а зайві інструменти сховати в <b>Налаштуваннях › Інструменти</b>.]]</p>
+  <h3>[[What to do with the result||Що робити з результатом]]</h3>
+  <table class="keys">
+    <tr><td><kbd>⌘C</kbd></td><td>[[Copy. The editor then closes by itself; to keep it open, turn that off in Settings › Screenshots.||Копіювати. Після цього редактор закривається сам; щоб лишався, вимкніть це в Налаштуваннях › Скріншоти.]]</td></tr>
+    <tr><td><kbd>⌘S</kbd></td><td>[[Save to the folder from Settings (the Desktop at first). The arrow next to it saves as PNG, JPEG, HEIC or PDF wherever you choose.||Зберегти в теку з налаштувань (спершу це Робочий стіл). Стрілка поруч зберігає як PNG, JPEG, HEIC чи PDF туди, куди ви виберете.]]</td></tr>
+    <tr><td>[[Drag||Перетягніть]]</td><td>[[the picture (with Select, <kbd>0</kbd>) straight into a chat, an email or a folder||картинку (у режимі Вибір, <kbd>0</kbd>) одразу в чат, лист чи теку]]</td></tr>
+    <tr><td><kbd>P</kbd></td><td>[[Pin: the shot floats over your windows while you work. Hover it to copy or close it.||Закріпити: знімок висить поверх вікон, поки ви працюєте. Наведіть на нього, щоб скопіювати чи закрити.]]</td></tr>
+    <tr><td>[[Link||Посилання]]</td><td>[[The link button uploads the shot and copies a link that works for 1, 6 or 12 hours, then the picture is deleted.||Кнопка посилання завантажує знімок і копіює посилання, яке працює 1, 6 чи 12 годин; потім знімок видаляється.]]</td></tr>
+    <tr><td>[[Share||Поділитися]]</td><td>[[AirDrop, Messages, Mail and the rest of the system share menu||AirDrop, Повідомлення, Пошта та інше з системного меню «Поділитися»]]</td></tr>
+    <tr><td><kbd>T</kbd></td><td>[[Text: select words right on the screenshot, <kbd>⌘C</kbd> copies them||Текст: виділяйте слова просто на знімку, <kbd>⌘C</kbd> копіює їх]]</td></tr>
+    <tr><td><kbd>esc</kbd></td><td>[[Close||Закрити]]</td></tr>
+  </table>
+  <figure class="small"><img data-shot="pinned" alt="[[A pinned screenshot||Закріплений знімок]]"></figure>
+  <h3>[[Background and watermark||Фон і водяний знак]]</h3>
+  <p>[[<b>Background</b> puts the shot on a gradient or a colour, with rounded corners and a margin you set: good for posts and presentations. For a photo, the same menu can remove its background and keep the subject. The signature button stamps your watermark: text or a logo, in one of nine spots, with its size, see-through and tilt.||<b>Фон</b> кладе знімок на градієнт чи колір, із заокругленими кутами й відступом на ваш вибір: зручно для дописів і презентацій. Для фото те саме меню вміє прибрати фон і лишити головне. Кнопка з підписом ставить ваш водяний знак: текст чи логотип в одному з дев’яти місць, з розміром, прозорістю й нахилом.]]</p>
+  <figure><img data-shot="editor-background" alt="[[A screenshot on a green background, with a watermark||Знімок на зеленому фоні з водяним знаком]]"></figure>
+</section>
+
+<section id="scrolling">
+  <h2>[[Scrolling screenshots||Довгі скріншоти]]</h2>
+  <p>[[For anything longer than the screen: a web page, a chat, a table.||Для всього, що довше за екран: сторінки, чату, таблиці.]]</p>
+  <ol class="steps">
+    <li>[[Press <kbd>⌘⇧3</kbd> (or <kbd>S</kbd> in the usual picker) and select the part that scrolls.||Натисніть <kbd>⌘⇧3</kbd> (або <kbd>S</kbd> у звичайному виборі області) і виділіть ту частину, що прокручується.]]</li>
+    <li>[[Scroll down slowly, at your own pace. The bar under the area shows the height so far.||Повільно прокручуйте вниз у своєму темпі. Смужка під областю показує, скільки вже знято.]]</li>
+    <li>[[Press <b>Done</b> or <kbd>↩</kbd>. The long shot opens in the editor.||Натисніть <b>Готово</b> або <kbd>↩</kbd>. Довгий знімок відкриється в редакторі.]]</li>
+  </ol>
+  <p class="note">[[If the bar says <b>Too fast</b>, scroll back up a little and go on slower. Headers that stay in place (a site’s top bar) appear in the result once.||Якщо смужка пише <b>Занадто швидко</b>, прокрутіть трохи назад і продовжуйте повільніше. Шапки, що стоять на місці (верхня панель сайту), у результаті будуть один раз.]]</p>
+</section>
+
+<section id="text">
+  <h2>[[Text from the screen||Текст з екрана]]</h2>
+  <p>[[Press <kbd>⌘⇧1</kbd> and select any area: a picture, a video, a dialog you can’t copy from. Its text opens in a small window, where you can fix it before copying. <kbd>⌘↩</kbd> copies it all.||Натисніть <kbd>⌘⇧1</kbd> і виділіть будь-яку область: картинку, відео, вікно, з якого не копіюється. Текст відкриється в маленькому вікні, де його можна виправити перед копіюванням. <kbd>⌘↩</kbd> копіює все.]]</p>
+  <figure><img data-shot="text" alt="[[Text read off a screenshot, ready to copy||Текст, прочитаний зі знімка, готовий до копіювання]]"></figure>
+  <p>[[It’s recognised on your Mac, works offline and reads Ukrainian, English and the other languages macOS knows.||Текст розпізнається на вашому Mac, працює без інтернету й читає українську, англійську та інші мови, які знає macOS.]]</p>
+</section>
+
+<section id="clipboard">
+  <h2>[[Clipboard history||Історія буфера обміну]]</h2>
+  <p>[[Everything you copy is kept: text, links, pictures, files and colours. Press <kbd>⇧⌘V</kbd> and the panel opens next to the pointer.||Усе, що ви копіюєте, зберігається: текст, посилання, картинки, файли й кольори. Натисніть <kbd>⇧⌘V</kbd>, і панель відкриється біля вказівника.]]</p>
+  <figure><img data-shot="clipboard" alt="[[The clipboard panel: the history on the left, the selected entry on the right||Панель буфера: історія ліворуч, вибраний запис праворуч]]"></figure>
+  <table class="keys">
+    <tr><td><kbd>↩</kbd></td><td>[[paste into the app you were in||вставити в програму, де ви були]]</td></tr>
+    <tr><td><kbd>1</kbd>–<kbd>9</kbd></td><td>[[paste that row at once||одразу вставити цей рядок]]</td></tr>
+    <tr><td><kbd>⌥↩</kbd></td><td>[[paste as plain text, without formatting||вставити без форматування]]</td></tr>
+    <tr><td><kbd>⌘↩</kbd></td><td>[[only copy, don’t paste||лише скопіювати, не вставляти]]</td></tr>
+    <tr><td><kbd>⌘P</kbd></td><td>[[pin: pinned entries stay when the history is cleared||закріпити: закріплене лишається, коли історію очищують]]</td></tr>
+    <tr><td><kbd>⌘E</kbd></td><td>[[open a picture in the screenshot editor||відкрити картинку в редакторі скріншотів]]</td></tr>
+    <tr><td><kbd>⌘⌫</kbd></td><td>[[delete the entry||видалити запис]]</td></tr>
+    <tr><td><kbd>⇧Tab</kbd></td><td>[[only text, links, pictures, colours or files||лише текст, посилання, картинки, кольори чи файли]]</td></tr>
+    <tr><td><kbd>Tab</kbd></td><td>[[switch to the snippets||перейти до сніпетів]]</td></tr>
+  </table>
+  <h3>[[Search||Пошук]]</h3>
+  <p>[[Just start typing. It finds any word, including words inside pictures and screenshots.||Просто почніть друкувати. Знаходить будь-яке слово, зокрема слова на картинках і скріншотах.]]</p>
+  <figure><img data-shot="clipboard-search" alt="[[Search in the clipboard history||Пошук в історії буфера]]"></figure>
+  <h3>[[Several at once||Кілька одразу]]</h3>
+  <p>[[Mark entries with <kbd>⌘</kbd>-click or <kbd>⇧↓</kbd> / <kbd>⇧↑</kbd>. Then <kbd>↩</kbd> pastes them together, a line each, and <kbd>⌘↩</kbd> one by one: the first now, and each next <kbd>⇧⌘V</kbd> pastes the next. Handy for filling a form field by field.||Позначайте записи <kbd>⌘</kbd>-кліком або <kbd>⇧↓</kbd> / <kbd>⇧↑</kbd>. Тоді <kbd>↩</kbd> вставляє їх разом, кожен з нового рядка, а <kbd>⌘↩</kbd> по черзі: перший одразу, а кожне наступне <kbd>⇧⌘V</kbd> вставляє наступний. Зручно заповнювати форму поле за полем.]]</p>
+  <h3>[[Quick actions||Швидкі дії]]</h3>
+  <p>[[<kbd>⌘K</kbd> shows what you can do with the entry before pasting: clean a link of trackers, change the case, join lines into one, trim spaces, format JSON, save it as a snippet.||<kbd>⌘K</kbd> показує, що можна зробити із записом перед вставкою: очистити посилання від трекерів, змінити регістр, з’єднати рядки, прибрати зайві пробіли, відформатувати JSON, зберегти як сніпет.]]</p>
+  <figure><img data-shot="clipboard-actions" alt="[[Quick actions for a link||Швидкі дії для посилання]]"></figure>
+  <h3>[[Privacy||Приватність]]</h3>
+  <ul>
+    <li>[[Passwords that password managers mark as private are never kept, and nothing is kept from the apps in <b>Settings › Clipboard › Never keep copies from</b>.||Паролі, які менеджери паролів позначають як приватні, не зберігаються ніколи, а з програм у <b>Налаштуваннях › Буфер обміну › Не зберігати скопійоване з</b> не зберігається нічого.]]</li>
+    <li>[[Text that looks like a card number or an access token never reaches the disk and is gone from the history after a minute.||Текст, схожий на номер картки чи токен доступу, не записується на диск і зникає з історії через хвилину.]]</li>
+    <li>[[The menu bar can pause the history for 5 minutes or clear it. By default it keeps 200 entries, pictures for 30 days; both are in Settings.||З рядка меню історію можна призупинити на 5 хвилин або очистити. Типово вона тримає 200 записів, картинки 30 днів; обидва числа є в налаштуваннях.]]</li>
+  </ul>
+</section>
+
+<section id="snippets">
+  <h2>[[Snippets||Сніпети]]</h2>
+  <p>[[Text you type often, saved once: replies, signatures, addresses, bank details. Use them in two ways:||Текст, який ви часто набираєте, збережений один раз: відповіді, підписи, адреси, реквізити. Ними можна користуватися двома способами:]]</p>
+  <ul>
+    <li>[[<b>By abbreviation.</b> Type it in any app, like <code>;reply</code>, and it turns into the full text.||<b>Скороченням.</b> Наберіть його в будь-якій програмі, наприклад <code>;відп</code>, і воно перетвориться на повний текст.]]</li>
+    <li>[[<b>From the panel.</b> <kbd>⇧⌘B</kbd>, or <kbd>Tab</kbd> in the clipboard panel. Folders are on the left (<kbd>←</kbd> <kbd>→</kbd>), <kbd>↩</kbd> pastes.||<b>З панелі.</b> <kbd>⇧⌘B</kbd> або <kbd>Tab</kbd> у панелі буфера. Ліворуч папки (<kbd>←</kbd> <kbd>→</kbd>), <kbd>↩</kbd> вставляє.]]</li>
+  </ul>
+  <figure><img data-shot="snippets" alt="[[Snippets in the panel, by folder||Сніпети в панелі, за папками]]"></figure>
+  <h3>[[Fill-ins and questions||Підстановки й запитання]]</h3>
+  <table class="keys">
+    <tr><td><code>{date}</code> · <code>{time}</code></td><td>[[today’s date, the time now||сьогоднішня дата, поточний час]]</td></tr>
+    <tr><td><code>{clipboard}</code></td><td>[[what you copied last||те, що ви скопіювали останнім]]</td></tr>
+    <tr><td><code>{cursor}</code></td><td>[[where the cursor ends up after pasting||де опиниться курсор після вставки]]</td></tr>
+    <tr><td><code>{?Name}</code></td><td>[[a question: the panel asks for it before pasting||запитання: панель спитає його перед вставкою]]</td></tr>
+  </table>
+  <figure><img data-shot="snippets-question" alt="[[A snippet asking for a name before it’s pasted||Сніпет питає ім’я перед вставкою]]"></figure>
+  <h3>[[The snippet editor||Редактор сніпетів]]</h3>
+  <p>[[<b>Edit Snippets…</b> in the panel or the menu bar. Coloured folders on the left, snippets in the middle, the one you’re editing on the right with its abbreviation, folder and pictures (they’re pasted along with the text). <b>Share…</b> on a folder gives its texts and pictures as files, to send to a colleague.||<b>Редагувати сніпети…</b> у панелі чи в рядку меню. Ліворуч кольорові папки, посередині сніпети, праворуч той, що ви редагуєте, з його скороченням, папкою й картинками (вони вставляються разом із текстом). <b>Поділитися…</b> на папці дає її тексти й картинки файлами, щоб надіслати колезі.]]</p>
+  <figure><img data-shot="snippet-editor" alt="[[The snippet editor||Редактор сніпетів]]"></figure>
+</section>
+
+<section id="completion">
+  <h2>[[Text completion||Дописування тексту]]</h2>
+  <p>[[As you type in any app, a grey suggestion appears after the cursor. Take it or ignore it and keep typing.||Поки ви пишете в будь-якій програмі, після курсора з’являється сіра підказка. Прийміть її або не зважайте й пишіть далі.]]</p>
+  <table class="keys">
+    <tr><td><kbd>Tab</kbd></td><td>[[take the next word||взяти наступне слово]]</td></tr>
+    <tr><td><kbd>⌥Tab</kbd></td><td>[[take the whole suggestion||взяти всю підказку]]</td></tr>
+    <tr><td><kbd>esc</kbd></td><td>[[hide it||сховати її]]</td></tr>
+    <tr><td><kbd>:</kbd>[[word||слово]]</td><td>[[emoji by name: <code>:fire</code> offers 🔥; more letters narrow the list, <kbd>1</kbd>–<kbd>9</kbd> or a click picks||емодзі за назвою: <code>:fire</code> пропонує 🔥; наступні літери звужують список, <kbd>1</kbd>–<kbd>9</kbd> або клік вибирає]]</td></tr>
+  </table>
+  <p>[[A misspelled word gets a fix you take with <kbd>Tab</kbd> too. The model runs on your Mac: nothing you type is sent anywhere.||Слово з помилкою отримує виправлення, яке теж береться клавішею <kbd>Tab</kbd>. Модель працює на вашому Mac: нічого з набраного нікуди не надсилається.]]</p>
+  <p>[[In <b>Settings › Completion</b>: <b>Suggestions</b> from cautious (only sure, short ones) to bold; <b>Use text on screen</b>, so suggestions fit the chat or page you’re answering; <b>Use what I just copied</b>; and <b>Learn my style</b>: a few of your own texts, kept on this Mac only, so suggestions sound like you. <b>Forget what I wrote</b> deletes them.||У <b>Налаштуваннях › Дописування</b>: <b>Підказки</b> від обережних (лише певні й короткі) до сміливих; <b>Враховувати текст на екрані</b>, щоб підказки пасували до переписки чи сторінки, на яку ви відповідаєте; <b>Враховувати щойно скопійоване</b>; і <b>Вчитися мого стилю</b>: кілька ваших текстів, лише на цьому Mac, щоб підказки звучали як ви. <b>Забути мої тексти</b> їх видаляє.]]</p>
+  <figure><img data-shot="settings-completion" alt="[[Settings › Completion||Налаштування › Дописування]]"></figure>
+</section>
+
+<section id="photos">
+  <h2>[[Watermark photos||Водяні знаки на фото]]</h2>
+  <p>[[<b>Watermark Photos…</b> in the menu bar puts one watermark on a whole folder of photos. Drop the photos in, set the text or logo, its size, see-through and tilt, and pick a spot for all of them. Any single photo can have its own spot, or you drag the mark by hand.||<b>Водяний знак на фото…</b> у рядку меню ставить один водяний знак на цілу папку фото. Перетягніть фото у вікно, задайте текст чи логотип, розмір, прозорість і нахил та виберіть місце для всіх. Будь-якому фото можна дати своє місце або пересунути знак вручну.]]</p>
+  <figure><img data-shot="watermark-photos" alt="[[Watermarking six photos at once||Водяний знак одразу на шість фото]]"></figure>
+  <p>[[The results go to a <b>Watermarked</b> folder. Photos keep their size, colour profile and camera details; the originals stay untouched.||Результати йдуть у теку <b>Watermarked</b>. Фото зберігають розмір, колірний профіль і дані про зйомку; оригінали не змінюються.]]</p>
+</section>
+
+<section id="settings">
+  <h2>[[Settings||Налаштування]]</h2>
+  <p>[[Open them from the menu bar: <b>Settings…</b>||Відкриваються з рядка меню: <b>Налаштування…</b>]]</p>
+  <h3>[[Turn off what you don’t need||Вимкніть непотрібне]]</h3>
+  <p>[[<b>General › Features</b> has a switch for each tool. One you turn off leaves the menu, frees its shortcuts for other apps and stops working in the background. Its settings and data stay, for when you turn it back on. Here too: the language (English or Ukrainian), sounds, the Dock icon and opening at login.||У <b>Загальних › Функції</b> є перемикач для кожного інструмента. Вимкнений зникає з меню, звільняє свої сполучення клавіш для інших програм і перестає працювати у фоні. Його налаштування й дані лишаються, на випадок, якщо ввімкнете знову. Тут же мова (українська чи англійська), звуки, значок у Dock і запуск під час входу.]]</p>
+  <figure><img data-shot="settings-general" alt="[[Settings › General||Налаштування › Загальні]]"></figure>
+  <h3>[[Your own shortcuts||Свої сполучення клавіш]]</h3>
+  <p>[[<b>Shortcuts</b>: click a shortcut and press the new one. <kbd>⌘⇧3</kbd> is also the macOS full-screen screenshot, and some apps use <kbd>⇧⌘V</kbd> or <kbd>⇧⌘B</kbd>; if one clashes with something you need, change it here.||<b>Гарячі клавіші</b>: клацніть сполучення й натисніть нове. <kbd>⌘⇧3</kbd> у macOS ще й знімок усього екрана, а деякі програми використовують <kbd>⇧⌘V</kbd> чи <kbd>⇧⌘B</kbd>; якщо щось заважає потрібному вам, змініть тут.]]</p>
+  <figure><img data-shot="settings-shortcuts" alt="[[Settings › Shortcuts||Налаштування › Гарячі клавіші]]"></figure>
+</section>
+
+<section id="help">
+  <h2>[[If something doesn’t work||Якщо щось не працює]]</h2>
+  <details>
+    <summary>[[Screenshots show only the desktop picture, or pasting stopped working after an update||На знімках лише шпалери або вставка перестала працювати після оновлення]]</summary>
+    <p>[[macOS may stop trusting the new copy with its permissions even though the switches still look on. Open <b>System Settings › Privacy &amp; Security</b>, remove Shotleaf with <b>–</b> from <b>Screen Recording</b> and <b>Accessibility</b>, then allow it again. Shotleaf restarts by itself.||macOS може перестати довіряти новій версії дозволи, хоча перемикачі виглядають увімкненими. Відкрийте <b>Системні параметри › Приватність і безпека</b>, приберіть Shotleaf кнопкою <b>–</b> з <b>Запису екрана</b> й <b>Універсального доступу</b>, потім дозвольте знову. Shotleaf перезапуститься сам.]]</p>
+  </details>
+  <details>
+    <summary>[[A shortcut does nothing||Сполучення клавіш нічого не робить]]</summary>
+    <p>[[Another app may be using it: change it in <b>Settings › Shortcuts</b>. Also check that its tool is on in <b>Settings › General › Features</b>. If your keyboard goes through a keyboard-sharing app (Deskflow, Synergy, Barrier), it sends symbols rather than keys, so shortcuts with digits can depend on the layout on each computer; a shortcut with a letter works in any layout.||Можливо, його використовує інша програма: змініть його в <b>Налаштуваннях › Гарячі клавіші</b>. Перевірте також, що інструмент увімкнено в <b>Налаштуваннях › Загальні › Функції</b>. Якщо клавіатура працює через програму спільного доступу (Deskflow, Synergy, Barrier), та передає символи, а не клавіші, тож сполучення з цифрами можуть залежати від розкладки на кожному комп’ютері; сполучення з буквою працює в будь-якій розкладці.]]</p>
+  </details>
+  <details>
+    <summary>[[Snippets don’t expand, or nothing is pasted from the history||Сніпети не розгортаються або з історії нічого не вставляється]]</summary>
+    <p>[[Both need the Accessibility permission: see <b>Settings › Permissions</b>. Snippets also need their tool on in <b>General › Features</b>.||Обом потрібен дозвіл Універсального доступу: дивіться <b>Налаштування › Дозволи</b>. Сніпетам ще потрібно, щоб їхній інструмент був увімкнений у <b>Загальних › Функції</b>.]]</p>
+  </details>
+  <details>
+    <summary>[[No grey suggestions as I type||Під час набору немає сірих підказок]]</summary>
+    <p>[[Check that the model is downloaded in <b>Settings › Completion</b> and that text completion is on in <b>General › Features</b>. Some apps don’t let other apps read their text fields, and there are no suggestions in password fields.||Перевірте, що модель завантажена в <b>Налаштуваннях › Дописування</b> і що дописування ввімкнене в <b>Загальних › Функції</b>. Деякі програми не дають іншим читати свої текстові поля, а в полях для паролів підказок немає.]]</p>
+  </details>
+  <details>
+    <summary>[[How do I remove everything?||Як видалити все?]]</summary>
+    <p>[[<b>Settings › General › Delete All Shotleaf Data…</b> deletes the history, snippets, recent screenshots, your writing style, the model and the settings, then quits. Then drag Shotleaf from Applications to the Bin.||<b>Налаштування › Загальні › Видалити всі дані Shotleaf…</b> видаляє історію, сніпети, недавні скріншоти, ваш стиль письма, модель і налаштування, а потім закриває програму. Після цього перетягніть Shotleaf із Програм у Смітник.]]</p>
+  </details>
+  <p class="note">[[Still stuck? Write to <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a> or open an <a href="https://github.com/Syvyj/shotleaf/issues">issue on GitHub</a>. If Shotleaf crashed, attach the newest <code>Shotleaf-*.ips</code> file from <code>~/Library/Logs/DiagnosticReports</code>.||Не вийшло? Напишіть на <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a> або створіть <a href="https://github.com/Syvyj/shotleaf/issues">issue на GitHub</a>. Якщо Shotleaf упав, додайте найновіший файл <code>Shotleaf-*.ips</code> з <code>~/Library/Logs/DiagnosticReports</code>.]]</p>
+</section>
+
+    </div>
+  </div>
+</main>
+
+<footer class="wrap">
+  <span>© 2026 [[Oleksii Ziuzin||Олексій Зюзін]]</span>
+  <a href="https://syvyj.dev">syvyj.dev</a>
+  <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a>
+  <a href="{{home}}privacy/">[[Privacy||Приватність]]</a>
+  <a href="{{other}}" lang="{{other_lang}}">[[Українська||English]]</a>
+  <small>[[Icons||Іконки]]: <a href="https://icon-sets.iconify.design/solar/">Solar</a>, CC BY 4.0 · [[Font||Шрифт]]: Geist, OFL</small>
+</footer>
+
+<script src="{{root}}vendor/gsap.min.js" defer></script>
+<script src="{{root}}vendor/ScrollTrigger.min.js" defer></script>
+<script src="{{root}}vendor/lenis.min.js" defer></script>
+<script src="{{root}}motion.js?v={{ver}}" defer></script>
+</body>
+</html>

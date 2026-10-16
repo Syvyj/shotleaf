@@ -6,7 +6,18 @@
   const root = document.documentElement;
   const done = () => root.classList.add("ready");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // The guide's contents: the section being read is marked (not motion, so always on).
+  const toc = [...document.querySelectorAll(".toc a")];
+  if (toc.length) {
+    const seen = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) toc.forEach((a) => a.classList.toggle("on", a.hash === "#" + e.target.id));
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    toc.forEach((a) => { const s = document.querySelector(a.hash); if (s) seen.observe(s); });
+  }
+
   if (reduce || !window.gsap || !window.ScrollTrigger) return done();
+  const has = (selector) => document.querySelector(selector) !== null;
 
   // Word split. Screen readers get the heading's text once; the moving words are
   // hidden from them. A nested element (the framed word) moves as one piece.
@@ -59,7 +70,7 @@
 
   // Hero: navigation, the text under the heading and the buttons never wait for the intro.
   const out = (i) => (i % 2 ? 1 : -1) * 16, down = (i) => (i < 2 ? -1 : 1) * 16;
-  gsap.timeline({ defaults: { ease: "power3.out" } })
+  if (has(".hero")) gsap.timeline({ defaults: { ease: "power3.out" } })
     .from(".hero h1 .w:not(.el) .wi", { yPercent: 105, duration: .8, stagger: .045 }, .05)
     .from(".hero h1 .w.el .wi", { yPercent: 40, autoAlpha: 0, duration: .7 }, .05)
     .from(".hero .frame > i", { x: out, y: down, autoAlpha: 0, duration: .55, stagger: .05, ease: "back.out(2.2)" }, .45)
@@ -71,6 +82,7 @@
   addEventListener("resize", measure);
 
   // Section headings, word by word as they arrive.
+  if (has(".guide-head")) gsap.from(".guide-head h1 .wi", { yPercent: 105, duration: .8, stagger: .05, ease: "power3.out" });
   document.querySelectorAll("main h2[data-split]").forEach((h) => {
     gsap.from(h.querySelectorAll(".wi"), {
       yPercent: 105, duration: .8, stagger: .04, ease: "power3.out",
@@ -79,21 +91,21 @@
   });
 
   // Then the copy and the windows under them.
-  const rise = ".head > p, .tool .about, .tool .stagebox, .feats .feat, .facts li, .install li, .give a, .final-box > p, .final-box .btn";
-  gsap.set(rise, { y: 34, autoAlpha: 0 });
-  ScrollTrigger.batch(rise, {
+  const rise = [...document.querySelectorAll(".head > p, .tool .about, .tool .stagebox, .feats .feat, .facts li, .install li, .give a, .final-box > p, .final-box .btn, .guide-body figure")];
+  if (rise.length) gsap.set(rise, { y: 34, autoAlpha: 0 });
+  if (rise.length) ScrollTrigger.batch(rise, {
     start: "top 90%", once: true,
     onEnter: (els) => gsap.to(els, { y: 0, autoAlpha: 1, duration: .75, stagger: .07, ease: "power3.out", overwrite: true, clearProps: "transform,opacity,visibility" }),
   });
 
   // The closing frame snaps around the last call to action.
-  gsap.from(".final-box > i", {
+  if (has(".final-box")) gsap.from(".final-box > i", {
     x: (i) => -out(i) * 2.5, y: (i) => -down(i) * 2.5, autoAlpha: 0, duration: .7, stagger: .05, ease: "back.out(1.8)",
     scrollTrigger: { trigger: ".final-box", start: "top 80%", once: true },
   });
 
   // The privacy band opens from a rounded selection to the full width while it scrolls in.
-  gsap.fromTo(".band", { clipPath: "inset(0% 3% round 40px)" }, {
+  if (has(".band")) gsap.fromTo(".band", { clipPath: "inset(0% 3% round 40px)" }, {
     clipPath: "inset(0% 0% round 0px)", ease: "none",
     scrollTrigger: { trigger: ".band", start: "top bottom", end: "top 30%", scrub: true },
   });

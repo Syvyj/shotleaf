@@ -30,6 +30,26 @@ def donate_block():
     return '<div class="give">\n        ' + "\n        ".join(cards) + "\n      </div>"
 
 
+def webp_size(path):
+    """Width and height of a WebP file (VP8X, VP8L or VP8), from its header."""
+    data = open(path, "rb").read(30)
+    if data[12:16] == b"VP8X":
+        return 1 + int.from_bytes(data[24:27], "little"), 1 + int.from_bytes(data[27:30], "little")
+    if data[12:16] == b"VP8L":
+        bits = int.from_bytes(data[21:25], "little")
+        return (bits & 0x3FFF) + 1, ((bits >> 14) & 0x3FFF) + 1
+    return int.from_bytes(data[26:28], "little") & 0x3FFF, int.from_bytes(data[28:30], "little") & 0x3FFF
+
+
+def shots(page, lang, root):
+    """<img data-shot="editor"> → that guide picture in this language, with its size (no jump while it loads)."""
+    def one(m):
+        rel = f"assets/guide/{m.group(1)}-{lang}.webp"
+        w, h = webp_size(os.path.join(HERE, rel))
+        return f'src="{root}{rel}" width="{w}" height="{h}" loading="lazy" decoding="async"'
+    return re.sub(r'data-shot="([\w-]+)"', one, page)
+
+
 def render(template, lang, folder=""):
     """`folder` is where the English page lives ("" or "privacy/"); the Ukrainian one is under uk/."""
     side = 0 if lang == "en" else 1
@@ -44,6 +64,7 @@ def render(template, lang, folder=""):
               "other": root + there, "other_lang": "uk" if lang == "en" else "en",
               "url": SITE + here, "og": f"{SITE}assets/og-{lang}.png"}
     page = re.sub(r"\{\{(\w+)\}\}", lambda m: values[m.group(1)], page)
+    page = shots(page, lang, root)
     assert "[[" not in page and "{{" not in page, f"unfilled placeholder in {lang}"
     return page
 
@@ -55,7 +76,7 @@ def write(out, text):
     print("wrote", out)
 
 
-for name, folder in [("page.html", ""), ("privacy.html", "privacy/")]:
+for name, folder in [("page.html", ""), ("guide.html", "guide/"), ("privacy.html", "privacy/")]:
     template = open(os.path.join(HERE, "src", name), encoding="utf-8").read()
     write(folder + "index.html", render(template, "en", folder))
     write("uk/" + folder + "index.html", render(template, "uk", folder))
