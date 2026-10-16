@@ -3978,6 +3978,96 @@
           }
         }
       }
+    },
+    "Download Shotleaf %@…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажити Shotleaf %@…"
+          }
+        }
+      }
+    },
+    "Shotleaf %@ is out": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вийшов Shotleaf %@"
+          }
+        }
+      }
+    },
+    "You have %@. Download the new version, open it and drag Shotleaf onto Applications over the old one; your settings and permissions stay.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У вас %@. Завантажте нову версію, відкрийте її й перетягніть Shotleaf на «Програми» поверх старої; налаштування й дозволи збережуться."
+          }
+        }
+      }
+    },
+    "Later": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пізніше"
+          }
+        }
+      }
+    },
+    "Shotleaf is up to date": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У вас найновіший Shotleaf"
+          }
+        }
+      }
+    },
+    "%@ is the newest version.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — найновіша версія."
+          }
+        }
+      }
+    },
+    "Check for updates automatically": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перевіряти оновлення автоматично"
+          }
+        }
+      }
+    },
+    "Once a day Shotleaf asks GitHub for its newest version. Nothing about you is sent.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Раз на день Shotleaf питає в GitHub, яка версія найновіша. Нічого про вас не надсилається."
+          }
+        }
+      }
+    },
+    "Version %@ is out: download": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вийшла версія %@: завантажити"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

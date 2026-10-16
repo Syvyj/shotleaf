@@ -12,6 +12,10 @@ public struct MenuBarRootView: View {
     }
 
     public var body: some View {
+        if let update = coordinator.update {
+            Button("Download Shotleaf \(update.version)…") { NSWorkspace.shared.open(update.download) }
+            Divider()
+        }
         if coordinator.isOn(.screenshots) {
             Button(Self.label(String(localized: "Screenshot…"), coordinator.actionHotkeys[.capture])) {
                 coordinator.takeScreenshot()
@@ -98,7 +102,7 @@ public struct MenuBarRootView: View {
         }
         .keyboardShortcut(",")
         Button("Setup Guide…") { coordinator.showOnboarding() }
-        Button("Check for Updates…") { NSWorkspace.shared.open(AppInfo.releases) }
+        Button("Check for Updates…") { coordinator.checkForUpdatesNow() }
         Button("Support the Author…") { NSWorkspace.shared.open(AppInfo.supportPage) }
 
         Divider()

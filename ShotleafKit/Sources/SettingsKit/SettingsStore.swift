@@ -30,6 +30,12 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "showInDock") }
     }
 
+    /// Ask GitHub once a day whether a newer Shotleaf is out.
+    public var checksForUpdates: Bool {
+        get { defaults.object(forKey: "checksForUpdates") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "checksForUpdates") }
+    }
+
     /// Inline completion as you type (needs the built-in model).
     public var completionEnabled: Bool {
         get { defaults.object(forKey: "completionEnabled") as? Bool ?? true }

@@ -58,6 +58,7 @@ public final class AppCoordinator {
             showOnboarding()
         }
         restartWhenGranted(missing)
+        startUpdateChecks()
         if UserDefaults.standard.bool(forKey: Self.reopenSettingsKey) {
             UserDefaults.standard.removeObject(forKey: Self.reopenSettingsKey)
             openSettingsWindow()
@@ -440,6 +441,58 @@ public final class AppCoordinator {
                 window.makeKeyAndOrderFront(nil)
                 window.orderFrontRegardless()
                 return
+            }
+        }
+    }
+
+    // MARK: Updates
+
+    /// A newer release than this one, once a check has found it (shown in the menu).
+    public private(set) var update: Updates.Release?
+    public var checksForUpdates: Bool { container.settings.checksForUpdates }
+    private var updateTask: Task<Void, Never>?
+
+    public func setChecksForUpdates(_ on: Bool) {
+        container.settings.checksForUpdates = on
+        startUpdateChecks()
+    }
+
+    /// At launch, then once a day while Shotleaf runs.
+    private func startUpdateChecks() {
+        updateTask?.cancel()
+        guard checksForUpdates else { update = nil; return }
+        updateTask = Task { [weak self] in
+            var launch = true
+            while !Task.isCancelled {
+                let last = UserDefaults.standard.object(forKey: "lastUpdateCheck") as? Date ?? .distantPast
+                if launch || Date().timeIntervalSince(last) > 86_400, let release = try? await Updates.latest() {
+                    UserDefaults.standard.set(Date(), forKey: "lastUpdateCheck")
+                    self?.update = Updates.isNewer(release.version, than: Updates.current) ? release : nil
+                }
+                launch = false
+                try? await Task.sleep(for: .seconds(3600))
+            }
+        }
+    }
+
+    /// "Check for Updates…": the answer right away, in a window.
+    public func checkForUpdatesNow() {
+        Task {
+            guard let release = try? await Updates.latest() else { NSWorkspace.shared.open(AppInfo.releases); return }
+            let newer = Updates.isNewer(release.version, than: Updates.current)
+            update = newer ? release : nil
+            let alert = NSAlert()
+            NSApp.activate(ignoringOtherApps: true)
+            if newer {
+                alert.messageText = String(localized: "Shotleaf \(release.version) is out")
+                alert.informativeText = String(localized: "You have \(Updates.current). Download the new version, open it and drag Shotleaf onto Applications over the old one; your settings and permissions stay.")
+                alert.addButton(withTitle: String(localized: "Download"))
+                alert.addButton(withTitle: String(localized: "Later"))
+                if alert.runModal() == .alertFirstButtonReturn { NSWorkspace.shared.open(release.download) }
+            } else {
+                alert.messageText = String(localized: "Shotleaf is up to date")
+                alert.informativeText = String(localized: "\(Updates.current) is the newest version.")
+                alert.runModal()
             }
         }
     }

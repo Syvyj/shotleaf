@@ -60,7 +60,7 @@ A shortcut doesn't fire? Another app may be using it. If your keyboard goes thro
 
 ## Privacy
 
-Shotleaf has no account and sends nothing anywhere. Text recognition and completion run on your Mac. The only network requests are the model download from Hugging Face (when you ask for it) and screenshot links: when you press the link button, the picture goes to Shotleaf's link service on Cloudflare (`s.syvyj.dev`, code in `server/links`) and is deleted when the link expires, 12 hours at most. You can use your own server instead (`server/shots`).
+Shotleaf has no account and sends nothing anywhere. Text recognition and completion run on your Mac. The only network requests are the model download from Hugging Face (when you ask for it), the check for a new version (at launch and once a day Shotleaf asks GitHub which release is the newest; nothing about you is sent, and it can be turned off in **Settings › General**) and screenshot links: when you press the link button, the picture goes to Shotleaf's link service on Cloudflare (`s.syvyj.dev`, code in `server/links`) and is deleted when the link expires, 12 hours at most. You can use your own server instead (`server/shots`).
 
 Passwords copied from password managers aren't kept in the history.
 
@@ -171,7 +171,7 @@ macOS може перестати довіряти новій версії до�
 
 ## Приватність
 
-У Shotleaf немає облікового запису, і він нічого нікуди не надсилає. Розпізнавання тексту й дописування працюють на вашому Mac. Єдині запити в мережу: завантаження моделі з Hugging Face (коли ви про це попросите) і посилання на скріншоти. Коли ви натискаєте кнопку посилання, картинка йде в сервіс посилань Shotleaf на Cloudflare (`s.syvyj.dev`, код у `server/links`) і видаляється, коли посилання спливає, щонайбільше за 12 годин. Замість нього можна підключити власний сервер (`server/shots`).
+У Shotleaf немає облікового запису, і він нічого нікуди не надсилає. Розпізнавання тексту й дописування працюють на вашому Mac. Єдині запити в мережу: завантаження моделі з Hugging Face (коли ви про це попросите), перевірка нової версії (під час запуску й раз на день Shotleaf питає в GitHub, який реліз найновіший; нічого про вас не надсилається, а вимкнути її можна в **Налаштуваннях › Загальні**) і посилання на скріншоти. Коли ви натискаєте кнопку посилання, картинка йде в сервіс посилань Shotleaf на Cloudflare (`s.syvyj.dev`, код у `server/links`) і видаляється, коли посилання спливає, щонайбільше за 12 годин. Замість нього можна підключити власний сервер (`server/shots`).
 
 Паролі, скопійовані з менеджерів паролів, в історії не зберігаються.
 

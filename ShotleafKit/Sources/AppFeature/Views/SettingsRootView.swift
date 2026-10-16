@@ -135,6 +135,9 @@ public struct SettingsRootView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: AppInfo.name).font(Leaf.font(18, .bold))
                     Text(Self.version).foregroundStyle(.secondary)
+                    if let update = coordinator.update {
+                        Link("Version \(update.version) is out: download", destination: update.download).fontWeight(.semibold)
+                    }
                     Text(verbatim: AppInfo.copyright).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -269,6 +272,10 @@ public struct SettingsRootView: View {
                 Text(verbatim: "Українська").tag("uk")
             }
             Toggle("Sounds", isOn: $sounds)
+            Toggle(isOn: Binding(get: { coordinator.checksForUpdates }, set: { coordinator.setChecksForUpdates($0) })) {
+                Text("Check for updates automatically")
+                Text("Once a day Shotleaf asks GitHub for its newest version. Nothing about you is sent.")
+            }
             Toggle("Open Shotleaf at login", isOn: Binding(
                 get: { coordinator.launchAtLogin },
                 set: { coordinator.setLaunchAtLogin($0) }
