@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+
+- Text from a screenshot: ⌘C copies all the text and closes the window, as in the screenshot editor. With part of the text selected, ⌘C copies just that and the window stays open.
+
 ## 0.1.1
 
 - Shotleaf tells you when a new version is out: it checks GitHub at launch and once a day, and a newer release shows at the top of the menu and in Settings › General. "Check for Updates…" now answers right away. The check sends nothing about you and can be turned off in Settings › General.
