@@ -36,7 +36,8 @@ ditto "$APP" "$STAGE/Shotleaf.app"
 ln -s /Applications "$STAGE/Applications"
 hdiutil create -quiet -volname Shotleaf -srcfolder "$STAGE" -fs HFS+ -format UDZO -ov "$OUT/Shotleaf.dmg"
 rm -rf "$STAGE"
-codesign --force --timestamp=none -s "$IDENTITY" "$OUT/Shotleaf.dmg"
+# The disk image stays unsigned: macOS blocks a quarantined image signed by a certificate it
+# doesn't know before it even opens; an unsigned one opens, and only the app asks.
 (cd "$OUT" && shasum -a 256 Shotleaf.dmg > Shotleaf.dmg.sha256)
 echo "Shotleaf $VERSION ($BUILD): $OUT/Shotleaf.dmg ($(du -h "$OUT/Shotleaf.dmg" | cut -f1))"
 cat "$OUT/Shotleaf.dmg.sha256"
