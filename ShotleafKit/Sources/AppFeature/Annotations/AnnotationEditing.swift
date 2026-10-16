@@ -149,6 +149,14 @@ enum AnnotationEditing {
         return b
     }
 
+    /// A Shift-drawn pen line: the end turned to the nearest 45° from `a`.
+    static func angleSnapped(_ a: CGPoint, _ b: CGPoint) -> CGPoint {
+        let step = CGFloat.pi / 4
+        let angle = (atan2(b.y - a.y, b.x - a.x) / step).rounded() * step
+        let length = hypot(b.x - a.x, b.y - a.y)
+        return CGPoint(x: a.x + (cos(angle) * length).rounded(), y: a.y + (sin(angle) * length).rounded())
+    }
+
     static func distance(from p: CGPoint, toSegment a: CGPoint, _ b: CGPoint) -> CGFloat {
         let dx = b.x - a.x, dy = b.y - a.y
         let len2 = dx * dx + dy * dy

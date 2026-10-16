@@ -757,7 +757,10 @@ struct ScreenshotView: View {
         case .cut:
             guard big else { return nil }
             return final ? .piece(source: rect, offset: .zero, fill: sampled()) : .rectangle(rect) // outline while selecting
-        case .pen: return penPoints.isEmpty ? nil : .pen(penPoints)
+        case .pen:
+            // Shift: a straight line from where the stroke began, level, plumb or at 45°.
+            if NSEvent.modifierFlags.contains(.shift) { return hypot(b.x - a.x, b.y - a.y) > 4 ? .pen([a, AnnotationEditing.angleSnapped(a, b)]) : nil }
+            return penPoints.isEmpty ? nil : .pen(penPoints)
         case .text, .step: return nil
         }
     }
