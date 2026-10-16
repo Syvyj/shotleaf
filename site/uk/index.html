@@ -16,7 +16,7 @@
 <link rel="alternate" hreflang="en" href="../">
 <link rel="preload" href="../fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/geist-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../style.css?v=6e0f2271">
+<link rel="stylesheet" href="../style.css?v=bf022c8c">
 <!-- Motion is an extra: without JS (or if it fails to start) the page shows as is. -->
 <script>document.documentElement.classList.add("js"); setTimeout(() => document.documentElement.classList.add("ready"), 2500);</script>
 </head>
@@ -45,8 +45,8 @@
     <a class="brand" href="./"><img src="../assets/icon.png" alt="">Shotleaf</a>
     <a class="l" href="#features">Можливості</a>
     <a class="l" href="../uk/guide/">Посібник</a>
-    <a class="l" href="#private">Приватність</a>
     <a class="l" href="#support">Підтримати</a>
+    <a class="l" href="#private">Приватність</a>
     <a class="l" href="#install">Встановити</a>
     <a class="l lang" href="../" lang="en">EN</a>
     <a class="btn primary" href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.zip">Завантажити</a>
@@ -337,8 +337,22 @@
   </div>
 </section>
 
-<section class="band" id="private">
+<section class="band" id="support">
   <div class="wrap">
+    <svg class="spark" aria-hidden="true"><use href="#spark"/></svg>
+    <p class="eyebrow">Підтримати автора</p>
+    <h2 data-split>Підтримайте Shotleaf</h2>
+    <p>Я розробляю Shotleaf сам. Якщо він вам корисний, можете підтримати розробку донатом.</p>
+    <div class="give">
+        <a href="https://ko-fi.com/syvyj" target="_blank" rel="noopener"><b>Ko-fi</b><small>Картка чи PayPal</small></a>
+        <a href="https://buymeacoffee.com/syvyj" target="_blank" rel="noopener"><b>Buy Me a Coffee</b><small>Кава, будь-яка сума</small></a>
+        <a href="https://send.monobank.ua/jar/5juJPj142b" target="_blank" rel="noopener"><b>Банка Monobank</b><small>Картка, Apple Pay, Google Pay</small></a>
+      </div>
+  </div>
+</section>
+
+<section class="wrap" id="private">
+  <div class="private-card">
     <div class="head">
       <p class="eyebrow">Приватний за задумом</p>
       <h2 data-split>Усе лишається на вашому Mac</h2>
@@ -352,19 +366,6 @@
       <li><svg aria-hidden="true"><use href="#i-code-square"/></svg><b>Відкритий код</b><span>GPL-3.0: кожен рядок є на <a href="https://github.com/Syvyj/shotleaf">GitHub</a>.</span></li>
     </ul>
     <a class="more" href="../uk/privacy/">Сторінка приватності<svg aria-hidden="true"><use href="#i-arrow-right-up"/></svg></a>
-  </div>
-</section>
-
-<section class="wrap" id="support">
-  <div class="support">
-    <svg class="spark" aria-hidden="true"><use href="#logo"/></svg>
-    <h2 data-split>Підтримайте Shotleaf</h2>
-    <p>Я розробляю Shotleaf сам. Якщо він вам корисний, можете підтримати розробку донатом.</p>
-    <div class="give">
-        <a href="https://ko-fi.com/syvyj" target="_blank" rel="noopener"><b>Ko-fi</b><small>Картка чи PayPal</small></a>
-        <a href="https://buymeacoffee.com/syvyj" target="_blank" rel="noopener"><b>Buy Me a Coffee</b><small>Кава, будь-яка сума</small></a>
-        <a href="https://send.monobank.ua/jar/5juJPj142b" target="_blank" rel="noopener"><b>Банка Monobank</b><small>Картка, Apple Pay, Google Pay</small></a>
-      </div>
   </div>
 </section>
 
@@ -403,7 +404,7 @@
 <script src="../vendor/gsap.min.js" defer></script>
 <script src="../vendor/ScrollTrigger.min.js" defer></script>
 <script src="../vendor/lenis.min.js" defer></script>
-<script src="../motion.js?v=6e0f2271" defer></script>
-<script src="../mocks.js?v=6e0f2271" defer></script>
+<script src="../motion.js?v=bf022c8c" defer></script>
+<script src="../mocks.js?v=bf022c8c" defer></script>
 </body>
 </html>

@@ -34,8 +34,8 @@
     <a class="brand" href="./"><img src="{{root}}assets/icon.png" alt="">Shotleaf</a>
     <a class="l" href="#features">[[Features||Можливості]]</a>
     <a class="l" href="{{home}}guide/">[[Guide||Посібник]]</a>
-    <a class="l" href="#private">[[Privacy||Приватність]]</a>
     <a class="l" href="#support">[[Support||Підтримати]]</a>
+    <a class="l" href="#private">[[Privacy||Приватність]]</a>
     <a class="l" href="#install">[[Install||Встановити]]</a>
     <a class="l lang" href="{{other}}" lang="{{other_lang}}">[[UA||EN]]</a>
     <a class="btn primary" href="{{download}}">[[Download||Завантажити]]</a>
@@ -326,8 +326,18 @@
   </div>
 </section>
 
-<section class="band" id="private">
+<section class="band" id="support">
   <div class="wrap">
+    <svg class="spark" aria-hidden="true"><use href="#spark"/></svg>
+    <p class="eyebrow">[[Support the author||Підтримати автора]]</p>
+    <h2 data-split>[[Support Shotleaf||Підтримайте Shotleaf]]</h2>
+    <p>[[I develop Shotleaf on my own. If you find it useful, you can support its development with a donation.||Я розробляю Shotleaf сам. Якщо він вам корисний, можете підтримати розробку донатом.]]</p>
+    {{donate}}
+  </div>
+</section>
+
+<section class="wrap" id="private">
+  <div class="private-card">
     <div class="head">
       <p class="eyebrow">[[Private by design||Приватний за задумом]]</p>
       <h2 data-split>[[It stays on your Mac||Усе лишається на вашому Mac]]</h2>
@@ -341,15 +351,6 @@
       <li><svg aria-hidden="true"><use href="#i-code-square"/></svg><b>[[Open source||Відкритий код]]</b><span>[[GPL-3.0: every line is on <a href="https://github.com/Syvyj/shotleaf">GitHub</a>.||GPL-3.0: кожен рядок є на <a href="https://github.com/Syvyj/shotleaf">GitHub</a>.]]</span></li>
     </ul>
     <a class="more" href="{{home}}privacy/">[[Read the privacy page||Сторінка приватності]]<svg aria-hidden="true"><use href="#i-arrow-right-up"/></svg></a>
-  </div>
-</section>
-
-<section class="wrap" id="support">
-  <div class="support">
-    <svg class="spark" aria-hidden="true"><use href="#logo"/></svg>
-    <h2 data-split>[[Support Shotleaf||Підтримайте Shotleaf]]</h2>
-    <p>[[I develop Shotleaf on my own. If you find it useful, you can support its development with a donation.||Я розробляю Shotleaf сам. Якщо він вам корисний, можете підтримати розробку донатом.]]</p>
-    {{donate}}
   </div>
 </section>
 
