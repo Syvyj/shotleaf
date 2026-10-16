@@ -1,5 +1,7 @@
 # Shotleaf
 
+**English** · [Українська](README.uk.md)
+
 Screenshots and clipboard history for the Mac. Shotleaf lives in the menu bar:
 
 - **Screenshots** of an area, a window or the whole screen, with an editor for arrows, text, blur, backgrounds and watermarks.
@@ -9,7 +11,17 @@ Screenshots and clipboard history for the Mac. Shotleaf lives in the menu bar:
 - **Snippets**: type an abbreviation anywhere and it expands, with dates, questions and pictures.
 - **Text completion** as you type, from a small model that runs on your Mac.
 
-Website: [shotleaf.syvyj.dev](https://shotleaf.syvyj.dev)
+<p align="center"><img src="site/assets/guide/editor-en.webp" alt="The screenshot editor with a box, an arrow, a step number and a callout" width="800"></p>
+
+<table><tr>
+<td><img src="site/assets/guide/clipboard-en.webp" alt="Clipboard history"></td>
+<td><img src="site/assets/guide/snippets-en.webp" alt="Snippets"></td>
+</tr><tr>
+<td align="center">Clipboard history</td>
+<td align="center">Snippets</td>
+</tr></table>
+
+Website: [shotleaf.syvyj.dev](https://shotleaf.syvyj.dev) · [Guide](https://shotleaf.syvyj.dev/guide/) · [Download](https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg)
 
 ## Requirements
 
