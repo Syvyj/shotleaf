@@ -2,7 +2,7 @@
 # Build Shotleaf for release: Release config, Apple silicon, build number = commit count,
 # signed with the "Shotleaf Local Signing" certificate (scripts/make-signing-cert.sh) rather
 # than ad hoc, so macOS keeps the user's permissions across updates (ADR-0069).
-# Out: build/release/Shotleaf.zip and Shotleaf.zip.sha256.
+# Out: build/release/Shotleaf.dmg (the app and a link to Applications to drag it onto) and Shotleaf.dmg.sha256.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -30,6 +30,13 @@ if codesign -d --entitlements - "$APP" 2>/dev/null | grep -q get-task-allow; the
 [ "$(lipo -archs "$APP/Contents/MacOS/Shotleaf")" = arm64 ] || { echo "not arm64-only" >&2; exit 1; }
 
 VERSION=$(defaults read "$PWD/$APP/Contents/Info.plist" CFBundleShortVersionString)
-(cd "$OUT" && ditto -c -k --keepParent Shotleaf.app Shotleaf.zip && shasum -a 256 Shotleaf.zip > Shotleaf.zip.sha256)
-echo "Shotleaf $VERSION ($BUILD): $OUT/Shotleaf.zip ($(du -h "$OUT/Shotleaf.zip" | cut -f1))"
-cat "$OUT/Shotleaf.zip.sha256"
+STAGE="$OUT/dmg"
+mkdir -p "$STAGE"
+ditto "$APP" "$STAGE/Shotleaf.app"
+ln -s /Applications "$STAGE/Applications"
+hdiutil create -quiet -volname Shotleaf -srcfolder "$STAGE" -fs HFS+ -format UDZO -ov "$OUT/Shotleaf.dmg"
+rm -rf "$STAGE"
+codesign --force --timestamp=none -s "$IDENTITY" "$OUT/Shotleaf.dmg"
+(cd "$OUT" && shasum -a 256 Shotleaf.dmg > Shotleaf.dmg.sha256)
+echo "Shotleaf $VERSION ($BUILD): $OUT/Shotleaf.dmg ($(du -h "$OUT/Shotleaf.dmg" | cut -f1))"
+cat "$OUT/Shotleaf.dmg.sha256"
