@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Shotleaf tells you when a new version is out: it checks GitHub at launch and once a day, and a newer release shows at the top of the menu and in Settings › General. "Check for Updates…" now answers right away. The check sends nothing about you and can be turned off in Settings › General.
+
 ## 0.1.0 — first public release
 
 - Screenshots of an area, a window or the whole screen, with an editor: arrows, shapes, text, blur, crop, backgrounds and watermarks.
