@@ -13,7 +13,8 @@ public struct MenuBarRootView: View {
 
     public var body: some View {
         if let update = coordinator.update {
-            Button("Download Shotleaf \(update.version)…") { NSWorkspace.shared.open(update.download) }
+            Button(coordinator.updating ? "Updating Shotleaf…" : "Update to Shotleaf \(update.version)…") { coordinator.installUpdate() }
+                .disabled(coordinator.updating)
             Divider()
         }
         if coordinator.isOn(.screenshots) {

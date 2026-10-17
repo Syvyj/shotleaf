@@ -450,6 +450,8 @@ public final class AppCoordinator {
     /// A newer release than this one, once a check has found it (shown in the menu).
     public private(set) var update: Updates.Release?
     public var checksForUpdates: Bool { container.settings.checksForUpdates }
+    /// An update is downloading and being checked (Shotleaf restarts when it's ready).
+    public private(set) var updating = false
     private var updateTask: Task<Void, Never>?
 
     public func setChecksForUpdates(_ on: Bool) {
@@ -475,6 +477,38 @@ public final class AppCoordinator {
         }
     }
 
+    /// Downloads the update, checks it and restarts into it. Windows close with the
+    /// restart, so it asks first (unless that was just asked). If it can't, the
+    /// DMG can still be downloaded by hand.
+    public func installUpdate(confirmed: Bool = false) {
+        guard let release = update, !updating else { return }
+        NSApp.activate(ignoringOtherApps: true)
+        if !confirmed {
+            let ask = NSAlert()
+            ask.messageText = String(localized: "Update to Shotleaf \(release.version)?")
+            ask.informativeText = String(localized: "Shotleaf downloads it, checks it and restarts in a few seconds. Open screenshots close, so copy or save what you need first.")
+            ask.addButton(withTitle: String(localized: "Update"))
+            ask.addButton(withTitle: String(localized: "Later"))
+            guard ask.runModal() == .alertFirstButtonReturn else { return }
+        }
+        updating = true
+        Task {
+            do {
+                Updates.swapAndRelaunch(try await Updates.prepare(release))
+            } catch {
+                updating = false
+                Self.log.error("update failed: \(error.localizedDescription, privacy: .public)")
+                let alert = NSAlert()
+                alert.messageText = String(localized: "Couldn’t update Shotleaf")
+                alert.informativeText = error.localizedDescription + " " + String(localized: "You can download the new version and drag it onto Applications yourself.")
+                alert.addButton(withTitle: String(localized: "Download"))
+                alert.addButton(withTitle: String(localized: "Cancel"))
+                NSApp.activate(ignoringOtherApps: true)
+                if alert.runModal() == .alertFirstButtonReturn { NSWorkspace.shared.open(release.download) }
+            }
+        }
+    }
+
     /// "Check for Updates…": the answer right away, in a window.
     public func checkForUpdatesNow() {
         Task {
@@ -485,10 +519,10 @@ public final class AppCoordinator {
             NSApp.activate(ignoringOtherApps: true)
             if newer {
                 alert.messageText = String(localized: "Shotleaf \(release.version) is out")
-                alert.informativeText = String(localized: "You have \(Updates.current). Download the new version, open it and drag Shotleaf onto Applications over the old one; your settings and permissions stay.")
-                alert.addButton(withTitle: String(localized: "Download"))
+                alert.informativeText = String(localized: "You have \(Updates.current). Shotleaf downloads the new version, checks it and restarts; your settings and permissions stay.")
+                alert.addButton(withTitle: String(localized: "Update"))
                 alert.addButton(withTitle: String(localized: "Later"))
-                if alert.runModal() == .alertFirstButtonReturn { NSWorkspace.shared.open(release.download) }
+                if alert.runModal() == .alertFirstButtonReturn { installUpdate(confirmed: true) }
             } else {
                 alert.messageText = String(localized: "Shotleaf is up to date")
                 alert.informativeText = String(localized: "\(Updates.current) is the newest version.")

@@ -67,6 +67,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         #if DEBUG
+        if CommandLine.arguments.contains("--install-update") { // developer run: the in-app update, end to end
+            Task {
+                await coordinator.start()
+                for _ in 0..<60 where coordinator.update == nil { try? await Task.sleep(for: .seconds(0.5)) }
+                coordinator.installUpdate(confirmed: true)
+            }
+            return
+        }
         if let i = CommandLine.arguments.firstIndex(of: "--completion-live-test") { // developer run
             let args = CommandLine.arguments
             let text = args.count > i + 1 ? args[i + 1] : "Hi Anna, thanks for the update. I think we should"

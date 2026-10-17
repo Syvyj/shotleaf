@@ -136,7 +136,8 @@ public struct SettingsRootView: View {
                     Text(verbatim: AppInfo.name).font(Leaf.font(18, .bold))
                     Text(Self.version).foregroundStyle(.secondary)
                     if let update = coordinator.update {
-                        Link("Version \(update.version) is out: download", destination: update.download).fontWeight(.semibold)
+                        Button("Version \(update.version) is out: update") { coordinator.installUpdate() }
+                            .buttonStyle(.link).fontWeight(.semibold).disabled(coordinator.updating)
                     }
                     Text(verbatim: AppInfo.copyright).foregroundStyle(.secondary)
                 }

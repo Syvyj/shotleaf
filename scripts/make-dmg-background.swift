@@ -10,7 +10,7 @@ let app = CGPoint(x: 170, y: 210), apps = CGPoint(x: 470, y: 210) // icon centre
 func rgb(_ hex: UInt32, _ a: CGFloat = 1) -> NSColor {
     NSColor(srgbRed: CGFloat(hex >> 16 & 0xFF) / 255, green: CGFloat(hex >> 8 & 0xFF) / 255, blue: CGFloat(hex & 0xFF) / 255, alpha: a)
 }
-let forest = rgb(0x0E1A0B), deep = rgb(0x2D4A19), lime = rgb(0xC6E86B)
+let paper = rgb(0xF3F4EE), ink = rgb(0x0F150C), leaf = rgb(0x4F7F2A), fresh = rgb(0x8FBF3A), lime = rgb(0xC6E86B)
 
 func draw(scale: CGFloat, to url: URL) {
     let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size.width * scale), pixelsHigh: Int(size.height * scale),
@@ -23,18 +23,19 @@ func draw(scale: CGFloat, to url: URL) {
     let flipped = NSGraphicsContext(cgContext: ctx, flipped: true)
     NSGraphicsContext.current = flipped
 
-    // Deep forest with a soft glow where the icons stand.
-    forest.setFill(); CGRect(origin: .zero, size: size).fill()
-    let glow = NSGradient(colors: [deep.withAlphaComponent(0.9), forest.withAlphaComponent(0)])!
-    glow.draw(fromCenter: CGPoint(x: 320, y: 210), radius: 0, toCenter: CGPoint(x: 320, y: 210), radius: 330, options: [])
+    // The site's paper with a faint fresh glow where the icons stand. Light, because Finder
+    // writes the icons' names in black on a window with a picture, in light and dark mode.
+    paper.setFill(); CGRect(origin: .zero, size: size).fill()
+    NSGradient(colors: [lime.withAlphaComponent(0.35), paper.withAlphaComponent(0)])!
+        .draw(fromCenter: CGPoint(x: 320, y: 210), radius: 0, toCenter: CGPoint(x: 320, y: 210), radius: 330, options: [])
 
     // The line on top, in both languages.
     func text(_ s: String, _ font: NSFont, _ color: NSColor, y: CGFloat) {
         let a = NSAttributedString(string: s, attributes: [.font: font, .foregroundColor: color])
         a.draw(at: CGPoint(x: (size.width - a.size().width) / 2, y: y))
     }
-    text("Drag Shotleaf into Applications", .systemFont(ofSize: 20, weight: .semibold), .white, y: 44)
-    text("Перетягніть Shotleaf у Програми", .systemFont(ofSize: 14, weight: .regular), lime.withAlphaComponent(0.75), y: 74)
+    text("Drag Shotleaf into Applications", .systemFont(ofSize: 20, weight: .semibold), ink, y: 44)
+    text("Перетягніть Shotleaf у Програми", .systemFont(ofSize: 14, weight: .regular), leaf, y: 74)
 
     // Selection corners around each icon, as in the capture picker.
     for c in [app, apps] {
@@ -44,18 +45,14 @@ func draw(scale: CGFloat, to url: URL) {
                                  (CGPoint(x: r.minX, y: r.maxY), 1.0, -1.0), (CGPoint(x: r.maxX, y: r.maxY), -1.0, -1.0)] {
             p.move(to: CGPoint(x: corner.x, y: corner.y + dy * arm)); p.line(to: corner); p.line(to: CGPoint(x: corner.x + dx * arm, y: corner.y))
         }
-        lime.withAlphaComponent(0.55).setStroke(); p.stroke()
-        // A mid-tone plate under the name: Finder writes it black in light mode and
-        // white in dark mode, and both read on this.
-        rgb(0x8A9A7E, 0.9).setFill()
-        NSBezierPath(roundedRect: CGRect(x: c.x - 62, y: c.y + 59, width: 124, height: 24), xRadius: 12, yRadius: 12).fill()
+        leaf.withAlphaComponent(0.6).setStroke(); p.stroke()
     }
 
     // The arrow from the app to Applications.
     let arrow = NSBezierPath(); arrow.lineWidth = 4; arrow.lineCapStyle = .round; arrow.lineJoinStyle = .round
     arrow.move(to: CGPoint(x: 272, y: 210)); arrow.line(to: CGPoint(x: 366, y: 210))
     arrow.move(to: CGPoint(x: 352, y: 198)); arrow.line(to: CGPoint(x: 368, y: 210)); arrow.line(to: CGPoint(x: 352, y: 222))
-    lime.setStroke(); arrow.stroke()
+    fresh.setStroke(); arrow.stroke()
 
     NSGraphicsContext.restoreGraphicsState()
     try! rep.representation(using: .png, properties: [:])!.write(to: url)

@@ -3979,32 +3979,12 @@
         }
       }
     },
-    "Download Shotleaf %@…": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Завантажити Shotleaf %@…"
-          }
-        }
-      }
-    },
     "Shotleaf %@ is out": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Вийшов Shotleaf %@"
-          }
-        }
-      }
-    },
-    "You have %@. Download the new version, open it and drag Shotleaf onto Applications over the old one; your settings and permissions stay.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "У вас %@. Завантажте нову версію, відкрийте її й перетягніть Shotleaf на «Програми» поверх старої; налаштування й дозволи збережуться."
           }
         }
       }
@@ -4059,22 +4039,142 @@
         }
       }
     },
-    "Version %@ is out: download": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вийшла версія %@: завантажити"
-          }
-        }
-      }
-    },
     "Copy selection": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
             "value": "Копіювати виділене"
+          }
+        }
+      }
+    },
+    "Update to Shotleaf %@…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оновити до Shotleaf %@…"
+          }
+        }
+      }
+    },
+    "Updating Shotleaf…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оновлення Shotleaf…"
+          }
+        }
+      }
+    },
+    "Version %@ is out: update": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вийшла версія %@: оновити"
+          }
+        }
+      }
+    },
+    "Update": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оновити"
+          }
+        }
+      }
+    },
+    "Update to Shotleaf %@?": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оновити до Shotleaf %@?"
+          }
+        }
+      }
+    },
+    "Shotleaf downloads it, checks it and restarts in a few seconds. Open screenshots close, so copy or save what you need first.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shotleaf завантажить її, перевірить і перезапуститься за кілька секунд. Відкриті скріншоти закриються, тож скопіюйте чи збережіть потрібне."
+          }
+        }
+      }
+    },
+    "You have %@. Shotleaf downloads the new version, checks it and restarts; your settings and permissions stay.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У вас %@. Shotleaf завантажить нову версію, перевірить її і перезапуститься; налаштування й дозволи збережуться."
+          }
+        }
+      }
+    },
+    "Couldn’t update Shotleaf": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося оновити Shotleaf"
+          }
+        }
+      }
+    },
+    "You can download the new version and drag it onto Applications yourself.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Можна завантажити нову версію й перетягнути її в «Програми» самостійно."
+          }
+        }
+      }
+    },
+    "Shotleaf can’t replace itself in the folder it’s in.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shotleaf не може замінити себе в теці, де лежить."
+          }
+        }
+      }
+    },
+    "The download doesn’t match the release.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажене не збігається з релізом."
+          }
+        }
+      }
+    },
+    "The downloaded app isn’t signed like this one.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажений застосунок підписаний інакше, ніж цей."
+          }
+        }
+      }
+    },
+    "The downloaded disk image couldn’t be opened.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося відкрити завантажений образ диска."
           }
         }
       }

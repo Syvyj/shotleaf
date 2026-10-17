@@ -38,6 +38,10 @@ macOS 15 or later on Apple silicon (M1 or newer).
    Shotleaf restarts by itself after each one is turned on. Until both are on, the setup guide opens at every launch.
 4. Text completion needs its model, Gemma 4 E2B (about 3.6 GB). Download it from the setup guide or **Settings › Completion**. Everything else works without it.
 
+### Updates
+
+When a new version is out, **Update to Shotleaf…** appears at the top of the menu. Shotleaf downloads it, checks it against the release's checksum and its own signature, and restarts into it, with your settings and permissions. It looks for a new version at launch and once a day (turn that off in **Settings › General**). Versions before 0.1.3 can't do this yet: update those once by hand from [Releases](https://github.com/Syvyj/shotleaf/releases/latest), quitting Shotleaf first.
+
 ### After an update
 
 macOS may stop trusting the new copy with its permissions even though the switches still look on. If screenshots or pasting stop working, open **System Settings › Privacy & Security**, remove Shotleaf with **–** from **Screen Recording** and **Accessibility**, and allow it again.
@@ -148,6 +152,10 @@ macOS 15 або новіша на Apple silicon (M1 чи новіший).
 
    Після кожного дозволу Shotleaf перезапускається сам. Поки обидва не ввімкнені, посібник відкривається при кожному запуску.
 4. Для дописування тексту потрібна модель Gemma 4 E2B (близько 3,6 ГБ). Завантажте її з посібника або в **Налаштуваннях › Дописування**. Усе інше працює без неї.
+
+### Оновлення
+
+Коли виходить нова версія, угорі меню з’являється **Оновити до Shotleaf…**. Shotleaf завантажує її, звіряє з контрольною сумою релізу й зі своїм підписом і перезапускається вже в ній, з усіма налаштуваннями й дозволами. Нову версію він шукає під час запуску й раз на день (вимкнути можна в **Налаштуваннях › Загальні**). Версії до 0.1.3 так ще не вміють: їх один раз оновіть вручну з [Releases](https://github.com/Syvyj/shotleaf/releases/latest), спершу закривши Shotleaf.
 
 ### Після оновлення
 
