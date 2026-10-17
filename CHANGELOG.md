@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- Updates install themselves: **Update to Shotleaf…** in the menu downloads the new version, checks it against the release's checksum and Shotleaf's own signature, and restarts into it. No browser, no dragging, no "Open Anyway", and the settings and permissions stay. This works from 0.1.3 on; update to 0.1.3 itself by hand, quitting Shotleaf first.
+- The disk image's window is light, so the names under the icons read on any Mac.
+
 ## 0.1.2
 
 - Text from a screenshot: ⌘C copies all the text and closes the window, as in the screenshot editor. With part of the text selected, ⌘C copies just that and the window stays open.
