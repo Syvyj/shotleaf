@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+- Privacy: text completion no longer takes what a password manager copies, a card number or an access token as a hint. Until now only the clipboard history skipped them, so the model could offer a just-copied password back as a suggestion (it never left the Mac). Both now go through one check. Thanks to the person who spotted it.
+
 ## 0.1.3
 
 - Updates install themselves: **Update to Shotleaf…** in the menu downloads the new version, checks it against the release's checksum and Shotleaf's own signature, and restarts into it. No browser, no dragging, no "Open Anyway", and the settings and permissions stay. This works from 0.1.3 on; update to 0.1.3 itself by hand, quitting Shotleaf first.
