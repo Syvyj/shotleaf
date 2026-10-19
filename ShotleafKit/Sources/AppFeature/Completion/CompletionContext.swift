@@ -45,7 +45,8 @@ final class CompletionContext {
             let pasteboard = NSPasteboard.general
             if pasteboard.changeCount != clipboardChange {
                 clipboardChange = pasteboard.changeCount
-                clipboard = pasteboard.string(forType: .string).map { ($0, Date()) }
+                // Never a password or a token: the model could offer it back as a suggestion.
+                clipboard = pasteboard.string(forType: .string).flatMap { ClipboardHistory.isPrivate(pasteboard, text: $0) ? nil : ($0, Date()) }
             }
             if let clipboard, Date().timeIntervalSince(clipboard.at) < Self.clipboardMaxAge {
                 context.clipboard = clipboard.text

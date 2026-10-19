@@ -19,6 +19,23 @@ struct ClipboardHistoryTests {
         #expect(!ClipboardHistory.looksSensitive("Project ID: alpha-1234"))
     }
 
+    @Test("A password manager's concealed copy, a card number, a token: private for the history and for completion alike")
+    func privateCopies() {
+        let board = NSPasteboard(name: .init("shotleaf-test-\(UUID())"))
+        defer { board.releaseGlobally() }
+        board.clearContents()
+        board.declareTypes([.string, .init("org.nspasteboard.ConcealedType")], owner: nil)
+        board.setString("hunter2", forType: .string)
+        #expect(ClipboardHistory.isPrivate(board, text: "hunter2"))
+        board.clearContents()
+        board.setString("4111 1111 1111 1111", forType: .string)
+        #expect(ClipboardHistory.isPrivate(board, text: "4111 1111 1111 1111"))
+        #expect(!ClipboardHistory.isPrivate(board))  // the history keeps it a minute, in memory only
+        board.clearContents()
+        board.setString("See you at 14:00", forType: .string)
+        #expect(!ClipboardHistory.isPrivate(board, text: "See you at 14:00"))
+    }
+
     @Test("Reads text, files and images off a pasteboard; skips nothing-to-keep")
     func read() throws {
         let board = NSPasteboard(name: .init("shotleaf-test-\(UUID())"))
