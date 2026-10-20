@@ -84,22 +84,18 @@ final class CompletionContext {
     }
 
     /// On-device OCR, top to bottom (Ukrainian and English).
+    /// `perform` is synchronous, so the results are read right after it. (A completion
+    /// handler resumed a continuation, and a failed `perform` resumed it again: a
+    /// crash on screens Vision couldn't read.)
     private nonisolated static func recognize(_ image: CGImage) async -> String {
-        await withCheckedContinuation { continuation in
-            let request = VNRecognizeTextRequest { request, _ in
-                let lines = (request.results as? [VNRecognizedTextObservation] ?? [])
-                    .sorted { $0.boundingBox.minY > $1.boundingBox.minY }
-                    .compactMap { $0.topCandidates(1).first?.string }
-                continuation.resume(returning: lines.joined(separator: "\n"))
-            }
-            request.recognitionLevel = .accurate
-            request.recognitionLanguages = ["uk-UA", "en-US"]
-            request.usesLanguageCorrection = true
-            do {
-                try VNImageRequestHandler(cgImage: image).perform([request])
-            } catch {
-                continuation.resume(returning: "")
-            }
-        }
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.recognitionLanguages = ["uk-UA", "en-US"]
+        request.usesLanguageCorrection = true
+        guard (try? VNImageRequestHandler(cgImage: image).perform([request])) != nil else { return "" }
+        return (request.results ?? [])
+            .sorted { $0.boundingBox.minY > $1.boundingBox.minY }
+            .compactMap { $0.topCandidates(1).first?.string }
+            .joined(separator: "\n")
     }
 }
