@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5
+
+- Fixed a crash: with text completion reading the screen, Shotleaf could quit when macOS couldn't read the text of a window.
+
 ## 0.1.4
 
 - Privacy: text completion no longer takes what a password manager copies, a card number or an access token as a hint. Until now only the clipboard history skipped them, so the model could offer a just-copied password back as a suggestion (it never left the Mac). Both now go through one check. Thanks to the person who spotted it.
