@@ -117,7 +117,7 @@ xcodebuild -project Shotleaf.xcodeproj -scheme Shotleaf -configuration Debug COD
 ### 7.3 Канал зворотного зв'язку
 
 - [x] Шаблони issue: bug (версії підставляються з меню) і idea; config → Discussions
-- [ ] Увімкнути GitHub Discussions (Settings › General › Features — вручну на GitHub)
+- [x] Увімкнути GitHub Discussions
 - [x] «Повідомити про проблему…» у меню і в Settings › About → issues/new з уже заповненими версіями
 - [x] Сайт і README: посилання на Discussions, не на пошту
 
