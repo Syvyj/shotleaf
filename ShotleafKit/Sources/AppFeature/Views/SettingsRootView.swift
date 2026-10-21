@@ -146,6 +146,7 @@ public struct SettingsRootView: View {
                     Link("syvyj.dev", destination: AppInfo.website)
                     Link(AppInfo.email, destination: URL(string: "mailto:\(AppInfo.email)")!)
                     Link("Privacy", destination: AppInfo.privacyPage)
+                    Link("Report a problem", destination: AppInfo.newIssue)
                     Button("Third-party licences") { showNotices = true }.buttonStyle(.link)
                 }
             }
@@ -158,7 +159,7 @@ public struct SettingsRootView: View {
                 Image(systemName: "heart.fill").font(.title2).foregroundStyle(Leaf.leaf)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Shotleaf is free and open source").fontWeight(.semibold)
-                    Text("If it helps you, support its development.").foregroundStyle(.secondary)
+                    Text("Donations go towards Apple's developer licence ($99 a year), so Shotleaf installs without “Open Anyway”.").foregroundStyle(.secondary)
                 }
                 Spacer()
                 Button("Support the Author") { NSWorkspace.shared.open(AppInfo.supportPage) }
@@ -409,7 +410,7 @@ public struct SettingsRootView: View {
                 Picker("Images", selection: $clipboardImageDays) {
                     ForEach([7, 30, 90], id: \.self) { Text("\($0) days").tag($0) }
                 }
-                LabeledContent("Never keep copies from") {
+                LabeledContent {
                     VStack(alignment: .trailing, spacing: 4) {
                         // Defaults that aren't installed stay listed but out of sight.
                         ForEach(excludedApps.filter { NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0) != nil
@@ -422,6 +423,9 @@ public struct SettingsRootView: View {
                         }
                         Button("Add App…") { addExcludedApp() }
                     }
+                } label: {
+                    Text("Never in these apps")
+                    Text("No clipboard history and no text completion in them.")
                 }
                 Button("Clear History") { coordinator.clipboard.clear() }
             }
@@ -533,6 +537,8 @@ public struct SettingsRootView: View {
             }
         } header: {
             Text("Completion")
+        } footer: {
+            Text("Never in password fields, while secure input is on (sudo, password managers), in terminals, or in the apps listed under Clipboard › Never in these apps.")
         }
     }
 

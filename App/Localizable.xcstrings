@@ -1250,16 +1250,6 @@
         }
       }
     },
-    "If it helps you, support its development.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Якщо він вам допомагає, підтримайте розробку."
-          }
-        }
-      }
-    },
     "Image": {
       "localizations": {
         "uk": {
@@ -1576,16 +1566,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Потрібно, щоб читати виділений текст і вставляти результат."
-          }
-        }
-      }
-    },
-    "Never keep copies from": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Не зберігати скопійоване з"
           }
         }
       }
@@ -2636,16 +2616,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shotleaf безкоштовний і з відкритим кодом"
-          }
-        }
-      }
-    },
-    "Shotleaf is free and open source. If it saves you time, you can support its development. Shotleaf asks this only once.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shotleaf безкоштовний і з відкритим кодом. Якщо він заощаджує вам час, можете підтримати розробку. Shotleaf питає про це лише раз."
           }
         }
       }
@@ -4175,6 +4145,76 @@
           "stringUnit": {
             "state": "translated",
             "value": "Не вдалося відкрити завантажений образ диска."
+          }
+        }
+      }
+    },
+    "Never in these apps": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ніколи в цих програмах"
+          }
+        }
+      }
+    },
+    "No clipboard history and no text completion in them.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У них не ведеться історія буфера й не працює дописування."
+          }
+        }
+      }
+    },
+    "Never in password fields, while secure input is on (sudo, password managers), in terminals, or in the apps listed under Clipboard › Never in these apps.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ніколи в полях для паролів, під час захищеного вводу (sudo, менеджери паролів), у терміналах і в програмах зі списку Буфер обміну › Ніколи в цих програмах."
+          }
+        }
+      }
+    },
+    "Report a Problem…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повідомити про проблему…"
+          }
+        }
+      }
+    },
+    "Report a problem": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повідомити про проблему"
+          }
+        }
+      }
+    },
+    "Donations go towards Apple's developer licence ($99 a year), so Shotleaf installs without “Open Anyway”.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Донати йдуть на ліцензію розробника Apple ($99 на рік), щоб Shotleaf встановлювався без «Усе одно відкрити»."
+          }
+        }
+      }
+    },
+    "Shotleaf is free and open source. Donations go towards Apple's developer licence ($99 a year), so Shotleaf installs without “Open Anyway”. Shotleaf asks this only once.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shotleaf безкоштовний і з відкритим кодом. Донати йдуть на ліцензію розробника Apple ($99 на рік), щоб Shotleaf встановлювався без «Усе одно відкрити». Shotleaf питає про це лише раз."
           }
         }
       }

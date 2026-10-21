@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import Carbon.HIToolbox
 import SwiftUI
 import EmbeddedKit
 import OSLog
@@ -27,11 +28,19 @@ final class InlineCompletion {
     /// The model answers in ~50 ms now; waiting longer only feels slow.
     private static let debounce: Duration = .milliseconds(60)
 
-    /// Apps where completion only gets in the way.
-    nonisolated private static let excluded: Set<String> = [
+    /// Apps where completion only gets in the way (terminals), always; plus
+    /// the user's "Never in these apps" list, shared with the clipboard history.
+    nonisolated static let alwaysExcluded: Set<String> = [
         "com.apple.Terminal", "com.googlecode.iterm2", "dev.warp.Warp-Stable", "net.kovidgoyal.kitty",
-        "com.mitchellh.ghostty", "io.alacritty", "com.apple.keychainaccess", "com.1password.1password",
+        "com.mitchellh.ghostty", "io.alacritty",
     ]
+    nonisolated static func excludedApps(_ defaults: UserDefaults = .standard) -> Set<String> {
+        alwaysExcluded.union(ClipboardHistory.excludedApps(defaults))
+    }
+    /// Secure input is on (a password field, sudo in a terminal, a password
+    /// manager): macOS hides the keys from the tap, and Shotleaf reads no field
+    /// either, so nothing typed then can end up in a suggestion.
+    nonisolated static var inputIsSecure: Bool { IsSecureEventInputEnabled() }
     /// Chromium browsers expose their text to Accessibility only on request.
     private static let chromium: Set<String> = [
         "com.google.Chrome", "com.brave.Browser", "com.microsoft.edgemac", "company.thebrowser.Browser",
@@ -215,7 +224,9 @@ final class InlineCompletion {
     /// The focused field, read off the main thread: some apps take a while
     /// to answer Accessibility queries.
     private static func readField() async -> FocusedField? {
+        guard !inputIsSecure else { return nil }
         let top = NSScreen.screens.first?.frame.maxY ?? 0
+        let excluded = excludedApps()
         return await Task.detached { FocusedField.current(excluding: excluded, screenTop: top) }.value
     }
 

@@ -16,6 +16,9 @@ DONATE = [
     ("[[Monobank jar||Банка Monobank]]", "https://send.monobank.ua/jar/", "5juJPj142b", "[[Card, Apple Pay, Google Pay||Картка, Apple Pay, Google Pay]]"),
 ]
 
+# The donation goal (ADR-0069: no Developer ID yet). Update RAISED by hand after each donation.
+GOAL, RAISED = 99, 0
+
 # Where "Download" points: the newest GitHub release (ADR-0069).
 DOWNLOAD = "https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"
 
@@ -62,7 +65,7 @@ def render(template, lang, folder=""):
     root = "../" * here.count("/")
     # A new version of the CSS/JS gets a new URL, so browsers don't keep the old one.
     ver = hashlib.sha1(b"".join(open(os.path.join(HERE, f), "rb").read() for f in ("style.css", "mocks.js", "motion.js"))).hexdigest()[:8]
-    values = {"ver": ver, "download": DOWNLOAD, "lang": lang, "root": root, "home": root + ("" if lang == "en" else "uk/"),
+    values = {"ver": ver, "goal": str(GOAL), "raised": str(RAISED), "download": DOWNLOAD, "lang": lang, "root": root, "home": root + ("" if lang == "en" else "uk/"),
               "other": root + there, "other_lang": "uk" if lang == "en" else "en",
               "url": SITE + here, "og": f"{SITE}assets/og-{lang}.png"}
     page = re.sub(r"\{\{(\w+)\}\}", lambda m: values[m.group(1)], page)

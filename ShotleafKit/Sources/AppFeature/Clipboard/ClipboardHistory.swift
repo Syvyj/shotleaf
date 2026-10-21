@@ -49,17 +49,20 @@ final class ClipboardHistory {
     var queueTotal = 0
 
     // Settings → Clipboard (read live, so the Settings window just writes UserDefaults).
-    static let enabledKey = "clipboardEnabled", limitKey = "clipboardLimit", imageDaysKey = "clipboardImageDays", excludedKey = "clipboardExcluded"
+    nonisolated static let enabledKey = "clipboardEnabled", limitKey = "clipboardLimit", imageDaysKey = "clipboardImageDays", excludedKey = "clipboardExcluded"
     private var defaults: UserDefaults { .standard }
     var enabled: Bool { defaults.object(forKey: Self.enabledKey) as? Bool ?? true }
     var limit: Int { defaults.object(forKey: Self.limitKey) as? Int ?? 200 }
     var imageDays: Int { defaults.object(forKey: Self.imageDaysKey) as? Int ?? 30 }
-    /// Bundle IDs whose copies are never kept (one per line in UserDefaults).
-    var excludedApps: [String] {
-        (defaults.string(forKey: Self.excludedKey) ?? Self.defaultExcluded.joined(separator: "\n")).split(separator: "\n").map(String.init)
+    /// Bundle IDs whose copies are never kept (one per line in UserDefaults);
+    /// text completion stays off in them too.
+    var excludedApps: [String] { Self.excludedList(defaults) }
+    nonisolated static func excludedList(_ defaults: UserDefaults) -> [String] {
+        (defaults.string(forKey: excludedKey) ?? defaultExcluded.joined(separator: "\n")).split(separator: "\n").map(String.init)
     }
+    nonisolated static func excludedApps(_ defaults: UserDefaults = .standard) -> Set<String> { Set(excludedList(defaults)) }
 
-    static let defaultExcluded = ["com.1password.1password", "com.agilebits.onepassword7", "com.bitwarden.desktop",
+    nonisolated static let defaultExcluded = ["com.1password.1password", "com.agilebits.onepassword7", "com.bitwarden.desktop",
                                   "com.apple.keychainaccess", "com.apple.Passwords", "com.lastpass.LastPass", "com.dashlane.dashlanephonefinal"]
     /// Marks Shotleaf's own writes so they aren't recorded twice.
     static let ownType = NSPasteboard.PasteboardType("dev.syvyj.shotleaf.own")

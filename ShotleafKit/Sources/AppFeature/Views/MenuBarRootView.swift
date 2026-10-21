@@ -104,6 +104,7 @@ public struct MenuBarRootView: View {
         .keyboardShortcut(",")
         Button("Setup Guide…") { coordinator.showOnboarding() }
         Button("Check for Updates…") { coordinator.checkForUpdatesNow() }
+        Button("Report a Problem…") { NSWorkspace.shared.open(AppInfo.newIssue) }
         Button("Support the Author…") { NSWorkspace.shared.open(AppInfo.supportPage) }
 
         Divider()

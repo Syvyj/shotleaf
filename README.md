@@ -2,7 +2,7 @@
 <p align="center"><img src="App/Assets.xcassets/AppIcon.appiconset/icon_256x256@2x.png" width="128" height="128" alt="Shotleaf icon"></p>
 <h1 align="center">Shotleaf</h1>
 <p align="center"><b>Screenshots, clipboard history, snippets and text completion for the Mac.</b><br>Free and open source. No account, no tracking.</p>
-<p align="center"><a href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><b>Download for Mac</b></a> · <a href="https://shotleaf.syvyj.dev">Website</a> · <a href="https://shotleaf.syvyj.dev/guide/">Guide</a> · <a href="#uk">Українська ↓</a></p>
+<p align="center"><a href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><b>Download for Mac</b></a> · <a href="https://shotleaf.syvyj.dev">Website</a> · <a href="https://shotleaf.syvyj.dev/guide/">Guide</a> · <a href="#uk">Українська ↓</a><br><a href="https://github.com/Syvyj/shotleaf/actions/workflows/ci.yml"><img src="https://github.com/Syvyj/shotleaf/actions/workflows/ci.yml/badge.svg" alt="CI"></a></p>
 
 Screenshots and clipboard history for the Mac. Shotleaf lives in the menu bar:
 
@@ -103,9 +103,13 @@ Tests: `cd ShotleafKit && swift test`.
 
 The code is in the `ShotleafKit` Swift package (`Core`, `CaptureKit`, `PerceptionKit`, `SettingsKit`, `EmbeddedKit`, `AppFeature`); `App/` is the thin app target. Design decisions are in `ARCHITECTURE_DECISIONS.md`.
 
+## Questions, bugs, ideas
+
+Bugs and ideas go to [Issues](https://github.com/Syvyj/shotleaf/issues/new/choose) (**Report a Problem…** in the menu fills in the versions); questions to [Discussions](https://github.com/Syvyj/shotleaf/discussions).
+
 ## Support
 
-If Shotleaf saves you time, you can [support the author](https://shotleaf.syvyj.dev/#support).
+Donations currently go towards Apple's developer licence ($99 a year), so Shotleaf installs without the "Open Anyway" step: [support the author](https://shotleaf.syvyj.dev/#support).
 
 ## Licence
 
@@ -218,9 +222,13 @@ scripts/run.sh                 # зібрати, встановити в ~/Appli
 
 Код у Swift-пакеті `ShotleafKit` (`Core`, `CaptureKit`, `PerceptionKit`, `SettingsKit`, `EmbeddedKit`, `AppFeature`); `App/` лише тонка обгортка застосунку. Рішення щодо архітектури в `ARCHITECTURE_DECISIONS.md`.
 
+## Питання, помилки, ідеї
+
+Помилки та ідеї — в [Issues](https://github.com/Syvyj/shotleaf/issues/new/choose) («Повідомити про проблему…» в меню сам підставить версії), питання — у [Discussions](https://github.com/Syvyj/shotleaf/discussions).
+
 ## Підтримка
 
-Якщо Shotleaf заощаджує вам час, можете [підтримати автора](https://shotleaf.syvyj.dev/uk/#support).
+Зараз донати йдуть на ліцензію розробника Apple ($99 на рік), щоб Shotleaf встановлювався без кроку «Усе одно відкрити»: [підтримати автора](https://shotleaf.syvyj.dev/uk/#support).
 
 ## Ліцензія
 

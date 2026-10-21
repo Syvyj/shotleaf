@@ -10,6 +10,16 @@ public enum AppInfo {
     public static let email = "shotleaf@syvyj.dev"
     /// ponytail: opens the page; compare with the latest tag in the app if people miss updates.
     public static let releases = URL(string: "https://github.com/Syvyj/shotleaf/releases")!
+    public static let discussions = URL(string: "https://github.com/Syvyj/shotleaf/discussions")!
+    /// A new bug report with this version and macOS already filled in.
+    public static var newIssue: URL {
+        let info = Bundle.main.infoDictionary
+        let version = "\(info?["CFBundleShortVersionString"] as? String ?? "dev") (\(info?["CFBundleVersion"] as? String ?? "0"))"
+        var parts = URLComponents(string: "https://github.com/Syvyj/shotleaf/issues/new")!
+        parts.queryItems = [.init(name: "template", value: "bug.yml"), .init(name: "version", value: version),
+                            .init(name: "macos", value: "macOS " + ProcessInfo.processInfo.operatingSystemVersionString)]
+        return parts.url!
+    }
     /// The site's donation links (kept there, so they change without an app update).
     public static var supportPage: URL { site("#support") }
     public static var privacyPage: URL { site("privacy/") }

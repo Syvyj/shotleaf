@@ -1,0 +1,16 @@
+name: Idea
+description: Something Shotleaf should do
+labels: [idea]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What would you like
+      description: What you're trying to do and where Shotleaf gets in the way or falls short.
+    validations:
+      required: true
+  - type: input
+    id: elsewhere
+    attributes:
+      label: Does another app do this well?
+      placeholder: CleanShot X, Maccy, Raycast…

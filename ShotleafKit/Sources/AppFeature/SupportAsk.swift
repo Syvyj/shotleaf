@@ -24,7 +24,7 @@ enum SupportAsk {
         defaults.set(true, forKey: doneKey)
         let alert = NSAlert()
         alert.messageText = String(localized: "Enjoying Shotleaf?")
-        alert.informativeText = String(localized: "Shotleaf is free and open source. If it saves you time, you can support its development. Shotleaf asks this only once.")
+        alert.informativeText = String(localized: "Shotleaf is free and open source. Donations go towards Apple's developer licence ($99 a year), so Shotleaf installs without “Open Anyway”. Shotleaf asks this only once.")
         alert.addButton(withTitle: String(localized: "Support the Author"))
         alert.addButton(withTitle: String(localized: "No, Thanks"))
         NSApp.activate(ignoringOtherApps: true)

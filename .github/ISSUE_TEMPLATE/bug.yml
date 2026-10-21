@@ -1,0 +1,38 @@
+name: Bug
+description: Something doesn't work
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Shotleaf version
+      description: Settings › General › About, or the menu bar icon › Settings
+      placeholder: 0.1.5 (5)
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac
+      placeholder: macOS 15.6, MacBook Air M2
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: App where it happened
+      description: For completion, snippets or clipboard — which app you were typing in
+      placeholder: Safari, Slack, Xcode…
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what Shotleaf did instead. A screenshot or recording helps.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Crash report or log (optional)
+      description: "A crash: Console.app › Crash Reports › Shotleaf. Other problems: `log show --last 10m --predicate 'subsystem == \"dev.syvyj.shotleaf\"'` in Terminal."
+      render: text
