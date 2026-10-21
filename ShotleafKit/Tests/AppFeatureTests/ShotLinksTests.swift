@@ -35,10 +35,15 @@ struct ShotLinksTests {
         server.standardOutput = FileHandle.nullDevice
         try server.run()
         defer { server.terminate() }
-        try await Task.sleep(for: .milliseconds(700))
-
         let png = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3])
-        let link = try await ShotLinks.upload(png, hours: 1, server: "http://127.0.0.1:8797", token: "test-key")
+        // Python takes a moment to listen (longer on a CI runner): retry while the connection is refused.
+        var found: URL?
+        for _ in 0..<40 {
+            try await Task.sleep(for: .milliseconds(250))
+            do { found = try await ShotLinks.upload(png, hours: 1, server: "http://127.0.0.1:8797", token: "test-key"); break }
+            catch let error as URLError where error.code == .cannotConnectToHost { continue }
+        }
+        let link = try #require(found)
         let (body, response) = try await URLSession.shared.data(from: link)
         #expect((response as? HTTPURLResponse)?.statusCode == 200 && body == png)
         await #expect(throws: ShotLinks.Failure.self) {

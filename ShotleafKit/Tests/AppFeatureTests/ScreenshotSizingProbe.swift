@@ -9,6 +9,9 @@ struct ScreenshotSizingTests {
     @Test("A big square capture opens a window that fits its content and the screen")
     func squareCapture() async throws {
         let size = 1600
+        // 800 pt of content plus chrome must fit; a CI runner's screen is smaller, and then the window is sized to the screen instead.
+        let m = 2 * ScreenshotView.margin
+        guard let screen = NSScreen.main, screen.visibleFrame.height > 800 + m + ScreenshotWindows.chromeHeight else { return }
         let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: size, pixelsHigh: size, bitsPerSample: 8, samplesPerPixel: 4,
                                    hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
         NSGraphicsContext.saveGraphicsState()
@@ -21,7 +24,6 @@ struct ScreenshotSizingTests {
         defer { panel.orderOut(nil) }
         print("SIZING panel", panel.frame, "screens", NSScreen.screens.map(\.visibleFrame))
         // 800×800 pt image + canvas margin + 14 pt padding each side; + header/actions.
-        let m = 2 * ScreenshotView.margin
         #expect(panel.frame.width == max(800 + m, ScreenshotView.minContentWidth) + 28)
         #expect(panel.frame.height > 800 + m && panel.frame.height <= 800 + m + ScreenshotWindows.chromeHeight)
         #expect(NSScreen.screens.contains { $0.visibleFrame.contains(panel.frame) })
