@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6
+
+- Privacy: text completion now stays off while macOS's secure input is on (password fields, `sudo` in a terminal, password managers), and in the apps listed in Settings › Clipboard › **Never in these apps**. That list now covers both the clipboard history and completion. Terminals are always left alone.
+- **Report a Problem…** in the menu and in Settings opens a GitHub issue with your Shotleaf and macOS versions already filled in.
+- Donations now go towards Apple's developer licence, so Shotleaf can install without the "Open Anyway" step. The site shows how much is collected.
+
 ## 0.1.5
 
 - Fixed a crash: with text completion reading the screen, Shotleaf could quit when macOS couldn't read the text of a window.
