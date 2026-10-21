@@ -21,4 +21,4 @@ jobs:
       - name: Test
         run: swift test --package-path ShotleafKit
       - name: Build the app
-        run: xcodebuild -project Shotleaf.xcodeproj -scheme Shotleaf -configuration Debug CODE_SIGNING_ALLOWED=NO -derivedDataPath build/CI build | tail -40; exit ${PIPESTATUS[0]}
+        run: xcodebuild -project Shotleaf.xcodeproj -scheme Shotleaf -configuration Debug CODE_SIGNING_ALLOWED=NO -skipMacroValidation -derivedDataPath build/CI -quiet build

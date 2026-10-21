@@ -86,7 +86,7 @@ tccutil reset ScreenCapture dev.syvyj.shotleaf && tccutil reset Accessibility de
 ```bash
 swift build --package-path ShotleafKit
 swift test --package-path ShotleafKit
-xcodebuild -project Shotleaf.xcodeproj -scheme Shotleaf -configuration Debug CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project Shotleaf.xcodeproj -scheme Shotleaf -configuration Debug CODE_SIGNING_ALLOWED=NO -skipMacroValidation build
 ```
 
 ## Фокус (2026-10-10)
