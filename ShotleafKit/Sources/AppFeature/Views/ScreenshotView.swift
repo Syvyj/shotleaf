@@ -47,6 +47,8 @@ struct ScreenshotView: View {
     }
 
     @State private var toast: String?
+    /// The first few times the editor opens: which keys do the main things.
+    @State private var keysHint = EditorHint.take()
     @State private var dragStart: CGPoint?
     @State private var dragNow: CGPoint?
     /// The pen line being drawn.
@@ -87,6 +89,7 @@ struct ScreenshotView: View {
         VStack(alignment: .leading, spacing: 12) {
             header.zIndex(1) // tips and menus draw over the canvas
             canvas.overlay(alignment: .top) { toastPill }
+                .overlay(alignment: .bottom) { keysHintPill }
             toolbar.zIndex(1) // its tips show above, over the canvas
         }
         .onChange(of: doc.tool) { _, tool in
@@ -125,6 +128,26 @@ struct ScreenshotView: View {
             Color.clear
                 .frame(maxWidth: .infinity, maxHeight: 36)
                 .overlay(WindowDragArea())
+        }
+    }
+
+    /// "1 arrow · 5 blur · C crop · ⌘C copy": the main keys, for the first few shots
+    /// (each tool also names itself on hover). The user's own keys, if they changed them.
+    @ViewBuilder private var keysHintPill: some View {
+        if keysHint {
+            HStack(spacing: 10) {
+                Text(EditorHint.text).font(Leaf.font(12, .medium))
+                Button { withAnimation { keysHint = false }; EditorHint.dismiss() } label: {
+                    Image(systemName: "xmark").font(.system(size: 10, weight: .bold))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text("Hide"))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14).padding(.vertical, 8)
+            .background(Capsule().fill(Color.black.opacity(0.72)))
+            .padding(.bottom, 12)
+            .transition(.opacity)
         }
     }
 
@@ -1043,5 +1066,25 @@ struct PinnedScreenshotView: View {
                 Button("") { close() }.keyboardShortcut(.cancelAction).opacity(0)
                 Button("") { copy() }.keyboardShortcut("c", modifiers: .command).opacity(0)
             }
+    }
+}
+
+/// The editor's key hint: shown the first three times it opens, or until closed.
+enum EditorHint {
+    static let countKey = "editorHintShown", dismissedKey = "editorHintDismissed", times = 3
+
+    /// Whether to show it this time (and counts the showing).
+    static func take(_ defaults: UserDefaults = .standard) -> Bool {
+        let shown = defaults.integer(forKey: countKey)
+        guard !defaults.bool(forKey: dismissedKey), shown < times else { return false }
+        defaults.set(shown + 1, forKey: countKey)
+        return true
+    }
+
+    static func dismiss(_ defaults: UserDefaults = .standard) { defaults.set(true, forKey: dismissedKey) }
+
+    static var text: String {
+        let key = { (tool: AnnotationTool) in tool.keyLabel.isEmpty ? "–" : tool.keyLabel }
+        return String(localized: "Hover a tool for its name. \(key(.arrow)) arrow · \(key(.blur)) blur · \(key(.crop)) crop · ⌘C copy and close")
     }
 }

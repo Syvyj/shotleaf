@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7
+
+- A new setup guide. It starts by asking which tools you want, then asks only for the permissions those need, each explained where it's used. The completion model is clearly optional. Then you take your first screenshot right from the guide, and a last page shows how to use the rest.
+- The guide no longer comes back at every launch for a permission that only a tool you turned off needs.
+- The editor shows its main keys the first three times it opens: arrow, blur, crop and ⌘C. Close the hint and it stays gone.
+
 ## 0.1.6
 
 - Privacy: text completion now stays off while macOS's secure input is on (password fields, `sudo` in a terminal, password managers), and in the apps listed in Settings › Clipboard › **Never in these apps**. That list now covers both the clipboard history and completion. Terminals are always left alone.

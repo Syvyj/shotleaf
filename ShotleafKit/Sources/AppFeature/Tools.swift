@@ -1,4 +1,5 @@
 import SwiftUI
+import Core
 
 /// The parts of Shotleaf that can be turned off (Settings → General → Tools).
 /// An off tool leaves the menu, frees its shortcuts and stops its background work.
@@ -23,6 +24,23 @@ public enum Tool: String, CaseIterable, Identifiable, Sendable {
         case .clipboard: [.clipboard]
         case .snippets: [.snippets]
         case .completion: []
+        }
+    }
+
+    /// What it needs from macOS: the screen for the capture tools, the keyboard
+    /// (Accessibility) for those that type or paste into other apps.
+    var permissions: [PermissionKind] {
+        switch self {
+        case .screenshots, .screenText: [.screenRecording]
+        case .clipboard, .snippets, .completion: [.accessibility]
+        }
+    }
+
+    /// The permissions the tools that are on still lack, screen first (granting
+    /// Accessibility restarts Shotleaf, so it comes last).
+    static func missing(on: [Tool], status: [PermissionKind: PermissionStatus]) -> [PermissionKind] {
+        [PermissionKind.screenRecording, .accessibility].filter { kind in
+            on.contains { $0.permissions.contains(kind) } && status[kind] != .granted
         }
     }
 

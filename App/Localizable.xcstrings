@@ -87,16 +87,6 @@
         }
       }
     },
-    "A few quick steps and Shotleaf works in any app.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кілька коротких кроків — і Shotleaf працює в будь-якій програмі."
-          }
-        }
-      }
-    },
     "API key": {
       "localizations": {
         "uk": {
@@ -236,26 +226,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Усі фото"
-          }
-        }
-      }
-    },
-    "Allow Accessibility": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дозвольте Універсальний доступ"
-          }
-        }
-      }
-    },
-    "Allow Screen Recording": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дозвольте запис екрана"
           }
         }
       }
@@ -970,16 +940,6 @@
         }
       }
     },
-    "Download the completion model": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Завантажте модель для дописування"
-          }
-        }
-      }
-    },
     "Downloaded · %@": {
       "localizations": {
         "uk": {
@@ -1150,16 +1110,6 @@
         }
       }
     },
-    "For screenshots and text from screenshots.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Для скріншотів і тексту зі скріншотів."
-          }
-        }
-      }
-    },
     "Forget what I wrote": {
       "localizations": {
         "uk": {
@@ -1186,16 +1136,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Відформатувати JSON"
-          }
-        }
-      }
-    },
-    "Gemma 4 E2B base, about 3.6 GB. Runs only on this Mac — what you type never leaves it.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gemma 4 E2B base, близько 3,6 ГБ. Працює лише на цьому Mac — те, що ви пишете, нікуди не йде."
           }
         }
       }
@@ -2760,26 +2700,6 @@
         }
       }
     },
-    "For completing your text as you type, expanding snippets and pasting from the clipboard history.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Щоб дописувати текст, розгортати сніпети й вставляти з історії буфера обміну."
-          }
-        }
-      }
-    },
-    "After enabling Shotleaf in the list, it restarts by itself.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Після того як увімкнете Shotleaf у списку, він сам перезапуститься."
-          }
-        }
-      }
-    },
     "⌘⇧3, ⇧⌘V and ⇧⌘B are also used by macOS (the full-screen screenshot) or by some apps. If a shortcut clashes with one you need, change it in Settings › Shortcuts.": {
       "localizations": {
         "uk": {
@@ -3173,16 +3093,6 @@
         }
       }
     },
-    "Take a screenshot with %@, or start typing anywhere and press Tab when a grey suggestion appears.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Зробіть скріншот через %@ або почніть писати будь-де й натисніть Tab, коли з'явиться сіра підказка."
-          }
-        }
-      }
-    },
     "Text": {
       "localizations": {
         "uk": {
@@ -3359,16 +3269,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Спробувати ще"
-          }
-        }
-      }
-    },
-    "Try it": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Спробуйте"
           }
         }
       }
@@ -4215,6 +4115,446 @@
           "stringUnit": {
             "state": "translated",
             "value": "Shotleaf безкоштовний і з відкритим кодом. Донати йдуть на ліцензію розробника Apple ($99 на рік), щоб Shotleaf встановлювався без «Усе одно відкрити». Shotleaf питає про це лише раз."
+          }
+        }
+      }
+    },
+    "A click picks a window, Return takes the whole screen, Esc cancels. The editor opens with your shot.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Клік вибирає вікно, Return знімає весь екран, Esc скасовує. Знімок відкриється в редакторі."
+          }
+        }
+      }
+    },
+    "Allow what these tools need": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дозвольте те, що потрібно цим інструментам"
+          }
+        }
+      }
+    },
+    "Allowed": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дозволено"
+          }
+        }
+      }
+    },
+    "Allow…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дозволити…"
+          }
+        }
+      }
+    },
+    "An area, a window or the whole screen, with an editor for arrows, blur, crop and more.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Область, вікно чи весь екран, з редактором для стрілок, розмиття, обрізки та іншого."
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Назад"
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Далі"
+          }
+        }
+      }
+    },
+    "Copy the words from any picture or app, recognised on your Mac.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копіюйте текст з будь-якої картинки чи програми, розпізнаний на вашому Mac."
+          }
+        }
+      }
+    },
+    "Downloaded": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантажено"
+          }
+        }
+      }
+    },
+    "Drag over an area, click a window or press Return for the whole screen. The menu also has scrolling screenshots.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виділіть область, клацніть вікно або натисніть Return, щоб зняти весь екран. У меню є й довгі скріншоти."
+          }
+        }
+      }
+    },
+    "Every tool is off. Turn some on in Settings › General › Features.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усі інструменти вимкнено. Увімкніть потрібні в Налаштуваннях › Загальні › Функції."
+          }
+        }
+      }
+    },
+    "Everything is also in the menu bar, under the Shotleaf icon.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усе це є й у рядку меню, під значком Shotleaf."
+          }
+        }
+      }
+    },
+    "Everything you copied, searchable and ready to paste again.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усе, що ви копіювали, з пошуком і готове до повторної вставки."
+          }
+        }
+      }
+    },
+    "For: %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для: %@"
+          }
+        }
+      }
+    },
+    "Gemma 4 E2B, about 3.6 GB. It runs only on this Mac: what you type never leaves it.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemma 4 E2B, близько 3,6 ГБ. Працює лише на цьому Mac: те, що ви пишете, нікуди не йде."
+          }
+        }
+      }
+    },
+    "Grey suggestions as you type, from a small model on your Mac (a 3.6 GB download).": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сірі підказки, поки ви пишете, від невеликої моделі на вашому Mac (завантаження 3,6 ГБ)."
+          }
+        }
+      }
+    },
+    "Hide": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сховати"
+          }
+        }
+      }
+    },
+    "Hover a tool for its name. %@ arrow · %@ blur · %@ crop · ⌘C copy and close": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наведіть на інструмент, щоб побачити назву. %@ стрілка · %@ розмиття · %@ обрізка · ⌘C скопіювати й закрити"
+          }
+        }
+      }
+    },
+    "It keeps downloading if you go on.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Завантаження триватиме, навіть якщо ви підете далі."
+          }
+        }
+      }
+    },
+    "Lets Shotleaf paste from the history, expand snippets and type completions into other apps. It never reads password fields.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дає Shotleaf вставляти з історії, розгортати сніпети й дописувати текст в інших програмах. Поля паролів він не читає ніколи."
+          }
+        }
+      }
+    },
+    "Lets Shotleaf see the screen when you take a screenshot or copy text from one. Nothing is recorded or sent anywhere.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дає Shotleaf бачити екран, коли ви робите скріншот або копіюєте з нього текст. Нічого не записується й нікуди не надсилається."
+          }
+        }
+      }
+    },
+    "Make one in the menu › Snippets › Edit Snippets…, then type its abbreviation anywhere.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Створіть сніпет у меню › Сніпети › Редагувати сніпети…, а потім набирайте його абревіатуру будь-де."
+          }
+        }
+      }
+    },
+    "Mark it up with the tools at the top of the editor (hover one to see its name), then ⌘C copies it and closes the editor.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Позначте щось інструментами вгорі редактора (наведіть на інструмент, щоб побачити його назву), а ⌘C скопіює знімок і закриє редактор."
+          }
+        }
+      }
+    },
+    "Optional. Everything else works without it, and you can download it later in Settings › Completion.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Необов’язково. Усе інше працює без неї, а завантажити її можна пізніше в Налаштуваннях › Дописування."
+          }
+        }
+      }
+    },
+    "Press": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Натисніть"
+          }
+        }
+      }
+    },
+    "Screenshots need Screen Recording, which isn’t allowed yet. Go back to allow it, or skip this for now.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скріншотам потрібен запис екрана, а його ще не дозволено. Поверніться, щоб дозволити, або поки пропустіть цей крок."
+          }
+        }
+      }
+    },
+    "Search, then Return pastes the item into the app you were in.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знайдіть потрібне, і Return вставить його в програму, де ви були."
+          }
+        }
+      }
+    },
+    "Select an area and its text opens, ready to copy.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виділіть область, і її текст відкриється, готовий до копіювання."
+          }
+        }
+      }
+    },
+    "Skip": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пропустити"
+          }
+        }
+      }
+    },
+    "Skip for Now": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поки пропустити"
+          }
+        }
+      }
+    },
+    "Take a Screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зробити скріншот"
+          }
+        }
+      }
+    },
+    "Take your first screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зробіть перший скріншот"
+          }
+        }
+      }
+    },
+    "Text completion model": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Модель для дописування"
+          }
+        }
+      }
+    },
+    "That’s your first screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ось ваш перший скріншот"
+          }
+        }
+      }
+    },
+    "The quickest way to see what Shotleaf does.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Найшвидший спосіб побачити, що вміє Shotleaf."
+          }
+        }
+      }
+    },
+    "Turn Shotleaf on in the list; it restarts and brings you back here.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Увімкніть Shotleaf у списку: він перезапуститься й поверне вас сюди."
+          }
+        }
+      }
+    },
+    "Turn Shotleaf on in the list; it restarts and brings you back here. macOS may ask you to confirm this again from time to time, which is normal for apps from outside the App Store.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Увімкніть Shotleaf у списку: він перезапуститься й поверне вас сюди. Час від часу macOS може перепитувати цей дозвіл, для програм не з App Store це нормально."
+          }
+        }
+      }
+    },
+    "Turn on what you’ll use. You can change it any time in Settings › General › Features.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Увімкніть те, чим користуватиметеся. Змінити це можна будь-коли в Налаштуваннях › Загальні › Функції."
+          }
+        }
+      }
+    },
+    "Type a short abbreviation anywhere and get the whole text.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Наберіть коротку абревіатуру будь-де й отримайте весь текст."
+          }
+        }
+      }
+    },
+    "Type in any app. Tab takes the next word, ⌥Tab the whole suggestion.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пишіть у будь-якій програмі. Tab бере наступне слово, ⌥Tab усю підказку."
+          }
+        }
+      }
+    },
+    "What do you need?": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Що вам потрібно?"
+          }
+        }
+      }
+    },
+    "You’re all set": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усе готово"
+          }
+        }
+      }
+    },
+    "macOS asks you to allow these once. Nothing leaves your Mac.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS попросить дозволити це один раз. Нічого не залишає ваш Mac."
+          }
+        }
+      }
+    },
+    "or the button below, then drag over any part of the screen.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "або кнопку нижче й виділіть будь-яку частину екрана."
           }
         }
       }

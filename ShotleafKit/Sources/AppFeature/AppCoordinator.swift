@@ -48,14 +48,15 @@ public final class AppCoordinator {
             registerHotkey(action, on: Tool.owning(action).map(isOn) ?? true)
         }
 
-        // The setup guide: on first launch, whenever a permission is missing,
-        // and back after the restart that follows granting one.
+        // The setup guide: on first launch, when a tool that's on lacks its
+        // permission, and back after the restart that follows granting one.
         let reopenGuide = UserDefaults.standard.bool(forKey: Self.reopenGuideKey)
         UserDefaults.standard.removeObject(forKey: Self.reopenGuideKey)
         let missing = Self.restartPermissions.filter { permissions[$0] != .granted }
-        if !container.settings.onboardingCompleted || reopenGuide || !missing.isEmpty {
+        let needed = Tool.missing(on: Tool.allCases.filter(isOn), status: permissions)
+        if !container.settings.onboardingCompleted || reopenGuide || !needed.isEmpty {
             container.settings.onboardingCompleted = true
-            showOnboarding()
+            showOnboarding(resume: reopenGuide)
         }
         restartWhenGranted(missing)
         startUpdateChecks()
@@ -181,6 +182,7 @@ public final class AppCoordinator {
     /// (Settings → Screenshots). Kept for "Edit Last Screenshot" either way.
     private func deliver(_ shot: ImagePayload) {
         recentShots = ScreenshotWindows.remember(shot)
+        shotsThisRun += 1
         SupportAsk.countShot()
         let entry = clipboard.addScreenshot(shot.data)
         let after = container.settings.afterCapture
@@ -568,9 +570,13 @@ public final class AppCoordinator {
     // MARK: Onboarding
 
     private var onboarding: OnboardingWindowController?
+    /// Screenshots taken since launch (the setup guide waits for the first one).
+    public private(set) var shotsThisRun = 0
 
-    /// The setup guide: shown once on first launch, and from the menu any time.
-    public func showOnboarding() {
+    /// The setup guide: shown on first launch, and from the menu any time (from
+    /// its start). `resume`: back on the page it was on, after a restart for a permission.
+    public func showOnboarding(resume: Bool = false) {
+        if !resume { UserDefaults.standard.removeObject(forKey: OnboardingView.pageKey) }
         let controller = onboarding ?? OnboardingWindowController { [weak self] in
             guard let self else { return AnyView(EmptyView()) }
             return AnyView(OnboardingView(coordinator: self))
@@ -579,7 +585,10 @@ public final class AppCoordinator {
         controller.show()
     }
 
-    public func closeOnboarding() { onboarding?.close() }
+    public func closeOnboarding() {
+        UserDefaults.standard.removeObject(forKey: OnboardingView.pageKey)
+        onboarding?.close()
+    }
 
     // MARK: Permissions (for Settings)
 
