@@ -1,6 +1,8 @@
 import Testing
 import Core
 import Foundation
+import AppKit
+import SwiftUI
 @testable import AppFeature
 
 @Suite("Setup guide")
@@ -42,5 +44,29 @@ struct SetupGuidePreviews {
             UserDefaults.standard.set(page.rawValue, forKey: OnboardingView.pageKey)
             try renderPreview(OnboardingView(coordinator: coordinator), "guide-\(page.rawValue).png")
         }
+    }
+}
+
+@Suite("Setup guide picture for the site")
+@MainActor
+struct SetupGuideSitePicture {
+    /// The guide's first page with the app's icon, as a PNG at SHOTLEAF_GUIDE_SHOT (skipped without it).
+    @Test("First page, for site/assets/guide/setup-*.webp")
+    func picture() throws {
+        guard let out = ProcessInfo.processInfo.environment["SHOTLEAF_GUIDE_SHOT"] else { return }
+        let icon = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("../../../App/Assets.xcassets/AppIcon.appiconset/icon_256x256@2x.png").standardized
+        NSApplication.shared.applicationIconImage = NSImage(contentsOf: icon)
+        UserDefaults.standard.set(OnboardingView.Page.tools.rawValue, forKey: OnboardingView.pageKey)
+        defer { UserDefaults.standard.removeObject(forKey: OnboardingView.pageKey) }
+        let view = OnboardingView(coordinator: AppCoordinator()).fixedSize()
+            .background(Color(nsColor: .windowBackgroundColor)).environment(\.colorScheme, .light)
+        let host = NSHostingView(rootView: view)
+        host.appearance = NSAppearance(named: .aqua)
+        host.frame = CGRect(origin: .zero, size: host.fittingSize)
+        host.layoutSubtreeIfNeeded()
+        let rep = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+        host.cacheDisplay(in: host.bounds, to: rep)
+        try rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: out))
     }
 }
