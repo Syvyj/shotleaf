@@ -55,9 +55,10 @@ struct SetupGuideSitePicture {
     func picture() throws {
         guard let out = ProcessInfo.processInfo.environment["SHOTLEAF_GUIDE_SHOT"] else { return }
         let icon = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-            .appendingPathComponent("../../../App/Assets.xcassets/AppIcon.appiconset/icon_256x256@2x.png").standardized
+            .appendingPathComponent("../../../App/Assets.xcassets/AppIcon.appiconset/icon_512x512@2x.png").standardized
         NSApplication.shared.applicationIconImage = NSImage(contentsOf: icon)
-        UserDefaults.standard.set(OnboardingView.Page.tools.rawValue, forKey: OnboardingView.pageKey)
+        let page = ProcessInfo.processInfo.environment["SHOTLEAF_GUIDE_PAGE"] ?? OnboardingView.Page.tools.rawValue
+        UserDefaults.standard.set(page, forKey: OnboardingView.pageKey)
         defer { UserDefaults.standard.removeObject(forKey: OnboardingView.pageKey) }
         let view = OnboardingView(coordinator: AppCoordinator()).fixedSize()
             .background(Color(nsColor: .windowBackgroundColor)).environment(\.colorScheme, .light)
@@ -65,7 +66,12 @@ struct SetupGuideSitePicture {
         host.appearance = NSAppearance(named: .aqua)
         host.frame = CGRect(origin: .zero, size: host.fittingSize)
         host.layoutSubtreeIfNeeded()
-        let rep = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+        // SHOTLEAF_GUIDE_SCALE: pixels per point (2 for the site, 3 for posts).
+        let scale = Double(ProcessInfo.processInfo.environment["SHOTLEAF_GUIDE_SCALE"] ?? "") ?? 2
+        let rep = try #require(NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(host.bounds.width * scale),
+                                                pixelsHigh: Int(host.bounds.height * scale), bitsPerSample: 8, samplesPerPixel: 4,
+                                                hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0))
+        rep.size = host.bounds.size
         host.cacheDisplay(in: host.bounds, to: rep)
         try rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: out))
     }
