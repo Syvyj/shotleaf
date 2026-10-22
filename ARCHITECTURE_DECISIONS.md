@@ -5,7 +5,7 @@
 
 > Статуси: ✅ ПРИЙНЯТО · 🟡 ЗАПРОПОНОВАНО · ⏳ ОЧІКУЄ ПІДТВЕРДЖЕННЯ · ❌ ВІДХИЛЕНО · ⛔ СКАСОВАНО
 
-> **Поточний стан (2026-10-07).** Працює вертикальний зріз першої частини (ШІ-панелі): ⌘⇧Space → плаваюча панель → Rewrite/Explain/Translate/Summarize/Custom → стрімінг → Copy/Replace/Insert. Провайдер обирається в Settings (LM Studio / Ollama / OpenAI / OpenRouter / custom; ключ у Keychain), Mock — запасний варіант. Скріншоти + OCR працюють (етап 5). MLX та inline-дописування — ще не почато. Xcode 26 встановлено: `swift test` і `xcodebuild` працюють. Дорожня карта — `PLAN.md`.
+> **Поточний стан (2026-10-07).** Працює вертикальний зріз першої частини (ШІ-панелі): ⌘⇧Space → плаваюча панель → Rewrite/Explain/Translate/Summarize/Custom → стрімінг → Copy/Replace/Insert. Провайдер обирається в Settings (LM Studio / Ollama / OpenAI / OpenRouter / custom; ключ у Keychain), Mock — запасний варіант. Скріншоти + OCR працюють (етап 5). MLX та inline-дописування — ще не почато. Xcode 26 встановлено: `swift test` і `xcodebuild` працюють. Дорожня карта ведеться окремо, поза репозиторієм.
 
 ---
 
