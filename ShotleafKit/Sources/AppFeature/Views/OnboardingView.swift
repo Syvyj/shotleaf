@@ -102,11 +102,7 @@ struct OnboardingView: View {
 
     private var footer: some View {
         HStack(spacing: 10) {
-            if page == .tour {
-                Link("Shotleaf is free. Support the author ♥", destination: AppInfo.supportPage).font(.callout)
-            } else {
-                dots
-            }
+            if page != .tour { dots }
             Spacer()
             if page != .tools {
                 Button("Back") { go(-1) }.buttonStyle(LeafButtonStyle())
@@ -278,7 +274,25 @@ struct OnboardingView: View {
                 Text("Every tool is off. Turn some on in Settings › General › Features.").foregroundStyle(.secondary)
             }
             Text(Self.shortcutsNote).font(Leaf.font(12)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            supportCard.padding(.top, 4)
         }
+    }
+
+    /// The same ask as Settings › General: what donations are for, and the button.
+    private var supportCard: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "heart.fill").font(.title2).foregroundStyle(Leaf.leaf)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Shotleaf is free and open source").font(Leaf.font(13, .semibold))
+                Text("Donations go towards Apple's developer licence ($99 a year), so Shotleaf installs without “Open Anyway”.")
+                    .font(Leaf.font(12)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 8)
+            Button("Support the Author") { NSWorkspace.shared.open(AppInfo.supportPage) }
+                .buttonStyle(LeafButtonStyle(prominent: true))
+        }
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Leaf.leaf.opacity(0.1)))
     }
 
     /// The language Shotleaf shows (may differ from the system's), for joining names with "and".

@@ -33,7 +33,10 @@ public final class AppCoordinator {
         inlineCompletion.quickFixes = container.settings.completionQuickFixes
         inlineCompletion.history.enabled = container.settings.completionLearnsStyle
         if container.settings.completionEnabled { inlineCompletion.start() }
-        screenshots.allClosed = { SupportAsk.askIfDue() }
+        screenshots.allClosed = { [weak self] in
+            // The setup guide's first screenshot: back to the guide, which closing the editor left behind other apps.
+            if self?.onboarding?.isVisible == true { self?.onboarding?.show() } else { SupportAsk.askIfDue() }
+        }
         screenshots.toSnippets = { [weak self] png in
             guard let self else { return nil }
             let folder = UserDefaults.standard.string(forKey: "snippetFolder").flatMap(UUID.init) // the folder last opened in the panel

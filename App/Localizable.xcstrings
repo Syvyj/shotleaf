@@ -2560,16 +2560,6 @@
         }
       }
     },
-    "Shotleaf is free. Support the author ♥": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shotleaf безкоштовний. Підтримати автора ♥"
-          }
-        }
-      }
-    },
     "Support the Author": {
       "localizations": {
         "uk": {

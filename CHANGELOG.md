@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.8
+
+- Setup guide: after your first screenshot, closing the editor brings the guide back to the front. It used to end up behind every other window.
+- The guide's last page asks for support with a proper card and button, and says what donations are for.
+
 ## 0.1.7
 
 - A new setup guide. It starts by asking which tools you want, then asks only for the permissions those need, each explained where it's used. The completion model is clearly optional. Then you take your first screenshot right from the guide, and a last page shows how to use the rest.
