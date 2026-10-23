@@ -284,7 +284,7 @@ struct OnboardingView: View {
             Image(systemName: "heart.fill").font(.title2).foregroundStyle(Leaf.leaf)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Shotleaf is free and open source").font(Leaf.font(13, .semibold))
-                Text("Donations go towards Apple's developer licence ($99 a year), so Shotleaf installs without “Open Anyway”.")
+                Text("Donations support my time on Shotleaf and my other apps: new features, fixes and new tools.")
                     .font(Leaf.font(12)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 8)

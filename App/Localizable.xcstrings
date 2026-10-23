@@ -4089,26 +4089,6 @@
         }
       }
     },
-    "Donations go towards Apple's developer licence ($99 a year), so Shotleaf installs without “Open Anyway”.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Донати йдуть на ліцензію розробника Apple ($99 на рік), щоб Shotleaf встановлювався без «Усе одно відкрити»."
-          }
-        }
-      }
-    },
-    "Shotleaf is free and open source. Donations go towards Apple's developer licence ($99 a year), so Shotleaf installs without “Open Anyway”. Shotleaf asks this only once.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shotleaf безкоштовний і з відкритим кодом. Донати йдуть на ліцензію розробника Apple ($99 на рік), щоб Shotleaf встановлювався без «Усе одно відкрити». Shotleaf питає про це лише раз."
-          }
-        }
-      }
-    },
     "A click picks a window, Return takes the whole screen, Esc cancels. The editor opens with your shot.": {
       "localizations": {
         "uk": {
@@ -4545,6 +4525,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "або кнопку нижче й виділіть будь-яку частину екрана."
+          }
+        }
+      }
+    },
+    "Donations support my time on Shotleaf and my other apps: new features, fixes and new tools.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Донати підтримують мою роботу над Shotleaf та іншими застосунками: нові можливості, виправлення й нові інструменти."
+          }
+        }
+      }
+    },
+    "Shotleaf is free and open source. If it saves you time, donations support my work on it and my other apps. Shotleaf asks this only once.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shotleaf безкоштовний і з відкритим кодом. Якщо він заощаджує вам час, донати підтримують мою роботу над ним та іншими застосунками. Shotleaf питає про це лише раз."
           }
         }
       }

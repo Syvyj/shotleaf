@@ -109,7 +109,7 @@ Bugs and ideas go to [Issues](https://github.com/Syvyj/shotleaf/issues/new/choos
 
 ## Support
 
-Donations currently go towards Apple's developer licence ($99 a year), so Shotleaf installs without the "Open Anyway" step: [support the author](https://shotleaf.syvyj.dev/#support).
+Donations support my time on Shotleaf and my other apps: [support the author](https://shotleaf.syvyj.dev/#support).
 
 ## Licence
 
@@ -228,7 +228,7 @@ scripts/run.sh                 # зібрати, встановити в ~/Appli
 
 ## Підтримка
 
-Зараз донати йдуть на ліцензію розробника Apple ($99 на рік), щоб Shotleaf встановлювався без кроку «Усе одно відкрити»: [підтримати автора](https://shotleaf.syvyj.dev/uk/#support).
+Донати підтримують мою роботу над Shotleaf та іншими застосунками: [підтримати автора](https://shotleaf.syvyj.dev/uk/#support).
 
 ## Ліцензія
 

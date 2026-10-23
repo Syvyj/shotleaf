@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Settings, the setup guide and the one-time ask now say donations support the author's work on Shotleaf and other apps (there's no separate goal for Apple's developer licence any more).
+
 ## 0.1.8
 
 - Setup guide: after your first screenshot, closing the editor brings the guide back to the front. It used to end up behind every other window.

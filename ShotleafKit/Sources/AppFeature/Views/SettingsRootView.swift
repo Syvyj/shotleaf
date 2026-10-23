@@ -159,7 +159,7 @@ public struct SettingsRootView: View {
                 Image(systemName: "heart.fill").font(.title2).foregroundStyle(Leaf.leaf)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Shotleaf is free and open source").fontWeight(.semibold)
-                    Text("Donations go towards Apple's developer licence ($99 a year), so Shotleaf installs without “Open Anyway”.").foregroundStyle(.secondary)
+                    Text("Donations support my time on Shotleaf and my other apps: new features, fixes and new tools.").foregroundStyle(.secondary)
                 }
                 Spacer()
                 Button("Support the Author") { NSWorkspace.shared.open(AppInfo.supportPage) }
