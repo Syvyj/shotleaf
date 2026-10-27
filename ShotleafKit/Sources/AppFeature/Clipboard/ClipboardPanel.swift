@@ -75,6 +75,10 @@ final class ClipboardPanelModel {
     }
 
     var markedItems: [ClipItem] { marked.compactMap { id in history.items.first { $0.id == id } } }
+    /// The picked entries when `item` is one of several picked, else just `item`.
+    func entries(with item: ClipItem) -> [ClipItem] { marked.count > 1 && marked.contains(item.id) ? markedItems : [item] }
+    /// The entry being dragged out of the list (to a snippets folder).
+    var dragged: ClipItem?
 
     /// ⇧Tab: the history's types, round and round.
     func nextKind(_ by: Int) {
@@ -122,6 +126,7 @@ final class ClipboardPanelController {
                                       pickTogether: { [weak self] in self?.pasteTogether($0) },
                                       pickQueue: { [weak self] in self?.startQueue($0) },
                                       runAction: { [weak self] in self?.run($0) },
+                                      saveSnippet: { [weak self] in self?.saveSnippet($0, folder: $1) },
                                       close: { [weak self] in self?.close() })
         let panel = ScreenshotWindows.makePanel(view)
         panel.setFrameOrigin(Self.origin(for: panel.frame.size))
@@ -296,22 +301,27 @@ final class ClipboardPanelController {
     fileprivate func run(_ action: ClipAction) {
         guard let model, let item = model.current else { return }
         if action == .saveSnippet {
-            // The picked entries (or the current one) become one snippet: texts and pictures, in the folder last opened.
-            let entries = model.marked.count > 1 ? model.markedItems : [item]
-            let text = entries.filter { $0.kind != .image }.map(\.text).joined(separator: "\n")
-            let pngs = entries.filter { $0.kind == .image }.compactMap { try? Data(contentsOf: history.imageURL($0)) }
-            let title = text.split(whereSeparator: \.isNewline).first.map { String($0.prefix(40)) }
-                ?? (pngs.count > 1 ? String(localized: "Screenshots (\(pngs.count))") : String(localized: "Screenshot"))
-            let saved = snippets.save(title: title, text: text, pngs: pngs, folder: model.snippetFolder)
+            // The picked entries (or the current one) become one snippet, in the folder last opened.
+            saveSnippet(model.entries(with: item), folder: model.snippetFolder)
             model.actionsShown = false
-            model.marked = []
-            Toast.show(snippets.folder(saved.folder).map { String(localized: "Saved to “\($0.name)”") } ?? String(localized: "Saved as a snippet"))
             return
         }
         guard let text = action.apply(item.text) else { return }
         Paster.put(text)
         close()
         pasteIntoTarget(.paste)
+    }
+
+    /// Entries as one snippet: their texts and pictures.
+    fileprivate func saveSnippet(_ entries: [ClipItem], folder: UUID?) {
+        guard !entries.isEmpty else { return }
+        let text = entries.filter { $0.kind != .image }.map(\.text).joined(separator: "\n")
+        let pngs = entries.filter { $0.kind == .image }.compactMap { try? Data(contentsOf: history.imageURL($0)) }
+        let title = text.split(whereSeparator: \.isNewline).first.map { String($0.prefix(40)) }
+            ?? (pngs.count > 1 ? String(localized: "Screenshots (\(pngs.count))") : String(localized: "Screenshot"))
+        let saved = snippets.save(title: title, text: text, pngs: pngs, folder: folder)
+        model?.marked = []
+        Toast.show(snippets.folder(saved.folder).map { String(localized: "Saved to “\($0.name)”") } ?? String(localized: "Saved as a snippet"))
     }
 
     func pick(_ item: ClipItem, _ mode: Mode) {

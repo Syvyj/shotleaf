@@ -3,6 +3,9 @@
 ## Unreleased
 
 - Settings, the setup guide and the one-time ask now say donations support the author's work on Shotleaf and other apps (there's no separate goal for Apple's developer licence any more).
+- Clipboard: right-click an entry for paste, plain text, copy, pin, save as snippet, actions and delete.
+- Clipboard: drag an entry onto **Snippets** to open them, then drop it on a folder to save it there. Entries can also be dragged into other apps.
+- The **Snippets** button's tip is no longer cut off at the panel's edge.
 
 ## 0.1.8
 

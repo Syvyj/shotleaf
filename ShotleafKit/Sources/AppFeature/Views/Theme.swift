@@ -327,12 +327,14 @@ struct InstantTip: ViewModifier {
     var hidden = false
     /// Show above the view (for rows at the bottom of a window).
     var above = false
+    /// Grows to the left (for a view at the right edge of a window).
+    var trailing = false
     @State private var hovered = false
 
     func body(content: Content) -> some View {
         content
             .onHover { hovered = $0 }
-            .overlay(alignment: above ? .top : .bottom) {
+            .overlay(alignment: above ? (trailing ? .topTrailing : .top) : (trailing ? .bottomTrailing : .bottom)) {
                 if hovered && !hidden {
                     Text(LocalizedStringKey(text))
                         .font(Leaf.font(12, .semibold))
@@ -348,7 +350,7 @@ struct InstantTip: ViewModifier {
 }
 
 extension View {
-    func instantTip(_ text: String, hidden: Bool = false, above: Bool = false) -> some View {
-        modifier(InstantTip(text: text, hidden: hidden, above: above))
+    func instantTip(_ text: String, hidden: Bool = false, above: Bool = false, trailing: Bool = false) -> some View {
+        modifier(InstantTip(text: text, hidden: hidden, above: above, trailing: trailing))
     }
 }

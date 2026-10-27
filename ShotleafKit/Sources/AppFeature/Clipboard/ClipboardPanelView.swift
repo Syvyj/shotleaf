@@ -11,6 +11,7 @@ struct ClipboardPanelView: View {
     var pickTogether: ([ClipItem]) -> Void = { _ in }
     var pickQueue: ([ClipItem]) -> Void = { _ in }
     var runAction: (ClipAction) -> Void = { _ in }
+    var saveSnippet: ([ClipItem], UUID?) -> Void = { _, _ in }
     let close: () -> Void
     @FocusState private var searching: Bool
     @FocusState private var answering: Int?
@@ -24,6 +25,7 @@ struct ClipboardPanelView: View {
                     folderList.frame(width: 230).background(card)
                     Group { if model.asking != nil { snippetPreview } else { snippetList } }
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).background(card)
+                        .onDrop(of: [.item], isTargeted: nil) { _ in dropDragged(into: model.snippetFolder) }
                 } else {
                     list(results).frame(width: 380).background(card)
                     Group { if model.actionsShown { actionList } else { preview } }
@@ -71,14 +73,18 @@ struct ClipboardPanelView: View {
                     }
                 }
                 Rectangle().fill(.primary.opacity(0.12)).frame(width: 1, height: 22).padding(.horizontal, 4)
-                tileButton("text.badge.star", String(localized: "Snippets") + "  Tab", on: model.showsSnippets) { model.showsSnippets = true }
+                tileButton("text.badge.star", String(localized: "Snippets") + "  Tab", on: model.showsSnippets, trailing: true) { model.showsSnippets = true }
+                    // An entry dragged here opens the snippets, to drop it on a folder.
+                    .onDrop(of: [.item], isTargeted: Binding(get: { false }, set: { if $0, model.dragged != nil { model.showsSnippets = true } })) { _ in
+                        dropDragged(into: model.snippetFolder)
+                    }
             }
         }
         .overlay(WindowDragArea().allowsHitTesting(false))
         .zIndex(1) // tips over the list
     }
 
-    private func tileButton(_ symbol: String, _ tip: String, on: Bool, _ action: @escaping () -> Void) -> some View {
+    private func tileButton(_ symbol: String, _ tip: String, on: Bool, trailing: Bool = false, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.system(size: 15, weight: .medium))
@@ -88,7 +94,7 @@ struct ClipboardPanelView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .instantTip(tip)
+        .instantTip(tip, trailing: trailing)
     }
 
     /// The editor's tool tile: green when on.
@@ -196,6 +202,8 @@ struct ClipboardPanelView: View {
                                 if NSEvent.modifierFlags.contains(.command) { model.toggleMark(item.id); model.selected = i }
                                 else { pick(item, .paste) }
                             }
+                            .onDrag { model.dragged = item; return dragProvider(item) }
+                            .contextMenu { menu(item, index: i) }
                     }
                 }
                 .padding(8)
@@ -227,6 +235,38 @@ struct ClipboardPanelView: View {
         .padding(.horizontal, 8).frame(height: 32)
         .background { if on { tile(true) } }
         .contentShape(Rectangle())
+    }
+
+    /// Right click: what the action row does, for this entry.
+    @ViewBuilder
+    private func menu(_ item: ClipItem, index: Int) -> some View {
+        Button("Paste") { pick(item, .paste) }
+        Button("Plain text") { pick(item, .plain) }
+        Button("Copy") { pick(item, .copy) }
+        Divider()
+        Button(item.pinned ? "Unpin" : "Pin") { model.history.togglePin(item.id) }
+        Button("Save as snippet") { saveSnippet(model.entries(with: item), model.snippetFolder) }
+        if item.kind != .image, item.kind != .file { Button("Actions") { model.selected = index; model.actionsShown = true } }
+        Divider()
+        Button("Delete") { model.history.remove(item.id); model.move(0) }
+    }
+
+    /// The entry as other apps take it: the picture, the files, or the text.
+    private func dragProvider(_ item: ClipItem) -> NSItemProvider {
+        switch item.kind {
+        case .image: NSItemProvider(contentsOf: model.history.imageURL(item)) ?? NSItemProvider()
+        case .file: item.fileURLs.first.flatMap(NSItemProvider.init(contentsOf:)) ?? NSItemProvider()
+        default: NSItemProvider(object: item.text as NSString)
+        }
+    }
+
+    /// Drops the entry dragged from the list (and the others picked with it) into a folder.
+    private func dropDragged(into folder: UUID?) -> Bool {
+        guard let item = model.dragged else { return false }
+        model.dragged = nil
+        saveSnippet(model.entries(with: item), folder)
+        model.snippetFolder = folder
+        return true
     }
 
     // MARK: Actions (⌘K)
@@ -290,6 +330,7 @@ struct ClipboardPanelView: View {
         .background { if on { tile(true) } }
         .contentShape(Rectangle())
         .onTapGesture { model.query = ""; model.snippetFolder = id }
+        .onDrop(of: [.item], isTargeted: nil) { _ in dropDragged(into: id) }
     }
 
     private var snippetList: some View {
