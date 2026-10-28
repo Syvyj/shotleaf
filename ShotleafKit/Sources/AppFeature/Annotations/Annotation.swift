@@ -265,6 +265,13 @@ final class AnnotationDocument {
         return item.id
     }
 
+    /// Several marks as one undo step (e.g. "Blur private info").
+    func add(all kinds: [Annotation.Kind]) {
+        guard !kinds.isEmpty else { return }
+        commit(items + kinds.map { Annotation(kind: $0, color: color, lineWidth: lineWidth) })
+        selection = nil
+    }
+
     func remove(_ id: Annotation.ID) {
         commit(items.filter { $0.id != id })
         if selection == id { selection = nil }

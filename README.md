@@ -4,9 +4,13 @@
 <p align="center"><b>Screenshots, clipboard history, snippets and text completion for the Mac.</b><br>Free and open source. No account, no tracking.</p>
 <p align="center"><a href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><b>Download for Mac</b></a> · <a href="https://shotleaf.syvyj.dev">Website</a> · <a href="https://shotleaf.syvyj.dev/guide/">Guide</a> · <a href="#uk">Українська ↓</a><br><a href="https://github.com/Syvyj/shotleaf/actions/workflows/ci.yml"><img src="https://github.com/Syvyj/shotleaf/actions/workflows/ci.yml/badge.svg" alt="CI"></a></p>
 
+```
+0.0 % CPU at rest  ·  ≈50 MB of memory  ·  50 MB app (14 MB download)  ·  no account, no tracking
+```
+
 Screenshots and clipboard history for the Mac. Shotleaf lives in the menu bar:
 
-- **Screenshots** of an area, a window or the whole screen, with an editor for arrows, text, blur, backgrounds and watermarks.
+- **Screenshots** of an area, a window or the whole screen, with an editor for arrows, text, blur, backgrounds and watermarks. One click blurs faces, emails, phone numbers and card numbers.
 - **Scrolling screenshots**: a whole page in one image.
 - **Text from the screen**: copy words from any image or app, recognised on your Mac.
 - **Clipboard history** with search, pinned items and screenshots; paste several items at once.
@@ -64,7 +68,11 @@ A shortcut doesn't fire? Another app may be using it. If your keyboard goes thro
 
 ## Privacy
 
-Shotleaf has no account and sends nothing anywhere. Text recognition and completion run on your Mac. The only network requests are the model download from Hugging Face (when you ask for it), the check for a new version (at launch and once a day Shotleaf asks GitHub which release is the newest; nothing about you is sent, and it can be turned off in **Settings › General**) and screenshot links: when you press the link button, the picture goes to Shotleaf's link service on Cloudflare (`s.syvyj.dev`, code in `server/links`) and is deleted when the link expires, 12 hours at most. You can use your own server instead (`server/shots`).
+Shotleaf has no account and no analytics. Text recognition, blurring private info and completion run on your Mac. It goes online for three things only:
+
+- **The completion model**, downloaded once from Hugging Face when you ask for it. After that it loads from disk.
+- **The check for a new version**: at launch and once a day Shotleaf asks GitHub which release is the newest. Nothing about you is sent. Turn it off in **Settings › General**.
+- **Screenshot links**, when you press the link button: the picture goes to Shotleaf's link service on Cloudflare (`s.syvyj.dev`, code in `server/links`) and is deleted when the link expires, 12 hours at most. You can use your own server instead (`server/shots`).
 
 Passwords copied from password managers aren't kept in the history.
 
@@ -123,9 +131,13 @@ Donations support my time on Shotleaf and my other apps: [support the author](ht
 <p align="center"><b>Скріншоти, історія буфера обміну, сніпети й дописування тексту для Mac.</b><br>Безкоштовний і з відкритим кодом. Без акаунта й стеження.</p>
 <p align="center"><a href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><b>Завантажити для Mac</b></a> · <a href="https://shotleaf.syvyj.dev/uk/">Сайт</a> · <a href="https://shotleaf.syvyj.dev/uk/guide/">Посібник</a> · <a href="#en">↑ English</a></p>
 
+```
+0.0 % CPU у спокої  ·  ≈50 МБ пам'яті  ·  50 МБ застосунок (14 МБ завантаження)  ·  без акаунта й стеження
+```
+
 Скріншоти та історія буфера обміну для Mac. Shotleaf живе в рядку меню:
 
-- **Скріншоти** області, вікна чи всього екрана, з редактором для стрілок, тексту, розмиття, фонів і водяних знаків.
+- **Скріншоти** області, вікна чи всього екрана, з редактором для стрілок, тексту, розмиття, фонів і водяних знаків. Один клік розмиває обличчя, пошти, телефони й номери карток.
 - **Довгі скріншоти**: уся сторінка однією картинкою.
 - **Текст зі скріншоту**: копіюйте слова з будь-якої картинки чи програми, розпізнаються на вашому Mac.
 - **Історія буфера обміну** з пошуком, закріпленими записами й скріншотами; вставляйте кілька записів разом.
@@ -183,7 +195,11 @@ macOS може перестати довіряти новій версії до�
 
 ## Приватність
 
-У Shotleaf немає облікового запису, і він нічого нікуди не надсилає. Розпізнавання тексту й дописування працюють на вашому Mac. Єдині запити в мережу: завантаження моделі з Hugging Face (коли ви про це попросите), перевірка нової версії (під час запуску й раз на день Shotleaf питає в GitHub, який реліз найновіший; нічого про вас не надсилається, а вимкнути її можна в **Налаштуваннях › Загальні**) і посилання на скріншоти. Коли ви натискаєте кнопку посилання, картинка йде в сервіс посилань Shotleaf на Cloudflare (`s.syvyj.dev`, код у `server/links`) і видаляється, коли посилання спливає, щонайбільше за 12 годин. Замість нього можна підключити власний сервер (`server/shots`).
+У Shotleaf немає облікового запису й аналітики. Розпізнавання тексту, розмиття приватного й дописування працюють на вашому Mac. У мережу він ходить лише по три речі:
+
+- **Модель для дописування**: завантажується один раз із Hugging Face, коли ви про це попросите. Далі вона береться з диска.
+- **Перевірка нової версії**: під час запуску й раз на день Shotleaf питає в GitHub, який реліз найновіший. Нічого про вас не надсилається. Вимкнути можна в **Налаштуваннях › Загальні**.
+- **Посилання на скріншоти**, коли ви натискаєте кнопку посилання: картинка йде в сервіс посилань Shotleaf на Cloudflare (`s.syvyj.dev`, код у `server/links`) і видаляється, коли посилання спливає, щонайбільше за 12 годин. Замість нього можна підключити власний сервер (`server/shots`).
 
 Паролі, скопійовані з менеджерів паролів, в історії не зберігаються.
 

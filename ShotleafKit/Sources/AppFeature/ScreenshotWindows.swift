@@ -194,10 +194,13 @@ final class ScreenshotWindows {
         panel.makeKeyAndOrderFront(nil)
     }
 
-    private func close(_ panel: FloatingPanel?) {
+    func close(_ panel: FloatingPanel?) { // internal for tests
         guard let panel else { return }
         panel.orderOut(nil)
         open[ObjectIdentifier(panel)] = nil
+        // The view's buttons hold the panel: let go of the view (after this click
+        // is done with it), or the window and its screenshot are never freed.
+        Task { panel.contentViewController = nil }
         Task { [weak self] in
             try? await Task.sleep(for: .seconds(1))
             if let self, self.open.isEmpty { self.allClosed() }

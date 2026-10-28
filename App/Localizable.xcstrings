@@ -4548,6 +4548,46 @@
           }
         }
       }
+    },
+    "Blur private info": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розмити приватне"
+          }
+        }
+      }
+    },
+    "Faces, emails, phone numbers, card numbers and tokens": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обличчя, пошти, телефони, номери карток і токени"
+          }
+        }
+      }
+    },
+    "Nothing private found": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нічого приватного не знайдено"
+          }
+        }
+      }
+    },
+    "Blurred %lld": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розмито: %lld"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

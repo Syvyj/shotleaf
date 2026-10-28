@@ -6,6 +6,8 @@
 - Clipboard: right-click an entry for paste, plain text, copy, pin, save as snippet, actions and delete.
 - Clipboard: drag an entry onto **Snippets** to open them, then drop it on a folder to save it there. Entries can also be dragged into other apps.
 - The **Snippets** button's tip is no longer cut off at the panel's edge.
+- Editor: with **Blur** picked, **Blur private info** finds faces, emails, phone numbers, card numbers and tokens on the screenshot and blurs them in one step (one ⌘Z undoes it). It runs on your Mac.
+- Memory: a closed screenshot window no longer stays in memory with its picture. After a day of screenshots Shotleaf could grow past 1.5 GB; now it stays near what it uses at launch (about 50 MB).
 
 ## 0.1.8
 

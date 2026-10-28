@@ -157,7 +157,7 @@ final class ClipboardHistory {
     }
 
     /// A card number (passes Luhn) or a long secret-looking token.
-    static func looksSensitive(_ text: String) -> Bool {
+    nonisolated static func looksSensitive(_ text: String) -> Bool {
         let digits = text.filter(\.isNumber)
         let cardLike = text.allSatisfy { $0.isNumber || $0 == " " || $0 == "-" } && (13...19).contains(digits.count)
         if cardLike {

@@ -11,6 +11,17 @@ struct ScreenshotWindowTests {
     static let blankImage: CGImage = CGContext(data: nil, width: 4, height: 4, bitsPerComponent: 8, bytesPerRow: 0,
                                                space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!.makeImage()!
 
+    @Test("A closed editor window is freed, with its screenshot")
+    func closedWindowIsFreed() async throws {
+        let png = try #require(NSBitmapImageRep(cgImage: Self.blankImage).representation(using: .png, properties: [:]))
+        let windows = ScreenshotWindows()
+        windows.show(ScreenshotWindows.payload(png), sound: false)
+        weak var panel = try #require(windows.open.values.first)
+        windows.close(panel)
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(panel == nil)
+    }
+
     @Test("File name is sortable and Finder-safe")
     func fileName() {
         var c = DateComponents(); c.year = 2026; c.month = 10; c.day = 8; c.hour = 16; c.minute = 5; c.second = 9

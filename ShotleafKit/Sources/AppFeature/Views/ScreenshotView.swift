@@ -47,6 +47,7 @@ struct ScreenshotView: View {
     }
 
     @State private var toast: String?
+    @State private var findingPrivate = false
     /// The first few times the editor opens: which keys do the main things.
     @State private var keysHint = EditorHint.take()
     @State private var dragStart: CGPoint?
@@ -89,6 +90,7 @@ struct ScreenshotView: View {
         VStack(alignment: .leading, spacing: 12) {
             header.zIndex(1) // tips and menus draw over the canvas
             canvas.overlay(alignment: .top) { toastPill }
+                .overlay(alignment: .topTrailing) { privatePill }
                 .overlay(alignment: .bottom) { keysHintPill }
             toolbar.zIndex(1) // its tips show above, over the canvas
         }
@@ -148,6 +150,31 @@ struct ScreenshotView: View {
             .background(Capsule().fill(Color.black.opacity(0.72)))
             .padding(.bottom, 12)
             .transition(.opacity)
+        }
+    }
+
+    /// With Blur picked: blurs faces, emails, phone numbers, cards and tokens in one go.
+    @ViewBuilder private var privatePill: some View {
+        if doc.tool == .blur {
+            Button {
+                findingPrivate = true
+                Task {
+                    let spots = await PrivateSpots.find(in: pictureCG, size: pictureSize)
+                    doc.add(all: spots.map { .blur($0) })
+                    findingPrivate = false
+                    flash(spots.isEmpty ? String(localized: "Nothing private found") : String(localized: "Blurred \(spots.count)"))
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    if findingPrivate { ProgressView().controlSize(.small) } else { Image(systemName: "eye.slash") }
+                    Text("Blur private info")
+                }
+                .font(Leaf.font(12, .semibold))
+            }
+            .buttonStyle(LeafButtonStyle())
+            .disabled(findingPrivate)
+            .instantTip("Faces, emails, phone numbers, card numbers and tokens")
+            .padding(12)
         }
     }
 
