@@ -90,6 +90,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task { await coordinator.start() }
     }
 
+    /// Finder › Open With › Shotleaf (or a picture dropped on the app): each one in the editor.
+    func application(_ application: NSApplication, open urls: [URL]) {
+        coordinator.openImages(urls)
+    }
+
     /// Clicking the Dock icon (when shown) opens Settings — there's no main window.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
         if !hasVisibleWindows { coordinator.openSettingsWindow() }

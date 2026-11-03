@@ -74,6 +74,12 @@ struct ToolIcon: View {
                 ctx.stroke(Path(roundedRect: r(7.5, 7.5, 8, 7.5), cornerRadius: 1.8 * u), with: ink, style: line)
             case .ellipse:
                 ctx.stroke(Path(ellipseIn: r(2.5, 4, 13, 10)), with: ink, style: line)
+            case .magnify: // a lens with a handle and a plus
+                var path = Path(ellipseIn: r(2.5, 2.5, 10, 10))
+                path.move(to: p(11, 11)); path.addLine(to: p(15.5, 15.5))
+                path.move(to: p(5.5, 7.5)); path.addLine(to: p(9.5, 7.5))
+                path.move(to: p(7.5, 5.5)); path.addLine(to: p(7.5, 9.5))
+                ctx.stroke(path, with: ink, style: line)
             case .crop:
                 var path = Path()
                 path.move(to: p(5, 1.5)); path.addLine(to: p(5, 13)); path.addLine(to: p(16.5, 13))

@@ -213,6 +213,30 @@ public final class AppCoordinator {
         screenshots.show(shot, sound: false)
     }
 
+    /// Pictures from Finder (Open With), each in its own editor.
+    public func openImages(_ urls: [URL]) {
+        let shots = urls.compactMap(ScreenshotWindows.load)
+        if shots.isEmpty { NSSound.beep() }
+        NSApp.activate()
+        for shot in shots { screenshots.show(shot, sound: false) }
+    }
+
+    /// "Combine Images…": pick two or more pictures; they open in the editor as one.
+    public func combineImages() {
+        let ask = NSOpenPanel()
+        ask.allowedContentTypes = [.image]
+        ask.allowsMultipleSelection = true
+        ask.message = String(localized: "Pick two or more pictures to combine into one")
+        ask.prompt = String(localized: "Combine")
+        NSApp.activate()
+        guard ask.runModal() == .OK else { return }
+        let images = ask.urls.compactMap { NSBitmapImageRep(data: (try? Data(contentsOf: $0)) ?? Data())?.cgImage }
+        guard images.count >= 2, let combined = Collage.make(images),
+              let png = NSBitmapImageRep(cgImage: combined).representation(using: .png, properties: [:])
+        else { NSSound.beep(); return }
+        screenshots.show(ImagePayload(data: png, width: combined.width, height: combined.height), sound: false)
+    }
+
     public func clearRecentShots() {
         try? FileManager.default.removeItem(at: ScreenshotWindows.recentFolder)
         recentShots = []

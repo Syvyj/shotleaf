@@ -16,9 +16,14 @@ enum AnnotationRenderer {
         func changesPicture(_ k: Annotation.Kind) -> Bool {
             switch k { case .blur, .erase, .piece: true; default: false }
         }
-        drawEach(items.filter { changesPicture($0.kind) }, image: image, imageSize: imageSize, in: ctx)
+        let picture = items.filter { changesPicture($0.kind) }
+        drawEach(picture, image: image, imageSize: imageSize, in: ctx)
         let spots = items.compactMap { if case .focus(let r) = $0.kind { r } else { nil } }
         if !spots.isEmpty { focus(spots, imageSize: imageSize, in: ctx) }
+        // Loupes show the picture as changed (blurred stays blurred), under the marks on top.
+        for item in items { if case .magnify(let r) = item.kind {
+            magnify(r, rim: item.color.nsColor.cgColor, width: item.lineWidth, image: image, imageSize: imageSize, picture: picture, in: ctx)
+        } }
         drawEach(items.filter { !changesPicture($0.kind) }, image: image, imageSize: imageSize, in: ctx)
         if cropGuide, let crop = items.lazy.compactMap({ if case .crop(let r) = $0.kind { r } else { nil } }).first {
             cropGuideLayer(crop, in: ctx)
@@ -49,7 +54,11 @@ enum AnnotationRenderer {
                 measure(from: a, to: b, pixelsPerPoint: CGFloat(image.width) / max(imageSize.width, 1), color: item.color.nsColor, in: ctx)
             case .rectangle(let r): box(r, width: item.lineWidth, color: color, in: ctx)
             case .pen(let points): pen(points, width: item.lineWidth, color: color, in: ctx)
-            case .focus, .crop: break // focus drawn above; crop is a guide / export bound
+            case .focus, .crop, .magnify: break // focus and loupes drawn above; crop is a guide / export bound
+            case .image(let picture, let r):
+                ctx.setShadow(offset: CGSize(width: 0, height: 2), blur: 8, color: NSColor.black.withAlphaComponent(0.30).cgColor)
+                ctx.interpolationQuality = .high
+                drawUpright(picture, in: r, ctx: ctx)
             case .ellipse(let r):
                 softShadow(ctx)
                 ctx.setStrokeColor(color)
@@ -241,6 +250,37 @@ enum AnnotationRenderer {
         ctx.setStrokeColor(NSColor.white.withAlphaComponent(0.7).cgColor)
         ctx.setLineWidth(1.5)
         for r in spots { ctx.addPath(CGPath(roundedRect: r, cornerWidth: 6, cornerHeight: 6, transform: nil)) }
+        ctx.strokePath()
+        ctx.restoreGState()
+    }
+
+    /// The picture inside the circle, enlarged around its centre, with a rim in the mark's color.
+    private static func magnify(_ r: CGRect, rim: CGColor, width: CGFloat, image: CGImage, imageSize: CGSize,
+                                picture: [Annotation], in ctx: CGContext) {
+        let circle = CGPath(ellipseIn: r, transform: nil)
+        ctx.saveGState()
+        ctx.setShadow(offset: CGSize(width: 0, height: 2), blur: 10, color: NSColor.black.withAlphaComponent(0.35).cgColor)
+        ctx.setFillColor(NSColor.white.cgColor) // outside the shot: plain canvas
+        ctx.addPath(circle)
+        ctx.fillPath()
+        ctx.restoreGState()
+
+        ctx.saveGState()
+        ctx.addPath(circle)
+        ctx.clip()
+        let zoom = AnnotationStyle.zoom
+        ctx.translateBy(x: r.midX, y: r.midY)
+        ctx.scaleBy(x: zoom, y: zoom)
+        ctx.translateBy(x: -r.midX, y: -r.midY)
+        ctx.interpolationQuality = .high
+        drawUpright(image, in: CGRect(origin: .zero, size: imageSize), ctx: ctx)
+        drawEach(picture, image: image, imageSize: imageSize, in: ctx)
+        ctx.restoreGState()
+
+        ctx.saveGState()
+        ctx.setStrokeColor(rim)
+        ctx.setLineWidth(width)
+        ctx.addPath(circle)
         ctx.strokePath()
         ctx.restoreGState()
     }

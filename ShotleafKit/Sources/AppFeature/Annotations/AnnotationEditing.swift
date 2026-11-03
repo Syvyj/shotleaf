@@ -30,7 +30,8 @@ enum AnnotationEditing {
         case .arrow(let a, let b), .measure(let a, let b): return distance(from: p, toSegment: a, b) <= tolerance
         case .pen(let points):
             return zip(points, points.dropFirst()).contains { distance(from: p, toSegment: $0, $1) <= tolerance }
-        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r):
+        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r),
+             .magnify(let r), .image(_, let r):
             return r.insetBy(dx: -tolerance / 2, dy: -tolerance / 2).contains(p)
         case .piece(let source, let offset, _):
             return source.offsetBy(dx: offset.width, dy: offset.height).contains(p)
@@ -45,7 +46,8 @@ enum AnnotationEditing {
     static func frame(of kind: Annotation.Kind) -> CGRect {
         switch kind {
         case .arrow(let a, let b), .measure(let a, let b): return CaptureMath.rect(a, b)
-        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r): return r
+        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r),
+             .magnify(let r), .image(_, let r): return r
         case .piece(let source, let offset, _): return source.offsetBy(dx: offset.width, dy: offset.height)
         case .text(let o, let s, _, let w, let f): return AnnotationStyle.bubble(origin: o, string: s, width: w, size: f)
         default: return Annotation(kind: kind, color: .coral).bounds
@@ -62,7 +64,8 @@ enum AnnotationEditing {
             let bubble = AnnotationStyle.bubble(origin: o, string: s, width: w, size: f)
             return [(.tail, tail ?? CGPoint(x: bubble.minX + 14, y: bubble.maxY)),
                     (.textWidth, CGPoint(x: bubble.maxX, y: bubble.midY))]
-        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r):
+        case .rectangle(let r), .highlight(let r), .blur(let r), .erase(let r, _), .focus(let r), .ellipse(let r), .crop(let r),
+             .magnify(let r), .image(_, let r):
             return [(.corner(0), CGPoint(x: r.minX, y: r.minY)), (.corner(1), CGPoint(x: r.maxX, y: r.minY)),
                     (.corner(2), CGPoint(x: r.maxX, y: r.maxY)), (.corner(3), CGPoint(x: r.minX, y: r.maxY))]
         default:
@@ -88,6 +91,8 @@ enum AnnotationEditing {
         case .focus(let r): return .focus(m(r))
         case .ellipse(let r): return .ellipse(m(r))
         case .crop(let r): return .crop(m(r))
+        case .magnify(let r): return .magnify(m(r))
+        case .image(let picture, let r): return .image(picture, m(r))
         case .pen(let points): return .pen(points.map(m))
         case .erase(let r, let fill): return .erase(m(r), fill: fill)
         case .step(let c, let n): return .step(center: m(c), number: n)
@@ -114,11 +119,17 @@ enum AnnotationEditing {
     /// The mark with `handle` dragged to `p`. Corners keep the opposite corner
     /// fixed; dragging past it flips the box instead of inverting it.
     static func resized(_ kind: Annotation.Kind, _ handle: Handle, to p: CGPoint) -> Annotation.Kind {
-        func box(_ r: CGRect) -> CGRect {
-            guard case .corner(let i) = handle else { return r }
-            let opposite = [CGPoint(x: r.maxX, y: r.maxY), CGPoint(x: r.minX, y: r.maxY),
-                            CGPoint(x: r.minX, y: r.minY), CGPoint(x: r.maxX, y: r.minY)][i]
-            return CaptureMath.rect(opposite, p)
+        func opposite(_ r: CGRect) -> CGPoint? {
+            guard case .corner(let i) = handle else { return nil }
+            return [CGPoint(x: r.maxX, y: r.maxY), CGPoint(x: r.minX, y: r.maxY),
+                    CGPoint(x: r.minX, y: r.minY), CGPoint(x: r.maxX, y: r.minY)][i]
+        }
+        func box(_ r: CGRect) -> CGRect { opposite(r).map { CaptureMath.rect($0, p) } ?? r }
+        /// A pasted picture keeps its proportions: the width leads.
+        func keepingShape(_ r: CGRect) -> CGRect {
+            guard let o = opposite(r), r.width > 0, r.height > 0 else { return r }
+            let width = max(abs(p.x - o.x), 8), height = width * r.height / r.width
+            return CGRect(x: p.x < o.x ? o.x - width : o.x, y: p.y < o.y ? o.y - height : o.y, width: width, height: height)
         }
         switch (kind, handle) {
         case (.arrow(_, let b), .arrowStart): return .arrow(from: p, to: b)
@@ -137,9 +148,21 @@ enum AnnotationEditing {
         case (.focus(let r), _): return .focus(box(r))
         case (.ellipse(let r), _): return .ellipse(box(r))
         case (.crop(let r), _): return .crop(box(r))
+        case (.magnify(let r), _): return .magnify(box(r))
+        case (.image(let picture, let r), _): return .image(picture, keepingShape(r))
         case (.erase(let r, let fill), _): return .erase(box(r), fill: fill)
         default: return kind
         }
+    }
+
+    /// Where a pasted picture lands: at the shot's pixel density, shrunk to fit
+    /// in 60 % of the shot if it's bigger, in the middle.
+    static func pastedFrame(pixels: CGSize, pixelsPerPoint: CGFloat, picture: CGSize) -> CGRect {
+        var size = CGSize(width: pixels.width / max(pixelsPerPoint, 0.01), height: pixels.height / max(pixelsPerPoint, 0.01))
+        let fit = min(1, picture.width * 0.6 / max(size.width, 1), picture.height * 0.6 / max(size.height, 1))
+        size = CGSize(width: (size.width * fit).rounded(), height: (size.height * fit).rounded())
+        return CGRect(x: ((picture.width - size.width) / 2).rounded(), y: ((picture.height - size.height) / 2).rounded(),
+                      width: size.width, height: size.height)
     }
 
     /// A ruler end snaps to horizontal / vertical when it's nearly there.

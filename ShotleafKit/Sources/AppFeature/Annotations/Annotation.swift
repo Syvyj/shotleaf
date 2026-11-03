@@ -29,6 +29,10 @@ struct Annotation: Identifiable, Equatable {
         case measure(from: CGPoint, to: CGPoint)
         /// Freehand line, as drawn.
         case pen([CGPoint])
+        /// Loupe: the picture under the circle, `AnnotationStyle.zoom` times bigger.
+        case magnify(CGRect)
+        /// A picture pasted on top (⌘V), drawn into the rect.
+        case image(CGImage, CGRect)
     }
 
     let id = UUID()
@@ -43,9 +47,9 @@ struct Annotation: Identifiable, Equatable {
         case .arrow(let a, let b):
             let head = AnnotationStyle.arrowHead(for: lineWidth)
             return CaptureMath.rect(a, b).insetBy(dx: -head, dy: -head)
-        case .rectangle(let r), .ellipse(let r):
+        case .rectangle(let r), .ellipse(let r), .magnify(let r):
             return r.insetBy(dx: -lineWidth, dy: -lineWidth)
-        case .crop(let r):
+        case .crop(let r), .image(_, let r):
             return r
         case .pen(let points):
             return points.reduce(CGRect.null) { $0.union(CGRect(origin: $1, size: .zero)) }.insetBy(dx: -lineWidth, dy: -lineWidth)
@@ -94,7 +98,7 @@ enum AnnotationColor: String, CaseIterable, Identifiable {
 }
 
 enum AnnotationTool: String, CaseIterable, Identifiable {
-    case arrow, rectangle, text, highlight, pen, blur, step, erase, cut, focus, ellipse, crop, ruler
+    case arrow, rectangle, text, highlight, pen, blur, step, erase, cut, focus, ellipse, crop, ruler, magnify
     var id: String { rawValue }
 
     /// The tools on 1…9, in their original order (kept stable for muscle memory).
@@ -115,11 +119,12 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
         case .ellipse: String(localized: "Oval")
         case .crop: String(localized: "Crop")
         case .ruler: String(localized: "Ruler")
+        case .magnify: String(localized: "Magnifier")
         }
     }
 
     /// Tools whose marks have a line thickness.
-    var usesLineWidth: Bool { [.arrow, .rectangle, .ellipse, .pen].contains(self) }
+    var usesLineWidth: Bool { [.arrow, .rectangle, .ellipse, .pen, .magnify].contains(self) }
 
     /// The editor key: the user's own (Settings → Editor tools) or the
     /// default — 1…9 for the original tools, letters for later ones. None of
@@ -135,6 +140,7 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
         case .crop: "c"
         case .ruler: "m"
         case .pen: "d"
+        case .magnify: "l"
         default: Character(String((Self.numbered.firstIndex(of: self) ?? 0) + 1))
         }
     }
@@ -363,6 +369,8 @@ enum AnnotationStyle {
     static func arrowHead(for width: CGFloat) -> CGFloat { 10 + width * 2 }
     static let stepRadius: CGFloat = 15
     static let blurBlock: CGFloat = 10 // pixelation cell, in image points
+    /// How much the magnifier enlarges.
+    static let zoom: CGFloat = 2
 
     /// Callout text wraps here unless its width was dragged.
     static let textWrap: CGFloat = 320

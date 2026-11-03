@@ -49,23 +49,31 @@ struct SnippetTests {
         #expect(SnippetText.expand("x{cursor}y{cursor}z") == ("xyz", 2))       // only the first counts
     }
 
-    @Test("An abbreviation that starts with a letter fires only as a whole word")
-    func wholeWord() {
-        let mail = [Snippet(title: "Mail", text: "me@example.com", abbreviation: "mail")]
-        #expect(SnippetExpander.match("mail", in: mail) != nil)
-        #expect(SnippetExpander.match("write to mail", in: mail) != nil)
-        #expect(SnippetExpander.match(";mail", in: mail) != nil)
-        #expect(SnippetExpander.match("gmail", in: mail) == nil)
-        #expect(SnippetExpander.match("xx;addr", in: [Snippet(title: "A", text: "a", abbreviation: ";addr")]) != nil)
+    @Test("A bare word never fires: abbreviations get a ; in front, old ones too")
+    func bareWord() throws {
+        let bare = [Snippet(title: "Mail", text: "me@example.com", abbreviation: "mail")]
+        for typing in ["mail", "write to mail", "e-mail", "gmail"] { #expect(SnippetExpander.match(typing, in: bare) == nil) }
+        #expect(Snippet.abbreviation("mail") == ";mail" && Snippet.abbreviation("2fa") == ";2fa")
+        #expect(Snippet.abbreviation(";mail") == ";mail" && Snippet.abbreviation("//sig") == "//sig" && Snippet.abbreviation("").isEmpty)
+        let mail = [Snippet(title: "Mail", text: "me@example.com", abbreviation: ";mail")]
+        #expect(SnippetExpander.match("write to ;mail", in: mail) != nil)
+        #expect(SnippetExpander.match("write to mail", in: mail) == nil)
+
+        // A store saved before this keeps working, with the ; added.
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("snippets-\(UUID()).json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        try #"{"snippets":[{"id":"\#(UUID())","title":"Mail","text":"me@example.com","abbreviation":"mail"}],"folders":[]}"#
+            .write(to: file, atomically: true, encoding: .utf8)
+        #expect(SnippetStore(file: file).snippets.first?.abbreviation == ";mail")
     }
 
     @Test("Abbreviation: the typing must end with it; the longest wins")
     func match() {
-        let s = [Snippet(title: "a", text: "A", abbreviation: ";addr"), Snippet(title: "b", text: "B", abbreviation: "dr"),
+        let s = [Snippet(title: "a", text: "A", abbreviation: ";addr"), Snippet(title: "b", text: "B", abbreviation: "/dr"),
                  Snippet(title: "c", text: "C")]
         #expect(SnippetExpander.match("hello ;addr", in: s)?.title == "a")
         #expect(SnippetExpander.match("hello ;add", in: s) == nil)
-        #expect(SnippetExpander.match("word dr", in: s)?.title == "b")
+        #expect(SnippetExpander.match("word /dr", in: s)?.title == "b")
     }
 
     @Test("Store: search by title, text or abbreviation; survives a restart")

@@ -4588,6 +4588,56 @@
           }
         }
       }
+    },
+    "Magnifier": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лупа"
+          }
+        }
+      }
+    },
+    "Combine Images…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Об’єднати картинки…"
+          }
+        }
+      }
+    },
+    "Combine": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Об’єднати"
+          }
+        }
+      }
+    },
+    "Pick two or more pictures to combine into one": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виберіть дві чи більше картинок, щоб об’єднати їх в одну"
+          }
+        }
+      }
+    },
+    "JPEG under %@…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JPEG до %@…"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

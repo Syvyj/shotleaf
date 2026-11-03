@@ -12,6 +12,13 @@ struct Snippet: Codable, Identifiable, Equatable {
     /// Pictures pasted along with the text: file names in the store's image folder.
     /// Optional: snippets saved before pictures have no such field.
     var images: [String]?
+
+    /// An abbreviation as kept: one that starts with a letter or digit gets a ";"
+    /// in front, so typing an ordinary word ("mail", "mailbox") never sets it off.
+    static func abbreviation(_ typed: String) -> String {
+        guard let first = typed.first, first.isLetter || first.isNumber else { return typed }
+        return ";" + typed
+    }
 }
 
 struct SnippetFolder: Codable, Identifiable, Equatable {
@@ -43,7 +50,7 @@ final class SnippetStore {
         imageFolder = file.deletingLastPathComponent().appendingPathComponent("Snippet Images", isDirectory: true)
         loading = true
         if let data = try? Data(contentsOf: file), let saved = try? JSONDecoder().decode(Saved.self, from: data) {
-            snippets = saved.snippets
+            snippets = saved.snippets.map { var s = $0; s.abbreviation = Snippet.abbreviation(s.abbreviation); return s } // older ones could be bare words
             folders = saved.folders
         }
         loading = false

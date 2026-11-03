@@ -7,6 +7,12 @@
 - Clipboard: drag an entry onto **Snippets** to open them, then drop it on a folder to save it there. Entries can also be dragged into other apps.
 - The **Snippets** button's tip is no longer cut off at the panel's edge.
 - Editor: with **Blur** picked, **Blur private info** finds faces, emails, phone numbers, card numbers and tokens on the screenshot and blurs them in one step (one ⌘Z undoes it). It runs on your Mac.
+- Editor: a **Magnifier** (with the arrow, box and oval, key L): a circle that shows what's under it twice as big. Blurred parts stay blurred in it.
+- Editor: **⌘V** pastes a picture from the clipboard on top of the shot. Move it, or drag a corner to resize it (it keeps its shape).
+- Finder: right-click any picture › **Open With › Shotleaf** to mark it up in the editor. Shotleaf never becomes the default app for pictures.
+- **Combine Images…** in the menu: pick two or more pictures and they open in the editor as one, laid out in rows with a gap.
+- Save as: **JPEG under 1 MB / 500 KB / 200 KB** for mail and chats: the best quality that fits, and a smaller picture only when it has to be.
+- Snippets: an abbreviation always starts with **;** (or another symbol). A bare word like `mail` used to go off in the middle of ordinary typing ("mail", "mailbox", "e-mail"); now the editor puts the ; in front as you type, and existing ones get it too (`mail` → `;mail`).
 - Memory: a closed screenshot window no longer stays in memory with its picture. After a day of screenshots Shotleaf could grow past 1.5 GB; now it stays near what it uses at launch (about 50 MB).
 
 ## 0.1.8

@@ -174,7 +174,10 @@ struct SnippetEditorView: View {
                 HStack(alignment: .bottom, spacing: 10) {
                     field("Name") { TextField("", text: snippet.title).textFieldStyle(.roundedBorder) }
                     field("Abbreviation") {
-                        TextField("", text: snippet.abbreviation, prompt: Text(verbatim: ";addr")).textFieldStyle(.roundedBorder)
+                        // A word gets its ";" as it's typed: "mail" becomes ";mail".
+                        TextField("", text: Binding(get: { snippet.abbreviation.wrappedValue },
+                                                    set: { snippet.abbreviation.wrappedValue = Snippet.abbreviation($0) }),
+                                  prompt: Text(verbatim: ";addr")).textFieldStyle(.roundedBorder)
                             .font(.system(size: 13, design: .monospaced))
                     }
                     .frame(width: 130)
@@ -186,10 +189,6 @@ struct SnippetEditorView: View {
                         .labelsHidden()
                     }
                     .frame(width: 150)
-                }
-                if store.snippets[i].abbreviation.first?.isLetter == true {
-                    Text("Tip: start it with ; (like ;\(store.snippets[i].abbreviation)) so it never goes off while you type a normal word.")
-                        .font(Leaf.font(11)).opacity(0.55)
                 }
                 if let clash = abbreviationClash(store.snippets[i]) {
                     Text("“\(clash)” already uses this abbreviation").font(Leaf.font(11)).foregroundStyle(.orange)

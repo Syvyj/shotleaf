@@ -14,6 +14,8 @@ struct ScreenshotActions {
     var dragFile: () -> URL?
     /// "Save as…" in another format (asks where).
     var saveAs: (UTType) -> Void = { _ in }
+    /// "JPEG under 1 MB…": a smaller file for mail and chats (asks where).
+    var saveSmall: (Int) -> Void = { _ in }
     /// Uploads the result to the link server; the link lives that many hours.
     var link: (Int) async throws -> URL = { _ in throw ShotLinks.Failure.notSetUp }
     /// The system share menu (AirDrop, Messages, Mail…).
@@ -195,8 +197,8 @@ struct ScreenshotView: View {
         }
     }
 
-    /// Arrow, box and oval share one button; its menu picks which.
-    static let shapeTools: [AnnotationTool] = [.arrow, .rectangle, .ellipse]
+    /// Arrow, box, oval and magnifier share one button; its menu picks which.
+    static let shapeTools: [AnnotationTool] = [.arrow, .rectangle, .ellipse, .magnify]
     private static var toolbarTools: [AnnotationTool] {
         let ordered = AnnotationTool.ordered
         let firstShape = ordered.first { shapeTools.contains($0) }
@@ -814,6 +816,9 @@ struct ScreenshotView: View {
         case .blur: return big ? .blur(rect) : nil
         case .focus: return big ? .focus(rect) : nil
         case .ellipse: return big ? .ellipse(rect) : nil
+        case .magnify: // always round, from the corner dragged
+            let side = max(rect.width, rect.height)
+            return side >= 8 ? .magnify(CGRect(x: b.x < a.x ? a.x - side : a.x, y: b.y < a.y ? a.y - side : a.y, width: side, height: side)) : nil
         case .crop: return big ? .crop(rect) : nil
         case .ruler:
             let end = AnnotationEditing.snapped(a, b)
@@ -882,7 +887,7 @@ struct ScreenshotView: View {
                         } label: {
                             Text("To Snippets").font(Leaf.font(13, .medium))
                                 .padding(.horizontal, 8).padding(.vertical, 4)
-                                .frame(width: 110, alignment: .leading)
+                                .frame(width: 150, alignment: .leading)
                                 .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
@@ -891,7 +896,17 @@ struct ScreenshotView: View {
                                 Text(verbatim: "\(type.preferredFilenameExtension?.uppercased() ?? "")…")
                                     .font(Leaf.font(13, .medium))
                                     .padding(.horizontal, 8).padding(.vertical, 4)
-                                    .frame(width: 110, alignment: .leading)
+                                    .frame(width: 150, alignment: .leading)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        ForEach(SmallFile.limits, id: \.self) { limit in
+                            Button { flyout = nil; actions.saveSmall(limit) } label: {
+                                Text("JPEG under \(SmallFile.label(limit))…")
+                                    .font(Leaf.font(13, .medium))
+                                    .padding(.horizontal, 8).padding(.vertical, 4)
+                                    .frame(width: 150, alignment: .leading)
                                     .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
@@ -999,6 +1014,7 @@ struct ScreenshotView: View {
                 .keyboardShortcut("z", modifiers: [.command, .shift])
                 .disabled(!doc.canRedo)
             Button("") { pick(nil) }.keyboardShortcut("0", modifiers: [])
+            Button("") { pastePicture() }.keyboardShortcut("v", modifiers: .command)
             ForEach(AnnotationTool.allCases) { tool in
                 if let key = tool.key {
                     Button("") { pick(tool) }.keyboardShortcut(KeyEquivalent(key), modifiers: [])
@@ -1043,6 +1059,16 @@ struct ScreenshotView: View {
                 flash(error.localizedDescription)
             }
         }
+    }
+
+    /// ⌘V: the clipboard's picture on top of the shot, selected, to move and resize.
+    private func pastePicture() {
+        guard let pasted = NSImage(pasteboard: .general),
+              let picture = pasted.cgImage(forProposedRect: nil, context: nil, hints: nil) else { NSSound.beep(); return }
+        let frame = AnnotationEditing.pastedFrame(pixels: CGSize(width: picture.width, height: picture.height),
+                                                  pixelsPerPoint: picturePixels.width / max(pictureSize.width, 1), picture: pictureSize)
+        pick(nil)
+        doc.add(.image(picture, frame))
     }
 
     private func toggleLiveText() {

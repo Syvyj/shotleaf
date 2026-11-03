@@ -77,6 +77,17 @@ final class ScreenshotWindows {
                     do { try data.write(to: url) } catch { SaveError.show(error, saving: String(localized: "the screenshot")) }
                 }
             },
+            saveSmall: { limit in
+                let ask = NSSavePanel()
+                ask.allowedContentTypes = [.jpeg]
+                ask.directoryURL = Self.saveFolder
+                ask.nameFieldStringValue = (Self.fileName(Date(), template: Self.settings.fileNameTemplate) as NSString).deletingPathExtension
+                ask.beginSheetModal(for: panel) { response in
+                    guard response == .OK, let url = ask.url else { return }
+                    guard let picture = NSBitmapImageRep(data: result())?.cgImage, let data = SmallFile.jpeg(picture, under: limit) else { NSSound.beep(); return }
+                    do { try data.write(to: url) } catch { SaveError.show(error, saving: String(localized: "the screenshot")) }
+                }
+            },
             link: { hours in try await ShotLinks.upload(result(), hours: hours) },
             share: {
                 guard let view = panel.contentView else { return }
