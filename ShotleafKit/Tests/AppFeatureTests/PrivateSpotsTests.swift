@@ -15,7 +15,8 @@ struct PrivateSpotsTests {
         #expect(parts("Meeting notes for Tuesday, room 4").isEmpty)
     }
 
-    @Test("Vision finds the email on a picture, where it is")
+    // On GitHub's runners (a VM without the GPU) Vision's face request never returns and stalls the whole run.
+    @Test("Vision finds the email on a picture, where it is", .disabled(if: ProcessInfo.processInfo.environment["CI"] != nil))
     func onPicture() async throws {
         let size = CGSize(width: 800, height: 200)
         let image = NSImage(size: size, flipped: true) { rect in
