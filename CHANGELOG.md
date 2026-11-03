@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.9
 
 - Settings, the setup guide and the one-time ask now say donations support the author's work on Shotleaf and other apps (there's no separate goal for Apple's developer licence any more).
 - Clipboard: right-click an entry for paste, plain text, copy, pin, save as snippet, actions and delete.
