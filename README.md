@@ -1,31 +1,34 @@
 <a name="en"></a>
-<p align="center"><img src="App/Assets.xcassets/AppIcon.appiconset/icon_256x256@2x.png" width="128" height="128" alt="Shotleaf icon"></p>
-<h1 align="center">Shotleaf</h1>
-<p align="center"><b>Screenshots, clipboard history, snippets and text completion for the Mac.</b><br>Free and open source. No account, no tracking.</p>
-<p align="center"><a href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><b>Download for Mac</b></a> · <a href="https://shotleaf.syvyj.dev">Website</a> · <a href="https://shotleaf.syvyj.dev/guide/">Guide</a> · <a href="#uk">Українська ↓</a><br><a href="https://github.com/Syvyj/shotleaf/actions/workflows/ci.yml"><img src="https://github.com/Syvyj/shotleaf/actions/workflows/ci.yml/badge.svg" alt="CI"></a></p>
 
-```
-0.0 % CPU at rest  ·  ≈50 MB of memory  ·  50 MB app (14 MB download)  ·  no account, no tracking
-```
+![Shotleaf — Capture. Create. Keep. Screenshots and clipboard for Mac.](docs/assets/readme-hero.png)
 
-Screenshots and clipboard history for the Mac. Shotleaf lives in the menu bar:
+**English** · [Українська ↓](#uk)
 
-- **Screenshots** of an area, a window or the whole screen, with an editor for arrows, text, blur, backgrounds and watermarks. One click blurs faces, emails, phone numbers and card numbers.
-- **Scrolling screenshots**: a whole page in one image.
-- **Text from the screen**: copy words from any image or app, recognised on your Mac.
-- **Clipboard history** with search, pinned items and screenshots; paste several items at once.
-- **Snippets**: type an abbreviation anywhere and it expands, with dates, questions and pictures.
-- **Text completion** as you type, from a small model that runs on your Mac.
+# Shotleaf
 
-<p align="center"><img src="site/assets/guide/editor-en.webp" alt="The screenshot editor with a box, an arrow, a step number and a callout" width="800"></p>
+Capture and annotate screenshots, find what you copied, and bring frequently used text back in a few keystrokes. Shotleaf lives in your Mac menu bar. Free and open source, with no account or tracking.
 
-<table><tr>
-<td><img src="site/assets/guide/clipboard-en.webp" alt="Clipboard history"></td>
-<td><img src="site/assets/guide/snippets-en.webp" alt="Snippets"></td>
-</tr><tr>
-<td align="center">Clipboard history</td>
-<td align="center">Snippets</td>
-</tr></table>
+**[Download for Mac](https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg)** · [Website](https://shotleaf.syvyj.dev) · [Guide](https://shotleaf.syvyj.dev/guide/) · [Releases](https://github.com/Syvyj/shotleaf/releases)
+
+macOS 15+ · Apple silicon (M1 or newer) · [GPL-3.0-or-later](LICENSE) · [![CI](https://github.com/Syvyj/shotleaf/actions/workflows/ci.yml/badge.svg)](https://github.com/Syvyj/shotleaf/actions/workflows/ci.yml)
+
+## 01 · Capture and annotate
+
+Capture an area, a window, the screen or a scrolling page. Add arrows, text, shapes, backgrounds and watermarks; blur private information and copy text from images on your Mac.
+
+![Shotleaf screenshot editor with annotations](site/assets/guide/editor-en.webp)
+
+## 02 · Find what you copied
+
+Search and pin items in clipboard history, find screenshots and paste several items at once.
+
+![Shotleaf clipboard history](site/assets/guide/clipboard-en.webp)
+
+## 03 · Let snippets do the typing
+
+Expand abbreviations into reusable text with dates, questions and pictures. Optional text completion runs from a model on your Mac.
+
+![Shotleaf snippets](site/assets/guide/snippets-en.webp)
 
 ## Requirements
 
@@ -126,33 +129,36 @@ Donations support my time on Shotleaf and my other apps: [support the author](ht
 ---
 
 <a name="uk"></a>
-<p align="center"><img src="App/Assets.xcassets/AppIcon.appiconset/icon_256x256@2x.png" width="128" height="128" alt="Іконка Shotleaf"></p>
-<h1 align="center">Shotleaf</h1>
-<p align="center"><b>Скріншоти, історія буфера обміну, сніпети й дописування тексту для Mac.</b><br>Безкоштовний і з відкритим кодом. Без акаунта й стеження.</p>
-<p align="center"><a href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><b>Завантажити для Mac</b></a> · <a href="https://shotleaf.syvyj.dev/uk/">Сайт</a> · <a href="https://shotleaf.syvyj.dev/uk/guide/">Посібник</a> · <a href="#en">↑ English</a></p>
 
-```
-0.0 % CPU у спокої  ·  ≈50 МБ пам'яті  ·  50 МБ застосунок (14 МБ завантаження)  ·  без акаунта й стеження
-```
+![Shotleaf — скріншоти та історія буфера для Mac.](docs/assets/readme-hero.png)
 
-Скріншоти та історія буфера обміну для Mac. Shotleaf живе в рядку меню:
+[↑ English](#en) · **Українська**
 
-- **Скріншоти** області, вікна чи всього екрана, з редактором для стрілок, тексту, розмиття, фонів і водяних знаків. Один клік розмиває обличчя, пошти, телефони й номери карток.
-- **Довгі скріншоти**: уся сторінка однією картинкою.
-- **Текст зі скріншоту**: копіюйте слова з будь-якої картинки чи програми, розпізнаються на вашому Mac.
-- **Історія буфера обміну** з пошуком, закріпленими записами й скріншотами; вставляйте кілька записів разом.
-- **Сніпети**: наберіть скорочення будь-де, і воно розгорнеться, з датами, запитаннями й картинками.
-- **Дописування тексту** під час набору, від невеликої моделі, що працює на вашому Mac.
+# Shotleaf
 
-<p align="center"><img src="site/assets/guide/editor-uk.webp" alt="Редактор скріншотів із рамкою, стрілкою, номером кроку й виноскою" width="800"></p>
+Робіть і редагуйте скріншоти, знаходьте скопійоване й повертайте потрібний текст кількома натисканнями. Shotleaf живе в рядку меню Mac. Безкоштовний і з відкритим кодом, без акаунта й стеження.
 
-<table><tr>
-<td><img src="site/assets/guide/clipboard-uk.webp" alt="Історія буфера обміну"></td>
-<td><img src="site/assets/guide/snippets-uk.webp" alt="Сніпети"></td>
-</tr><tr>
-<td align="center">Історія буфера обміну</td>
-<td align="center">Сніпети</td>
-</tr></table>
+**[Завантажити для Mac](https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg)** · [Сайт](https://shotleaf.syvyj.dev/uk/) · [Посібник](https://shotleaf.syvyj.dev/uk/guide/) · [Релізи](https://github.com/Syvyj/shotleaf/releases)
+
+macOS 15+ · Apple silicon (M1 або новіший) · [GPL-3.0-or-later](LICENSE)
+
+## 01 · Знімайте й редагуйте
+
+Знімайте область, вікно, екран або довгу сторінку. Додавайте стрілки, текст, фігури, фони й водяні знаки; розмивайте приватні дані та копіюйте текст із зображень на Mac.
+
+![Редактор скріншотів Shotleaf із позначками](site/assets/guide/editor-uk.webp)
+
+## 02 · Знаходьте скопійоване
+
+Шукайте й закріплюйте записи в історії буфера, знаходьте скріншоти та вставляйте кілька записів разом.
+
+![Історія буфера обміну Shotleaf](site/assets/guide/clipboard-uk.webp)
+
+## 03 · Доручіть повторення сніпетам
+
+Розгортайте скорочення в готовий текст із датами, запитаннями й картинками. Необов'язкове дописування тексту працює за допомогою моделі на вашому Mac.
+
+![Сніпети Shotleaf](site/assets/guide/snippets-uk.webp)
 
 ## Вимоги
 
