@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
 
 - Privacy: **Learn my style** is off until you turn it on, and it keeps nothing until the completion model is downloaded. Texts with card numbers, tokens, emails or phone numbers are never kept. (It used to be on from the start and keep texts even without the model; **Forget what I wrote** in Settings › Completion deletes what was kept.)
 - Privacy: the clipboard history and **Blur private info** also recognise JWTs and API keys from AWS, GitHub, GitLab and Google.
