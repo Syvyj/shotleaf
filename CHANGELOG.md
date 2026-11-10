@@ -6,10 +6,12 @@
 - Privacy: the clipboard history and **Blur private info** also recognise JWTs and API keys from AWS, GitHub, GitLab and Google.
 - Privacy: a copy made in an app under **Never in these apps** is skipped even if you switch to another app right after it.
 - Screenshot links: a shot over 5 MB goes as a JPEG that fits instead of failing. The link service deletes a picture when its link expires (within 15 minutes), not up to a day later.
+- Screenshot links: **Delete last link** in the link menu takes the picture off the server at once, before the link expires. Works with the free service and with your own server (update `shots.py` there).
 - Saving twice in the same second keeps both files ("… 2.png") instead of replacing the first.
 - Snippets: a `{clipboard}` whose text contains `{cursor}` or `{?…}` is pasted as it is.
 - "Save at 1x" with **After a screenshot: Save** uses the scale of the screen the shot came from.
 - Text over 1 MB isn't kept in the clipboard history, and so doesn't slow every copy down.
+- Several copies in a row are written to the history file once, not once each.
 - The completion model leaves memory after 10 minutes without use (about 2 GB back).
 - Closed snippet and watermark windows and a long editing session use less memory.
 - If a picture for the clipboard history or the recent screenshots can't be written (disk full), Shotleaf says so.

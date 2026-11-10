@@ -103,11 +103,18 @@ final class ClipboardHistory {
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.poll() }
         }
+        if quitWatch == nil {
+            quitWatch = NotificationCenter.default.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.flush() }
+            }
+        }
     }
+    private var quitWatch: (any NSObjectProtocol)?
 
     func stop() {
         timer?.invalidate()
         timer = nil
+        flush()
     }
 
     var isPaused: Bool { pausedUntil.map { $0 > Date() } ?? false }
@@ -265,14 +272,14 @@ final class ClipboardHistory {
         guard let i = items.firstIndex(where: { $0.id == id }) else { return }
         try? FileManager.default.removeItem(at: imageURL(items[i]))
         items.remove(at: i)
-        save()
+        write() // deleted: off the disk now
     }
 
     /// Everything but the pinned.
     func clear() {
         for item in items where !item.pinned { try? FileManager.default.removeItem(at: imageURL(item)) }
         items.removeAll { !$0.pinned }
-        save()
+        write() // cleared: off the disk now
     }
 
     func imageURL(_ item: ClipItem) -> URL { folder.appendingPathComponent("\(item.id.uuidString).png") }
@@ -335,7 +342,28 @@ final class ClipboardHistory {
         dropExpired()
     }
 
+    /// Copies come in bursts, and each write is the whole history: while the history is running,
+    /// changes within a second share one write. Not running (tests, the guide's pictures): at once.
     func save() {
+        guard timer != nil else { return write() }
+        guard pending == nil else { return }
+        let work = DispatchWorkItem { [weak self] in MainActor.assumeIsolated { self?.flush() } }
+        pending = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: work)
+    }
+    private var pending: DispatchWorkItem?
+
+    /// Writes what `save` put off (on stop and on quit).
+    func flush() {
+        guard let work = pending else { return }
+        work.cancel()
+        pending = nil
+        write()
+    }
+
+    private func write() {
+        pending?.cancel()
+        pending = nil
         do {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             try JSONEncoder().encode(items.filter { !$0.sensitive || $0.pinned }).write(to: file, options: .atomic) // card numbers, tokens: memory only

@@ -1340,6 +1340,26 @@
         }
       }
     },
+    "Delete last link": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити останнє"
+          }
+        }
+      }
+    },
+    "Link deleted": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посилання видалено"
+          }
+        }
+      }
+    },
     "Link copied · works %lld h": {
       "localizations": {
         "uk": {

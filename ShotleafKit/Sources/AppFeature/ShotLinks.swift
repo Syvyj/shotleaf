@@ -74,7 +74,41 @@ enum ShotLinks {
             throw Failure.rejected(answer?["error"] as? String ?? "HTTP \((response as? HTTPURLResponse)?.statusCode ?? 0)")
         }
         guard let link = (answer?["url"] as? String).flatMap(URL.init(string:)) else { throw Failure.noAnswer }
+        // The free service hands out a token per picture; an own server deletes with its key.
+        last = Made(url: link, key: answer?["delete"] as? String ?? token, until: Date().addingTimeInterval(Double(hours) * 3600))
         return link
+    }
+
+    // MARK: Taking a link down
+
+    struct Made { var url: URL, key: String?, until: Date }
+
+    /// The link made last, while it still works: the one "Delete last link" takes down.
+    // ponytail: only the last link, forgotten on quit; a list on disk if people ask to delete older ones.
+    @MainActor private(set) static var last: Made? {
+        get { stored.flatMap { $0.until > Date() ? $0 : nil } }
+        set { stored = newValue }
+    }
+    @MainActor private static var stored: Made?
+
+    static func removal(_ made: Made) -> URLRequest {
+        var request = URLRequest(url: made.url, timeoutInterval: 30)
+        request.httpMethod = "DELETE"
+        if let key = made.key, !key.isEmpty { request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization") }
+        return request
+    }
+
+    /// Deletes the last link's picture from the server. Already gone (404) counts as done.
+    @MainActor
+    static func deleteLast() async throws {
+        guard let made = last else { return }
+        let (data, response) = try await URLSession.shared.data(for: removal(made))
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        guard status == 204 || status == 404 else {
+            let answer = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+            throw Failure.rejected(answer?["error"] as? String ?? "HTTP \(status)")
+        }
+        last = nil
     }
 
     // MARK: Keychain

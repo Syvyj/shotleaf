@@ -189,6 +189,22 @@ struct PrivateTextTests {
         #expect(!ClipboardHistory.looksSensitive("example.com/path"))
     }
 
+    @Test("While running, a burst of copies shares one write; stopping writes what was put off, deleting writes at once")
+    func oneWrite() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-burst-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let h = ClipboardHistory(folder: dir)
+        h.start()
+        h.add(ClipItem(kind: .text, text: "one"))
+        h.add(ClipItem(kind: .text, text: "two"))
+        #expect(ClipboardHistory(folder: dir).items.isEmpty) // not on disk yet
+        h.remove(h.items[0].id)
+        #expect(ClipboardHistory(folder: dir).items.map(\.text) == ["one"])
+        h.add(ClipItem(kind: .text, text: "three"))
+        h.stop()
+        #expect(ClipboardHistory(folder: dir).items.count == 2)
+    }
+
     @Test("A text over the limit isn't kept; too big rich text leaves the plain text")
     func bigCopies() throws {
         let board = NSPasteboard(name: .init("shotleaf-big-\(UUID())"))

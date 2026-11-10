@@ -24,7 +24,7 @@ import OSLog
 final class InlineCompletion {
     private let log = Logger(subsystem: "dev.syvyj.shotleaf", category: "completion")
     /// Marks Shotleaf's own synthetic key events so the tap lets them through.
-    nonisolated fileprivate static let marker = Paster.marker
+    nonisolated static let marker = Paster.marker
     /// The model answers in ~50 ms now; waiting longer only feels slow.
     private static let debounce: Duration = .milliseconds(60)
 
@@ -49,7 +49,7 @@ final class InlineCompletion {
 
     private var tapThread: EventTapThread?
     /// Shared with the tap thread: is a suggestion up (so Tab is ours)?
-    fileprivate let tapState = TapState()
+    private let tapState = TapState()
     private var debounceTask: Task<Void, Never>?
     private var generation: Task<Void, Never>?
     /// Bumped by every key press: partial results of an older request are dropped.
@@ -122,7 +122,7 @@ final class InlineCompletion {
     // MARK: Keys (from the tap thread, in order, on main)
 
     /// Tab was swallowed because a suggestion was up.
-    fileprivate func tab(all: Bool) {
+    func tab(all: Bool) {
         switch offer {
         case .completion(let text): accept(all ? text : CompletionText.nextWord(of: text).word)
         case .fix(let fix):
@@ -135,10 +135,10 @@ final class InlineCompletion {
     }
 
     /// Esc was swallowed.
-    fileprivate func escape() { dismiss() }
+    func escape() { dismiss() }
 
     /// 1–9 (or Tab → 0, or a click) in the emoji picker.
-    fileprivate func pickEmoji(_ index: Int) {
+    func pickEmoji(_ index: Int) {
         guard let picker, picker.candidates.indices.contains(index) else { return }
         let emoji = picker.candidates[index].emoji
         Self.deleteBackward(picker.query.count + 1) // ":" + the letters
@@ -182,10 +182,10 @@ final class InlineCompletion {
         pickerPanel.orderOut(nil)
     }
 
-    fileprivate func clicked() { dismiss() } // a click moves the caret
+    func clicked() { dismiss() } // a click moves the caret
 
     /// Any other key went through to the app.
-    fileprivate func typed(_ typed: String, shortcut: Bool) {
+    func typed(_ typed: String, shortcut: Bool) {
         if shortcut { dismiss(); return }
         // Typing the suggested letters keeps the rest of the suggestion.
         if case .completion(let text) = offer, field?.afterCursor.isEmpty == true,
@@ -199,7 +199,7 @@ final class InlineCompletion {
         schedule()
     }
 
-    nonisolated fileprivate static func characters(of event: CGEvent) -> String {
+    nonisolated static func characters(of event: CGEvent) -> String {
         var length = 0
         var chars = [UniChar](repeating: 0, count: 8)
         event.keyboardGetUnicodeString(maxStringLength: 8, actualStringLength: &length, unicodeString: &chars)
@@ -388,464 +388,5 @@ final class InlineCompletion {
         if let id = app.bundleIdentifier, chromium.contains(id) {
             AXUIElementSetAttributeValue(element, "AXEnhancedUserInterface" as CFString, kCFBooleanTrue)
         }
-    }
-}
-
-/// What the tap thread needs to decide on its own, at once.
-private final class TapState: @unchecked Sendable {
-    private let lock = NSLock()
-    private var _hasSuggestion = false
-    var hasSuggestion: Bool {
-        get { lock.withLock { _hasSuggestion } }
-        set { lock.withLock { _hasSuggestion = newValue } }
-    }
-    private var _picker: CGRect?
-    /// The emoji picker's frame (global, top-left origin) while it's open.
-    var picker: CGRect? {
-        get { lock.withLock { _picker } }
-        set { lock.withLock { _picker = newValue } }
-    }
-    private weak var _controller: InlineCompletion?
-    /// Set on main, read on the tap thread: behind the lock like the rest.
-    var controller: InlineCompletion? {
-        get { lock.withLock { _controller } }
-        set { lock.withLock { _controller = newValue } }
-    }
-    private var _port: CFMachPort?
-    var port: CFMachPort? {
-        get { lock.withLock { _port } }
-        set { lock.withLock { _port = newValue } }
-    }
-
-    /// On the tap thread: swallow? Everything else is handed to main.
-    func handle(_ type: CGEventType, _ event: CGEvent) -> Bool {
-        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-            if let port { CGEvent.tapEnable(tap: port, enable: true) }
-            return false
-        }
-        let controller = self.controller
-        guard type == .keyDown else {
-            if let picker, picker.contains(event.location) { return false } // a click on the picker picks
-            DispatchQueue.main.async { MainActor.assumeIsolated { controller?.clicked() } }
-            return false
-        }
-        if event.getIntegerValueField(.eventSourceUserData) == InlineCompletion.marker { return false }
-        let key = event.getIntegerValueField(.keyboardEventKeycode)
-        let flags = event.flags
-        if picker != nil, flags.isDisjoint(with: [.maskCommand, .maskControl]) {
-            let digit = Int(InlineCompletion.characters(of: event)).flatMap { (1...9).contains($0) ? $0 - 1 : nil }
-            if let index = digit ?? (key == 48 ? 0 : nil) { // 1–9, or Tab for the first
-                DispatchQueue.main.async { MainActor.assumeIsolated { controller?.pickEmoji(index) } }
-                return true
-            }
-            if key == 53 { // Esc
-                DispatchQueue.main.async { MainActor.assumeIsolated { controller?.escape() } }
-                return true
-            }
-        }
-        if hasSuggestion {
-            if key == 48, flags.isDisjoint(with: [.maskCommand, .maskControl, .maskShift]) { // Tab
-                let all = flags.contains(.maskAlternate)
-                DispatchQueue.main.async { MainActor.assumeIsolated { controller?.tab(all: all) } }
-                return true
-            }
-            if key == 53 { // Esc
-                DispatchQueue.main.async { MainActor.assumeIsolated { controller?.escape() } }
-                return true
-            }
-        }
-        let typed = InlineCompletion.characters(of: event)
-        let shortcut = !flags.isDisjoint(with: [.maskCommand, .maskControl])
-        DispatchQueue.main.async { MainActor.assumeIsolated { controller?.typed(typed, shortcut: shortcut) } }
-        return false
-    }
-}
-
-/// Runs the keyboard event tap on its own run loop, so a busy main thread
-/// never holds up the user's typing.
-private final class EventTapThread: Thread, @unchecked Sendable {
-    private let state: TapState
-    private let ready = DispatchSemaphore(value: 0)
-    private var ok = false
-    private var runLoop: CFRunLoop?
-
-    init(state: TapState) {
-        self.state = state
-        super.init()
-        name = "Shotleaf completion keys"
-        qualityOfService = .userInteractive
-    }
-
-    /// Starts the thread; false when macOS refuses the tap.
-    func startAndWait() -> Bool {
-        start()
-        ready.wait()
-        return ok
-    }
-
-    override func main() {
-        let mask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.leftMouseDown.rawValue)
-            | (1 << CGEventType.rightMouseDown.rawValue)
-        guard let port = CGEvent.tapCreate(
-            tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
-            eventsOfInterest: CGEventMask(mask), callback: inlineCompletionTapCallback,
-            userInfo: Unmanaged.passUnretained(state).toOpaque()
-        ) else {
-            ready.signal()
-            return
-        }
-        state.port = port
-        runLoop = CFRunLoopGetCurrent()
-        CFRunLoopAddSource(runLoop, CFMachPortCreateRunLoopSource(nil, port, 0), .commonModes)
-        CGEvent.tapEnable(tap: port, enable: true)
-        ok = true
-        ready.signal()
-        CFRunLoopRun()
-    }
-
-    func stop() {
-        if let port = state.port { CGEvent.tapEnable(tap: port, enable: false) }
-        state.port = nil
-        if let runLoop { CFRunLoopStop(runLoop) }
-    }
-}
-
-/// C callback → `TapState.handle`, on the tap thread.
-private func inlineCompletionTapCallback(
-    proxy: CGEventTapProxy, type: CGEventType, event: CGEvent, refcon: UnsafeMutableRawPointer?
-) -> Unmanaged<CGEvent>? {
-    guard let refcon else { return Unmanaged.passUnretained(event) }
-    let state = Unmanaged<TapState>.fromOpaque(refcon).takeUnretainedValue()
-    return state.handle(type, event) ? nil : Unmanaged.passUnretained(event)
-}
-
-/// The text field that has the keyboard, read through Accessibility.
-/// Immutable; the AX element is a CF reference, safe to pass between threads.
-struct FocusedField: @unchecked Sendable {
-    let element: AXUIElement
-    let beforeCursor: String
-    /// The character before the caret, in AppKit screen coordinates.
-    let caret: CGRect
-    /// The field's right edge (screen x): suggestions stop there.
-    let rightEdge: CGFloat
-    let pid: pid_t
-    let bundleID: String
-    let appName: String?
-    let windowTitle: String
-    /// The rest of the line after the cursor ("" at the end of a line).
-    let afterCursor: String
-    /// How it was read: "value" or "markers" (for the log).
-    let via: String
-    /// The raw caret box from Accessibility (top-left coordinates, for the log).
-    let axCaret: CGRect
-
-    /// nil when there's no editable, non-secure field with an empty selection
-    /// (or the app is excluded / Shotleaf itself).
-    /// Safe off the main thread; `screenTop` is the main screen's top (AppKit).
-    static func current(excluding excluded: Set<String>, screenTop top: CGFloat) -> FocusedField? {
-        let system = AXUIElementCreateSystemWide()
-        AXUIElementSetMessagingTimeout(system, 0.2) // a hung app must not freeze typing
-        guard let element: AXUIElement = attribute(system, kAXFocusedUIElementAttribute) else { return nil }
-        var pid: pid_t = 0
-        AXUIElementGetPid(element, &pid)
-        guard pid != getpid(), let app = NSRunningApplication(processIdentifier: pid),
-              !excluded.contains(app.bundleIdentifier ?? "")
-        else { return nil }
-        if let subrole: String = attribute(element, kAXSubroleAttribute), subrole == kAXSecureTextFieldSubrole { return nil }
-        // Plain fields (Cocoa, Qt…) expose their text as a value; web editors
-        // (Chromium, Electron — Claude, Slack, Notion) only through text markers.
-        let byValue = viaValue(element)
-        guard let read = byValue ?? viaTextMarkers(element) else { return nil }
-        let bounds = read.caret
-        // AX uses top-left global coordinates; AppKit — bottom-left of the main screen.
-        let caret = CGRect(x: bounds.minX, y: top - bounds.maxY, width: bounds.width, height: bounds.height)
-        var rightEdge = caret.maxX + 600
-        if let position: AXValue = attribute(element, kAXPositionAttribute), let size: AXValue = attribute(element, kAXSizeAttribute) {
-            var origin = CGPoint.zero, extent = CGSize.zero
-            if AXValueGetValue(position, .cgPoint, &origin), AXValueGetValue(size, .cgSize, &extent), extent.width > 0 {
-                rightEdge = origin.x + extent.width
-            }
-        }
-        var title = ""
-        if let window: AXUIElement = attribute(element, kAXWindowAttribute), let t: String = attribute(window, kAXTitleAttribute) { title = t }
-        return FocusedField(element: element, beforeCursor: read.before, caret: caret, rightEdge: rightEdge,
-                            pid: pid, bundleID: app.bundleIdentifier ?? "", appName: app.localizedName, windowTitle: title,
-                            afterCursor: read.after, via: byValue != nil ? "value" : "markers", axCaret: bounds)
-    }
-
-    /// Text before / after the cursor (rest of the line) and the box of the
-    /// character before it (AX coordinates).
-    private typealias Read = (before: String, after: String, caret: CGRect)
-
-    /// The field's value and selected range, and the bounds of a character range.
-    private static func viaValue(_ element: AXUIElement) -> Read? {
-        var settable: DarwinBoolean = false
-        guard AXUIElementIsAttributeSettable(element, kAXValueAttribute as CFString, &settable) == .success, settable.boolValue,
-              let value: String = attribute(element, kAXValueAttribute),
-              let rangeValue: AXValue = attribute(element, kAXSelectedTextRangeAttribute)
-        else { return nil }
-        var range = CFRange()
-        guard AXValueGetValue(rangeValue, .cfRange, &range), range.length == 0, range.location > 0 else { return nil }
-        let text = value as NSString
-        guard range.location <= text.length else { return nil }
-        var charRange = CFRange(location: range.location - 1, length: 1)
-        guard let query = AXValueCreate(.cfRange, &charRange),
-              let bounds = rect(parameterized(element, kAXBoundsForRangeParameterizedAttribute, query)), bounds.height > 2
-        else { return nil }
-        let rest = text.substring(from: range.location)
-        return (text.substring(to: range.location), CompletionText.restOfLine(rest), bounds)
-    }
-
-    /// Web editors: the selection as a text-marker range, the text from the
-    /// start to it, and the bounds of the character just before it.
-    private static func viaTextMarkers(_ element: AXUIElement) -> Read? {
-        guard let selection = marker(element, "AXSelectedTextMarkerRange", AXTextMarkerRangeGetTypeID()).map({ $0 as! AXTextMarkerRange }),
-              let start = marker(element, "AXStartTextMarker", AXTextMarkerGetTypeID()).map({ $0 as! AXTextMarker }),
-              let end = marker(element, "AXEndTextMarker", AXTextMarkerGetTypeID()).map({ $0 as! AXTextMarker })
-        else { return nil }
-        let caretStart = AXTextMarkerRangeCopyStartMarker(selection)
-        let caretEnd = AXTextMarkerRangeCopyEndMarker(selection)
-        func string(_ from: AXTextMarker, _ to: AXTextMarker) -> String? {
-            parameterized(element, "AXStringForTextMarkerRange", AXTextMarkerRangeCreate(nil, from, to)) as? String
-        }
-        guard string(caretStart, caretEnd)?.isEmpty != false, // no selection, just a cursor
-              let before = string(start, caretStart), !before.isEmpty,
-              let previousRef = parameterized(element, "AXPreviousTextMarkerForTextMarker", caretStart),
-              CFGetTypeID(previousRef) == AXTextMarkerGetTypeID()
-        else { return nil }
-        let previous = previousRef as! AXTextMarker
-        guard let bounds = rect(parameterized(element, "AXBoundsForTextMarkerRange", AXTextMarkerRangeCreate(nil, previous, caretStart))),
-              bounds.height > 2
-        else { return nil }
-        let after = string(caretEnd, end) ?? ""
-        return (before, CompletionText.restOfLine(after), bounds)
-    }
-
-    /// For the AX watch: each step of the text-marker read on `element` and
-    /// its editable ancestors / web area — where does it stop?
-    static func markerDiagnosis(_ element: AXUIElement) -> String {
-        var candidates: [(String, AXUIElement)] = [("focused", element)]
-        for name in ["AXEditableAncestor", "AXHighestEditableAncestor"] {
-            if let e: AXUIElement = attribute(element, name) { candidates.append((name, e)) }
-        }
-        var walker: AXUIElement? = element
-        for _ in 0..<30 {
-            guard let current = walker else { break }
-            if let role: String = attribute(current, kAXRoleAttribute), role == "AXWebArea" { candidates.append(("web area", current)); break }
-            walker = attribute(current, kAXParentAttribute)
-        }
-        return candidates.map { label, e in
-            let selection = marker(e, "AXSelectedTextMarkerRange", AXTextMarkerRangeGetTypeID())
-            let start = marker(e, "AXStartTextMarker", AXTextMarkerGetTypeID())
-            var parts = ["\(label): selection \(selection != nil), start \(start != nil)"]
-            if let selection, let start {
-                let caret = AXTextMarkerRangeCopyStartMarker(selection as! AXTextMarkerRange)
-                let before = parameterized(e, "AXStringForTextMarkerRange", AXTextMarkerRangeCreate(nil, start as! AXTextMarker, caret)) as? String
-                parts.append("before \(before?.count ?? -1) chars")
-                if let previous = parameterized(e, "AXPreviousTextMarkerForTextMarker", caret), CFGetTypeID(previous) == AXTextMarkerGetTypeID() {
-                    let bounds = rect(parameterized(e, "AXBoundsForTextMarkerRange", AXTextMarkerRangeCreate(nil, previous as! AXTextMarker, caret)))
-                    parts.append("caret box \(bounds.map { "\(Int($0.width))×\(Int($0.height))" } ?? "none")")
-                } else {
-                    parts.append("no previous marker")
-                }
-            }
-            return parts.joined(separator: ", ")
-        }.joined(separator: " | ")
-    }
-
-    private static func marker(_ element: AXUIElement, _ name: String, _ type: CFTypeID) -> CFTypeRef? {
-        var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, name as CFString, &value) == .success, let value, CFGetTypeID(value) == type
-        else { return nil }
-        return value
-    }
-
-    private static func parameterized(_ element: AXUIElement, _ name: String, _ parameter: CFTypeRef) -> CFTypeRef? {
-        var value: CFTypeRef?
-        guard AXUIElementCopyParameterizedAttributeValue(element, name as CFString, parameter, &value) == .success else { return nil }
-        return value
-    }
-
-    private static func rect(_ value: CFTypeRef?) -> CGRect? {
-        guard let value, CFGetTypeID(value) == AXValueGetTypeID() else { return nil }
-        var rect = CGRect.zero
-        return AXValueGetValue(value as! AXValue, .cgRect, &rect) ? rect : nil
-    }
-
-    private static func attribute<T>(_ element: AXUIElement, _ name: String) -> T? {
-        var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, name as CFString, &value) == .success else { return nil }
-        return value as? T
-    }
-}
-
-/// The grey suggestion right after the caret: a click-through, never-key panel.
-@MainActor
-final class GhostPanel: NSPanel {
-    private let label = NSTextField(labelWithString: "")
-
-    init() {
-        super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
-        isOpaque = false
-        backgroundColor = .clear
-        hasShadow = false
-        ignoresMouseEvents = true
-        level = .popUpMenu
-        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
-        label.textColor = NSColor.tertiaryLabelColor
-        label.lineBreakMode = .byClipping
-        label.wantsLayer = true
-        label.layer?.cornerRadius = 5
-        label.layer?.masksToBounds = true
-        contentView = label
-    }
-
-    override var canBecomeKey: Bool { false }
-    override var canBecomeMain: Bool { false }
-
-    private var caret = CGRect.zero
-
-    func show(text: String, caret: CGRect) {
-        self.caret = caret
-        label.textColor = NSColor.tertiaryLabelColor
-        label.drawsBackground = false
-        // Roughly the field's font: a line is ~1.2× the font size.
-        label.font = Self.font(for: caret)
-        update(text: text)
-        orderFrontRegardless()
-    }
-
-    /// Roughly the field's font: a line is ~1.2× the font size.
-    static func font(for caret: CGRect) -> NSFont { .systemFont(ofSize: min(max(caret.height / 1.22, 11), 30)) }
-
-    /// The words of `text` that fit between the caret and `rightEdge`; nil if
-    /// not even the first one does.
-    static func fitting(_ text: String, caret: CGRect, rightEdge: CGFloat) -> String? {
-        let room = rightEdge - caret.maxX - 8
-        let attributes: [NSAttributedString.Key: Any] = [.font: font(for: caret)]
-        var candidate = text
-        while !candidate.trimmingCharacters(in: .whitespaces).isEmpty {
-            if NSAttributedString(string: candidate, attributes: attributes).size().width <= room { return candidate }
-            guard let cut = candidate.lastIndex(where: \.isWhitespace), cut > candidate.startIndex else { return nil }
-            candidate = String(candidate[..<cut])
-        }
-        return nil
-    }
-
-    func update(text: String) {
-        badge = false
-        label.stringValue = text
-        layoutAtCaret()
-    }
-
-    /// Mid-line or a quick fix: a small "⇥ text" badge just under the caret.
-    func showBadge(_ text: String, caret: CGRect) {
-        self.caret = caret
-        badge = true
-        label.font = .systemFont(ofSize: 12, weight: .medium)
-        label.stringValue = "⇥  " + text
-        label.textColor = .labelColor
-        label.drawsBackground = true
-        label.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.95)
-        layoutAtCaret()
-        orderFrontRegardless()
-    }
-
-    private var badge = false
-
-    func move(caret: CGRect) {
-        self.caret = caret
-        layoutAtCaret()
-    }
-
-    private func layoutAtCaret() {
-        let size = label.intrinsicContentSize
-        if badge { // under the caret, slightly left so the ⇥ sits below it
-            setFrame(CGRect(x: caret.maxX - 6, y: caret.minY - size.height - 4, width: size.width + 8, height: size.height + 2), display: true)
-            return
-        }
-        let y = caret.minY + (caret.height - size.height) / 2
-        setFrame(CGRect(x: caret.maxX, y: y, width: size.width + 4, height: size.height), display: true)
-    }
-}
-
-/// The emoji picker under the cursor, in the Leaves style: "1 👍  2 😂 …";
-/// the first one (what Tab takes) is highlighted, a click picks too. Never
-/// takes the keyboard — the user keeps typing in their app.
-@MainActor
-final class EmojiPickerPanel: NSPanel {
-    private let onPick: (Int) -> Void
-
-    init(onPick: @escaping (Int) -> Void) {
-        self.onPick = onPick
-        super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
-        isOpaque = false
-        backgroundColor = .clear
-        hasShadow = true
-        level = .popUpMenu
-        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient, .ignoresCycle]
-    }
-
-    override var canBecomeKey: Bool { false }
-    override var canBecomeMain: Bool { false }
-
-    /// Shows the candidates under `caret` (AppKit screen coordinates) and
-    /// returns the panel's frame.
-    func show(_ candidates: [EmojiShortcodes.Candidate], under caret: CGRect) -> CGRect {
-        let host = FirstClickHostingView(rootView: EmojiPickerRow(candidates: candidates, onPick: onPick))
-        contentView = host
-        let size = host.fittingSize
-        let frame = CGRect(x: caret.minX - 8, y: caret.minY - size.height - 6, width: size.width, height: size.height)
-        setFrame(frame, display: true)
-        orderFrontRegardless()
-        return frame
-    }
-}
-
-/// A click on the picker counts even though its window never becomes key.
-private final class FirstClickHostingView<Content: View>: NSHostingView<Content> {
-    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-}
-
-private struct EmojiPickerRow: View {
-    let candidates: [EmojiShortcodes.Candidate]
-    let onPick: (Int) -> Void
-    @State private var hovered: Int?
-    private let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
-
-    var body: some View {
-        HStack(spacing: 2) {
-            ForEach(Array(candidates.enumerated()), id: \.offset) { i, candidate in
-                Button { onPick(i) } label: {
-                    HStack(spacing: 3) {
-                        Text(verbatim: "\(i + 1)")
-                            .font(Leaf.font(10, .bold))
-                            .foregroundStyle(Leaf.ink)
-                        Text(verbatim: candidate.emoji).font(.system(size: 19))
-                    }
-                    .padding(.horizontal, 6).padding(.vertical, 3)
-                    .background {
-                        let on = hovered.map { $0 == i } ?? (i == 0) // Tab takes the first
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(on ? AnyShapeStyle(Leaf.selection) : AnyShapeStyle(.clear))
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .onHover { hovered = $0 ? i : (hovered == i ? nil : hovered) }
-                .help(candidate.name.replacingOccurrences(of: "_", with: " "))
-            }
-        }
-        .padding(5)
-        .background {
-            ZStack {
-                shape.fill(.ultraThinMaterial)
-                shape.fill(Leaf.surface)
-                shape.fill(LinearGradient(colors: [Leaf.fresh.opacity(0.12), .clear], startPoint: .top, endPoint: .bottom))
-            }
-        }
-        .overlay(shape.strokeBorder(Leaf.markGradient, lineWidth: 1).opacity(0.55))
-        .clipShape(shape)
-        .fixedSize()
     }
 }

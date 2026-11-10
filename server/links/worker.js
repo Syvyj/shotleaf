@@ -1,7 +1,8 @@
 // Shotleaf's free screenshot links (s.syvyj.dev): the app uploads a PNG/JPEG, gets a short
 // link back, and the picture is gone after at most 12 hours: the link stops at its expiry,
 // and the picture is deleted then (on the first visit after it) or by the sweep within 15 minutes.
-// Same protocol as the self-hosted server/shots: POST /upload?ttl=SECONDS → 201 {url, expires}.
+// Same protocol as the self-hosted server/shots: POST /upload?ttl=SECONDS → 201 {url, expires, delete};
+// DELETE /<id> with "Authorization: Bearer <delete>" takes the picture down early.
 // Open to anyone (the app is open source, so a key couldn't stay secret): limits instead.
 
 const MAX_BYTES = 5 * 1024 * 1024
@@ -13,6 +14,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url)
     if (request.method === "POST" && url.pathname === "/upload") return upload(request, env, url)
+    if (request.method === "DELETE") return remove(request, env, url)
     if (request.method !== "GET" && request.method !== "HEAD") return json(405, { error: "method not allowed" })
     if (url.pathname === "/") return Response.redirect(SITE, 302)
     const match = url.pathname.match(/^\/([A-Za-z0-9]{8})(\.(png|jpg))?$/)
@@ -53,8 +55,27 @@ async function upload(request, env, url) {
 
   const id = randomID()
   const expires = Math.floor(Date.now() / 1000) + ttl
-  await env.SHOTS.put(id, body, { httpMetadata: { contentType: type }, customMetadata: { expires: String(expires) } })
-  return json(201, { url: `${base(url)}/${id}`, expires })
+  // Only the uploader gets the delete token; the bucket keeps its hash.
+  const token = randomID(32)
+  await env.SHOTS.put(id, body, { httpMetadata: { contentType: type }, customMetadata: { expires: String(expires), delete: await sha256(token) } })
+  return json(201, { url: `${base(url)}/${id}`, expires, delete: token })
+}
+
+// The uploader takes the picture down before it expires.
+async function remove(request, env, url) {
+  const match = url.pathname.match(/^\/([A-Za-z0-9]{8})$/)
+  const object = match && (await env.SHOTS.head(match[1]))
+  if (!object) return notFound()
+  const given = (request.headers.get("Authorization") || "").replace(/^Bearer /, "")
+  const hash = object.customMetadata?.delete
+  if (!hash || (await sha256(given)) !== hash) return json(403, { error: "wrong delete token" })
+  await env.SHOTS.delete(match[1])
+  return new Response(null, { status: 204 })
+}
+
+async function sha256(text) {
+  const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text))
+  return Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, "0")).join("")
 }
 
 async function show(env, url, id, raw) {
@@ -87,9 +108,9 @@ function kind(head) {
   return null
 }
 
-function randomID() {
+function randomID(length = 8) {
   const abc = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"
-  return Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => abc[b % abc.length]).join("")
+  return Array.from(crypto.getRandomValues(new Uint8Array(length)), (b) => abc[b % abc.length]).join("")
 }
 
 const json = (status, data) => new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } })

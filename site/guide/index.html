@@ -110,6 +110,8 @@
   <p>To catch an open menu or a tooltip, take the screenshot from the menu bar: <b>Screenshot with Delay</b>, 3, 5 or 10 seconds. A countdown shows at the top of the screen; it never gets into the shot. A delay for every shot is in <b>Settings › Screenshots</b>.</p>
   <h3>Back to an earlier shot</h3>
   <p><kbd>⌃⌥⌘E</kbd> opens the last screenshot in the editor again, as it was taken. The menu bar keeps the last ten under <b>Recent Screenshots</b>, even after a restart. <kbd>⌃⌥⌘V</kbd> opens any picture from the clipboard in the editor, to mark it up like a screenshot.</p>
+  <h3>Any picture, not only a screenshot</h3>
+  <p>In Finder, right-click a picture › <b>Open With › Shotleaf</b> to mark it up in the editor; Shotleaf never becomes the default app for pictures. <b>Combine Images…</b> in the menu bar takes two or more pictures and opens them in the editor as one, laid out in rows with a gap.</p>
 </section>
 
 <section id="editor">
@@ -117,11 +119,12 @@
   <p>Tools are along the top, what to do with the result along the bottom. Each tool has a key, so you rarely need the mouse to switch.</p>
   <figure><img src="../assets/guide/editor-en.webp" width="1600" height="961" loading="lazy" decoding="async" alt="The editor with a box, an arrow, a step number, a callout and a blurred line"></figure>
   <table class="keys">
-    <tr><td><kbd>1</kbd></td><td>Arrow. The arrow button’s menu also has the box and the oval.</td></tr>
+    <tr><td><kbd>1</kbd></td><td>Arrow. The arrow button’s menu also has the box, the oval and the magnifier.</td></tr>
     <tr><td><kbd>2</kbd> · <kbd>O</kbd></td><td>Box · Oval</td></tr>
+    <tr><td><kbd>L</kbd></td><td>Magnifier: a circle that shows what’s under it twice as big. Blurred parts stay blurred in it.</td></tr>
     <tr><td><kbd>3</kbd></td><td>Text: a callout on a bubble</td></tr>
     <tr><td><kbd>4</kbd> · <kbd>D</kbd></td><td>Marker · Pen. Hold <kbd>⇧</kbd> while drawing with the pen for a straight line.</td></tr>
-    <tr><td><kbd>5</kbd></td><td>Blur: hides names, numbers, faces</td></tr>
+    <tr><td><kbd>5</kbd></td><td>Blur: hides names, numbers, faces. With Blur picked, <b>Blur private info</b> finds faces, emails, phone numbers, card numbers and tokens by itself and blurs them in one step; it runs on your Mac.</td></tr>
     <tr><td><kbd>6</kbd></td><td>Steps: each click drops the next number, 1, 2, 3</td></tr>
     <tr><td><kbd>7</kbd></td><td>Erase: paints over with the colour around, wipes text off a plain background</td></tr>
     <tr><td><kbd>8</kbd></td><td>Cut: moves a piece of the picture</td></tr>
@@ -129,14 +132,14 @@
     <tr><td><kbd>C</kbd> · <kbd>M</kbd></td><td>Crop · Ruler (length in pixels)</td></tr>
     <tr><td><kbd>0</kbd></td><td>Select: click a mark to move, resize or delete it (<kbd>⌫</kbd>)</td></tr>
   </table>
-  <p>The colour, line width and text size are next to the tools. <kbd>⌘Z</kbd> undoes, <kbd>⇧⌘Z</kbd> redoes. You can change the keys or hide tools you don’t use in <b>Settings › Tools</b>.</p>
+  <p>The colour, line width and text size are next to the tools. <kbd>⌘Z</kbd> undoes, <kbd>⇧⌘Z</kbd> redoes (the last 50 steps). <kbd>⌘V</kbd> pastes a picture from the clipboard on top of the shot: move it, or drag a corner to resize it. You can change the keys or hide tools you don’t use in <b>Settings › Tools</b>.</p>
   <h3>What to do with the result</h3>
   <table class="keys">
     <tr><td><kbd>⌘C</kbd></td><td>Copy. The editor then closes by itself; to keep it open, turn that off in Settings › Screenshots.</td></tr>
-    <tr><td><kbd>⌘S</kbd></td><td>Save to the folder from Settings (the Desktop at first). The arrow next to it saves as PNG, JPEG, HEIC or PDF wherever you choose.</td></tr>
+    <tr><td><kbd>⌘S</kbd></td><td>Save to the folder from Settings (the Desktop at first). The arrow next to it saves as PNG, JPEG, HEIC or PDF wherever you choose, as a <b>JPEG under 1 MB, 500 KB or 200 KB</b> for mail and chats, or <b>To Snippets</b>.</td></tr>
     <tr><td>Drag</td><td>the picture (with Select, <kbd>0</kbd>) straight into a chat, an email or a folder</td></tr>
     <tr><td><kbd>P</kbd></td><td>Pin: the shot floats over your windows while you work. Hover it to copy or close it.</td></tr>
-    <tr><td>Link</td><td>The link button uploads the shot and copies a link that works for 1, 6 or 12 hours, then the picture is deleted. A shot over 5 MB goes as a JPEG that fits.</td></tr>
+    <tr><td>Link</td><td>The link button uploads the shot and copies a link that works for 1, 6 or 12 hours, then the picture is deleted. A shot over 5 MB goes as a JPEG that fits. Sent the wrong one? <b>Delete last link</b> in the menu next to the button takes the picture down at once.</td></tr>
     <tr><td>Share</td><td>AirDrop, Messages, Mail and the rest of the system share menu</td></tr>
     <tr><td><kbd>T</kbd></td><td>Text: select words right on the screenshot, <kbd>⌘C</kbd> copies them</td></tr>
     <tr><td><kbd>esc</kbd></td><td>Close</td></tr>
@@ -187,12 +190,12 @@
   <h3>Several at once</h3>
   <p>Mark entries with <kbd>⌘</kbd>-click or <kbd>⇧↓</kbd> / <kbd>⇧↑</kbd>. Then <kbd>↩</kbd> pastes them together, a line each, and <kbd>⌘↩</kbd> one by one: the first now, and each next <kbd>⇧⌘V</kbd> pastes the next. Handy for filling a form field by field.</p>
   <h3>Quick actions</h3>
-  <p><kbd>⌘K</kbd> shows what you can do with the entry before pasting: clean a link of trackers, change the case, join lines into one, trim spaces, format JSON, save it as a snippet.</p>
+  <p><kbd>⌘K</kbd> shows what you can do with the entry before pasting: clean a link of trackers, change the case, join lines into one, trim spaces, format JSON, save it as a snippet. A right-click on an entry has the same and more: paste, plain text, copy, pin, delete. Entries can be dragged into other apps, or onto <b>Snippets</b> and then a folder to keep them there.</p>
   <figure><img src="../assets/guide/clipboard-actions-en.webp" width="1560" height="1000" loading="lazy" decoding="async" alt="Quick actions for a link"></figure>
   <h3>Privacy</h3>
   <ul>
     <li>Passwords that password managers mark as private are never kept, and nothing is kept from the apps in <b>Settings › Clipboard › Never in these apps</b> (text completion stays off in them too).</li>
-    <li>Text that looks like a card number or an access token never reaches the disk and is gone from the history after a minute.</li>
+    <li>Text that looks like a card number or an access token never reaches the disk and is gone from the history after a minute, unless you pin it.</li>
     <li>The menu bar can pause the history for 5 minutes or clear it. By default it keeps 200 entries, pictures for 30 days; both are in Settings.</li>
   </ul>
 </section>
@@ -261,6 +264,8 @@
   <h3>Turn off what you don’t need</h3>
   <p><b>General › Features</b> has a switch for each tool. One you turn off leaves the menu, frees its shortcuts for other apps and stops working in the background. Its settings and data stay, for when you turn it back on. Here too: the language (English or Ukrainian), sounds, the Dock icon and opening at login.</p>
   <figure><img src="../assets/guide/settings-general-en.webp" width="1600" height="1264" loading="lazy" decoding="async" alt="Settings › General"></figure>
+  <h3>Screenshots</h3>
+  <p><b>Screenshots</b> sets where <kbd>⌘S</kbd> saves and the <b>File name</b>, where <code>{date}</code> and <code>{time}</code> are filled in. <b>Save at 1x</b> saves Retina shots at half the pixels, for smaller files. <b>Include the pointer</b> keeps the mouse pointer in the shot.</p>
   <h3>Your own shortcuts</h3>
   <p><b>Shortcuts</b>: click a shortcut and press the new one. <kbd>⌘⇧3</kbd> is also the macOS full-screen screenshot, and some apps use <kbd>⇧⌘V</kbd> or <kbd>⇧⌘B</kbd>; if one clashes with something you need, change it here.</p>
   <figure><img src="../assets/guide/settings-shortcuts-en.webp" width="1600" height="1264" loading="lazy" decoding="async" alt="Settings › Shortcuts"></figure>

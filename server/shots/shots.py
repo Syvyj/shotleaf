@@ -4,6 +4,7 @@
 POST /upload?ttl=SECONDS   (Authorization: Bearer <SHOTS_TOKEN>, body: PNG/JPEG)
     -> 201 {"url": "<SHOTS_PUBLIC_URL>/<id>", "expires": <unix time>}
 GET  /<id>                 -> the image, until it expires; then 404
+DELETE /<id>               (Authorization: Bearer <SHOTS_TOKEN>) -> 204, the image is gone now
 A sweep every minute deletes expired files.
 
 Settings (environment):
@@ -89,12 +90,28 @@ class Handler(BaseHTTPRequestHandler):
     def error(self, code, message):
         self.send(code, json.dumps({"error": message}).encode())
 
+    def allowed(self):
+        given = self.headers.get("Authorization", "").removeprefix("Bearer ").strip()
+        return bool(TOKEN) and hmac.compare_digest(given.encode(), TOKEN.encode())
+
+    def do_DELETE(self):
+        shot_id = urlparse(self.path).path.strip("/")
+        if not self.allowed():
+            return self.error(401, "wrong token")
+        if not ID.match(shot_id) or not os.path.exists(paths(shot_id)[1]):
+            return self.error(404, "not found")
+        for p in paths(shot_id):
+            try:
+                os.remove(p)
+            except OSError:
+                pass
+        self.send(204)
+
     def do_POST(self):
         url = urlparse(self.path)
         if url.path != "/upload":
             return self.error(404, "not found")
-        given = self.headers.get("Authorization", "").removeprefix("Bearer ").strip()
-        if not TOKEN or not hmac.compare_digest(given.encode(), TOKEN.encode()):
+        if not self.allowed():
             return self.error(401, "wrong token")
         try:
             length = int(self.headers.get("Content-Length", "0"))

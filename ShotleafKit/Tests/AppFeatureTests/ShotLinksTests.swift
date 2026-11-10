@@ -49,5 +49,12 @@ struct ShotLinksTests {
         await #expect(throws: ShotLinks.Failure.self) {
             try await ShotLinks.upload(png, hours: 1, server: "http://127.0.0.1:8797", token: "wrong")
         }
+        // "Delete last link": the picture is gone at once, and there is nothing left to delete.
+        #expect(await ShotLinks.last?.url == link)
+        try await ShotLinks.deleteLast()
+        // Past the cache: the first GET's answer may be kept for a few minutes.
+        let (_, after) = try await URLSession.shared.data(for: URLRequest(url: link, cachePolicy: .reloadIgnoringLocalCacheData))
+        #expect((after as? HTTPURLResponse)?.statusCode == 404)
+        #expect(await ShotLinks.last == nil)
     }
 }
