@@ -47,6 +47,9 @@ struct SnippetTests {
         #expect(SnippetText.expand("{clipboard}!", clipboard: "abc").text == "abc!")
         #expect(SnippetText.expand("a{?x}b").text == "ab")                      // unanswered: empty
         #expect(SnippetText.expand("x{cursor}y{cursor}z") == ("xyz", 2))       // only the first counts
+        // What goes in is pasted as it is: a copied "{cursor}" or "{?x}" isn't read as a variable.
+        #expect(SnippetText.expand("Hi {clipboard}!{cursor}", clipboard: "see {?x} {cursor}") == ("Hi see {?x} {cursor}!", 0))
+        #expect(SnippetText.expand("{?Name} {cursor}ok", answers: ["Name": "{date}"]) == ("{date} ok", 2))
     }
 
     @Test("A bare word never fires: abbreviations get a ; in front, old ones too")

@@ -123,15 +123,24 @@ public struct MenuBarRootView: View {
         return date.formatted(date: Calendar.current.isDateInToday(date) ? .omitted : .abbreviated, time: .shortened)
     }
 
+    /// Made once per shot: decoding ten full PNGs on every menu open was slow.
+    @MainActor private static var thumbnails: [URL: NSImage] = [:]
+
     /// A small picture for the menu row.
-    /// ponytail: decodes up to 10 full PNGs each time the menu opens; cache if it ever feels slow.
-    static func thumbnail(_ url: URL) -> NSImage? {
+    @MainActor static func thumbnail(_ url: URL) -> NSImage? {
+        if let made = thumbnails[url] { return made }
+        if thumbnails.count > 30 { thumbnails = [:] } // recent shots come and go
         guard let image = NSImage(contentsOf: url), image.size.width > 0 else { return nil }
         let side: CGFloat = 32
         let size = image.size.width >= image.size.height
             ? CGSize(width: side, height: max(1, side * image.size.height / image.size.width))
             : CGSize(width: max(1, side * image.size.width / image.size.height), height: side)
-        let thumb = NSImage(size: size, flipped: false) { rect in image.draw(in: rect); return true }
+        // Drawn now, so the full picture isn't kept by the drawing handler.
+        let thumb = NSImage(size: size)
+        thumb.lockFocus()
+        image.draw(in: CGRect(origin: .zero, size: size))
+        thumb.unlockFocus()
+        thumbnails[url] = thumb
         return thumb
     }
 

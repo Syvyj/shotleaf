@@ -176,3 +176,30 @@ struct ClipActionTests {
         try renderPreview(ClipboardPanelView(model: model, pick: { _, _ in }, close: {}), "clipboard-actions.png")
     }
 }
+
+@Suite("Private text, big copies")
+@MainActor
+struct PrivateTextTests {
+    @Test("Keys in well-known shapes are private; ordinary words that start the same aren't")
+    func shapes() {
+        #expect(ClipboardHistory.looksSensitive("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.abc_DEF-123")) // JWT
+        #expect(ClipboardHistory.looksSensitive("AKIAIOSFODNN7EXAMPLE"))                               // AWS
+        #expect(ClipboardHistory.looksSensitive("glpat-abcdefghij") && ClipboardHistory.looksSensitive("github_pat_11AB"))
+        #expect(!ClipboardHistory.looksSensitive("xoxo, see you"))
+        #expect(!ClipboardHistory.looksSensitive("example.com/path"))
+    }
+
+    @Test("A text over the limit isn't kept; too big rich text leaves the plain text")
+    func bigCopies() throws {
+        let board = NSPasteboard(name: .init("shotleaf-big-\(UUID())"))
+        defer { board.releaseGlobally() }
+        board.clearContents()
+        board.setString(String(repeating: "a", count: ClipboardHistory.maxBytes + 1), forType: .string)
+        #expect(ClipboardHistory.read(board) == nil)
+        board.clearContents()
+        board.setString("short", forType: .string)
+        board.setData(Data(count: ClipboardHistory.maxBytes + 1), forType: .rtf)
+        let (item, _) = try #require(ClipboardHistory.read(board))
+        #expect(item.text == "short" && item.rtf == nil)
+    }
+}

@@ -24,8 +24,9 @@ let package = Package(
         // macOS 27 SDK, so that trait is off.
         .package(url: "https://github.com/ml-explore/mlx-swift-lm", .upToNextMinor(from: "3.32.3"), traits: []),
         .package(url: "https://github.com/ml-explore/mlx-swift", .upToNextMinor(from: "0.32.3")),
-        .package(url: "https://github.com/huggingface/swift-huggingface", from: "0.9.0"),
-        .package(url: "https://github.com/huggingface/swift-transformers", from: "1.3.0"),
+        // Like MLX: minor updates only by hand (`swift package update` must not swap the tokenizer under users).
+        .package(url: "https://github.com/huggingface/swift-huggingface", .upToNextMinor(from: "0.13.0")),
+        .package(url: "https://github.com/huggingface/swift-transformers", .upToNextMinor(from: "1.3.4")),
     ],
     targets: [
         // Foundation-only contracts and domain types. Depends on nothing.

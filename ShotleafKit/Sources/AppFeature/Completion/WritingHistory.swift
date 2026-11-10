@@ -28,6 +28,7 @@ final class WritingHistory {
         guard enabled else { return }
         let passage = String(text.suffix(Self.passageLength)).trimmingCharacters(in: .whitespacesAndNewlines)
         guard passage.count >= 40 else { return } // too short to say anything about style
+        guard PrivateSpots.ranges(in: passage).isEmpty else { return } // card numbers, tokens, emails, phones: never kept
         var list = passages[app, default: []].filter { $0 != passage && !passage.hasPrefix($0) }
         list.append(passage)
         passages[app] = Array(list.suffix(Self.perApp))

@@ -75,9 +75,9 @@ Shotleaf has no account and no analytics. Text recognition, blurring private inf
 
 - **The completion model**, downloaded once from Hugging Face when you ask for it. After that it loads from disk.
 - **The check for a new version**: at launch and once a day Shotleaf asks GitHub which release is the newest. Nothing about you is sent. Turn it off in **Settings › General**.
-- **Screenshot links**, when you press the link button: the picture goes to Shotleaf's link service on Cloudflare (`s.syvyj.dev`, code in `server/links`) and is deleted when the link expires, 12 hours at most. You can use your own server instead (`server/shots`).
+- **Screenshot links**, when you press the link button: the picture goes to Shotleaf's link service on Cloudflare (`s.syvyj.dev`, code in `server/links`) and is deleted when the link expires (within 15 minutes of it), 12 hours at most. A picture over 5 MB goes as a JPEG that fits. You can use your own server instead (`server/shots`). **Check** in Settings › Screenshot Links sends a 1-pixel picture the same way.
 
-Passwords copied from password managers aren't kept in the history.
+Passwords copied from password managers aren't kept in the history. Card numbers and access tokens stay in memory for a minute and never reach the disk, unless you pin them. Learning your writing style is off until you turn it on.
 
 ## Where your data lives
 
@@ -205,9 +205,9 @@ macOS може перестати довіряти новій версії до�
 
 - **Модель для дописування**: завантажується один раз із Hugging Face, коли ви про це попросите. Далі вона береться з диска.
 - **Перевірка нової версії**: під час запуску й раз на день Shotleaf питає в GitHub, який реліз найновіший. Нічого про вас не надсилається. Вимкнути можна в **Налаштуваннях › Загальні**.
-- **Посилання на скріншоти**, коли ви натискаєте кнопку посилання: картинка йде в сервіс посилань Shotleaf на Cloudflare (`s.syvyj.dev`, код у `server/links`) і видаляється, коли посилання спливає, щонайбільше за 12 годин. Замість нього можна підключити власний сервер (`server/shots`).
+- **Посилання на скріншоти**, коли ви натискаєте кнопку посилання: картинка йде в сервіс посилань Shotleaf на Cloudflare (`s.syvyj.dev`, код у `server/links`) і видаляється, коли посилання спливає (протягом 15 хвилин після цього), щонайбільше за 12 годин. Картинка понад 5 МБ іде як JPEG, що вміщується в ліміт. Замість нього можна підключити власний сервер (`server/shots`). Кнопка **Перевірити** в Налаштуваннях › Посилання на скріншоти так само надсилає картинку в 1 піксель.
 
-Паролі, скопійовані з менеджерів паролів, в історії не зберігаються.
+Паролі, скопійовані з менеджерів паролів, в історії не зберігаються. Номери карток і токени доступу живуть у пам'яті хвилину й не потрапляють на диск, якщо ви їх не закріпите. Навчання вашому стилю письма вимкнене, доки ви його не ввімкнете.
 
 ## Де лежать ваші дані
 

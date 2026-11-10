@@ -19,7 +19,7 @@ public enum Updates {
 
     /// "0.10.0" is newer than "0.9.1"; a leading "v" is ignored.
     nonisolated static func isNewer(_ a: String, than b: String) -> Bool {
-        let parts = { (s: String) in s.trimmingCharacters(in: CharacterSet(charactersIn: "v")).split(separator: ".").map { Int($0) ?? 0 } }
+        let parts = { (s: String) in s.trimmingCharacters(in: CharacterSet(charactersIn: "vV")).split(separator: ".").map { Int($0) ?? 0 } }
         let x = parts(a), y = parts(b)
         for i in 0..<max(x.count, y.count) {
             let l = i < x.count ? x[i] : 0, r = i < y.count ? y[i] : 0
@@ -40,7 +40,7 @@ public enum Updates {
         let answer = try JSONDecoder().decode(Answer.self, from: data)
         let dmg = answer.assets.first { $0.name.hasSuffix(".dmg") }?.browser_download_url ?? AppInfo.releases
         let sum = answer.assets.first { $0.name.hasSuffix(".dmg.sha256") }?.browser_download_url
-        return Release(version: answer.tag_name.trimmingCharacters(in: CharacterSet(charactersIn: "v")), download: dmg, checksum: sum)
+        return Release(version: answer.tag_name.trimmingCharacters(in: CharacterSet(charactersIn: "vV")), download: dmg, checksum: sum)
     }
 
     // MARK: Installing

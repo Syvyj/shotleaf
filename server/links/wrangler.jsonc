@@ -1,5 +1,6 @@
 // Shotleaf's free screenshot links. Deploy: npx wrangler@4 deploy (from this folder).
-// The bucket keeps nothing past a day (lifecycle rule); the Worker stops serving at the link's own expiry.
+// The Worker stops serving at the link's own expiry and deletes the picture then; a cron sweep every
+// 15 minutes deletes the ones nobody opened. The bucket's one-day lifecycle rule is a backstop.
 {
   "name": "shotleaf-links",
   "main": "worker.js",
@@ -7,5 +8,6 @@
   "r2_buckets": [{ "binding": "SHOTS", "bucket_name": "shotleaf-links" }],
   "ratelimits": [{ "name": "UPLOADS", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } }],
   "routes": [{ "pattern": "s.syvyj.dev", "custom_domain": true }],
+  "triggers": { "crons": ["*/15 * * * *"] },
   "workers_dev": false
 }

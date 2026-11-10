@@ -1,3 +1,4 @@
+#if DEBUG // developer runs only (App/ShotleafApp.swift), not in the release app
 import AppKit
 import EmbeddedKit
 import ScreenCaptureKit
@@ -176,3 +177,4 @@ public enum CompletionLiveTest {
         try? png.write(to: url)
     }
 }
+#endif

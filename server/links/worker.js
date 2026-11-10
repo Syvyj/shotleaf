@@ -1,5 +1,6 @@
 // Shotleaf's free screenshot links (s.syvyj.dev): the app uploads a PNG/JPEG, gets a short
-// link back, and the picture is gone after at most 12 hours.
+// link back, and the picture is gone after at most 12 hours: the link stops at its expiry,
+// and the picture is deleted then (on the first visit after it) or by the sweep within 15 minutes.
 // Same protocol as the self-hosted server/shots: POST /upload?ttl=SECONDS → 201 {url, expires}.
 // Open to anyone (the app is open source, so a key couldn't stay secret): limits instead.
 
@@ -17,6 +18,21 @@ export default {
     const match = url.pathname.match(/^\/([A-Za-z0-9]{8})(\.(png|jpg))?$/)
     return match ? show(env, url, match[1], Boolean(match[2])) : notFound()
   },
+
+  // Cron (wrangler.jsonc): deletes every expired picture. The bucket's one-day lifecycle rule stays as a backstop.
+  async scheduled(_event, env) {
+    await sweep(env)
+  },
+}
+
+export async function sweep(env, now = Date.now()) {
+  let cursor
+  do {
+    const page = await env.SHOTS.list({ cursor, include: ["customMetadata"] })
+    const expired = page.objects.filter((o) => Number(o.customMetadata?.expires || 0) * 1000 <= now).map((o) => o.key)
+    if (expired.length) await env.SHOTS.delete(expired)
+    cursor = page.truncated ? page.cursor : undefined
+  } while (cursor)
 }
 
 async function upload(request, env, url) {
@@ -26,7 +42,9 @@ async function upload(request, env, url) {
 
   const ttl = Number(url.searchParams.get("ttl") || 6 * 3600)
   if (!Number.isInteger(ttl) || ttl < 60 || ttl > MAX_TTL) return json(400, { error: "links last 1 minute to 12 hours" })
-  const length = Number(request.headers.get("Content-Length") || 0)
+  // The size up front, so an endless body is never read in (the app always sends it).
+  const length = Number(request.headers.get("Content-Length"))
+  if (!request.headers.get("Content-Length") || !Number.isFinite(length)) return json(411, { error: "length required" })
   if (length > MAX_BYTES) return json(413, { error: "pictures up to 5 MB" })
   const body = await request.arrayBuffer()
   if (body.byteLength === 0 || body.byteLength > MAX_BYTES) return json(413, { error: "pictures up to 5 MB" })
@@ -42,7 +60,11 @@ async function upload(request, env, url) {
 async function show(env, url, id, raw) {
   const object = raw ? await env.SHOTS.get(id) : await env.SHOTS.head(id)
   const expires = Number(object?.customMetadata?.expires || 0)
-  if (!object || expires * 1000 <= Date.now()) return notFound() // the bucket's lifecycle rule deletes it within a day
+  if (!object) return notFound()
+  if (expires * 1000 <= Date.now()) {
+    await env.SHOTS.delete(id) // gone now, not at the next sweep
+    return notFound()
+  }
   const left = expires - Math.floor(Date.now() / 1000)
   const headers = { "Cache-Control": `public, max-age=${Math.min(left, 3600)}`, "X-Robots-Tag": "noindex", "X-Content-Type-Options": "nosniff" }
   if (raw) return new Response(object.body, { headers: { ...headers, "Content-Type": object.httpMetadata.contentType } })

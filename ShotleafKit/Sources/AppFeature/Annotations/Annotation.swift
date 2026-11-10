@@ -123,8 +123,6 @@ enum AnnotationTool: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Tools whose marks have a line thickness.
-    var usesLineWidth: Bool { [.arrow, .rectangle, .ellipse, .pen, .magnify].contains(self) }
 
     /// The editor key: the user's own (Settings → Editor tools) or the
     /// default — 1…9 for the original tools, letters for later ones. None of
@@ -320,8 +318,7 @@ final class AnnotationDocument {
             moved.kind = AnnotationEditing.shiftedWithPicture(item.kind, by: shift)
             return moved
         }
-        undoStack.append(Snapshot(items: items, base: base))
-        redoStack.removeAll()
+        pushUndo()
         items = kept
         base = Base(image: cropped, size: area.size, cutOut: current.cutOut)
         selection = nil
@@ -329,8 +326,7 @@ final class AnnotationDocument {
 
     /// A new picture of the same size under the marks ("Remove background") — one undo step.
     func replacePicture(_ image: CGImage, size: CGSize, cutOut: Bool) {
-        undoStack.append(Snapshot(items: items, base: base))
-        redoStack.removeAll()
+        pushUndo()
         base = Base(image: image, size: size, cutOut: cutOut)
     }
 
@@ -353,9 +349,17 @@ final class AnnotationDocument {
     }
 
     private func commit(_ new: [Annotation]) {
-        undoStack.append(Snapshot(items: items, base: base))
-        redoStack.removeAll()
+        pushUndo()
         items = new
+    }
+
+    /// Steps kept for ⌘Z: a step can hold a whole picture (crop, background removed).
+    static let undoLimit = 50
+
+    private func pushUndo() {
+        undoStack.append(Snapshot(items: items, base: base))
+        if undoStack.count > Self.undoLimit { undoStack.removeFirst() }
+        redoStack.removeAll()
     }
 }
 

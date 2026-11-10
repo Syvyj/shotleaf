@@ -1,3 +1,4 @@
+#if DEBUG // developer runs only (App/ShotleafApp.swift), not in the release app
 import AppKit
 import ApplicationServices
 
@@ -124,3 +125,4 @@ public enum AccessibilityProbe {
         try? lines.joined(separator: "\n").write(to: out.appendingPathComponent("ax-probe.txt"), atomically: true, encoding: .utf8)
     }
 }
+#endif

@@ -166,14 +166,21 @@ enum SnippetText {
         let time = DateFormatter()
         time.locale = .current
         time.timeStyle = .short
-        var out = text
-            .replacingOccurrences(of: "{date}", with: day.string(from: now))
-            .replacingOccurrences(of: "{time}", with: time.string(from: now))
-            .replacingOccurrences(of: "{clipboard}", with: clipboard)
-        for (question, answer) in answers { out = out.replacingOccurrences(of: "{?\(question)}", with: answer) }
-        out = out.replacing(/\{\?[^}]+\}/, with: "") // unanswered
-        guard let marker = out.range(of: "{cursor}") else { return (out, 0) }
-        let tail = out[marker.upperBound...].replacingOccurrences(of: "{cursor}", with: "") // only the first counts
-        return (out[..<marker.lowerBound] + tail, tail.count)
+        // One pass over the snippet itself: what goes in (the clipboard, an answer) is never
+        // read for variables, so a copied "{cursor}" or "{?x}" is pasted as it is.
+        var out = "", cursor: Int?, last = text.startIndex
+        for match in text.matches(of: /\{(date|time|clipboard|cursor|\?[^}]+)\}/) {
+            out += text[last..<match.range.lowerBound]
+            last = match.range.upperBound
+            switch match.1 {
+            case "date": out += day.string(from: now)
+            case "time": out += time.string(from: now)
+            case "clipboard": out += clipboard
+            case "cursor": if cursor == nil { cursor = out.count } // only the first counts
+            case let question: out += answers[String(question.dropFirst())] ?? "" // unanswered: empty
+            }
+        }
+        out += text[last...]
+        return (out, cursor.map { out.count - $0 } ?? 0)
     }
 }

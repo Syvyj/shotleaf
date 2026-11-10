@@ -24,7 +24,7 @@ import OSLog
 final class InlineCompletion {
     private let log = Logger(subsystem: "dev.syvyj.shotleaf", category: "completion")
     /// Marks Shotleaf's own synthetic key events so the tap lets them through.
-    nonisolated fileprivate static let marker: Int64 = 0x4150_494C // "APIL"
+    nonisolated fileprivate static let marker = Paster.marker
     /// The model answers in ~50 ms now; waiting longer only feels slow.
     private static let debounce: Duration = .milliseconds(60)
 
@@ -85,8 +85,6 @@ final class InlineCompletion {
     /// The field last read, to remember its text when the user moves on.
     private var lastSeen: (key: String, app: String, text: String)?
     private var activationObserver: NSObjectProtocol?
-
-    var isRunning: Bool { tapThread != nil }
 
     /// Starts watching. False when macOS refuses the event tap (no Accessibility).
     @discardableResult
@@ -231,7 +229,8 @@ final class InlineCompletion {
     }
 
     private func suggest(in field: FocusedField) {
-        rememberIfLeft(field)
+        // Only with the model in place: without it nothing would use what's kept.
+        if EmbeddedModel.completion.isDownloaded { rememberIfLeft(field) }
         if quickFixes, let query = EmojiShortcodes.query(beforeCursor: field.beforeCursor) {
             showPicker(query: query, in: field)
             return
@@ -406,8 +405,17 @@ private final class TapState: @unchecked Sendable {
         get { lock.withLock { _picker } }
         set { lock.withLock { _picker = newValue } }
     }
-    weak var controller: InlineCompletion?
-    var port: CFMachPort?
+    private weak var _controller: InlineCompletion?
+    /// Set on main, read on the tap thread: behind the lock like the rest.
+    var controller: InlineCompletion? {
+        get { lock.withLock { _controller } }
+        set { lock.withLock { _controller = newValue } }
+    }
+    private var _port: CFMachPort?
+    var port: CFMachPort? {
+        get { lock.withLock { _port } }
+        set { lock.withLock { _port = newValue } }
+    }
 
     /// On the tap thread: swallow? Everything else is handed to main.
     func handle(_ type: CGEventType, _ event: CGEvent) -> Bool {

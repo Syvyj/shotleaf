@@ -143,6 +143,9 @@ struct WritingHistoryTests {
         h.remember("Привіт! Так, давай о третій біля офісу, я буду трохи раніше.", app: "tg")
         h.remember("Дякую, отримав. Подивлюсь сьогодні ввечері й відпишу тобі.", app: "tg")
         h.remember("Hi Mark, thanks — I'll send the report by Friday.", app: "mail")
+        h.remember("Ось номер картки для оплати: 4242 4242 4242 4242, дякую!", app: "bank") // never kept
+        h.remember("Мій новий номер +380 67 123 45 67, пиши туди, будь ласка.", app: "bank")
+        #expect(h.examples(for: "bank", current: "").isEmpty)
         #expect(h.examples(for: "tg", current: "Ок").first?.hasPrefix("Дякую") == true)
         #expect(h.examples(for: "tg", current: "Ок").count == 2)
         #expect(h.examples(for: "mail", current: "Hi Mark, thanks — I'll send").isEmpty) // the one being written

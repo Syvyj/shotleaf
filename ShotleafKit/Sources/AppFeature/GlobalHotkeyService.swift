@@ -133,7 +133,8 @@ public enum HotkeyAction: String, CaseIterable, Identifiable, Sendable {
 /// way to get system-wide shortcuts on macOS. Needs no TCC permission. Several
 /// hotkeys at once, each under a string id ("panel", "screenshot-text"…);
 /// a press is emitted as `HotkeyEvent(identifier: id)`.
-public final class GlobalHotkeyService: HotkeyService, @unchecked Sendable {
+@MainActor
+public final class GlobalHotkeyService: HotkeyService {
     public let events: AsyncStream<HotkeyEvent>
     private let continuation: AsyncStream<HotkeyEvent>.Continuation
     private var handlerRef: EventHandlerRef?
@@ -228,9 +229,12 @@ public final class GlobalHotkeyService: HotkeyService, @unchecked Sendable {
                 nil, MemoryLayout<EventHotKeyID>.size, nil, &hotKeyID
             )
             guard status == noErr else { return status }
-            let service = Unmanaged<GlobalHotkeyService>.fromOpaque(userData).takeUnretainedValue()
-            if let id = service.active[hotKeyID.id]?.id {
-                service.continuation.yield(HotkeyEvent(identifier: id))
+            // The application event target runs on the main thread.
+            MainActor.assumeIsolated {
+                let service = Unmanaged<GlobalHotkeyService>.fromOpaque(userData).takeUnretainedValue()
+                if let id = service.active[hotKeyID.id]?.id {
+                    service.continuation.yield(HotkeyEvent(identifier: id))
+                }
             }
             return noErr
         }

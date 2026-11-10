@@ -262,16 +262,26 @@ final class ScreenshotWindows {
     /// Settings), at 1x if asked; `scale` = pixels per point of the shot.
     static func save(_ png: Data, to folder: URL? = nil, now: Date = Date(), scale: CGFloat = 1) -> URL? {
         let folder = folder ?? saveFolder
-        let url = folder.appendingPathComponent(fileName(now, template: settings.fileNameTemplate))
+        let url = unused(folder.appendingPathComponent(fileName(now, template: settings.fileNameTemplate)))
         let data = settings.saveAt1x ? oneX(png, scale: scale) : png
         do {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-            try data.write(to: url)
+            try data.write(to: url, options: .withoutOverwriting)
             return url
         } catch {
             SaveError.show(error, saving: String(localized: "the screenshot"))
             return nil
         }
+    }
+
+    /// `url`, or "name 2.png", "name 3.png"… when it's taken: two saves in one second keep both.
+    static func unused(_ url: URL) -> URL {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: url.path) else { return url }
+        let base = url.deletingPathExtension().lastPathComponent, ext = url.pathExtension, folder = url.deletingLastPathComponent()
+        var n = 2
+        while fm.fileExists(atPath: folder.appendingPathComponent("\(base) \(n)").appendingPathExtension(ext).path) { n += 1 }
+        return folder.appendingPathComponent("\(base) \(n)").appendingPathExtension(ext)
     }
 
     /// `template` with {date} and {time} filled in, made safe for Finder.
@@ -311,11 +321,15 @@ final class ScreenshotWindows {
     /// Keeps a new capture (the oldest beyond `recentLimit` go). Survives a restart.
     @discardableResult
     static func remember(_ shot: ImagePayload, in folder: URL = recentFolder, now: Date = Date()) -> [URL] {
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy-MM-dd HH.mm.ss.SSS"
-        try? shot.data.write(to: folder.appendingPathComponent("\(f.string(from: now)).png"))
+        do { // else "Edit Last Screenshot" would quietly have nothing to open
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try shot.data.write(to: folder.appendingPathComponent("\(f.string(from: now)).png"))
+        } catch {
+            SaveError.show(error, saving: String(localized: "the screenshot"))
+        }
         let all = recent(in: folder, limit: .max)
         for old in all.dropFirst(recentLimit) { try? FileManager.default.removeItem(at: old) }
         return Array(all.prefix(recentLimit))

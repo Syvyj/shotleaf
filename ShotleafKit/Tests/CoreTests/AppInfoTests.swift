@@ -33,4 +33,14 @@ struct AppInfoTests {
         AppInfo.migrateFromAPILA(defaults: defaults, support: base, oldDomain: oldName) // only once
         #expect(defaults.string(forKey: "afterCapture") == "save")
     }
+
+    @Test("Nothing to bring over: not marked done, so it isn't skipped for good")
+    func nothingYet() throws {
+        let suite = "apila-empty-\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent("apila-empty-\(UUID())")
+        AppInfo.migrateFromAPILA(defaults: defaults, support: base, oldDomain: "apila-none-\(UUID())")
+        #expect(!defaults.bool(forKey: "migratedFromAPILA"))
+    }
 }

@@ -25,6 +25,8 @@ public final class AppCoordinator {
         for name in ScreenshotWindows.tempFolders { // last run's drags, pastes and shares
             try? FileManager.default.removeItem(at: FileManager.default.temporaryDirectory.appendingPathComponent(name))
         }
+        // ponytail: left by builds before "Recent Screenshots"; drop this line after a few releases.
+        try? FileManager.default.removeItem(at: AppInfo.supportFolder.appendingPathComponent("last-capture.png"))
         applyDockPolicy()
         refreshPermissions()
         inlineCompletion.context.useScreen = container.settings.completionUsesScreen
@@ -39,7 +41,7 @@ public final class AppCoordinator {
         }
         screenshots.toSnippets = { [weak self] png in
             guard let self else { return nil }
-            let folder = UserDefaults.standard.string(forKey: "snippetFolder").flatMap(UUID.init) // the folder last opened in the panel
+            let folder = UserDefaults.standard.string(forKey: ClipboardPanelModel.folderKey).flatMap(UUID.init) // the folder last opened in the panel
             let saved = snippets.save(title: String(localized: "Screenshot"), text: "", pngs: [png], folder: folder)
             return snippets.folder(saved.folder)?.name
         }
@@ -115,7 +117,8 @@ public final class AppCoordinator {
     public func showSnippetEditor() {
         if snippetWindow?.isVisible != true {
             var window: FloatingPanel!
-            window = ScreenshotWindows.makePanel(SnippetEditorView(store: snippets, close: { window?.orderOut(nil) }),
+            // Closing lets go of the view, which holds the window: else every editor opened stays in memory.
+            window = ScreenshotWindows.makePanel(SnippetEditorView(store: snippets, close: { window?.orderOut(nil); Task { window?.contentViewController = nil } }),
                                                  proposedWidth: 1000, resizable: true)
             window.level = .normal
             window.setContentSize(NSSize(width: 1000, height: max(window.frame.height, 680))) // room for the bottom bar in longer languages
@@ -195,7 +198,9 @@ public final class AppCoordinator {
         }
         Sound.shutter()
         if after == .copy || after == .copyAndSave { ScreenshotWindows.copy(shot.data, own: entry != nil) }
-        if after == .save || after == .copyAndSave { _ = ScreenshotWindows.save(shot.data, scale: NSScreen.main?.backingScaleFactor ?? 2) }
+        // The screen the shot came from (the picker was under the pointer), as the editor does.
+        let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
+        if after == .save || after == .copyAndSave { _ = ScreenshotWindows.save(shot.data, scale: screen?.backingScaleFactor ?? 2) }
         SupportAsk.askIfDue()
     }
 
@@ -245,11 +250,15 @@ public final class AppCoordinator {
     /// Everything Shotleaf keeps, then quit (a running app would write some of it back).
     public func deleteAllData() {
         clipboard.stop()
+        expander.stop()
+        inlineCompletion.stop()
         try? FileManager.default.removeItem(at: AppInfo.supportFolder) // history, snippets, recent shots, style
         ShotLinks.token = nil
         try? SMAppService.mainApp.unregister()
         Task {
             try? await EmbeddedModel.completion.delete()
+            // Again: a save still in flight (a sensitive entry's expiry, a snippet) may have made the folder anew.
+            try? FileManager.default.removeItem(at: AppInfo.supportFolder)
             UserDefaults.standard.removePersistentDomain(forName: AppInfo.bundleID)
             NSApp.terminate(nil)
         }
@@ -273,7 +282,7 @@ public final class AppCoordinator {
         if batchWindow?.isVisible != true { batchWindow = nil } // closed: start over with no photos
         if batchWindow == nil {
             var window: FloatingPanel!
-            let view = BatchWatermarkView(model: BatchWatermark(), close: { window?.orderOut(nil) })
+            let view = BatchWatermarkView(model: BatchWatermark(), close: { window?.orderOut(nil); Task { window?.contentViewController = nil } })
             window = ScreenshotWindows.makePanel(view, proposedWidth: 1100, resizable: true)
             window.level = .normal // a longer task: other apps may go on top of it
             window.setContentSize(NSSize(width: 1100, height: max(window.frame.height, 740)))

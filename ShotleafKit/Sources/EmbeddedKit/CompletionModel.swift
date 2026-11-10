@@ -9,8 +9,7 @@ import Tokenizers
 
 /// The built-in completion model, run on this Mac with MLX (ADR-0065).
 /// Downloaded once from Hugging Face when the user asks (Settings), loaded on
-/// first use and kept in memory.
-/// ponytail: stays loaded until quit (~2 GB); unload after idle if memory matters.
+/// first use and let go after `idleTime` without a request (the next one loads it again).
 public actor EmbeddedModel {
     /// Gemma 4 E2B *base*: a plain text continuer for inline completion —
     /// instruct models answer instead of continuing, and need a slow prompt.
@@ -27,6 +26,9 @@ public actor EmbeddedModel {
     private var loading: Task<ModelContainer, Error>?
     /// What the model already read for the last completion (see `complete`).
     private let promptCache = PromptCache()
+    /// Unused this long, the model leaves memory (it holds ~2 GB).
+    public static let idleTime: Duration = .seconds(600)
+    private var idleUnload: Task<Void, Never>?
 
     init(configuration: ModelConfiguration, displayName: String) {
         self.configuration = configuration
@@ -95,6 +97,7 @@ public actor EmbeddedModel {
         onPartial: @Sendable @escaping (String) -> Void = { _ in }
     ) async throws -> (text: String, finished: Bool) {
         let container = try await load()
+        scheduleUnload()
         let promptCache = promptCache
         return try await container.perform { context in
             let tokens = context.tokenizer.encode(text: prefix, addSpecialTokens: true)
@@ -128,15 +131,32 @@ public actor EmbeddedModel {
         }
     }
 
-    /// Frees memory and disk.
+    private func scheduleUnload() {
+        idleUnload?.cancel()
+        idleUnload = Task {
+            try? await Task.sleep(for: Self.idleTime)
+            guard !Task.isCancelled else { return }
+            unload()
+        }
+    }
+
+    /// Out of memory (a running completion keeps its own reference until it's done).
+    public func unload() {
+        idleUnload?.cancel()
+        container = nil
+        promptCache.reset()
+        Memory.clearCache()
+    }
+
     /// Stops a download in progress (what's on disk stays for the next try).
     public func cancel() {
         loading?.cancel()
         loading = nil
     }
 
+    /// Frees memory and disk.
     public func delete() throws {
-        container = nil
+        unload()
         if let directory, FileManager.default.fileExists(atPath: directory.path) {
             try FileManager.default.removeItem(at: directory)
         }
@@ -153,6 +173,11 @@ private final class PromptCache: @unchecked Sendable {
     private var tokens: [Int] = []
     /// Tokens skipped last time (for the eval run).
     var reused = 0
+
+    func reset() {
+        cache = nil
+        tokens = []
+    }
 
     func prepare(for tokens: [Int], model: any LanguageModel, parameters: GenerateParameters) throws -> ([KVCache], Int) {
         defer { self.tokens = tokens }

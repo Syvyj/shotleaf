@@ -24,8 +24,9 @@ public struct HotkeyEvent: Sendable, Equatable {
     }
 }
 
-/// Registers global hotkeys and emits events.
-public protocol HotkeyService: Sendable {
+/// Registers global hotkeys and emits events. Main actor: Carbon delivers hotkeys there.
+@MainActor
+public protocol HotkeyService {
     var events: AsyncStream<HotkeyEvent> { get }
     /// False if the shortcut couldn't be registered (e.g. owned by another app).
     @discardableResult func start() -> Bool

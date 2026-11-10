@@ -5,7 +5,6 @@ import AppKit
 /// buttons. Same palette as the app icon and the capture overlay.
 enum Leaf {
     static let forest = Color(red: 0x12 / 255, green: 0x1A / 255, blue: 0x12 / 255)
-    static let moss = Color(red: 0x2E / 255, green: 0x4A / 255, blue: 0x24 / 255)
     static let leaf = Color(red: 0x4F / 255, green: 0x7F / 255, blue: 0x2A / 255)
     static let fresh = Color(red: 0x8F / 255, green: 0xBF / 255, blue: 0x3A / 255)
     static let lime = Color(red: 0xC9 / 255, green: 0xE8 / 255, blue: 0x6A / 255)

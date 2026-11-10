@@ -7,6 +7,8 @@ func updateVersions() {
     #expect(Updates.isNewer("v0.2", than: "0.1.9"))
     #expect(!Updates.isNewer("0.1.0", than: "0.1"))
     #expect(!Updates.isNewer("0.1.0", than: "0.2.0"))
+    #expect(Updates.isNewer("V0.2.0", than: "0.1.9"))                   // a capital V too
+    #expect(!Updates.isNewer("", than: "0.1"))
 }
 
 @Test("The checksum file gives its SHA-256, anything else gives nothing")

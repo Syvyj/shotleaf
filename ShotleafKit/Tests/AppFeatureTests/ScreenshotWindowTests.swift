@@ -18,7 +18,8 @@ struct ScreenshotWindowTests {
         windows.show(ScreenshotWindows.payload(png), sound: false)
         weak var panel = try #require(windows.open.values.first)
         windows.close(panel)
-        try await Task.sleep(for: .milliseconds(100))
+        // Freed once the close's task has run and AppKit's pool drained: poll, other tests may hold the main thread.
+        for _ in 0..<40 where panel != nil { try await Task.sleep(for: .milliseconds(50)) }
         #expect(panel == nil)
     }
 
@@ -159,14 +160,14 @@ struct PenBackdropTests {
 
     @Test("Tool keys: a taken key moves over, editor keys are refused, order moves")
     func toolPrefs() {
-        defer { ToolPrefs.reset() }
-        ToolPrefs.reset()
+        withDefaultToolKeys {
         #expect(ToolPrefs.setKey("D", for: .arrow))
         #expect(AnnotationTool.arrow.key == "d" && AnnotationTool.pen.key == nil)
         #expect(!ToolPrefs.setKey("p", for: .blur) && AnnotationTool.blur.key == "5")
         #expect(ToolPrefs.setKey("", for: .blur) && AnnotationTool.blur.key == nil)
         ToolPrefs.move(.rectangle, by: -1)
         #expect(Array(AnnotationTool.ordered.prefix(2)) == [.rectangle, .arrow])
+        }
     }
 
     @Test("Recent screenshots: newest first, only the last ten kept")
@@ -199,8 +200,10 @@ struct PenBackdropTests {
         #expect(AnnotationEditing.contains(line, CGPoint(x: 50, y: 3)))
         #expect(!AnnotationEditing.contains(line, CGPoint(x: 50, y: 50)))
         #expect(AnnotationEditing.moved(line, by: CGSize(width: 10, height: 5)) == .pen([CGPoint(x: 10, y: 5), CGPoint(x: 110, y: 5), CGPoint(x: 110, y: 105)]))
-        #expect(AnnotationTool.arrow.key == "1" && AnnotationTool.blur.key == "5" && AnnotationTool.focus.key == "9" && AnnotationTool.pen.key == "d")
-        #expect(Set(AnnotationTool.allCases.map(\.key)).count == AnnotationTool.allCases.count)
+        withDefaultToolKeys {
+            #expect(AnnotationTool.arrow.key == "1" && AnnotationTool.blur.key == "5" && AnnotationTool.focus.key == "9" && AnnotationTool.pen.key == "d")
+            #expect(Set(AnnotationTool.allCases.map(\.key)).count == AnnotationTool.allCases.count)
+        }
     }
 
     @Test("Background frames the shot with padding (in pixels) and keeps it opaque")
@@ -240,4 +243,18 @@ struct SoundTests {
             #expect(NSSound(data: Synth.wav(samples)) != nil)
         }
     }
+}
+
+/// Runs `body` with the default editor keys and order, then puts back whatever the Mac had:
+/// the tests never wipe the developer's own keys. (Main actor and synchronous: nothing else runs meanwhile.)
+@MainActor
+func withDefaultToolKeys(_ body: () -> Void) {
+    let defaults = UserDefaults.standard
+    let saved = (defaults.object(forKey: "toolKeys"), defaults.object(forKey: "toolOrder"))
+    defer {
+        defaults.set(saved.0, forKey: "toolKeys")
+        defaults.set(saved.1, forKey: "toolOrder")
+    }
+    ToolPrefs.reset()
+    body()
 }

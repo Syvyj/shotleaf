@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- Privacy: **Learn my style** is off until you turn it on, and it keeps nothing until the completion model is downloaded. Texts with card numbers, tokens, emails or phone numbers are never kept. (It used to be on from the start and keep texts even without the model; **Forget what I wrote** in Settings › Completion deletes what was kept.)
+- Privacy: the clipboard history and **Blur private info** also recognise JWTs and API keys from AWS, GitHub, GitLab and Google.
+- Privacy: a copy made in an app under **Never in these apps** is skipped even if you switch to another app right after it.
+- Screenshot links: a shot over 5 MB goes as a JPEG that fits instead of failing. The link service deletes a picture when its link expires (within 15 minutes), not up to a day later.
+- Saving twice in the same second keeps both files ("… 2.png") instead of replacing the first.
+- Snippets: a `{clipboard}` whose text contains `{cursor}` or `{?…}` is pasted as it is.
+- "Save at 1x" with **After a screenshot: Save** uses the scale of the screen the shot came from.
+- Text over 1 MB isn't kept in the clipboard history, and so doesn't slow every copy down.
+- The completion model leaves memory after 10 minutes without use (about 2 GB back).
+- Closed snippet and watermark windows and a long editing session use less memory.
+- If a picture for the clipboard history or the recent screenshots can't be written (disk full), Shotleaf says so.
+- Updates: a release tagged with a capital V is recognised.
+
 ## 0.1.9
 
 - Settings, the setup guide and the one-time ask now say donations support the author's work on Shotleaf and other apps (there's no separate goal for Apple's developer licence any more).

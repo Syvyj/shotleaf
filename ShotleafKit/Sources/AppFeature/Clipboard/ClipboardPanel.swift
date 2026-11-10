@@ -36,8 +36,9 @@ final class ClipboardPanelModel {
     var results: [ClipItem] { history.search(query, kind: kind) }
     var current: ClipItem? { guard !showsSnippets else { return nil }; let r = results; return r.indices.contains(selected) ? r[selected] : nil }
     /// The folder on the Snippets tab (nil = all); remembered for next time.
-    var snippetFolder: UUID? = UserDefaults.standard.string(forKey: "snippetFolder").flatMap(UUID.init) {
-        didSet { selected = 0; UserDefaults.standard.set(snippetFolder?.uuidString, forKey: "snippetFolder") }
+    nonisolated static let folderKey = "snippetFolder"
+    var snippetFolder: UUID? = UserDefaults.standard.string(forKey: ClipboardPanelModel.folderKey).flatMap(UUID.init) {
+        didSet { selected = 0; UserDefaults.standard.set(snippetFolder?.uuidString, forKey: Self.folderKey) }
     }
     /// The folder's snippets; a search looks through all of them.
     var snippetResults: [Snippet] {
@@ -353,7 +354,8 @@ final class ClipboardPanelController {
 /// modifiers released.
 @MainActor
 enum Paster {
-    static let marker: Int64 = 0x4150_494C
+    /// On every key event Shotleaf posts (pastes, snippets, completions), so its own taps skip them.
+    nonisolated static let marker: Int64 = 0x4150_494C // "APIL"
 
     /// Text on the clipboard, marked as Shotleaf's so the history doesn't keep it.
     /// With pictures or files, each is its own pasteboard item — a picture as PNG

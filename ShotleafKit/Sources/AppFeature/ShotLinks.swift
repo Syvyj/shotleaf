@@ -1,4 +1,4 @@
-import Foundation
+import AppKit
 import Security
 
 /// Expiring links to screenshots: Shotleaf's free service (server/links, on Cloudflare) unless the
@@ -7,6 +7,8 @@ enum ShotLinks {
     static let serverKey = "shotsServer", hoursKey = "shotsHours"
     static let freeService = "https://s.syvyj.dev"
     static let choices = [1, 6, 12]
+    /// What the free service takes (server/links/worker.js, MAX_BYTES).
+    static let freeLimit = 5 * 1024 * 1024
 
     /// The user's own server, or the free service.
     static var server: String {
@@ -54,10 +56,18 @@ enum ShotLinks {
         return request
     }
 
+    /// A PNG too big for the free service becomes the best JPEG that fits (an own server takes it as it is).
+    static func fitted(_ image: Data, server: String) -> Data {
+        guard server == freeService, image.count > freeLimit, let picture = NSBitmapImageRep(data: image)?.cgImage,
+              let jpeg = SmallFile.jpeg(picture, under: freeLimit) else { return image }
+        return jpeg
+    }
+
     /// Uploads a PNG/JPEG; the link it can be opened at until it expires.
     /// The key goes only to the user's own server (the free service needs none, and reading it may ask for the password).
+    @MainActor
     static func upload(_ image: Data, hours: Int, server: String = server, token: String? = ownServer ? token : nil) async throws -> URL {
-        guard let request = request(image, hours: hours, server: server, token: token) else { throw Failure.notSetUp }
+        guard let request = request(fitted(image, server: server), hours: hours, server: server, token: token) else { throw Failure.notSetUp }
         let (data, response) = try await URLSession.shared.data(for: request)
         let answer = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         guard let status = (response as? HTTPURLResponse)?.statusCode, status == 201 else {
@@ -72,7 +82,7 @@ enum ShotLinks {
     private static let service = "dev.syvyj.shotleaf.links"
 
     /// Read once per launch (each Keychain read of an item Shotleaf didn't create asks for the password).
-    nonisolated(unsafe) private static var cache: String??
+    @MainActor private static var cache: String??
 
     /// The key's old place (the app was called APILA): moved to `service` once.
     private static let oldService = "app.apila.shots"
@@ -91,7 +101,7 @@ enum ShotLinks {
         return (key, status == errSecSuccess || status == errSecItemNotFound)
     }
 
-    static var token: String? {
+    @MainActor static var token: String? {
         get {
             if let cache { return cache }
             let current = read(service)

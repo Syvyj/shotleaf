@@ -120,7 +120,7 @@ struct CropTests {
     func oval() {
         let oval: Annotation.Kind = .ellipse(CGRect(x: 0, y: 0, width: 10, height: 10))
         #expect(AnnotationEditing.resized(oval, .corner(2), to: CGPoint(x: 30, y: 20)) == .ellipse(CGRect(x: 0, y: 0, width: 30, height: 20)))
-        #expect(AnnotationTool.ellipse.key == "o" && AnnotationTool.crop.key == "c" && AnnotationTool.focus.key == "9")
+        withDefaultToolKeys { #expect(AnnotationTool.ellipse.key == "o" && AnnotationTool.crop.key == "c" && AnnotationTool.focus.key == "9") }
     }
 }
 

@@ -4,7 +4,6 @@ import Foundation
 public enum AppInfo {
     public static let name = "Shotleaf"
     public static let bundleID = "dev.syvyj.shotleaf"
-    public static let author = "Oleksii Ziuzin (Syvyj)"
     public static let copyright = "© 2026 Oleksii Ziuzin (Syvyj)"
     public static let website = URL(string: "https://syvyj.dev")!
     public static let email = "shotleaf@syvyj.dev"
@@ -54,9 +53,9 @@ public enum AppInfo {
 
         let doneKey = "migratedFromAPILA"
         guard !defaults.bool(forKey: doneKey) else { return }
-        defer { defaults.set(true, forKey: doneKey) }
-
+        // Marked done only once there was something to bring over.
         guard let saved = defaults.persistentDomain(forName: oldDomain), !saved.isEmpty else { return }
+        defer { defaults.set(true, forKey: doneKey) }
         // The Keychain key must be saved again by Shotleaf itself (else macOS asks every time).
         let skip: Set<String> = ["shotsKeyOwned", "onboardingCompleted", doneKey]
         for (key, value) in saved where !skip.contains(key) && defaults.object(forKey: key) == nil {

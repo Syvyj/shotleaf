@@ -15,7 +15,6 @@ enum CaptureStyle {
     static let panel = NSColor(srgbRed: 0.97, green: 0.98, blue: 0.96, alpha: 0.96)
     static let forest = NSColor(srgbRed: 0x12 / 255.0, green: 0x1A / 255.0, blue: 0x12 / 255.0, alpha: 1)
     static let capsuleStroke = NSColor(white: 1, alpha: 0.10)
-    static let keycap = NSColor(white: 1, alpha: 0.14)
 
     static let selectionRadius: CGFloat = 6
 

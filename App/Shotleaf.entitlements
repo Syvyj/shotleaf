@@ -3,8 +3,8 @@
 <plist version="1.0">
 <dict>
 	<!-- App Sandbox is OFF: Accessibility, global hotkeys and screen capture are
-	     incompatible with the full App Store sandbox. Distribution is Developer
-	     ID + notarization (see ADR-0013). -->
+	     incompatible with the full App Store sandbox. Releases are signed with the
+	     local "Shotleaf Local Signing" certificate, no Developer ID yet (ADR-0069). -->
 	<key>com.apple.security.app-sandbox</key>
 	<false/>
 </dict>

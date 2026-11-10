@@ -83,3 +83,47 @@ struct EditorExtrasTests {
         #expect(SmallFile.jpeg(striped(), under: 1_000_000)!.count < 20_000) // already small: best quality
     }
 }
+
+@Suite("Saving and links never lose a shot")
+@MainActor
+struct SaveAndLinkTests {
+    @Test("Two saves in the same second keep both files")
+    func twoSaves() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-save-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let now = Date()
+        let first = try #require(ScreenshotWindows.save(Data([1]), to: dir, now: now))
+        let second = try #require(ScreenshotWindows.save(Data([2]), to: dir, now: now))
+        #expect(first != second && second.deletingPathExtension().lastPathComponent.hasSuffix(" 2"))
+        #expect(try Data(contentsOf: first) == Data([1]) && Data(contentsOf: second) == Data([2]))
+    }
+
+    @Test("Undo keeps the last 50 steps")
+    func undoLimit() {
+        let doc = AnnotationDocument()
+        for i in 0..<60 { doc.add(.step(center: CGPoint(x: i, y: i), number: i + 1)) }
+        var steps = 0
+        while doc.canUndo { doc.undo(); steps += 1 }
+        #expect(steps == AnnotationDocument.undoLimit && doc.items.count == 10)
+    }
+}
+
+/// Off the main actor: making a 7 MB picture takes a while.
+@Suite("Links for big shots")
+struct BigLinkTests {
+    @Test("A PNG too big for the free link service goes as a JPEG that fits; an own server gets it as it is")
+    func fitted() throws {
+        let side = 1400 // random noise: a PNG well over 5 MB
+        var bytes = (0..<side * side * 4).map { _ in UInt8.random(in: 0...255) }
+        let picture = try #require(bytes.withUnsafeMutableBytes { buffer in
+            CGContext(data: buffer.baseAddress, width: side, height: side, bitsPerComponent: 8, bytesPerRow: side * 4,
+                      space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)?.makeImage()
+        })
+        let png = try #require(NSBitmapImageRep(cgImage: picture).representation(using: .png, properties: [:]))
+        try #require(png.count > ShotLinks.freeLimit)
+        let sent = ShotLinks.fitted(png, server: ShotLinks.freeService)
+        #expect(sent.count <= ShotLinks.freeLimit && sent.prefix(3) == Data([0xFF, 0xD8, 0xFF]))
+        #expect(ShotLinks.fitted(png, server: "https://shots.example.com") == png)
+        #expect(ShotLinks.fitted(Data([1, 2, 3]), server: ShotLinks.freeService) == Data([1, 2, 3]))
+    }
+}

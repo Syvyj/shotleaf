@@ -66,9 +66,10 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "completionQuickFixes") }
     }
 
-    /// Learn the user's style from their own texts (kept on this Mac).
+    /// Learn the user's style from their own texts (kept on this Mac). Off until the user
+    /// turns it on: it keeps what they wrote on disk.
     public var completionLearnsStyle: Bool {
-        get { defaults.object(forKey: "completionLearnsStyle") as? Bool ?? true }
+        get { defaults.object(forKey: "completionLearnsStyle") as? Bool ?? false }
         set { defaults.set(newValue, forKey: "completionLearnsStyle") }
     }
 

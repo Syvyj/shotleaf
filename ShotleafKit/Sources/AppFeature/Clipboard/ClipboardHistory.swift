@@ -81,6 +81,9 @@ final class ClipboardHistory {
 
     let folder: URL
     private var lastChange = NSPasteboard.general.changeCount
+    /// The app in front at the previous poll: a copy made just before switching apps
+    /// belongs to it, so an excluded app's copy isn't kept because the user moved on.
+    private var lastFront: String?
     private var timer: Timer?
     private let recognizer: (any TextRecognizing)?
 
@@ -113,13 +116,16 @@ final class ClipboardHistory {
 
     private func poll() {
         let board = NSPasteboard.general
+        let app = NSWorkspace.shared.frontmostApplication
+        let previous = lastFront
+        lastFront = app?.bundleIdentifier
         guard board.changeCount != lastChange else { return }
         lastChange = board.changeCount
         dropExpired()
         guard enabled, !isPaused else { return }
         guard !Self.isPrivate(board) else { return } // card numbers and tokens are kept a minute, in memory only
-        let app = NSWorkspace.shared.frontmostApplication
-        guard !excludedApps.contains(app?.bundleIdentifier ?? "") else { return }
+        let excluded = excludedApps
+        guard !excluded.contains(app?.bundleIdentifier ?? ""), !excluded.contains(previous ?? "") else { return }
         guard let (item, png) = Self.read(board) else { return }
         var new = item
         new.appName = app?.localizedName
@@ -133,9 +139,11 @@ final class ClipboardHistory {
             return (ClipItem(kind: .file, text: urls.map(\.path).joined(separator: "\n")), nil)
         }
         if let string = board.string(forType: .string), !string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            // A whole log or a database dump isn't something to search later, and each copy rewrites history.json.
+            guard string.utf8.count <= maxBytes else { return nil }
             let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
             var item = ClipItem(kind: kind(of: trimmed), text: string)
-            item.rtf = board.data(forType: .rtf)
+            item.rtf = board.data(forType: .rtf).flatMap { $0.count <= maxBytes ? $0 : nil } // too big: kept as plain text
             item.sensitive = looksSensitive(trimmed)
             return (item, nil)
         }
@@ -149,6 +157,9 @@ final class ClipboardHistory {
         return nil
     }
 
+    /// The biggest text (and rich text) the history keeps.
+    static let maxBytes = 1_000_000
+
     static func kind(of text: String) -> ClipItem.Kind {
         if text.range(of: #"^#?[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$"#, options: .regularExpression) != nil { return .color }
         if !text.contains(where: \.isWhitespace), let url = URL(string: text), let scheme = url.scheme?.lowercased(),
@@ -156,7 +167,8 @@ final class ClipboardHistory {
         return .text
     }
 
-    /// A card number (passes Luhn) or a long secret-looking token.
+    /// A card number (passes Luhn), a long secret-looking token, or a key in a well-known shape
+    /// (JWT, AWS access key, GitHub / GitLab / Slack / OpenAI / Google keys).
     nonisolated static func looksSensitive(_ text: String) -> Bool {
         let digits = text.filter(\.isNumber)
         let cardLike = text.allSatisfy { $0.isNumber || $0 == " " || $0 == "-" } && (13...19).contains(digits.count)
@@ -170,7 +182,11 @@ final class ClipboardHistory {
         }
         let token = text.count >= 32 && !text.contains(where: \.isWhitespace)
             && text.contains(where: \.isNumber) && text.contains(where: \.isLetter) && !text.contains("/") && !text.contains(".")
-        return token || text.hasPrefix("sk-") || text.hasPrefix("ghp_") || text.hasPrefix("xox")
+        if token { return true }
+        guard !text.contains(where: \.isWhitespace) else { return false }
+        return ["sk-", "ghp_", "gho_", "ghs_", "github_pat_", "glpat-", "xox", "AIza"].contains { text.hasPrefix($0) }
+            || text.wholeMatch(of: /eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*/) != nil // JWT
+            || text.wholeMatch(of: /(AKIA|ASIA)[0-9A-Z]{16}/) != nil                          // AWS access key
     }
 
     func add(_ item: ClipItem, png: Data? = nil) {
@@ -182,8 +198,13 @@ final class ClipboardHistory {
             items.remove(at: old)
         }
         if let png {
-            try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-            try? png.write(to: imageURL(item))
+            do {
+                try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+                try png.write(to: imageURL(item))
+            } catch {
+                SaveError.show(error, saving: String(localized: "the clipboard history"))
+                return // an entry without its picture would paste nothing
+            }
         }
         items.insert(item, at: 0)
         trim()
@@ -212,7 +233,10 @@ final class ClipboardHistory {
     /// The screenshot as edited (marks, crop, background) replaces the one captured.
     func updateImage(_ id: UUID, png: Data) {
         guard let i = items.firstIndex(where: { $0.id == id }), let rep = NSBitmapImageRep(data: png) else { return }
-        try? png.write(to: imageURL(items[i]))
+        do { try png.write(to: imageURL(items[i])) } catch {
+            SaveError.show(error, saving: String(localized: "the clipboard history"))
+            return
+        }
         items[i].imageSize = CGSize(width: rep.pixelsWide, height: rep.pixelsHigh)
         items[i].imageText = nil
         save()

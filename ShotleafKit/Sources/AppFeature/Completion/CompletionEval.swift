@@ -1,3 +1,4 @@
+#if DEBUG // developer runs only (App/ShotleafApp.swift), not in the release app
 import EmbeddedKit
 import Foundation
 
@@ -59,3 +60,4 @@ public enum CompletionEval {
         }
     }
 }
+#endif
