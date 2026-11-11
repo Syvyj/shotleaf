@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.1
 
 - Clipboard panel: it opens without the search focused, so 1–9 paste a row at once. Typing a letter (or a click) starts the search, where digits are just digits; esc leaves the search with its results, and 1–9 paste from them. A search can now start with a number.
 - Updates: a release must be signed with Shotleaf's update key, checked before the download is even opened (from this version on).
