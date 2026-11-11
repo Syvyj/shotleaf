@@ -13,6 +13,9 @@ final class ClipboardPanelModel {
     /// The Snippets tab instead of the history.
     var showsSnippets = false { didSet { selected = 0; asking = nil } }
     var selected = 0
+    /// The search field has the keyboard. Off as the panel opens, so 1–9 paste a row at once;
+    /// typing a letter (or a click) starts the search, and there digits are just digits.
+    var searching = false
     /// Entries picked with ⌘-click / ⇧↑↓, in the order picked.
     var marked: [UUID] = []
     /// ⌘K: the actions list instead of the preview.
@@ -215,6 +218,7 @@ final class ClipboardPanelController {
         case 48:                                                               // Tab: history ↔ snippets, ⇧Tab: the types
             if mods.contains(.shift) { model.showsSnippets = false; model.nextKind(1) } else { model.showsSnippets.toggle() }
             return true
+        case 53 where model.searching: model.searching = false; return true    // esc: out of the search (its results stay)
         case 53: close(); return true                                          // esc
         case 36, 76:                                                           // ↩
             guard let item = model.current else { return true }
@@ -233,14 +237,26 @@ final class ClipboardPanelController {
             openImage(payload)
             return true
         }
-        // ⌘1–⌘9 paste that row; bare digits are typed into the search.
-        if let n = Int(key), (1...9).contains(n), mods == .command {
+        // 1–9 paste that row (in the search they're typed; ⌘1–⌘9 paste from there too).
+        if let n = Int(key), (1...9).contains(n), mods == .command || (mods.isEmpty && !model.searching) {
             if model.showsSnippets {
                 let results = model.snippetResults
                 if results.indices.contains(n - 1) { pick(results[n - 1], .paste) }
             } else {
                 let results = model.results
                 if results.indices.contains(n - 1) { pick(results[n - 1], .paste) }
+            }
+            return true
+        }
+        // Typing anything else starts the search with it.
+        if !model.searching, mods.subtracting(.shift).isEmpty, let typed = event.characters, !typed.isEmpty,
+           typed.unicodeScalars.allSatisfy({ !CharacterSet.controlCharacters.contains($0) && !(0xF700...0xF8FF).contains($0.value) }) {
+            model.query += typed
+            model.searching = true
+            // A field that takes the keyboard selects all its text: put the caret after it instead.
+            DispatchQueue.main.async { [weak panel] in
+                guard let editor = panel?.firstResponder as? NSTextView else { return }
+                editor.setSelectedRange(NSRange(location: (editor.string as NSString).length, length: 0))
             }
             return true
         }
