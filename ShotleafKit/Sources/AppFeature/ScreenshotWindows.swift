@@ -66,10 +66,7 @@ final class ScreenshotWindows {
             close: close,
             dragFile: { Self.writeTempPNG(result()) },
             saveAs: { type in
-                let ask = NSSavePanel()
-                ask.allowedContentTypes = [type]
-                ask.directoryURL = Self.saveFolder
-                ask.nameFieldStringValue = (Self.fileName(Date(), template: Self.settings.fileNameTemplate) as NSString).deletingPathExtension
+                let ask = Self.savePanel(type)
                 ask.beginSheetModal(for: panel) { response in
                     let png = Self.settings.saveAt1x ? Self.oneX(result(), scale: scale) : result()
                     guard response == .OK, let url = ask.url,
@@ -78,10 +75,7 @@ final class ScreenshotWindows {
                 }
             },
             saveSmall: { limit in
-                let ask = NSSavePanel()
-                ask.allowedContentTypes = [.jpeg]
-                ask.directoryURL = Self.saveFolder
-                ask.nameFieldStringValue = (Self.fileName(Date(), template: Self.settings.fileNameTemplate) as NSString).deletingPathExtension
+                let ask = Self.savePanel(.jpeg)
                 ask.beginSheetModal(for: panel) { response in
                     guard response == .OK, let url = ask.url else { return }
                     guard let picture = NSBitmapImageRep(data: result())?.cgImage, let data = SmallFile.jpeg(picture, under: limit) else { NSSound.beep(); return }
@@ -310,6 +304,15 @@ final class ScreenshotWindows {
     }
 
     // MARK: Last shot & clipboard
+
+    /// "Save as…": asks where, starting in the save folder with the usual name.
+    private static func savePanel(_ type: UTType) -> NSSavePanel {
+        let ask = NSSavePanel()
+        ask.allowedContentTypes = [type]
+        ask.directoryURL = saveFolder
+        ask.nameFieldStringValue = (fileName(Date(), template: settings.fileNameTemplate) as NSString).deletingPathExtension
+        return ask
+    }
 
     /// The newest captures, as taken (Application Support/Shotleaf/Recent).
     static var recentFolder: URL {

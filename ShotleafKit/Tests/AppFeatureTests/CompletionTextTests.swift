@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import CoreGraphics
 @testable import AppFeature
 
 @Suite("Inline completion text")
@@ -163,5 +164,40 @@ struct ContextEmojiTests {
         #expect(ContextEmoji.parse(" ❤️ 1 # 👍🏽") == ["❤️", "👍🏽"])
         #expect(ContextEmoji.merged(["🎉", "👍"], recents: ["👍", "😂", "❤️"], limit: 4) == ["🎉", "👍", "😂", "❤️"])
         #expect(ContextEmoji.prompt(for: "Вітаю з днем народження").hasSuffix("Message: Вітаю з днем народження\nEmoji:"))
+    }
+}
+
+@Suite("Keys the completion tap takes")
+struct CompletionTapTests {
+    /// Whether the tap keeps a key press from the app in front.
+    private func taken(_ tap: TapState, _ code: CGKeyCode, _ flags: CGEventFlags = [], own: Bool = false, click: Bool = false) -> Bool {
+        let event = CGEvent(keyboardEventSource: nil, virtualKey: code, keyDown: true)!
+        event.flags = flags
+        if own { event.setIntegerValueField(.eventSourceUserData, value: InlineCompletion.marker) }
+        return tap.handle(click ? .leftMouseDown : .keyDown, event)
+    }
+
+    @Test("Tab and Esc are taken only while a suggestion or the emoji picker is up; shortcuts and Shotleaf's own keys never")
+    func swallowed() {
+        let tap = TapState()
+        let tab: CGKeyCode = 48, esc: CGKeyCode = 53, a: CGKeyCode = 0
+        #expect(!taken(tap, tab))                    // nothing shown: the app gets them
+        #expect(!taken(tap, esc))
+
+        tap.hasSuggestion = true
+        #expect(taken(tap, tab))
+        #expect(taken(tap, tab, .maskAlternate))     // ⌥Tab: the whole suggestion
+        #expect(taken(tap, esc))
+        #expect(!taken(tap, tab, .maskCommand))      // ⌘Tab switches apps
+        #expect(!taken(tap, tab, .maskShift))        // ⇧Tab goes back a field
+        #expect(!taken(tap, a))                      // typing is never held up
+        #expect(!taken(tap, tab, own: true))         // what Shotleaf itself types
+        #expect(!taken(tap, tab, click: true))       // a click only drops the suggestion
+
+        tap.hasSuggestion = false
+        tap.picker = CGRect(x: 0, y: 0, width: 10, height: 10)
+        #expect(taken(tap, tab))
+        #expect(taken(tap, esc))
+        #expect(!taken(tap, tab, .maskControl))
     }
 }

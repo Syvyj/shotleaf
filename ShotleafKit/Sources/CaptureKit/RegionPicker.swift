@@ -87,7 +87,7 @@ final class RegionPicker {
             let config = SCStreamConfiguration()
             config.width = Int(CGFloat(display.width) * scale)
             config.height = Int(CGFloat(display.height) * scale)
-            config.showsCursor = UserDefaults.standard.bool(forKey: "captureShowsCursor") // Settings → Screenshots
+            config.showsCursor = UserDefaults.standard.bool(forKey: DefaultsKey.captureShowsCursor) // Settings → Screenshots
             config.captureResolution = .best
             let filter = SCContentFilter(display: display, excludingApplications: ownApps, exceptingWindows: [])
             let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)

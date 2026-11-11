@@ -22,12 +22,8 @@ enum SupportAsk {
               due(shots: defaults.integer(forKey: shotsKey), since: defaults.object(forKey: sinceKey) as? Date ?? Date())
         else { return }
         defaults.set(true, forKey: doneKey)
-        let alert = NSAlert()
-        alert.messageText = String(localized: "Enjoying Shotleaf?")
-        alert.informativeText = String(localized: "Shotleaf is free and open source. If it saves you time, donations support my work on it and my other apps. Shotleaf asks this only once.")
-        alert.addButton(withTitle: String(localized: "Support the Author"))
-        alert.addButton(withTitle: String(localized: "No, Thanks"))
-        NSApp.activate(ignoringOtherApps: true)
-        if alert.runModal() == .alertFirstButtonReturn { NSWorkspace.shared.open(AppInfo.supportPage) }
+        if Ask.show(String(localized: "Enjoying Shotleaf?"),
+            String(localized: "Shotleaf is free and open source. If it saves you time, donations support my work on it and my other apps. Shotleaf asks this only once."),
+            buttons: [String(localized: "Support the Author"), String(localized: "No, Thanks")]) { NSWorkspace.shared.open(AppInfo.supportPage) }
     }
 }

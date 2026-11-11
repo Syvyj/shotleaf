@@ -1,4 +1,5 @@
 import Foundation
+import Core
 
 /// Persists user settings in UserDefaults.
 public final class SettingsStore: @unchecked Sendable {
@@ -111,7 +112,7 @@ public final class SettingsStore: @unchecked Sendable {
     }
 
     /// Put the mouse pointer into screenshots (read by the picker directly).
-    public static let showsCursorKey = "captureShowsCursor"
+    public static let showsCursorKey = DefaultsKey.captureShowsCursor
     public var captureShowsCursor: Bool {
         get { defaults.bool(forKey: Self.showsCursorKey) }
         set { defaults.set(newValue, forKey: Self.showsCursorKey) }
