@@ -71,9 +71,9 @@ extension ClipboardPanelView {
     func snippetRow(_ snippet: Snippet, index: Int) -> some View {
         let on = index == model.selected
         return HStack(spacing: 10) {
-            Text(index < 9 ? "\(index + 1)" : "")
+            Text(index < 9 ? "⌘\(index + 1)" : "")
                 .font(Leaf.font(11, .semibold)).monospacedDigit()
-                .frame(width: 20, height: 20)
+                .frame(width: 28, height: 20)
                 .background(RoundedRectangle(cornerRadius: 5).fill(on ? Leaf.fresh.opacity(0.45) : Color.primary.opacity(index < 9 ? 0.06 : 0)))
                 .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.55))
             Circle().fill(Color(nsColor: model.snippets.folder(snippet.folder).map { SnippetFolder.colors[$0.color % SnippetFolder.colors.count] } ?? .tertiaryLabelColor))

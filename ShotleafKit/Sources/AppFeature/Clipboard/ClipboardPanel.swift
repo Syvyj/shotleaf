@@ -233,8 +233,8 @@ final class ClipboardPanelController {
             openImage(payload)
             return true
         }
-        // 1–9 paste that row: always with ⌘, and bare while the search is empty.
-        if let n = Int(key), (1...9).contains(n), mods == .command || (mods.isEmpty && model.query.isEmpty) {
+        // ⌘1–⌘9 paste that row; bare digits are typed into the search.
+        if let n = Int(key), (1...9).contains(n), mods == .command {
             if model.showsSnippets {
                 let results = model.snippetResults
                 if results.indices.contains(n - 1) { pick(results[n - 1], .paste) }

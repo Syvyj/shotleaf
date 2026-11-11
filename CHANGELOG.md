@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Clipboard panel: ⌘1–⌘9 paste a row; a plain digit goes into the search (it used to paste a row when the search was empty, so a search couldn't start with a number).
 - Updates: a release must be signed with Shotleaf's update key, checked before the download is even opened (from this version on).
 - Snippets: your clipboard comes back as soon as the app has taken the snippet, instead of after a fixed 0.4 s (a slow app no longer pastes the old clipboard).
 - Text completion runs on the model library's current interface; the suggestions are the same.

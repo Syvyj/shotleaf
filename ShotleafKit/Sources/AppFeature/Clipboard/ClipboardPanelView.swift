@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The ⇧⌘V panel (history and snippets), in the screenshot window's look: name, search and type
-/// tiles on top; the list (1–9 on the first rows) and a preview on canvas
+/// tiles on top; the list (⌘1–⌘9 on the first rows) and a preview on canvas
 /// cards; actions with their keys at the bottom.
 struct ClipboardPanelView: View {
     @Bindable var model: ClipboardPanelModel
@@ -217,9 +217,9 @@ struct ClipboardPanelView: View {
     func row(_ item: ClipItem, index: Int) -> some View {
         let on = index == model.selected
         return HStack(spacing: 10) {
-            Text(index < 9 ? "\(index + 1)" : "")
+            Text(index < 9 ? "⌘\(index + 1)" : "")
                 .font(Leaf.font(11, .semibold)).monospacedDigit()
-                .frame(width: 20, height: 20)
+                .frame(width: 28, height: 20)
                 .background(RoundedRectangle(cornerRadius: 5).fill(on ? Leaf.fresh.opacity(0.45) : Color.primary.opacity(index < 9 ? 0.06 : 0)))
                 .foregroundStyle(on ? Leaf.ink : Color.primary.opacity(0.55))
             if let order = model.marked.firstIndex(of: item.id) {
