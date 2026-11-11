@@ -23,6 +23,38 @@ public enum CompletionEval {
                                          clipboard: nil)),
     ]
 
+    /// `--completion-stress`: typing fast, the way InlineCompletion asks — every key cancels the last
+    /// completion and starts the next — while the process's memory is printed.
+    public static func stress() async {
+        let model = EmbeddedModel.completion
+        guard model.isDownloaded else { print("completion model not downloaded"); return }
+        let note = String(repeating: "Сьогодні ми обговорили план на квартал, бюджет і найм нових людей. ", count: 6)
+        let screen = String(repeating: "Зустріч з командою о 10:00, звіт до п'ятниці, бюджет на рекламу. ", count: 8)
+        var running: Task<Void, Never>?
+        for step in 0..<400 {
+            running?.cancel()
+            let typed = note + String("Наступного тижня я хочу поговорити з командою про відпустки і графік роботи".prefix(step % 70))
+            let prompt = CompletionText.prompt(beforeCursor: typed, context: .init(app: "Chrome", window: "Notes", screen: screen))
+            running = Task { _ = try? await model.complete(prompt) }
+            try? await Task.sleep(for: .milliseconds(step % 9 == 0 ? 400 : 45)) // bursts of keys, short pauses
+            if step % 25 == 0 {
+                let mem = EmbeddedModel.memory, mb = { (n: Int) in "\(n / 1_048_576) MB" }
+                print("step \(step): process \(mb(footprint())), MLX active \(mb(mem.active)), cache \(mb(mem.cache)), peak \(mb(mem.peak))")
+            }
+        }
+        await running?.value
+    }
+
+    /// What Activity Monitor shows as Memory.
+    private static func footprint() -> Int {
+        var info = task_vm_info_data_t()
+        var count = mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<natural_t>.size)
+        let kr = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) { task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), $0, &count) }
+        }
+        return kr == KERN_SUCCESS ? Int(info.phys_footprint) : 0
+    }
+
     public static func run() async {
         let model = EmbeddedModel.completion
         if !model.isDownloaded { // the same download the setup guide starts
@@ -49,6 +81,8 @@ public enum CompletionEval {
             let shown = result.flatMap { CompletionText.suggestion(fromContinuation: $0.text, finished: $0.finished, beforeCursor: before) }
             print("    reused \(await model.lastReusedTokens) tokens")
             print("    raw: \((result?.text ?? "nil").debugDescription)  shown: \((shown ?? "nil").debugDescription)")
+            let mem = EmbeddedModel.memory, mb = { (n: Int) in "\(n / 1_048_576) MB" }
+            print("    memory: active \(mb(mem.active)), cache \(mb(mem.cache)), peak \(mb(mem.peak))")
         }
     }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Text completion could take all the Mac's memory: while typing, the model kept freed memory for reuse, up to about 11 GB on a 16 GB Mac, until everything froze. It now keeps at most 256 MB over the model itself (about 2.5 GB in all), and runs one suggestion at a time.
+
 ## 0.2.1
 
 - Clipboard panel: it opens without the search focused, so 1–9 paste a row at once. Typing a letter (or a click) starts the search, where digits are just digits; esc leaves the search with its results, and 1–9 paste from them. A search can now start with a number.

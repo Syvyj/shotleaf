@@ -24,8 +24,11 @@ public actor EmbeddedModel {
 
     private var container: ModelContainer?
     private var loading: Task<ModelContainer, Error>?
+    private var generating = false
     /// What the model already read for the last completion (see `complete`).
     private let promptCache = PromptCache()
+    /// The most MLX keeps in its buffer cache, over the model itself.
+    public static let cacheLimit = 256 * 1_048_576
     /// Unused this long, the model leaves memory (it holds ~2 GB).
     public static let idleTime: Duration = .seconds(600)
     private var idleUnload: Task<Void, Never>?
@@ -63,6 +66,9 @@ public actor EmbeddedModel {
     public func load(progress: @Sendable @escaping (Double) -> Void = { _ in }) async throws -> ModelContainer {
         if let container { return container }
         if let loading { return try await loading.value }
+        // MLX keeps freed buffers for reuse, by default up to the GPU's whole working set (~11 GB on a
+        // 16 GB Mac): prompts of every length while typing filled it until the Mac froze (0.2.1).
+        Memory.cacheLimit = Self.cacheLimit
         let configuration = configuration
         let task = Task {
             // Only the language part (no vision/audio towers) — less memory.
@@ -98,6 +104,14 @@ public actor EmbeddedModel {
     ) async throws -> (text: String, finished: Bool) {
         let container = try await load()
         scheduleUnload()
+        // One at a time: the cache below is shared, and the actor lets the next call in while this one
+        // waits on the model. A newer key press has cancelled this call if it's still waiting.
+        while generating {
+            if Task.isCancelled { return ("", false) }
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+        generating = true
+        defer { generating = false }
         let promptCache = promptCache
         return try await container.perform { context in
             let tokens = context.tokenizer.encode(text: prefix, addSpecialTokens: true)
@@ -152,6 +166,11 @@ public actor EmbeddedModel {
     }
 
     /// Out of memory (a running completion keeps its own reference until it's done).
+    /// What MLX holds now, in bytes: in use, kept in its buffer cache, and the most it has held.
+    public nonisolated static var memory: (active: Int, cache: Int, peak: Int) {
+        (Memory.activeMemory, Memory.cacheMemory, Memory.peakMemory)
+    }
+
     public func unload() {
         idleUnload?.cancel()
         container = nil

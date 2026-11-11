@@ -53,6 +53,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { await GuideShots.run(coordinator, out: out); exit(0) }
             return
         }
+        if CommandLine.arguments.contains("--completion-stress") { // developer run, see CompletionEval.stress
+            Task { await CompletionEval.stress(); exit(0) }
+            return
+        }
         if CommandLine.arguments.contains("--completion-eval") { // developer run, see CompletionEval
             Task { await CompletionEval.run(); exit(0) }
             return
