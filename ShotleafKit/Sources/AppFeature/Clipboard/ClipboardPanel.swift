@@ -140,7 +140,18 @@ final class ClipboardPanelController {
             return self.handle(event) ? nil : event
         }
         panel.makeKeyAndOrderFront(nil)
+        // AppKit hands a new window's first text field the keyboard: open out of the search, so 1–9 paste.
+        panel.makeFirstResponder(nil)
+        model.searching = false
+        DispatchQueue.main.async { [weak panel, weak model] in // and again once SwiftUI has laid the field out
+            guard let model, !model.searching || model.query.isEmpty else { return }
+            panel?.makeFirstResponder(nil)
+            model.searching = false
+        }
     }
+
+    /// The search field has the keyboard (for tests).
+    var searchHasKeyboard: Bool { panel?.firstResponder is NSText }
 
     func close() {
         if let monitor { NSEvent.removeMonitor(monitor) }

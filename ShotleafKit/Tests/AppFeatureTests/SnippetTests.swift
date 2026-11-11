@@ -149,3 +149,19 @@ struct SnippetPasteTests {
     }
 }
 
+@Suite("The clipboard panel")
+@MainActor
+struct ClipboardPanelFocusTests {
+    @Test("Opens with the keyboard out of the search, so 1–9 paste a row")
+    func opensOutOfSearch() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-panel-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let panel = ClipboardPanelController(history: ClipboardHistory(folder: dir), snippets: SnippetStore(file: dir.appendingPathComponent("s.json")))
+        panel.show()
+        defer { panel.close() }
+        for _ in 0..<10 { try await Task.sleep(for: .milliseconds(50)) } // SwiftUI lays out and may focus late
+        #expect(panel.isShown)
+        #expect(!panel.searchHasKeyboard)
+    }
+}
+
