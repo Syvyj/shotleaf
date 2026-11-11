@@ -9,8 +9,9 @@ jobs:
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
-      - name: Newest Xcode on the runner
-        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)" && xcodebuild -version && swift --version
+      # Pinned, so a new Xcode on the image can't change the build under us. Moving on: change it here.
+      - name: Xcode 26.6
+        run: sudo xcode-select -s /Applications/Xcode_26.6.app && xcodebuild -version && swift --version
       - uses: actions/cache@v4
         with:
           path: ShotleafKit/.build
