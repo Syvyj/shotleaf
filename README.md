@@ -47,7 +47,7 @@ macOS 15 or later on Apple silicon (M1 or newer).
 
 ### Updates
 
-When a new version is out, **Update to Shotleaf…** appears at the top of the menu. Shotleaf downloads it, checks it against the release's checksum and its own signature, and restarts into it, with your settings and permissions. It looks for a new version at launch and once a day (turn that off in **Settings › General**). Versions before 0.1.3 can't do this yet: update those once by hand from [Releases](https://github.com/Syvyj/shotleaf/releases/latest), quitting Shotleaf first.
+When a new version is out, **Update to Shotleaf…** appears at the top of the menu. Shotleaf downloads it, checks that the release is signed with Shotleaf's update key, that the download matches it and that the app inside is signed like the one you have, and restarts into it, with your settings and permissions. It looks for a new version at launch and once a day (turn that off in **Settings › General**). Versions before 0.1.3 can't do this yet: update those once by hand from [Releases](https://github.com/Syvyj/shotleaf/releases/latest), quitting Shotleaf first.
 
 ### After an update
 
@@ -177,7 +177,7 @@ macOS 15 або новіша на Apple silicon (M1 чи новіший).
 
 ### Оновлення
 
-Коли виходить нова версія, угорі меню з’являється **Оновити до Shotleaf…**. Shotleaf завантажує її, звіряє з контрольною сумою релізу й зі своїм підписом і перезапускається вже в ній, з усіма налаштуваннями й дозволами. Нову версію він шукає під час запуску й раз на день (вимкнути можна в **Налаштуваннях › Загальні**). Версії до 0.1.3 так ще не вміють: їх один раз оновіть вручну з [Releases](https://github.com/Syvyj/shotleaf/releases/latest), спершу закривши Shotleaf.
+Коли виходить нова версія, угорі меню з’являється **Оновити до Shotleaf…**. Shotleaf завантажує її, перевіряє, що реліз підписаний ключем оновлень Shotleaf, що завантаження йому відповідає і що застосунок усередині підписаний так само, як ваш, і перезапускається вже в ній, з усіма налаштуваннями й дозволами. Нову версію він шукає під час запуску й раз на день (вимкнути можна в **Налаштуваннях › Загальні**). Версії до 0.1.3 так ще не вміють: їх один раз оновіть вручну з [Releases](https://github.com/Syvyj/shotleaf/releases/latest), спершу закривши Shotleaf.
 
 ### Після оновлення
 

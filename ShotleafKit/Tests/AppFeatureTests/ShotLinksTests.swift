@@ -60,3 +60,26 @@ struct ShotLinksTests {
         #expect(await ShotLinks.last == nil)
     }
 }
+
+@Suite("The link server's key in the Keychain", .disabled(if: ProcessInfo.processInfo.environment["CI"] != nil)) // a runner's keychain is locked
+struct ShotLinksKeyTests {
+    @Test("Saved, read back, replaced, removed; a key in the old place moves and leaves nothing behind")
+    func keychain() {
+        let service = "dev.syvyj.shotleaf.test-\(UUID())", old = "app.apila.test-\(UUID())"
+        defer { ShotLinks.save(nil, in: service); ShotLinks.save(nil, in: old) }
+        #expect(ShotLinks.read(service).key == nil && ShotLinks.read(service).final) // nothing there is a final answer
+        ShotLinks.save("first", in: service)
+        #expect(ShotLinks.read(service).key == "first")
+        ShotLinks.save("second", in: service)
+        #expect(ShotLinks.read(service).key == "second")
+        ShotLinks.save(nil, in: service)
+        #expect(ShotLinks.read(service).key == nil)
+
+        ShotLinks.save("from APILA", in: old)
+        #expect(ShotLinks.move(from: old, to: service).key == "from APILA")
+        #expect(ShotLinks.read(service).key == "from APILA")
+        #expect(ShotLinks.read(old).key == nil)
+        #expect(ShotLinks.move(from: old, to: service).key == nil) // done once
+    }
+}
+

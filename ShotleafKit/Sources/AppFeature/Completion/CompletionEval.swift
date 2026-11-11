@@ -25,7 +25,10 @@ public enum CompletionEval {
 
     public static func run() async {
         let model = EmbeddedModel.completion
-        guard model.isDownloaded else { print("completion model not downloaded"); return }
+        if !model.isDownloaded { // the same download the setup guide starts
+            print("downloading the completion model…")
+            do { _ = try await model.load { print(String(format: "  %.0f%%", $0 * 100)) } } catch { print("download failed: \(error)"); return }
+        }
         _ = try? await model.complete("warm up")
         let sweep: [(String, CompletionText.Context)] = [2, 4, 6, 8, 10, 12, 16, 20, 26].map { n in
             (String(repeating: "Сьогодні ми обговорили план на квартал і бюджет. ", count: n) + "Наступного тижня я", CompletionText.Context())

@@ -13,11 +13,15 @@ enum Paster {
     /// Text on the clipboard, marked as Shotleaf's so the history doesn't keep it.
     /// With pictures or files, each is its own pasteboard item — a picture as PNG
     /// plus a named file — so apps that take several get them all.
-    static func put(_ text: String, images: [URL] = [], files: [URL] = [], on board: NSPasteboard = .general) {
+    /// With `watch`, the text and pictures are handed out on request, so `watch` learns when an app reads them.
+    static func put(_ text: String, images: [URL] = [], files: [URL] = [], on board: NSPasteboard = .general, watch: ReadWatch? = nil) {
         var objects: [NSPasteboardItem] = []
+        func offer(_ item: NSPasteboardItem, _ data: Data, _ type: NSPasteboard.PasteboardType) {
+            if let watch { watch.add(item, data, type) } else { item.setData(data, forType: type) }
+        }
         if !text.isEmpty {
             let item = NSPasteboardItem()
-            item.setString(text, forType: .string)
+            offer(item, Data(text.utf8), .string)
             objects.append(item)
         }
         if !images.isEmpty {
@@ -27,7 +31,7 @@ enum Paster {
                 let file = folder.appendingPathComponent(String(localized: "Image") + " \(n + 1).png")
                 try? png.write(to: file)
                 let item = NSPasteboardItem()
-                item.setData(png, forType: .png)
+                offer(item, png, .png)
                 item.setString(file.absoluteString, forType: .fileURL)
                 objects.append(item)
             }
@@ -87,5 +91,33 @@ enum Paster {
             return item
         }
         board.writeObjects(items)
+    }
+}
+
+/// Tells when another app has read what `Paster.put` offered (macOS asks the owner for
+/// lazily offered data), so a temporary paste can be taken back as soon as it's used.
+/// Reads before `armed` don't count: a clipboard tool may peek before ⌘V is pressed.
+final class ReadWatch: NSObject, NSPasteboardItemDataProvider {
+    private var data: [ObjectIdentifier: [NSPasteboard.PasteboardType: Data]] = [:]
+    var armed = false
+    private(set) var read = false
+
+    fileprivate func add(_ item: NSPasteboardItem, _ bytes: Data, _ type: NSPasteboard.PasteboardType) {
+        data[ObjectIdentifier(item), default: [:]][type] = bytes
+        item.setDataProvider(self, forTypes: [type])
+    }
+
+    func pasteboard(_ pasteboard: NSPasteboard?, item: NSPasteboardItem, provideDataForType type: NSPasteboard.PasteboardType) {
+        if let bytes = data[ObjectIdentifier(item)]?[type] { item.setData(bytes, forType: type) }
+        if armed { read = true }
+    }
+
+    /// Waits until an app read the paste after `armed`, or `limit` passes (an app that never reads).
+    @MainActor
+    func waitForRead(upTo limit: Duration) async {
+        let end = ContinuousClock.now + limit
+        while !read, ContinuousClock.now < end { try? await Task.sleep(for: .milliseconds(20)) }
+        // An app reads a paste's types one after another: give it a moment to take the rest.
+        if read { try? await Task.sleep(for: .milliseconds(150)) }
     }
 }

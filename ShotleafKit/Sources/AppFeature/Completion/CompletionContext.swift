@@ -46,7 +46,9 @@ final class CompletionContext {
             if pasteboard.changeCount != clipboardChange {
                 clipboardChange = pasteboard.changeCount
                 // Never a password or a token: the model could offer it back as a suggestion.
-                clipboard = pasteboard.string(forType: .string).flatMap { ClipboardHistory.isPrivate(pasteboard, text: $0) ? nil : ($0, Date()) }
+                // Marked private (or Shotleaf's own paste) is skipped before its text is even read.
+                clipboard = ClipboardHistory.isPrivate(pasteboard) ? nil
+                    : pasteboard.string(forType: .string).flatMap { ClipboardHistory.isPrivate(pasteboard, text: $0) ? nil : ($0, Date()) }
             }
             if let clipboard, Date().timeIntervalSince(clipboard.at) < Self.clipboardMaxAge {
                 context.clipboard = clipboard.text

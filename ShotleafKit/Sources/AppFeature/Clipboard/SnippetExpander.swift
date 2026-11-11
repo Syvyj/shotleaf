@@ -88,14 +88,17 @@ final class SnippetExpander {
             try? await Task.sleep(for: .milliseconds(50))
             await Paster.pressDelete(snippet.abbreviation.count)
             if asks { ask(snippet); return }
-            Paster.put(filled.text, images: store.imageURLs(snippet))
+            let watch = ReadWatch()
+            Paster.put(filled.text, images: store.imageURLs(snippet), watch: watch)
             try? await Task.sleep(for: .milliseconds(40))
+            watch.armed = true
             Paster.pressCommandV()
             if filled.afterCursor > 0 {
                 try? await Task.sleep(for: .milliseconds(120))
                 Paster.pressLeft(filled.afterCursor)
             }
-            try? await Task.sleep(for: .milliseconds(400)) // the app has read the clipboard by now
+            // The old clipboard comes back once the app has taken the snippet (a slow app gets up to 2 s).
+            await watch.waitForRead(upTo: .seconds(2))
             Paster.restore(saved)
         }
     }

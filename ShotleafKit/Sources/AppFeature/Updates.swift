@@ -11,6 +11,20 @@ public enum Updates {
         public let download: URL
         /// The release's "Shotleaf.dmg.sha256", needed to install it from inside the app.
         public let checksum: URL?
+        /// "Shotleaf.dmg.sha256.sig": the checksum file signed with the update key (from 0.2.1).
+        public var signature: URL? = nil
+    }
+
+    /// The public half of the update key (scripts/update-key.swift, ADR-0070). Only a checksum
+    /// file signed with its private half is trusted, so a disk image is opened only if it's ours.
+    nonisolated static let publicKey = "1ypqplg/J5P21FJp0MOevR0EN3Qwxm4xsqcHVw9zn0M="
+
+    /// The checksum file was signed with the update key.
+    nonisolated static func signed(_ sums: Data, signature: Data, key: String = publicKey) -> Bool {
+        guard let raw = Data(base64Encoded: key), let key = try? Curve25519.Signing.PublicKey(rawRepresentation: raw),
+              let signature = Data(base64Encoded: String(decoding: signature, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines))
+        else { return false }
+        return key.isValidSignature(signature, for: sums)
     }
 
     static let api = URL(string: "https://api.github.com/repos/Syvyj/shotleaf/releases/latest")!
@@ -45,19 +59,22 @@ public enum Updates {
         let answer = try JSONDecoder().decode(Answer.self, from: data)
         let dmg = answer.assets.first { $0.name.hasSuffix(".dmg") }?.browser_download_url ?? AppInfo.releases
         let sum = answer.assets.first { $0.name.hasSuffix(".dmg.sha256") }?.browser_download_url
-        return Release(version: answer.tag_name.trimmingCharacters(in: CharacterSet(charactersIn: "vV")), download: dmg, checksum: sum)
+        let signature = answer.assets.first { $0.name.hasSuffix(".dmg.sha256.sig") }?.browser_download_url
+        return Release(version: answer.tag_name.trimmingCharacters(in: CharacterSet(charactersIn: "vV")), download: dmg, checksum: sum,
+                       signature: signature)
     }
 
     // MARK: Installing
 
     /// Why an update couldn't be installed; the user can still download it by hand.
     enum Failure: LocalizedError {
-        case notWritable, checksum, signature, unpack
+        case notWritable, checksum, unsigned, signature, unpack
 
         var errorDescription: String? {
             switch self {
             case .notWritable: String(localized: "Shotleaf can’t replace itself in the folder it’s in.")
             case .checksum: String(localized: "The download doesn’t match the release.")
+            case .unsigned: String(localized: "This release isn’t signed with Shotleaf’s update key.")
             case .signature: String(localized: "The downloaded app isn’t signed like this one.")
             case .unpack: String(localized: "The downloaded disk image couldn’t be opened.")
             }
@@ -75,11 +92,16 @@ public enum Updates {
     /// signature (same identifier, same certificate), and puts the new copy next to this
     /// one. Downloaded by the app itself, it isn't marked as from the internet, so macOS
     /// doesn't ask again on its first launch.
-    static func prepare(_ release: Release) async throws -> URL {
-        let folder = Bundle.main.bundleURL.deletingLastPathComponent()
+    /// `folder`, `key` and `signedLike` are this app's own; tests give theirs.
+    static func prepare(_ release: Release, into folder: URL = Bundle.main.bundleURL.deletingLastPathComponent(), key: String = publicKey,
+                        signedLike: (URL) -> Bool = signedLikeThisApp) async throws -> URL {
         guard FileManager.default.isWritableFile(atPath: folder.path) else { throw Failure.notWritable }
         guard let sumURL = release.checksum else { throw Failure.checksum }
+        guard let signatureURL = release.signature else { throw Failure.unsigned }
         let (sum, _) = try await URLSession.shared.data(from: sumURL)
+        let (signature, _) = try await URLSession.shared.data(from: signatureURL)
+        // Before anything is downloaded or opened: the checksum file is ours.
+        guard signed(sum, signature: signature, key: key) else { throw Failure.unsigned }
         let (dmg, _) = try await URLSession.shared.download(from: release.download)
         defer { try? FileManager.default.removeItem(at: dmg) }
         let digest = SHA256.hash(data: try Data(contentsOf: dmg)).map { String(format: "%02x", $0) }.joined()
@@ -91,7 +113,7 @@ public enum Updates {
         let staged = folder.appendingPathComponent(".Shotleaf-update.app")
         try? FileManager.default.removeItem(at: staged)
         guard run("/usr/bin/ditto", mount.appendingPathComponent("Shotleaf.app").path, staged.path) else { throw Failure.unpack }
-        guard signedLikeThisApp(staged) else {
+        guard signedLike(staged) else {
             try? FileManager.default.removeItem(at: staged)
             throw Failure.signature
         }

@@ -126,7 +126,7 @@ enum ShotLinks {
     }
 
     /// The key, and whether the answer is final (found, or not there) rather than denied / locked.
-    private static func read(_ service: String) -> (key: String?, final: Bool) {
+    static func read(_ service: String) -> (key: String?, final: Bool) {
         var item: CFTypeRef?
         var query = query(service)
         query[kSecReturnData as String] = true
@@ -148,28 +148,38 @@ enum ShotLinks {
             }
             // Denied or locked: no answer yet, ask again next time instead of caching "no key".
             guard current.final else { return nil }
-            let (old, final) = read(oldService)
+            let (old, final) = move(from: oldService, to: service)
             guard final else { return nil }
-            if let old {
-                Self.token = old
-                // Only once the key is safely in its new place.
-                if read(service).key == old { SecItemDelete(query(oldService) as CFDictionary) }
-            }
+            if old != nil { UserDefaults.standard.set(buildHash, forKey: ownedKey) }
             cache = .some(old)
             return old
         }
         set {
-            let query = query(service)
-            SecItemDelete(query as CFDictionary)
             cache = .some(newValue)
             UserDefaults.standard.set(buildHash, forKey: ownedKey)
-            guard let newValue, !newValue.isEmpty else { return }
-            var add = query
-            add[kSecAttrAccount as String] = "shotleaf"
-            add[kSecValueData as String] = Data(newValue.utf8)
-            add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-            SecItemAdd(add as CFDictionary, nil)
+            save(newValue, in: service)
         }
+    }
+
+    /// Replaces the key in `service` (nil or empty: just removes it).
+    static func save(_ key: String?, in service: String) {
+        let query = query(service)
+        SecItemDelete(query as CFDictionary)
+        guard let key, !key.isEmpty else { return }
+        var add = query
+        add[kSecAttrAccount as String] = "shotleaf"
+        add[kSecValueData as String] = Data(key.utf8)
+        add[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+        SecItemAdd(add as CFDictionary, nil)
+    }
+
+    /// A key left in `old` goes to `service`; `old` is emptied only once the key is safely in its new place.
+    static func move(from old: String, to service: String) -> (key: String?, final: Bool) {
+        let found = read(old)
+        guard found.final, let key = found.key else { return found }
+        save(key, in: service)
+        if read(service).key == key { SecItemDelete(query(old) as CFDictionary) }
+        return found
     }
 
     private static let ownedKey = "shotsKeyOwnedBy"

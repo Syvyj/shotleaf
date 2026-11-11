@@ -428,3 +428,19 @@ the site and in the README. Releases are signed with the self-signed "Shotleaf L
 rather than ad hoc, so the designated requirement (bundle ID + certificate) stays the same across updates
 and macOS should keep the permissions; to be checked on a second Mac before the first release. Revisit
 Developer ID and notarisation if the install step puts people off.
+
+## ADR-0070: Updates are signed with an update key (2026-11-11)
+
+Until 0.2.0 the in-app update trusted the checksum file from the same GitHub release as the disk image, so
+it only caught a broken download; whoever could change the release got their image mounted, and only the
+signature check on the app inside stopped them. From 0.2.1 each release also carries
+`Shotleaf.dmg.sha256.sig`: the checksum file signed with an Ed25519 key ("Shotleaf Update Signing" in the
+login keychain, made by `scripts/make-signing-cert.sh`, used by `scripts/make-release.sh` through
+`scripts/update-key.swift`). The app holds the public half (`Updates.publicKey`) and checks the signature
+before it downloads or opens the image; no signature, no update. The designated-requirement check stays.
+
+The private key can't be made again: back it up with the "Shotleaf Local Signing" certificate. Losing it
+means users update once by hand to a build with a new public key. Unlike the certificate it never expires,
+so it also keeps updates checkable if the certificate's 2036 end comes first; `make-release.sh` refuses to
+build within a year of that date.
+

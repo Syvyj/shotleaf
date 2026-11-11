@@ -114,19 +114,30 @@ public actor EmbeddedModel {
                 components: GenerationComponents(logitProcessorFactory: { probe })
             )
             promptCache.reused = reused
-            var kept: [Int] = []
+            let (stream, task) = generateTokenTask(promptTokenCount: input.text.tokens.size, modelConfiguration: context.configuration,
+                                                   tokenizer: context.tokenizer, iterator: iterator)
+            var ids: [Int] = [], kept: [Int] = []
             var finished = true
-            _ = generate(input: input, context: context, iterator: iterator) { ids in
-                if Task.isCancelled { finished = false; return .stop }
-                let p = probe.box.last ?? 1
-                trace?(context.tokenizer.decode(tokenIds: [ids.last ?? 0], skipSpecialTokens: false), p)
-                if p < minProbability || ids.count > maxTokens { finished = false; return .stop }
+            for await event in stream {
+                guard case .token(let id) = event else { continue }
+                if Task.isCancelled { finished = false; break }
+                ids.append(id)
+                // As tuned (minProbability): a token stays only if the model is sure of the one after it, which the
+                // generation has already worked out by now. The last one has no next: its own counts.
+                // ponytail: the thresholds were set against this "next token" reading; judging each token by its
+                // own confidence shows one word more in 4 of 21 eval samples. Retune both together if changed.
+                let p = probe.box.probability(ids.count) ?? probe.box.probability(ids.count - 1) ?? 1
+                trace?(context.tokenizer.decode(tokenIds: [id], skipSpecialTokens: false), p)
+                if p < minProbability || ids.count > maxTokens { finished = false; break }
                 kept = ids
                 let text = context.tokenizer.decode(tokenIds: ids, skipSpecialTokens: true)
                 onPartial(text)
                 // A suggestion never goes past the line or the sentence: no need to write on.
-                return text.contains(where: { "\n.!?…".contains($0) }) ? .stop : .more
+                if text.contains(where: { "\n.!?…".contains($0) }) { break }
             }
+            // Stopped early: the generation must be done with the shared cache before the next one starts.
+            task.cancel()
+            await task.value
             return (context.tokenizer.decode(tokenIds: kept, skipSpecialTokens: true), finished)
         }
     }
@@ -201,13 +212,20 @@ private final class PromptCache: @unchecked Sendable {
 /// Watches the logits and notes how likely the chosen (greedy = top) token
 /// was. Changes nothing.
 private struct ConfidenceProbe: LogitProcessor {
-    final class Box: @unchecked Sendable { var last: Float? } // one generation, one thread
+    /// Written by the generation, read by the loop that takes its tokens.
+    final class Box: @unchecked Sendable {
+        private let lock = NSLock()
+        private var all: [Float] = []
+        func add(_ p: Float) { lock.withLock { all.append(p) } }
+        /// The confidence of the token at `index` (0 = the first generated).
+        func probability(_ index: Int) -> Float? { lock.withLock { index < all.count ? all[index] : nil } }
+    }
     let box = Box()
 
     mutating func prompt(_ prompt: MLXArray) {}
 
     func process(logits: MLXArray) -> MLXArray {
-        box.last = softmax(logits.asType(.float32), axis: -1).max().item(Float.self)
+        box.add(softmax(logits.asType(.float32), axis: -1).max().item(Float.self))
         return logits
     }
 

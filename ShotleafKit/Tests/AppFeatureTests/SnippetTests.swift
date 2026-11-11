@@ -128,3 +128,24 @@ struct SnippetTests {
         try renderPreview(ClipboardPanelView(model: model, pick: { _, _ in }, close: {}), "clipboard-asking.png")
     }
 }
+
+@Suite("A snippet's temporary paste")
+@MainActor
+struct SnippetPasteTests {
+    @Test("The paste says when an app read it; a read before ⌘V doesn't count")
+    func readWatch() {
+        let board = NSPasteboard(name: .init("shotleaf-watch-\(UUID())"))
+        defer { board.releaseGlobally() }
+        let watch = ReadWatch()
+        Paster.put("Добрий день!", on: board, watch: watch)
+        #expect(board.types?.contains(ClipboardHistory.ownType) == true) // the history skips it without reading the text
+        #expect(board.string(forType: .string) == "Добрий день!")      // a clipboard tool peeking first
+        #expect(!watch.read)
+        let second = ReadWatch()
+        Paster.put("Добрий день!", on: board, watch: second)
+        second.armed = true
+        #expect(board.string(forType: .string) == "Добрий день!")
+        #expect(second.read)
+    }
+}
+

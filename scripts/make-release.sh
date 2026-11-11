@@ -3,12 +3,18 @@
 # signed with the "Shotleaf Local Signing" certificate (scripts/make-signing-cert.sh) rather
 # than ad hoc, so macOS keeps the user's permissions across updates (ADR-0069).
 # Needs uv (brew install uv) for dmgbuild.
-# Out: build/release/Shotleaf.dmg (the app and a link to Applications to drag it onto) and Shotleaf.dmg.sha256.
+# Out: build/release/Shotleaf.dmg (the app and a link to Applications to drag it onto), Shotleaf.dmg.sha256
+# and Shotleaf.dmg.sha256.sig; all three go on the GitHub release.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 IDENTITY="Shotleaf Local Signing"
 security find-identity -v -p codesigning | grep -q "$IDENTITY" || { echo "no \"$IDENTITY\" certificate" >&2; exit 1; }
+security find-generic-password -s "Shotleaf Update Signing" >/dev/null 2>&1 || { echo "no update key: scripts/make-signing-cert.sh" >&2; exit 1; }
+# Without a timestamp, a signature stops checking once its certificate expires: in-app updates would fail.
+# A year ahead is time to plan the switch (a new certificate makes macOS ask for the permissions again).
+security find-certificate -c "$IDENTITY" -p | openssl x509 -checkend $((365 * 86400)) -noout >/dev/null \
+  || { echo "\"$IDENTITY\" expires within a year: $(security find-certificate -c "$IDENTITY" -p | openssl x509 -enddate -noout)" >&2; exit 1; }
 [ -z "$(git status --porcelain)" ] || { echo "commit your changes first: a release is built from a commit" >&2; exit 1; }
 
 BUILD=$(git rev-list --count HEAD)
@@ -43,5 +49,7 @@ uvx dmgbuild@1.6.7 -s scripts/dmg-settings.py -D app="$APP" -D background="$BG/b
 rm -rf "$BG"
 [ -f "$OUT/Shotleaf.dmg" ] || { echo "no disk image" >&2; exit 1; }
 (cd "$OUT" && shasum -a 256 Shotleaf.dmg > Shotleaf.dmg.sha256)
+# The checksum file signed with the update key (ADR-0070): from 0.2.1 the app installs nothing without it.
+security find-generic-password -s "Shotleaf Update Signing" -w | swift scripts/update-key.swift sign "$OUT/Shotleaf.dmg.sha256" > "$OUT/Shotleaf.dmg.sha256.sig"
 echo "Shotleaf $VERSION ($BUILD): $OUT/Shotleaf.dmg ($(du -h "$OUT/Shotleaf.dmg" | cut -f1))"
 cat "$OUT/Shotleaf.dmg.sha256"

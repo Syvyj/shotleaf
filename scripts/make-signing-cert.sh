@@ -4,6 +4,17 @@
 # (Accessibility, Screen Recording) survive rebuilds. Run once, by hand:
 # macOS asks for the keychain password ("Always Allow") on the first build.
 set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# The update key (ADR-0070): signs each release's checksum file. Its public half is
+# Updates.publicKey in the app. Lost, it can't be remade: back it up with the certificate.
+KEY_NAME="Shotleaf Update Signing"
+if ! security find-generic-password -s "$KEY_NAME" >/dev/null 2>&1; then
+  { read -r PRIVATE; read -r PUBLIC; } < <(swift scripts/update-key.swift new)
+  security add-generic-password -s "$KEY_NAME" -a shotleaf -w "$PRIVATE" -T /usr/bin/security
+  echo "\"$KEY_NAME\" created; its public key, for Updates.publicKey: $PUBLIC"
+fi
+
 NAME="Shotleaf Local Signing"
 if security find-identity -p codesigning | grep -q "$NAME"; then
   echo "\"$NAME\" already exists"; exit 0

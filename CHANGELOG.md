@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Updates: a release must be signed with Shotleaf's update key, checked before the download is even opened (from this version on).
+- Snippets: your clipboard comes back as soon as the app has taken the snippet, instead of after a fixed 0.4 s (a slow app no longer pastes the old clipboard).
+- Text completion runs on the model library's current interface; the suggestions are the same.
+
 ## 0.2.0
 
 - Privacy: **Learn my style** is off until you turn it on, and it keeps nothing until the completion model is downloaded. Texts with card numbers, tokens, emails or phone numbers are never kept. (It used to be on from the start and keep texts even without the model; **Forget what I wrote** in Settings › Completion deletes what was kept.)

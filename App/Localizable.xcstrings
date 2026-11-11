@@ -4039,6 +4039,16 @@
         }
       }
     },
+    "This release isn’t signed with Shotleaf’s update key.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цей випуск не підписаний ключем оновлень Shotleaf."
+          }
+        }
+      }
+    },
     "The downloaded app isn’t signed like this one.": {
       "localizations": {
         "uk": {
