@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.2
 
 - Text completion could take all the Mac's memory: while typing, the model kept freed memory for reuse, up to about 11 GB on a 16 GB Mac, until everything froze. It now keeps at most 256 MB over the model itself (about 2.5 GB in all), and runs one suggestion at a time.
 
