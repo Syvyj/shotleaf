@@ -125,5 +125,8 @@ struct BigLinkTests {
         #expect(sent.count <= ShotLinks.freeLimit && sent.prefix(3) == Data([0xFF, 0xD8, 0xFF]))
         #expect(ShotLinks.fitted(png, server: "https://shots.example.com") == png)
         #expect(ShotLinks.fitted(Data([1, 2, 3]), server: ShotLinks.freeService) == Data([1, 2, 3]))
+        // A limit nothing can meet gives nothing, never a file over the limit.
+        let big = try #require(NSBitmapImageRep(data: png)?.cgImage)
+        #expect(SmallFile.jpeg(big, under: 100) == nil)
     }
 }

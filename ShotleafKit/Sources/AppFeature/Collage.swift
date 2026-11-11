@@ -1,4 +1,5 @@
 import AppKit
+import Core
 
 /// "Combine Images…": several pictures as one, in rows, on white with a gap.
 /// The layout is picked for them: rows of the same height, every row as wide
@@ -48,8 +49,7 @@ enum Collage {
         let sizes = images.map { CGSize(width: $0.width, height: $0.height) }
         let (frames, size) = layout(sizes, columns: columns(for: sizes))
         guard size.width >= 1, size.height >= 1,
-              let ctx = CGContext(data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: 0,
-                                  space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+              let ctx = CGContext.sRGB(width: Int(size.width), height: Int(size.height))
         else { return nil }
         ctx.setFillColor(NSColor.white.cgColor)
         ctx.fill(CGRect(origin: .zero, size: size))

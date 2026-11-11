@@ -50,10 +50,12 @@ final class ClipboardHistory {
 
     // Settings → Clipboard (read live, so the Settings window just writes UserDefaults).
     nonisolated static let enabledKey = "clipboardEnabled", limitKey = "clipboardLimit", imageDaysKey = "clipboardImageDays", excludedKey = "clipboardExcluded"
-    private var defaults: UserDefaults { .standard }
+    nonisolated static let defaultLimit = 200, defaultImageDays = 30
+    /// The standard settings; tests give their own.
+    var defaults = UserDefaults.standard
     var enabled: Bool { defaults.object(forKey: Self.enabledKey) as? Bool ?? true }
-    var limit: Int { defaults.object(forKey: Self.limitKey) as? Int ?? 200 }
-    var imageDays: Int { defaults.object(forKey: Self.imageDaysKey) as? Int ?? 30 }
+    var limit: Int { defaults.object(forKey: Self.limitKey) as? Int ?? Self.defaultLimit }
+    var imageDays: Int { defaults.object(forKey: Self.imageDaysKey) as? Int ?? Self.defaultImageDays }
     /// Bundle IDs whose copies are never kept (one per line in UserDefaults);
     /// text completion stays off in them too.
     var excludedApps: [String] { Self.excludedList(defaults) }

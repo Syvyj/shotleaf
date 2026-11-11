@@ -1,5 +1,7 @@
 import AppKit
+import Core
 import ImageIO
+import Core
 import UniformTypeIdentifiers
 
 /// "Save as › JPEG under 1 MB…": the best quality that fits the limit, then
@@ -32,8 +34,7 @@ enum SmallFile {
 
     private static func flattened(_ image: CGImage, scale: CGFloat) -> CGImage? {
         let w = max(1, Int((CGFloat(image.width) * scale).rounded())), h = max(1, Int((CGFloat(image.height) * scale).rounded()))
-        guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
-                                  space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
+        guard let ctx = CGContext.sRGB(width: w, height: h, alpha: .noneSkipLast)
         else { return nil }
         ctx.setFillColor(NSColor.white.cgColor)
         ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))

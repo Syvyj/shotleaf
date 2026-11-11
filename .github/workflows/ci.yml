@@ -20,5 +20,6 @@ jobs:
         run: swift build --package-path ShotleafKit
       - name: Test
         run: swift test --package-path ShotleafKit
+      # Release and arm64, as scripts/make-release.sh builds it (the package above is built for debugging).
       - name: Build the app
-        run: xcodebuild -project Shotleaf.xcodeproj -scheme Shotleaf -configuration Debug CODE_SIGNING_ALLOWED=NO -skipMacroValidation -derivedDataPath build/CI -quiet build
+        run: xcodebuild -project Shotleaf.xcodeproj -scheme Shotleaf -configuration Release ARCHS=arm64 ENABLE_DEBUG_DYLIB=NO CODE_SIGNING_ALLOWED=NO -skipMacroValidation -derivedDataPath build/CI -quiet build

@@ -1,4 +1,5 @@
 import AppKit
+import Core
 
 /// Draws annotations with Core Graphics — used both live (SwiftUI Canvas) and
 /// for export, so the saved image is exactly what was on screen.
@@ -145,8 +146,7 @@ enum AnnotationRenderer {
         guard let crop = image.cropping(to: pixels) else { return }
         let cells = CGSize(width: max(1, (area.width / AnnotationStyle.blurBlock).rounded()),
                            height: max(1, (area.height / AnnotationStyle.blurBlock).rounded()))
-        guard let small = CGContext(data: nil, width: Int(cells.width), height: Int(cells.height), bitsPerComponent: 8, bytesPerRow: 0,
-                                    space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        guard let small = CGContext.sRGB(width: Int(cells.width), height: Int(cells.height))
         else { return }
         small.interpolationQuality = .medium
         small.draw(crop, in: CGRect(origin: .zero, size: cells))
@@ -369,9 +369,7 @@ enum AnnotationRenderer {
         guard !items.isEmpty || watermark != nil else { return image }
         let bounds = exportBounds(items, imageSize: imageSize)
         let scale = CGFloat(image.width) / imageSize.width
-        guard let ctx = CGContext(data: nil, width: Int((bounds.width * scale).rounded()), height: Int((bounds.height * scale).rounded()),
-                                  bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpace(name: CGColorSpace.sRGB)!,
-                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        guard let ctx = CGContext.sRGB(width: Int((bounds.width * scale).rounded()), height: Int((bounds.height * scale).rounded()))
         else { return nil }
         // Flip to y-down image points.
         ctx.translateBy(x: 0, y: CGFloat(ctx.height))

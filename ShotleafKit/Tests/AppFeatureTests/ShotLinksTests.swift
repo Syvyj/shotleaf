@@ -11,6 +11,8 @@ struct ShotLinksTests {
         #expect(ShotLinks.endpoint("http://shot.example.com") == nil)
         #expect(ShotLinks.endpoint("http://127.0.0.1:8787") != nil)
         #expect(ShotLinks.endpoint("shot.example.com") == nil)
+        #expect(ShotLinks.endpoint("http://localhost.evil.com") == nil) // only this Mac itself may be plain http
+        #expect(ShotLinks.endpoint("https://me:secret@shot.example.com")?.host() == "shot.example.com")
         let r = try #require(ShotLinks.request(Data([1]), hours: 6, server: "https://shot.example.com", token: "k"))
         #expect(r.url?.absoluteString == "https://shot.example.com/upload?ttl=21600")
         #expect(r.value(forHTTPHeaderField: "Authorization") == "Bearer k" && r.httpMethod == "POST")

@@ -4,6 +4,7 @@
 # Needs the "Shotleaf Local Signing" certificate, Shotleaf's Screen Recording
 # permission and cwebp (brew install webp). The screen is covered for about a
 # minute per language while the windows are shot: don't type meanwhile.
+# Just some of them: scripts/guide-shots.sh editor-magnifier,combine
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -15,7 +16,7 @@ codesign --force --options runtime --entitlements App/Shotleaf.entitlements -s "
 
 RAW=$(mktemp -d); trap 'rm -rf "$RAW"' EXIT
 for lang in en uk; do
-  open -n -W "$APP" --args --guide-shots "$RAW" -AppleLanguages "($lang)"
+  open -n -W "$APP" --args --guide-shots "$RAW" ${1:+--guide-only "$1"} -AppleLanguages "($lang)"
 done
 
 OUT=site/assets/guide # also holds pictures shot by hand (picker-*), so only these are replaced

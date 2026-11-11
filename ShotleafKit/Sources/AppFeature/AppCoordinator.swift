@@ -12,19 +12,17 @@ import EmbeddedKit
 @MainActor
 @Observable
 public final class AppCoordinator {
-    private let container: AppContainer
-    private var hotkeyTask: Task<Void, Never>?
+    let container: AppContainer
+    var hotkeyTask: Task<Void, Never>?
 
-    public private(set) var permissions: [PermissionKind: PermissionStatus] = [:]
+    public internal(set) var permissions: [PermissionKind: PermissionStatus] = [:]
     public init(container: AppContainer = AppContainer()) {
         self.container = container
         self.clipboard = ClipboardHistory(recognizer: container.recognizer)
     }
 
     public func start() async {
-        for name in ScreenshotWindows.tempFolders { // last run's drags, pastes and shares
-            try? FileManager.default.removeItem(at: FileManager.default.temporaryDirectory.appendingPathComponent(name))
-        }
+        TempFolder.clearAll() // last run's drags, pastes and shares
         // ponytail: left by builds before "Recent Screenshots"; drop this line after a few releases.
         try? FileManager.default.removeItem(at: AppInfo.supportFolder.appendingPathComponent("last-capture.png"))
         applyDockPolicy()
@@ -90,13 +88,13 @@ public final class AppCoordinator {
 
     // MARK: Screenshots
 
-    private let screenshots = ScreenshotWindows()
+    let screenshots = ScreenshotWindows()
 
     // MARK: Clipboard
 
     let clipboard: ClipboardHistory
     let snippets = SnippetStore()
-    @ObservationIgnored private lazy var clipboardPanel: ClipboardPanelController = {
+    @ObservationIgnored lazy var clipboardPanel: ClipboardPanelController = {
         let controller = ClipboardPanelController(history: clipboard, snippets: snippets)
         controller.openSnippetEditor = { [weak self] in self?.showSnippetEditor() }
         controller.openImage = { [weak self] in self?.screenshots.show($0, sound: false) }
@@ -105,13 +103,13 @@ public final class AppCoordinator {
 
     public func showClipboard(snippets: Bool = false) { clipboardPanel.show(snippets: snippets) }
 
-    @ObservationIgnored private lazy var expander: SnippetExpander = {
+    @ObservationIgnored lazy var expander: SnippetExpander = {
         let expander = SnippetExpander(store: snippets)
         expander.ask = { [weak self] in self?.clipboardPanel.pick($0, .paste) }
         return expander
     }()
 
-    private var snippetWindow: NSWindow?
+    var snippetWindow: NSWindow?
 
     /// The snippets editor (a window like the screenshot one).
     public func showSnippetEditor() {
@@ -186,7 +184,7 @@ public final class AppCoordinator {
 
     /// A new shot: into the editor, or straight to the clipboard / a file
     /// (Settings → Screenshots). Kept for "Edit Last Screenshot" either way.
-    private func deliver(_ shot: ImagePayload) {
+    func deliver(_ shot: ImagePayload) {
         recentShots = ScreenshotWindows.remember(shot)
         shotsThisRun += 1
         SupportAsk.countShot()
@@ -211,7 +209,7 @@ public final class AppCoordinator {
     }
 
     /// The newest captures, newest first (for the menu).
-    public private(set) var recentShots: [URL] = ScreenshotWindows.recent()
+    public internal(set) var recentShots: [URL] = ScreenshotWindows.recent()
 
     public func openRecent(_ url: URL) {
         guard let shot = ScreenshotWindows.load(url) else { NSSound.beep(); return }
@@ -274,7 +272,7 @@ public final class AppCoordinator {
         screenshots.show(shot, sound: false)
     }
 
-    private var batchWindow: NSWindow?
+    var batchWindow: NSWindow?
 
     /// "Watermark Photos…": one watermark on many photos, in a window that
     /// looks like the screenshot window (leaf chrome, no system title bar).
@@ -296,7 +294,7 @@ public final class AppCoordinator {
     // MARK: Settings
 
     /// The actions' shortcuts; missing = off.
-    public private(set) var actionHotkeys: [HotkeyAction: HotkeyShortcut] = [:]
+    public internal(set) var actionHotkeys: [HotkeyAction: HotkeyShortcut] = [:]
 
     /// Settings value → shortcut: nil = never set (default on), "off" = disabled.
     static func savedHotkey(_ saved: String?, default fallback: HotkeyShortcut) -> HotkeyShortcut? {
@@ -319,7 +317,7 @@ public final class AppCoordinator {
 
     // MARK: Tools
 
-    public private(set) var toolsOff: Set<Tool> = Tool.savedOff
+    public internal(set) var toolsOff: Set<Tool> = Tool.savedOff
 
     public func isOn(_ tool: Tool) -> Bool { tool == .completion ? completionEnabled : !toolsOff.contains(tool) }
 
@@ -336,7 +334,7 @@ public final class AppCoordinator {
     }
 
     /// The saved shortcut while the action's tool is on; none while it's off (the choice is kept).
-    private func registerHotkey(_ action: HotkeyAction, on: Bool) {
+    func registerHotkey(_ action: HotkeyAction, on: Bool) {
         let saved = on ? Self.savedHotkey(container.settings.hotkeyID(for: action.rawValue), default: action.defaultShortcut) : nil
         container.hotkeys.setShortcut(saved, for: action.rawValue)
         actionHotkeys[action] = container.hotkeys.shortcut(for: action.rawValue)
@@ -347,332 +345,20 @@ public final class AppCoordinator {
     public func pauseHotkey() { container.hotkeys.stop() }
     public func resumeHotkey() { container.hotkeys.start() }
 
-    // MARK: Completion model
-
-    public enum EmbeddedState: Equatable {
-        case notDownloaded
-        case downloading(Double)
-        case ready(bytes: Int64)
-        case failed(String)
-    }
-
-    public private(set) var modelState: EmbeddedState =
+    public internal(set) var modelState: EmbeddedState =
         EmbeddedModel.completion.isDownloaded ? .ready(bytes: EmbeddedModel.completion.sizeOnDisk) : .notDownloaded
-
-    /// Downloads (and loads) the completion model, reporting progress to Settings.
-    /// What the download needs on disk (the model is about 3.6 GB), with room to spare.
-    static let modelSpace: Int64 = 4_500_000_000
-
-    public func downloadModel() {
-        if case .downloading = modelState { return }
-        let home = URL(fileURLWithPath: NSHomeDirectory())
-        if let free = try? home.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage,
-           free < Self.modelSpace - EmbeddedModel.completion.sizeOnDisk {
-            let need = ByteCountFormatter.string(fromByteCount: Self.modelSpace, countStyle: .file)
-            let have = ByteCountFormatter.string(fromByteCount: free, countStyle: .file)
-            modelState = .failed(String(localized: "Not enough free space: the model needs about \(need), \(have) is free."))
-            return
-        }
-        modelState = .downloading(0)
-        Task {
-            do {
-                _ = try await EmbeddedModel.completion.load { fraction in
-                    Task { @MainActor [weak self] in
-                        if case .downloading = self?.modelState { self?.modelState = .downloading(fraction) }
-                    }
-                }
-                modelState = .ready(bytes: EmbeddedModel.completion.sizeOnDisk)
-            } catch {
-                guard case .downloading = modelState else { return } // cancelled
-                modelState = .failed(error.localizedDescription)
-            }
-        }
-    }
-
-    public func cancelModelDownload() {
-        modelState = .notDownloaded
-        Task { await EmbeddedModel.completion.cancel() }
-    }
-
-    public func deleteModel() {
-        Task {
-            do {
-                try await EmbeddedModel.completion.delete()
-                modelState = .notDownloaded
-            } catch {
-                modelState = .failed(error.localizedDescription)
-            }
-        }
-    }
-
-    // MARK: Inline completion
-
     let inlineCompletion = InlineCompletion() // internal: the live test drives it
-
-    public var completionEnabled: Bool { container.settings.completionEnabled }
-
-    public var completionUsesScreen: Bool { container.settings.completionUsesScreen }
-    public var completionUsesClipboard: Bool { container.settings.completionUsesClipboard }
-
-    public func setCompletionContext(screen: Bool? = nil, clipboard: Bool? = nil) {
-        if let screen { container.settings.completionUsesScreen = screen; inlineCompletion.context.useScreen = screen }
-        if let clipboard { container.settings.completionUsesClipboard = clipboard; inlineCompletion.context.useClipboard = clipboard }
-    }
-
-    public var completionBoldness: Double { container.settings.completionBoldness }
-    public var completionQuickFixes: Bool { container.settings.completionQuickFixes }
-    public var completionLearnsStyle: Bool { container.settings.completionLearnsStyle }
-
-    public func setCompletionBoldness(_ value: Double) {
-        container.settings.completionBoldness = value
-        inlineCompletion.boldness = .init(value)
-    }
-
-    public func setCompletionQuickFixes(_ on: Bool) {
-        container.settings.completionQuickFixes = on
-        inlineCompletion.quickFixes = on
-    }
-
-    public func setCompletionLearnsStyle(_ on: Bool) {
-        container.settings.completionLearnsStyle = on
-        inlineCompletion.history.enabled = on
-    }
-
-    public func forgetWritingStyle() { inlineCompletion.history.forget() }
-
-    public func setCompletion(_ on: Bool) {
-        container.settings.completionEnabled = on
-        if on { inlineCompletion.start() } else { inlineCompletion.stop() }
-    }
-
-    // MARK: Dock
-
-    /// Dock icon on/off: a regular app vs. a menu-bar-only (accessory) app.
-    public var showInDock: Bool { container.settings.showInDock }
-
-    public func setShowInDock(_ show: Bool) {
-        container.settings.showInDock = show
-        applyDockPolicy()
-        raiseSettingsWindow() // switching the policy sends the app's windows behind the others
-    }
-
-    private func applyDockPolicy() {
-        NSApp.setActivationPolicy(container.settings.showInDock ? .regular : .accessory)
-    }
-
-    /// The SwiftUI Settings scene, opened from AppKit (Dock click).
-    public func openSettingsWindow() {
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        raiseSettingsWindow()
-    }
-
-    /// A menu bar app isn't active, so its Settings window opens behind the
-    /// others; bring it up once SwiftUI has made it (after a relaunch that takes a while).
-    public func raiseSettingsWindow() {
-        Task {
-            for _ in 0..<30 {
-                try? await Task.sleep(for: .milliseconds(100))
-                guard let window = NSApp.windows.first(where: { $0.identifier?.rawValue.contains("Settings") == true })
-                else { continue }
-                // Not the polite activate(): after a relaunch macOS turns that down and the window stays behind.
-                NSApp.activate(ignoringOtherApps: true)
-                window.makeKeyAndOrderFront(nil)
-                window.orderFrontRegardless()
-                return
-            }
-        }
-    }
-
-    // MARK: Updates
-
     /// A newer release than this one, once a check has found it (shown in the menu).
-    public private(set) var update: Updates.Release?
-    public var checksForUpdates: Bool { container.settings.checksForUpdates }
+    public internal(set) var update: Updates.Release?
     /// An update is downloading and being checked (Shotleaf restarts when it's ready).
-    public private(set) var updating = false
-    private var updateTask: Task<Void, Never>?
-
-    public func setChecksForUpdates(_ on: Bool) {
-        container.settings.checksForUpdates = on
-        startUpdateChecks()
-    }
-
-    /// At launch, then once a day while Shotleaf runs.
-    private func startUpdateChecks() {
-        updateTask?.cancel()
-        guard checksForUpdates else { update = nil; return }
-        updateTask = Task { [weak self] in
-            var launch = true
-            while !Task.isCancelled {
-                let last = UserDefaults.standard.object(forKey: "lastUpdateCheck") as? Date ?? .distantPast
-                if launch || Date().timeIntervalSince(last) > 86_400, let release = try? await Updates.latest() {
-                    UserDefaults.standard.set(Date(), forKey: "lastUpdateCheck")
-                    self?.update = Updates.isNewer(release.version, than: Updates.current) ? release : nil
-                }
-                launch = false
-                try? await Task.sleep(for: .seconds(3600))
-            }
-        }
-    }
-
-    /// Downloads the update, checks it and restarts into it. Windows close with the
-    /// restart, so it asks first (unless that was just asked). If it can't, the
-    /// DMG can still be downloaded by hand.
-    public func installUpdate(confirmed: Bool = false) {
-        guard let release = update, !updating else { return }
-        NSApp.activate(ignoringOtherApps: true)
-        if !confirmed {
-            let ask = NSAlert()
-            ask.messageText = String(localized: "Update to Shotleaf \(release.version)?")
-            ask.informativeText = String(localized: "Shotleaf downloads it, checks it and restarts in a few seconds. Open screenshots close, so copy or save what you need first.")
-            ask.addButton(withTitle: String(localized: "Update"))
-            ask.addButton(withTitle: String(localized: "Later"))
-            guard ask.runModal() == .alertFirstButtonReturn else { return }
-        }
-        updating = true
-        Task {
-            do {
-                Updates.swapAndRelaunch(try await Updates.prepare(release))
-            } catch {
-                updating = false
-                Self.log.error("update failed: \(error.localizedDescription, privacy: .public)")
-                let alert = NSAlert()
-                alert.messageText = String(localized: "Couldn’t update Shotleaf")
-                alert.informativeText = error.localizedDescription + " " + String(localized: "You can download the new version and drag it onto Applications yourself.")
-                alert.addButton(withTitle: String(localized: "Download"))
-                alert.addButton(withTitle: String(localized: "Cancel"))
-                NSApp.activate(ignoringOtherApps: true)
-                if alert.runModal() == .alertFirstButtonReturn { NSWorkspace.shared.open(release.download) }
-            }
-        }
-    }
-
-    /// "Check for Updates…": the answer right away, in a window.
-    public func checkForUpdatesNow() {
-        Task {
-            guard let release = try? await Updates.latest() else { NSWorkspace.shared.open(AppInfo.releases); return }
-            let newer = Updates.isNewer(release.version, than: Updates.current)
-            update = newer ? release : nil
-            let alert = NSAlert()
-            NSApp.activate(ignoringOtherApps: true)
-            if newer {
-                alert.messageText = String(localized: "Shotleaf \(release.version) is out")
-                alert.informativeText = String(localized: "You have \(Updates.current). Shotleaf downloads the new version, checks it and restarts; your settings and permissions stay.")
-                alert.addButton(withTitle: String(localized: "Update"))
-                alert.addButton(withTitle: String(localized: "Later"))
-                if alert.runModal() == .alertFirstButtonReturn { installUpdate(confirmed: true) }
-            } else {
-                alert.messageText = String(localized: "Shotleaf is up to date")
-                alert.informativeText = String(localized: "\(Updates.current) is the newest version.")
-                alert.runModal()
-            }
-        }
-    }
-
-    // MARK: Language
-
-    /// The app's own language ("en", "uk"), or nil to follow macOS.
-    public var language: String? {
-        (UserDefaults.standard.persistentDomain(forName: AppInfo.bundleID)?["AppleLanguages"] as? [String])?.first
-    }
-
-    /// Takes effect on the next launch, so restart now and come back to Settings.
-    public func setLanguage(_ code: String?) {
-        guard code != language else { return }
-        if let code { UserDefaults.standard.set([code], forKey: "AppleLanguages") }
-        else { UserDefaults.standard.removeObject(forKey: "AppleLanguages") }
-        UserDefaults.standard.set(true, forKey: Self.reopenSettingsKey)
-        Self.relaunch()
-    }
-
-    private static let reopenSettingsKey = "reopenSettings"
-
-    // MARK: Launch at login
-
+    public internal(set) var updating = false
     /// Whether Shotleaf starts at login. Real only for the installed, signed app.
-    public private(set) var launchAtLogin = SMAppService.mainApp.status == .enabled
-    public private(set) var launchAtLoginError: String?
-
-    public func setLaunchAtLogin(_ enabled: Bool) {
-        do {
-            if enabled { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
-            launchAtLoginError = nil
-        } catch {
-            launchAtLoginError = error.localizedDescription
-        }
-        launchAtLogin = SMAppService.mainApp.status == .enabled
-    }
-
-    // MARK: Onboarding
-
-    private var onboarding: OnboardingWindowController?
+    public internal(set) var launchAtLogin = SMAppService.mainApp.status == .enabled
+    public internal(set) var launchAtLoginError: String?
     /// Screenshots taken since launch (the setup guide waits for the first one).
-    public private(set) var shotsThisRun = 0
+    public internal(set) var shotsThisRun = 0
 
-    /// The setup guide: shown on first launch, and from the menu any time (from
-    /// its start). `resume`: back on the page it was on, after a restart for a permission.
-    public func showOnboarding(resume: Bool = false) {
-        if !resume { UserDefaults.standard.removeObject(forKey: OnboardingView.pageKey) }
-        let controller = onboarding ?? OnboardingWindowController { [weak self] in
-            guard let self else { return AnyView(EmptyView()) }
-            return AnyView(OnboardingView(coordinator: self))
-        }
-        onboarding = controller
-        controller.show()
-    }
+    var updateTask: Task<Void, Never>?
 
-    public func closeOnboarding() {
-        UserDefaults.standard.removeObject(forKey: OnboardingView.pageKey)
-        onboarding?.close()
-    }
-
-    // MARK: Permissions (for Settings)
-
-    public func refreshPermissions() {
-        for kind in PermissionKind.allCases {
-            permissions[kind] = container.permissions.status(kind)
-        }
-    }
-
-    private static let log = Logger(subsystem: "dev.syvyj.shotleaf", category: "permissions")
-    private static let reopenGuideKey = "reopenSetupGuide"
-
-    /// What only works in a process that started with the permission on: the
-    /// keyboard taps (completion, snippets, pasting) and screen capture.
-    static let restartPermissions: [PermissionKind] = [.accessibility, .screenRecording]
-
-    /// Watches the permissions missing at launch; once the user grants one,
-    /// restarts so it takes effect (macOS doesn't always offer to).
-    private func restartWhenGranted(_ missing: [PermissionKind]) {
-        guard !missing.isEmpty else { return }
-        Task { [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(2))
-                guard let self else { return }
-                guard let granted = missing.first(where: { self.container.permissions.status($0) == .granted }) else { continue }
-                Self.log.notice("\(String(describing: granted), privacy: .public) granted — restarting")
-                if self.onboarding?.isVisible == true { UserDefaults.standard.set(true, forKey: Self.reopenGuideKey) }
-                Self.relaunch()
-                return
-            }
-        }
-    }
-
-    /// Opens a fresh copy once this one has quit (two copies can't run at once).
-    static func relaunch() {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/sh")
-        task.arguments = ["-c", "while kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.1; done; open \"$0\"", Bundle.main.bundlePath]
-        try? task.run()
-        NSApp.terminate(nil)
-    }
-
-    public func request(_ kind: PermissionKind) async {
-        await container.permissions.request(kind)
-        refreshPermissions()
-    }
-
-    public func openSettings(for kind: PermissionKind) {
-        container.permissions.openSystemSettings(for: kind)
-    }
+    var onboarding: OnboardingWindowController?
 }

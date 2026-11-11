@@ -205,6 +205,44 @@ struct PrivateTextTests {
         #expect(ClipboardHistory(folder: dir).items.count == 2)
     }
 
+    @Test("Everything about an entry comes back from disk; a broken file gives an empty history")
+    func roundTrip() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-round-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let h = ClipboardHistory(folder: dir)
+        var item = ClipItem(kind: .text, text: "Привіт", rtf: Data([1, 2, 3]))
+        item.imageText = "words on a picture"; item.appName = "Notes"; item.bundleID = "com.apple.Notes"; item.pinned = true
+        h.add(item)
+        let back = try #require(ClipboardHistory(folder: dir).items.first)
+        #expect(back.id == item.id && back.text == "Привіт" && back.rtf == Data([1, 2, 3]) && back.pinned)
+        #expect(back.imageText == "words on a picture" && back.appName == "Notes" && back.bundleID == "com.apple.Notes")
+        try Data("{ not json".utf8).write(to: dir.appendingPathComponent("history.json"))
+        #expect(ClipboardHistory(folder: dir).items.isEmpty)
+    }
+
+    @Test("Over the limit the oldest go, with their picture files; the pinned stay")
+    func limit() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-limit-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let suite = "shotleaf-limit-\(UUID())"
+        let settings = try #require(UserDefaults(suiteName: suite))
+        defer { settings.removePersistentDomain(forName: suite) }
+        settings.set(3, forKey: ClipboardHistory.limitKey)
+        let h = ClipboardHistory(folder: dir)
+        h.defaults = settings
+        var pinned = ClipItem(kind: .text, text: "pinned"); pinned.pinned = true
+        h.add(pinned)
+        let png = try #require(NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 2, pixelsHigh: 2, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
+                                                isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)?.representation(using: .png, properties: [:]))
+        let picture = ClipItem(kind: .image, text: "", hasImage: true)
+        h.add(picture, png: png)
+        #expect(FileManager.default.fileExists(atPath: h.imageURL(picture).path))
+        for n in 1...5 { h.add(ClipItem(kind: .text, text: "copy \(n)")) }
+        #expect(h.items.filter { !$0.pinned }.map(\.text) == ["copy 5", "copy 4", "copy 3"])
+        #expect(h.items.contains { $0.pinned })
+        #expect(!FileManager.default.fileExists(atPath: h.imageURL(picture).path))
+    }
+
     @Test("A text over the limit isn't kept; too big rich text leaves the plain text")
     func bigCopies() throws {
         let board = NSPasteboard(name: .init("shotleaf-big-\(UUID())"))

@@ -302,8 +302,7 @@ final class ScreenshotWindows {
         guard scale > 1, let image = NSBitmapImageRep(data: png)?.cgImage else { return png }
         let w = Int((CGFloat(image.width) / scale).rounded()), h = Int((CGFloat(image.height) / scale).rounded())
         guard w > 0, h > 0,
-              let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
-                                  space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+              let ctx = CGContext.sRGB(width: w, height: h)
         else { return png }
         ctx.interpolationQuality = .high
         ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
@@ -317,13 +316,18 @@ final class ScreenshotWindows {
         AppInfo.supportFolder.appendingPathComponent("Recent", isDirectory: true)
     }
     static let recentLimit = 10
+    /// How a recent capture's file is named (the menu reads the time back from it).
+    static var recentName: DateFormatter {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "yyyy-MM-dd HH.mm.ss.SSS"
+        return f
+    }
 
     /// Keeps a new capture (the oldest beyond `recentLimit` go). Survives a restart.
     @discardableResult
     static func remember(_ shot: ImagePayload, in folder: URL = recentFolder, now: Date = Date()) -> [URL] {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd HH.mm.ss.SSS"
+        let f = recentName
         do { // else "Edit Last Screenshot" would quietly have nothing to open
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             try shot.data.write(to: folder.appendingPathComponent("\(f.string(from: now)).png"))
@@ -360,17 +364,14 @@ final class ScreenshotWindows {
     }
 
     /// A drop target may read the file lazily, so it stays until the next launch
-    /// clears `tempFolders`.
+    /// clears them (`TempFolder.clearAll`).
     private static func writeTempPNG(_ png: Data) -> URL {
-        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("Shotleaf Drag/\(UUID().uuidString)", isDirectory: true)
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let folder = TempFolder.drag.new()
         let url = folder.appendingPathComponent(fileName(Date()))
         try? png.write(to: url)
         return url
     }
 
-    /// Where dragged, pasted and shared files wait for the app that takes them.
-    static let tempFolders = ["Shotleaf Drag", "Shotleaf Paste", "Shotleaf Share"]
 
     // MARK: Geometry
 

@@ -289,7 +289,7 @@ struct SnippetEditorView: View {
 
     /// The folder's files through the system share menu (AirDrop, Mail, Messages…), by the pointer.
     private func shareFolder(_ id: UUID) {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("Shotleaf Share/\(UUID().uuidString)/\(store.folder(id)?.name ?? "")")
+        let dir = TempFolder.share.new().appendingPathComponent(store.folder(id)?.name ?? "")
         let files = store.exportFiles(of: id, into: dir)
         guard !files.isEmpty, let window = NSApp.keyWindow, let view = window.contentView else { NSSound.beep(); return }
         let at = view.convert(window.mouseLocationOutsideOfEventStream, from: nil)

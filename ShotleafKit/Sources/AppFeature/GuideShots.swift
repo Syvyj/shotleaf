@@ -9,6 +9,7 @@ import SwiftUI
 /// could name a person or a server are overridden for this run only. A plain
 /// backdrop covers the screen meanwhile, so the glass shows no desktop through it.
 /// Run once per language: `open -n Shotleaf.app --args --guide-shots DIR -AppleLanguages "(uk)"`.
+/// `--guide-only editor,combine` shoots just those pictures.
 @MainActor
 public enum GuideShots {
     public static func run(_ coordinator: AppCoordinator, out: URL) async {
@@ -30,10 +31,21 @@ public enum GuideShots {
         NSApp.activate(ignoringOtherApps: true) // Settings and the setup guide drawn as the active window
         let demo = Demo(uk: uk)
         let shot = demo.screenshot()
+        if let i = CommandLine.arguments.firstIndex(of: "--guide-only"), CommandLine.arguments.count > i + 1 {
+            only = Set(CommandLine.arguments[i + 1].split(separator: ",").map(String.init))
+        }
 
         // The editor, marked up.
         await snap(editor(shot, marks: true, callout: uk ? "Нова дата!" : "New date!"), "editor", lang, out)
         await snap(editor(shot, marks: false, framed: true, watermark: uk ? "© Студія" : "© Studio"), "editor-background", lang, out)
+        // The magnifier over the date, with the door code blurred.
+        await snap(editor(shot, marks: false, magnifier: true), "editor-magnifier", lang, out)
+        // Combine Images: four photos as one picture.
+        let photos = demo.photos(in: temp).prefix(4).compactMap { NSImage(contentsOf: $0)?.cgImage(forProposedRect: nil, context: nil, hints: nil) }
+        if let combined = Collage.make(photos) {
+            await snap(editor(combined, marks: false, display: CGSize(width: 640, height: 640 * CGFloat(combined.height) / CGFloat(combined.width))),
+                       "combine", lang, out)
+        }
         // Pinned on top.
         await snap(ScreenshotWindows.makePanel(PinnedScreenshotView(image: NSImage(cgImage: shot, size: .zero),
                                                                     size: CGSize(width: 520, height: 325), copy: {}, close: {})), "pinned", lang, out)
@@ -76,6 +88,7 @@ public enum GuideShots {
         batchWindow.setContentSize(NSSize(width: 1100, height: max(batchWindow.frame.height, 700)))
         await snap(batchWindow, "watermark-photos", lang, out)
 
+        guard only.isEmpty else { return } // the rest opens real windows
         // The setup guide and Settings, as they are on this Mac (permissions on).
         coordinator.showOnboarding()
         try? await Task.sleep(for: .milliseconds(400))
@@ -99,9 +112,16 @@ public enum GuideShots {
 
     // MARK: Windows
 
-    private static func editor(_ shot: CGImage, marks: Bool, callout: String = "", framed: Bool = false, watermark: String? = nil) -> FloatingPanel {
+    private static func editor(_ shot: CGImage, marks: Bool, callout: String = "", framed: Bool = false, watermark: String? = nil,
+                               magnifier: Bool = false, display: CGSize? = nil) -> FloatingPanel {
         let doc = AnnotationDocument()
-        let size = CGSize(width: shot.width / 2, height: shot.height / 2)
+        let size = display ?? CGSize(width: shot.width / 2, height: shot.height / 2)
+        if magnifier {
+            doc.add(.blur(CGRect(x: 32, y: 210, width: 200, height: 34)))
+            doc.add(.magnify(CGRect(x: 150, y: 44, width: 150, height: 150)))
+            doc.tool = .magnify
+            doc.selection = nil
+        }
         if marks {
             doc.color = .coral
             doc.add(.rectangle(CGRect(x: 28, y: 80, width: 300, height: 58)))
@@ -142,8 +162,12 @@ public enum GuideShots {
 
     // MARK: Capture
 
+    /// The pictures to shoot (`--guide-only`); empty for all of them.
+    private static var only: Set<String> = []
+
     /// `then`: state to set once the window is up (views may reset it as they appear).
     private static func snap(_ window: NSWindow, _ name: String, _ lang: String, _ out: URL, keep: Bool = false, then: () -> Void = {}) async {
+        guard only.isEmpty || only.contains(name) else { return }
         let visible = NSScreen.main?.visibleFrame ?? .zero
         window.setFrameOrigin(NSPoint(x: visible.midX - window.frame.width / 2, y: visible.midY - window.frame.height / 2))
         window.makeKeyAndOrderFront(nil)

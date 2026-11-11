@@ -143,7 +143,7 @@ enum ShotLinks {
                 cache = .some(found)
                 // macOS ties the item to the build that saved it (no Team ID to tie it to instead), so a new
                 // build or another tool's key makes it ask every time; saved again by this build, it stops asking.
-                if UserDefaults.standard.string(forKey: ownedKey) != buildHash { token = found }
+                if UserDefaults.standard.string(forKey: ownedKey) != buildHash { Self.token = found }
                 return found
             }
             // Denied or locked: no answer yet, ask again next time instead of caching "no key".
@@ -151,7 +151,7 @@ enum ShotLinks {
             let (old, final) = read(oldService)
             guard final else { return nil }
             if let old {
-                token = old
+                Self.token = old
                 // Only once the key is safely in its new place.
                 if read(service).key == old { SecItemDelete(query(oldService) as CFDictionary) }
             }

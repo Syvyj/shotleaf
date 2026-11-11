@@ -1,5 +1,7 @@
 import AppKit
+import Core
 import SwiftUI
+import Core
 import Vision
 import CoreImage
 
@@ -52,8 +54,7 @@ struct Backdrop: Equatable {
     func framed(_ image: CGImage, scale: CGFloat) -> CGImage? {
         let pad = (padding * scale).rounded()
         let size = CGSize(width: CGFloat(image.width) + 2 * pad, height: CGFloat(image.height) + 2 * pad)
-        guard let ctx = CGContext(data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: 0,
-                                  space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue),
+        guard let ctx = CGContext.sRGB(width: Int(size.width), height: Int(size.height)),
               let gradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB),
                                         colors: [colors.0.cgColor, colors.1.cgColor] as CFArray, locations: [0, 1])
         else { return nil }

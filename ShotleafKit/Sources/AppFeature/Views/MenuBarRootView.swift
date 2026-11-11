@@ -116,10 +116,7 @@ public struct MenuBarRootView: View {
 
     /// "14:05" today, "11 Oct 2026, 14:05" before, from the file's time-stamped name.
     static func recentTitle(_ url: URL) -> String {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd HH.mm.ss.SSS"
-        guard let date = f.date(from: url.deletingPathExtension().lastPathComponent) else { return url.lastPathComponent }
+        guard let date = ScreenshotWindows.recentName.date(from: url.deletingPathExtension().lastPathComponent) else { return url.lastPathComponent }
         return date.formatted(date: Calendar.current.isDateInToday(date) ? .omitted : .abbreviated, time: .shortened)
     }
 

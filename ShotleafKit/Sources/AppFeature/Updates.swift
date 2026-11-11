@@ -32,6 +32,11 @@ public enum Updates {
         var request = URLRequest(url: api, timeoutInterval: 20)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         let (data, _) = try await URLSession.shared.data(for: request)
+        return try release(from: data)
+    }
+
+    /// GitHub's answer for the latest release → its version, disk image and checksum file.
+    nonisolated static func release(from data: Data) throws -> Release {
         struct Answer: Decodable {
             struct Asset: Decodable { let name: String; let browser_download_url: URL }
             let tag_name: String
@@ -108,6 +113,7 @@ public enum Updates {
 
     /// Once this app has quit: the new copy takes its place (the old one comes back if
     /// that fails) and starts. Same place and signature, so the permissions stay.
+    @MainActor
     static func swapAndRelaunch(_ staged: URL) {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/sh")
