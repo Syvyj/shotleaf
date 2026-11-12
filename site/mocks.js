@@ -1,7 +1,7 @@
 // Plays the mockups while they're on screen. CSS draws the screenshot ones;
 // the clipboard and snippet ones are scripted here. With reduced motion,
 // every mockup just shows its finished state.
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches || new URLSearchParams(location.search).has("still"); // ponytail: ?still is a manual switch to see the reduced-motion page
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const visible = async (m) => { while (!m.dataset.vis) await sleep(300); };
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -88,11 +88,13 @@ document.querySelectorAll(".m-snip").forEach(snippet);
   const box = tabs[0].parentElement, every = 9000;
   let current = 0, started = performance.now(), held = false;
   const show = (i) => {
+    const from = current;
     current = i; started = performance.now();
     tabs.forEach((t, n) => { t.classList.toggle("on", n === i); t.setAttribute("aria-selected", n === i); });
     slides.forEach((s, n) => s.classList.toggle("on", n === i));
     // On a phone the tabs are a sideways strip: keep the current one in view.
     if (box.scrollWidth > box.clientWidth) box.scrollTo({ left: tabs[i].offsetLeft - 24, behavior: reduce ? "auto" : "smooth" });
+    box.dispatchEvent(new CustomEvent("tab", { detail: { from, to: i } }));
   };
   tabs.forEach((t, i) => t.addEventListener("click", () => { held = true; tabs[current].style.setProperty("--p", 0); show(i); }));
   if (reduce) return;

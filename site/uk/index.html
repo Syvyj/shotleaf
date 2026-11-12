@@ -17,7 +17,7 @@
 <link rel="alternate" hreflang="en" href="../">
 <link rel="preload" href="../fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/geist-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../style.css?v=df546cba">
+<link rel="stylesheet" href="../style.css?v=539e3364">
 <!-- Motion is an extra: without JS (or if it fails to start) the page shows as is. -->
 <script>document.documentElement.classList.add("js"); setTimeout(() => document.documentElement.classList.add("ready"), 2500);</script>
 </head>
@@ -51,6 +51,7 @@
     <a class="l" href="#install">Встановити</a>
     <a class="l lang" href="../" lang="en">EN</a>
     <a class="btn primary" href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg">Завантажити</a>
+    <i class="progress" aria-hidden="true"></i>
   </div>
 </div>
 
@@ -70,6 +71,7 @@
         <a class="btn primary" href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg>Завантажити для Mac</a>
         <a class="btn quiet" href="#support">Підтримати автора</a>
       </div>
+      <p class="rel"><a href="https://github.com/Syvyj/shotleaf/releases/tag/v0.2.2">Версія 0.2.2</a> · 11 листопада · вже <b data-roll>212</b> завантажень</p>
       <p class="req">Для macOS 15 і новіших на Apple silicon.</p>
     </div>
   </div>
@@ -207,6 +209,7 @@
           <div class="sel"></div>
           <div class="loupe" style="left:47%;top:42%"></div>
           <div class="hint"><span><kbd>тягніть</kbd>область</span><span><kbd>клік</kbd>вікно</span><span><kbd>↩</kbd>весь екран</span><span><kbd>R</kbd>повторити</span><span><kbd>C</kbd>копіювати колір</span><span><kbd>esc</kbd>скасувати</span></div>
+          <div class="try" aria-hidden="true">Потягніть тут, щоб спробувати</div>
           <div class="flash"></div>
         </div>
         <svg class="cursor" style="left:47%;top:42%"><use href="#cur"/></svg>
@@ -363,9 +366,9 @@
       <li><svg aria-hidden="true"><use href="#i-user-cross-rounded"/></svg><b>Без акаунта</b><span>Ні входу, ні аналітики, ні реклами.</span></li>
       <li><svg aria-hidden="true"><use href="#i-cpu-bolt"/></svg><b>Працює на вашому Mac</b><span>Розпізнавання й дописування тексту працюють без інтернету.</span></li>
       <li><svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg><b>У мережу лише по три речі</b><span>Модель для дописування (один раз, коли попросите), щоденна перевірка нової версії (можна вимкнути) і посилання, які ви створюєте.</span></li>
-      <li><svg aria-hidden="true"><use href="#i-cpu-bolt"/></svg><b>Легкий</b><span>0.0 % процесора у спокої, близько 50 МБ пам'яті, 14 МБ завантаження.</span></li>
+      <li><svg aria-hidden="true"><use href="#i-cpu-bolt"/></svg><b>Легкий</b><span>0.0 % процесора у спокої, близько <span data-count="50">50</span> МБ пам'яті, <span data-count="14">14</span> МБ завантаження.</span></li>
       <li><svg aria-hidden="true"><use href="#i-shield-check"/></svg><b>Паролі не потрапляють</b><span>Паролі з менеджерів паролів не потрапляють в історію; номери карток і токени не записуються на диск.</span></li>
-      <li><svg aria-hidden="true"><use href="#i-link-round"/></svg><b>Посилання, що зникають</b><span>Скріншот, яким ви поділилися посиланням, видаляється щонайпізніше через 12 годин.</span></li>
+      <li><svg aria-hidden="true"><use href="#i-link-round"/></svg><b>Посилання, що зникають</b><span>Скріншот, яким ви поділилися посиланням, видаляється щонайпізніше через <span data-count="12">12</span> годин.</span></li>
       <li><svg aria-hidden="true"><use href="#i-code-square"/></svg><b>Відкритий код</b><span>GPL-3.0: кожен рядок є на <a href="https://github.com/Syvyj/shotleaf">GitHub</a>.</span></li>
     </ul>
     <a class="more" href="../uk/privacy/">Сторінка приватності<svg aria-hidden="true"><use href="#i-arrow-right-up"/></svg></a>
@@ -407,7 +410,7 @@
 <script src="../vendor/gsap.min.js" defer></script>
 <script src="../vendor/ScrollTrigger.min.js" defer></script>
 <script src="../vendor/lenis.min.js" defer></script>
-<script src="../motion.js?v=df546cba" defer></script>
-<script src="../mocks.js?v=df546cba" defer></script>
+<script src="../motion.js?v=539e3364" defer></script>
+<script src="../mocks.js?v=539e3364" defer></script>
 </body>
 </html>
