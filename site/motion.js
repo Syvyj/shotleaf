@@ -102,8 +102,8 @@
     });
   }
 
-  // The download counter rolls like an odometer (each digit spins a full turn), then its frame snaps shut.
-  // Screen readers get the number once; hovering the chip rolls it again.
+  // The download count in the button rolls like an odometer (each digit spins a full turn).
+  // Screen readers get the number once; hovering the button rolls it again.
   document.querySelectorAll("[data-roll]").forEach((el) => {
     const n = el.textContent.trim();
     const label = document.createElement("span");
@@ -123,12 +123,7 @@
     el.replaceChildren(label, shown);
     const to = (i) => -(10 + digits[i]) * 5; // one full turn, then the digit (20 rows: 5% each)
     gsap.fromTo(cols, { yPercent: 0 }, { yPercent: to, duration: 1.8, delay: .5, stagger: { each: .12, from: "end" }, ease: "power4.out" });
-    const chip = el.closest(".fc");
-    if (!chip) return;
-    gsap.from(chip.querySelectorAll(":scope > i"), {
-      x: (i) => (i % 2 ? 8 : -8), y: (i) => (i < 2 ? -8 : 8), autoAlpha: 0, duration: .5, stagger: .04, ease: "back.out(2.4)", delay: 1.9,
-    });
-    chip.addEventListener("pointerenter", () => gsap.fromTo(cols, { yPercent: (i) => -digits[i] * 5 }, {
+    el.closest("a")?.addEventListener("pointerenter", () => gsap.fromTo(cols, { yPercent: (i) => -digits[i] * 5 }, {
       yPercent: to, duration: 1.1, stagger: { each: .08, from: "end" }, ease: "power3.inOut", overwrite: true,
     }));
   });

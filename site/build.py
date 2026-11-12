@@ -39,18 +39,14 @@ DOWNLOADS = dmg_downloads()
 
 
 def downloads_line(lang):
-    """The counter next to the hero's Download button, e.g. "212 downloads" / "212 завантажень"."""
+    """The second line of the hero's Download button: "212 downloads so far" / "вже 212 завантажень"."""
     n = DOWNLOADS
     if not n:
         return ""
     if lang == "en":
-        word = "download" if n == 1 else "downloads"
-    else:
-        word = "завантаження" if n % 10 in (1, 2, 3, 4) and n % 100 not in (11, 12, 13, 14) else "завантажень"
-    source = "on GitHub" if lang == "en" else "з GitHub"
-    return (f'<p class="downloads fc"><i></i><i></i><i></i><i></i>'
-            f'<svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg>'
-            f'<b data-roll>{n}</b> <span>{word} <small>{source}</small></span></p>')
+        return f'<small><b data-roll>{n}</b> {"download" if n == 1 else "downloads"} so far</small>'
+    word = "завантаження" if n % 10 in (1, 2, 3, 4) and n % 100 not in (11, 12, 13, 14) else "завантажень"
+    return f'<small>вже <b data-roll>{n}</b> {word}</small>'
 
 
 def donate_block():
