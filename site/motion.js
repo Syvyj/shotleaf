@@ -51,6 +51,7 @@
   document.querySelectorAll("[data-split]").forEach(split);
 
   gsap.registerPlugin(ScrollTrigger);
+  const mm = gsap.matchMedia();
 
   // One smooth-scroll engine, driven by GSAP's ticker so ScrollTrigger reads the same frame.
   const lenis = window.Lenis ? new Lenis({ anchors: { offset: -96 }, autoRaf: false }) : null;
@@ -129,11 +130,32 @@
   });
 
   // Then the copy and the windows under them.
-  const rise = [...document.querySelectorAll(".head > p, .tool .about, .tool .stagebox, .feats .feat, .facts li, .install li, .give a, .final-box > p, .final-box .btn, .guide-body figure")];
+  const rise = [...document.querySelectorAll(".head > p, .tool .about, .feats .feat, .facts li, .install li, .give a, .final-box > p, .final-box .btn, .guide-body figure")];
   if (rise.length) gsap.set(rise, { y: 34, autoAlpha: 0 });
   if (rise.length) ScrollTrigger.batch(rise, {
     start: "top 90%", once: true,
     onEnter: (els) => gsap.to(els, { y: 0, autoAlpha: 1, duration: .75, stagger: .07, ease: "power3.out", overwrite: true, clearProps: "transform,opacity,visibility" }),
+  });
+
+  // Each tool's window opens like a selection as you reach it, its keys drop in.
+  document.querySelectorAll(".tool").forEach((tool) => {
+    const mock = tool.querySelector(".stagebox > .mock");
+    if (!mock) return;
+    gsap.timeline({ scrollTrigger: { trigger: tool, start: "top 72%", once: true } })
+      .from(tool.querySelectorAll(".about .cap"), { y: -18, autoAlpha: 0, duration: .5, stagger: .07, ease: "back.out(2.4)" }, 0)
+      .fromTo(mock, { clipPath: "inset(10% 8% 10% 8% round 28px)", scale: .94, autoAlpha: 0 }, {
+        clipPath: "inset(0% 0% 0% 0% round 0px)", scale: 1, autoAlpha: 1, duration: 1, ease: "power3.out",
+        clearProps: "clipPath,transform,opacity,visibility",
+      }, .1);
+  });
+
+  // Wide screens: the windows drift against the scroll, and the hero eases away as you leave it.
+  mm.add("(min-width: 761px)", () => {
+    document.querySelectorAll(".tool").forEach((tool) => {
+      const box = tool.querySelector(".stagebox");
+      if (box) gsap.fromTo(box, { y: 40 }, { y: -40, ease: "none", scrollTrigger: { trigger: tool, start: "top bottom", end: "bottom top", scrub: true } });
+    });
+    if (has(".hero-top")) gsap.to(".hero-top", { y: -60, opacity: .2, ease: "none", scrollTrigger: { trigger: ".hero-top", start: "top 10%", end: "bottom top", scrub: true } });
   });
 
   // The closing frame snaps around the last call to action.
