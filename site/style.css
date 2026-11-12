@@ -120,6 +120,13 @@ kbd { font: 500 .8em/1 var(--font); padding: .28em .5em; border-radius: 6px; bac
 .hero .sub { font-size: 20px; color: var(--muted); max-width: 32em; margin: 0; line-height: 1.5; }
 .hero .cta { display: flex; gap: 12px; flex-wrap: wrap; }
 .hero .req { margin: 14px 0 0; font-size: 14px; color: var(--faint); }
+.hero .downloads { display: flex; align-items: center; gap: 9px; margin: 16px 0 0; font-size: 15px; color: var(--muted); }
+.hero .downloads + .req { margin-top: 6px; }
+.hero .downloads b { font-weight: 650; color: var(--text); }
+.hero .downloads i { position: relative; width: 9px; height: 9px; border-radius: 50%; background: var(--leaf); }
+.hero .downloads i::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--leaf); animation: dl-ping 2.4s ease-out infinite; }
+@keyframes dl-ping { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .hero .downloads i::after { animation: none; } }
 
 /* the tool switcher: tabs under the stage pick the window shown above */
 .slides { display: grid; text-align: left; margin: 72px auto 0; max-width: 1060px; position: relative; will-change: transform; }

@@ -4,8 +4,10 @@ plus 404.html and robots.txt. In a template, [[English||Українська]] p
 Run: python3 site/build.py"""
 import hashlib
 import html
+import json
 import os
 import re
+import urllib.request
 
 SITE = "https://shotleaf.syvyj.dev/"
 # Donation links: one without a handle isn't shown.
@@ -20,6 +22,32 @@ DONATE = [
 DOWNLOAD = "https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def dmg_downloads():
+    """How many times Shotleaf.dmg was downloaded, over every GitHub release; None when GitHub can't be reached."""
+    try:
+        with urllib.request.urlopen("https://api.github.com/repos/Syvyj/shotleaf/releases?per_page=100", timeout=8) as r:
+            releases = json.load(r)
+        return sum(a["download_count"] for rel in releases for a in rel["assets"] if a["name"].endswith(".dmg"))
+    except Exception as e:  # offline build: the page simply has no counter
+        print("no download count:", e)
+        return None
+
+
+DOWNLOADS = dmg_downloads()
+
+
+def downloads_line(lang):
+    """The counter next to the hero's Download button, e.g. "212 downloads" / "212 завантажень"."""
+    n = DOWNLOADS
+    if not n:
+        return ""
+    if lang == "en":
+        word = "download" if n == 1 else "downloads"
+    else:
+        word = "завантаження" if n % 10 in (1, 2, 3, 4) and n % 100 not in (11, 12, 13, 14) else "завантажень"
+    return f'<p class="downloads"><i aria-hidden="true"></i><b data-count="{n}">{n}</b> {word}</p>'
 
 
 def donate_block():
@@ -62,7 +90,7 @@ def render(template, lang, folder=""):
     root = "../" * here.count("/")
     # A new version of the CSS/JS gets a new URL, so browsers don't keep the old one.
     ver = hashlib.sha1(b"".join(open(os.path.join(HERE, f), "rb").read() for f in ("style.css", "mocks.js", "motion.js"))).hexdigest()[:8]
-    values = {"ver": ver, "download": DOWNLOAD, "lang": lang, "root": root, "home": root + ("" if lang == "en" else "uk/"),
+    values = {"ver": ver, "download": DOWNLOAD, "downloads": downloads_line(lang), "lang": lang, "root": root, "home": root + ("" if lang == "en" else "uk/"),
               "other": root + there, "other_lang": "uk" if lang == "en" else "en",
               "url": SITE + here, "og": f"{SITE}assets/og-{lang}.png"}
     page = re.sub(r"\{\{(\w+)\}\}", lambda m: values[m.group(1)], page)
