@@ -221,6 +221,24 @@
     "--spin": 0, "--grow": 1, ease: "none", scrollTrigger: { trigger: ".band", start: "top bottom", end: "top 35%", scrub: true },
   });
 
+  // The big download buttons lean toward a mouse pointer.
+  mm.add("(pointer: fine) and (min-width: 761px)", () => {
+    const off = [...document.querySelectorAll(".hero .btn.primary, .final-box .btn.primary")].map((btn) => {
+      const mx = gsap.quickTo(btn, "--mx", { duration: .5, ease: "power3.out" }), my = gsap.quickTo(btn, "--my", { duration: .5, ease: "power3.out" });
+      const move = (e) => {
+        if (e.pointerType !== "mouse") return;
+        const r = btn.getBoundingClientRect();
+        mx((e.clientX - r.left - r.width / 2) * .3);
+        my((e.clientY - r.top - r.height / 2) * .3);
+      };
+      const leave = () => { mx(0); my(0); };
+      btn.addEventListener("pointermove", move);
+      btn.addEventListener("pointerleave", leave);
+      return () => { btn.removeEventListener("pointermove", move); btn.removeEventListener("pointerleave", leave); gsap.set(btn, { "--mx": 0, "--my": 0 }); };
+    });
+    return () => off.forEach((f) => f());
+  });
+
   // The closing frame snaps around the last call to action.
   if (has(".final-box")) gsap.from(".final-box > i", {
     x: (i) => -out(i) * 2.5, y: (i) => -down(i) * 2.5, autoAlpha: 0, duration: .7, stagger: .05, ease: "back.out(1.8)",
