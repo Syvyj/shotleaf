@@ -1,7 +1,7 @@
 // Plays the mockups while they're on screen. CSS draws the screenshot ones;
 // the clipboard and snippet ones are scripted here. With reduced motion,
 // every mockup just shows its finished state.
-const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches || new URLSearchParams(location.search).has("still"); // ponytail: ?still is a manual switch to see the reduced-motion page
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const visible = async (m) => { while (!m.dataset.vis) await sleep(300); };
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);

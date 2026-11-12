@@ -5,7 +5,7 @@
 (() => {
   const root = document.documentElement;
   const done = () => root.classList.add("ready");
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches || new URLSearchParams(location.search).has("still"); // ponytail: ?still is a manual switch to see the reduced-motion page
 
   // The guide's contents: the section being read is marked (not motion, so always on).
   const toc = [...document.querySelectorAll(".toc a")];
@@ -17,6 +17,7 @@
   }
 
   if (reduce || !window.gsap || !window.ScrollTrigger) return done();
+  root.classList.add("gs");
   const has = (selector) => document.querySelector(selector) !== null;
 
   // Word split. Screen readers get the heading's text once; the moving words are
@@ -80,6 +81,10 @@
     .from(".tabs .tab", { y: 26, autoAlpha: 0, duration: .6, stagger: .06, clearProps: "transform,opacity,visibility" }, .55);
   done();
   addEventListener("resize", measure);
+
+  // Reading progress in the nav, and the nav firms up once the page has moved.
+  if (has(".nav .progress")) gsap.to(".nav .progress", { scaleX: 1, ease: "none", scrollTrigger: { start: 0, end: "max", scrub: .3 } });
+  ScrollTrigger.create({ start: 80, end: "+=100000", toggleClass: { targets: ".nav", className: "scrolled" } });
 
   // Section headings, word by word as they arrive.
   if (has(".guide-head")) gsap.from(".guide-head h1 .wi", { yPercent: 105, duration: .8, stagger: .05, ease: "power3.out" });
