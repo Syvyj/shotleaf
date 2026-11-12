@@ -24,29 +24,38 @@ DOWNLOAD = "https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def dmg_downloads():
-    """How many times Shotleaf.dmg was downloaded, over every GitHub release; None when GitHub can't be reached."""
+def release_info():
+    """The newest release and how many times Shotleaf.dmg was downloaded over all releases; None when GitHub can't be reached."""
     try:
         with urllib.request.urlopen("https://api.github.com/repos/Syvyj/shotleaf/releases?per_page=100", timeout=8) as r:
-            releases = json.load(r)
-        return sum(a["download_count"] for rel in releases for a in rel["assets"] if a["name"].endswith(".dmg"))
-    except Exception as e:  # offline build: the page simply has no counter
-        print("no download count:", e)
+            releases = [rel for rel in json.load(r) if not rel["draft"] and not rel["prerelease"]]
+        latest = releases[0]
+        return {
+            "downloads": sum(a["download_count"] for rel in releases for a in rel["assets"] if a["name"].endswith(".dmg")),
+            "version": latest["tag_name"].lstrip("v"),
+            "date": latest["published_at"][:10],
+            "url": latest["html_url"],
+        }
+    except Exception as e:  # offline build: the page simply has no release line
+        print("no release info:", e)
         return None
 
 
-DOWNLOADS = dmg_downloads()
+RELEASE = release_info()
+MONTHS_UK = ["січня", "лютого", "березня", "квітня", "травня", "червня", "липня", "серпня", "вересня", "жовтня", "листопада", "грудня"]
+MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 
-def downloads_line(lang):
-    """The second line of the hero's Download button: "212 downloads so far" / "вже 212 завантажень"."""
-    n = DOWNLOADS
-    if not n:
+def release_line(lang):
+    """Under the hero buttons: "Version 0.2.2 · November 11 · 212 downloads so far" / "Версія 0.2.2 · 11 листопада · вже 212 завантажень"."""
+    if not RELEASE:
         return ""
+    n, (y, m, d) = RELEASE["downloads"], map(int, RELEASE["date"].split("-"))
+    link = f'<a href="{html.escape(RELEASE["url"])}">{"Version" if lang == "en" else "Версія"} {RELEASE["version"]}</a>'
     if lang == "en":
-        return f'<small><b data-roll>{n}</b> {"download" if n == 1 else "downloads"} so far</small>'
+        return f'<p class="rel">{link} · {MONTHS_EN[m - 1]} {d} · <b data-roll>{n}</b> {"download" if n == 1 else "downloads"} so far</p>'
     word = "завантаження" if n % 10 in (1, 2, 3, 4) and n % 100 not in (11, 12, 13, 14) else "завантажень"
-    return f'<small>вже <b data-roll>{n}</b> {word}</small>'
+    return f'<p class="rel">{link} · {d} {MONTHS_UK[m - 1]} · вже <b data-roll>{n}</b> {word}</p>'
 
 
 def donate_block():
@@ -89,7 +98,7 @@ def render(template, lang, folder=""):
     root = "../" * here.count("/")
     # A new version of the CSS/JS gets a new URL, so browsers don't keep the old one.
     ver = hashlib.sha1(b"".join(open(os.path.join(HERE, f), "rb").read() for f in ("style.css", "mocks.js", "motion.js"))).hexdigest()[:8]
-    values = {"ver": ver, "download": DOWNLOAD, "downloads": downloads_line(lang), "lang": lang, "root": root, "home": root + ("" if lang == "en" else "uk/"),
+    values = {"ver": ver, "download": DOWNLOAD, "release": release_line(lang), "lang": lang, "root": root, "home": root + ("" if lang == "en" else "uk/"),
               "other": root + there, "other_lang": "uk" if lang == "en" else "en",
               "url": SITE + here, "og": f"{SITE}assets/og-{lang}.png"}
     page = re.sub(r"\{\{(\w+)\}\}", lambda m: values[m.group(1)], page)

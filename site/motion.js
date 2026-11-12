@@ -102,8 +102,8 @@
     });
   }
 
-  // The download count in the button rolls like an odometer (each digit spins a full turn).
-  // Screen readers get the number once; hovering the button rolls it again.
+  // The download count rolls like an odometer (each digit spins a full turn).
+  // Screen readers get the number once; hovering its line rolls it again.
   document.querySelectorAll("[data-roll]").forEach((el) => {
     const n = el.textContent.trim();
     const label = document.createElement("span");
@@ -123,7 +123,7 @@
     el.replaceChildren(label, shown);
     const to = (i) => -(10 + digits[i]) * 5; // one full turn, then the digit (20 rows: 5% each)
     gsap.fromTo(cols, { yPercent: 0 }, { yPercent: to, duration: 1.8, delay: .5, stagger: { each: .12, from: "end" }, ease: "power4.out" });
-    el.closest("a")?.addEventListener("pointerenter", () => gsap.fromTo(cols, { yPercent: (i) => -digits[i] * 5 }, {
+    el.parentElement.addEventListener("pointerenter", () => gsap.fromTo(cols, { yPercent: (i) => -digits[i] * 5 }, {
       yPercent: to, duration: 1.1, stagger: { each: .08, from: "end" }, ease: "power3.inOut", overwrite: true,
     }));
   });
