@@ -203,6 +203,24 @@
   };
   if (matchMedia("(pointer: fine)").matches) document.querySelectorAll(".m-pick").forEach(tryPicker);
 
+  // The numbers count up, the privacy icons pop in, install steps fill as you read them, the support spark turns in.
+  document.querySelectorAll("[data-count]").forEach((el) => gsap.from(el, {
+    textContent: 0, snap: { textContent: 1 }, duration: 1.4, ease: "power2.out",
+    scrollTrigger: { trigger: el, start: "top 90%", once: true },
+  }));
+  const icons = document.querySelectorAll(".facts svg");
+  if (icons.length) {
+    gsap.set(icons, { scale: 0, rotation: -45 });
+    ScrollTrigger.batch(icons, {
+      start: "top 90%", once: true,
+      onEnter: (els) => gsap.to(els, { scale: 1, rotation: 0, duration: .6, stagger: .07, ease: "back.out(2.5)", overwrite: true }),
+    });
+  }
+  if (has(".install li")) gsap.to(".install li", { "--fill": 1, stagger: .5, ease: "none", scrollTrigger: { trigger: ".install", start: "top 80%", end: "bottom 55%", scrub: true } });
+  if (has(".band .spark")) gsap.fromTo(".band .spark", { "--spin": -90, "--grow": .6 }, {
+    "--spin": 0, "--grow": 1, ease: "none", scrollTrigger: { trigger: ".band", start: "top bottom", end: "top 35%", scrub: true },
+  });
+
   // The closing frame snaps around the last call to action.
   if (has(".final-box")) gsap.from(".final-box > i", {
     x: (i) => -out(i) * 2.5, y: (i) => -down(i) * 2.5, autoAlpha: 0, duration: .7, stagger: .05, ease: "back.out(1.8)",

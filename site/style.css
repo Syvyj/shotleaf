@@ -214,7 +214,7 @@ kbd { font: 500 .8em/1 var(--font); padding: .28em .5em; border-radius: 6px; bac
 
 /* support: the dark forest band, opened by scrolling (motion.js), so it catches the eye */
 .band { margin-top: 150px; padding: 110px 0 120px; text-align: center; background: radial-gradient(70% 60% at 50% 0%, rgba(124, 179, 66, .3), transparent 70%), var(--forest); color: #eef4e6; }
-.band .spark { display: block; width: 96px; height: 96px; margin: 0 auto 26px; transition: transform .6s cubic-bezier(.2, .9, .2, 1.3), filter .6s; filter: drop-shadow(0 0 18px rgba(198, 232, 107, .35)); }
+.band .spark { rotate: calc(var(--spin, 0) * 1deg); scale: var(--grow, 1); display: block; width: 96px; height: 96px; margin: 0 auto 26px; transition: transform .6s cubic-bezier(.2, .9, .2, 1.3), filter .6s; filter: drop-shadow(0 0 18px rgba(198, 232, 107, .35)); }
 .band:has(.give a:hover, .give a:focus-visible) .spark { transform: scale(1.18) rotate(12deg); filter: drop-shadow(0 0 30px rgba(198, 232, 107, .8)); }
 .band .eyebrow { color: #a9b8a0; }
 .band h2 { font: 650 clamp(38px, 5.4vw, 76px)/1 var(--font); letter-spacing: -.05em; margin: 0 0 18px; }
@@ -238,6 +238,7 @@ kbd { font: 500 .8em/1 var(--font); padding: .28em .5em; border-radius: 6px; bac
 .facts svg { width: 26px; height: 26px; color: var(--leaf); align-self: center; }
 .facts b { font-weight: 600; font-size: clamp(19px, 1.9vw, 24px); letter-spacing: -.02em; }
 .facts span { color: var(--muted); font-size: 16.5px; }
+[data-count] { font-variant-numeric: tabular-nums; }
 .facts a { color: var(--deep); text-decoration: underline; text-underline-offset: 3px; }
 .private-card .more { display: inline-flex; align-items: center; gap: 6px; margin-top: 30px; color: var(--deep); font-weight: 600; }
 .private-card .more svg { width: 18px; height: 18px; color: var(--leaf); transition: transform .2s; }
@@ -246,7 +247,7 @@ kbd { font: 500 .8em/1 var(--font); padding: .28em .5em; border-radius: 6px; bac
 /* install */
 .install { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; counter-reset: s; padding: 0; margin: 0; }
 .install li { list-style: none; counter-increment: s; padding: 24px 24px 26px; border-radius: 18px; background: var(--card); border: 1px solid var(--edge); color: var(--muted); font-size: 15.5px; }
-.install li::before { content: "0" counter(s); display: block; margin-bottom: 18px; font: 650 44px/1 var(--font); letter-spacing: -.04em; color: transparent; -webkit-text-stroke: 1.2px var(--leaf); }
+.install li::before { content: "0" counter(s); display: block; margin-bottom: 18px; font: 650 44px/1 var(--font); letter-spacing: -.04em; color: color-mix(in srgb, var(--leaf) calc(var(--fill, 0) * 100%), transparent); -webkit-text-stroke: 1.2px var(--leaf); }
 .install b { color: var(--text); font-weight: 600; }
 
 /* the closing call to action, captured in the same frame as the hero */
