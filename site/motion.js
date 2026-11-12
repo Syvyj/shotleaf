@@ -69,6 +69,38 @@
     dim.textContent = `${Math.round(r.width * k)} × ${Math.round(r.height * k)}`;
   };
 
+  // The tool tabs: a capture frame moves to the picked tab, and its window opens like a selection.
+  const tabBox = document.querySelector(".tabs");
+  if (tabBox) {
+    const tabs = [...tabBox.querySelectorAll(".tab")], slides = [...document.querySelectorAll(".slide")];
+    const sel = document.createElement("span");
+    sel.className = "tab-sel fc";
+    sel.setAttribute("aria-hidden", "true");
+    sel.innerHTML = "<i></i>".repeat(4);
+    tabBox.append(sel);
+    const place = (tab, duration) => gsap.to(sel, {
+      x: tab.offsetLeft - 6, y: tab.offsetTop - 6, width: tab.offsetWidth + 12, height: tab.offsetHeight + 12,
+      duration, ease: "power3.inOut", overwrite: "auto",
+    });
+    const placeNow = () => place(tabBox.querySelector(".tab.on") || tabs[0], 0);
+    placeNow();
+    addEventListener("resize", placeNow);
+    document.fonts?.ready.then(placeNow);
+    tabBox.addEventListener("tab", (e) => {
+      const { from, to } = e.detail;
+      if (from === to) return;
+      place(tabs[to], .55);
+      gsap.fromTo(slides[from], { autoAlpha: 1 }, {
+        autoAlpha: 0, y: -12, scale: .985, duration: .35, ease: "power2.in", overwrite: true, clearProps: "opacity,visibility,transform,clipPath",
+      });
+      gsap.fromTo(slides[to], { autoAlpha: 0, y: 24, clipPath: "inset(8% 6% 8% 6% round 28px)" }, {
+        autoAlpha: 1, y: 0, clipPath: "inset(0% 0% 0% 0% round 0px)", duration: .75, delay: .12, ease: "power3.out", overwrite: true,
+        clearProps: "opacity,visibility,transform,clipPath",
+      });
+      gsap.fromTo(tabs[to].querySelectorAll(".cap"), { y: 4 }, { y: 0, duration: .45, stagger: .05, ease: "back.out(3)" });
+    });
+  }
+
   // Hero: navigation, the text under the heading and the buttons never wait for the intro.
   const out = (i) => (i % 2 ? 1 : -1) * 16, down = (i) => (i < 2 ? -1 : 1) * 16;
   if (has(".hero")) gsap.timeline({ defaults: { ease: "power3.out" } })
@@ -78,7 +110,8 @@
     .from(".hero .frame .dim", { autoAlpha: 0, duration: .35, onStart: measure }, .8)
     .from(".hero .icon", { y: 30, rotation: -8, autoAlpha: 0, duration: 1 }, .1)
     .from(".slides", { y: 70, autoAlpha: 0, duration: 1.1 }, .3)
-    .from(".tabs .tab", { y: 26, autoAlpha: 0, duration: .6, stagger: .06, clearProps: "transform,opacity,visibility" }, .55);
+    .from(".tabs .tab", { y: 26, autoAlpha: 0, duration: .6, stagger: .06, clearProps: "transform,opacity,visibility" }, .55)
+    .from(".tabs .tab-sel", { autoAlpha: 0, scale: .9, duration: .5, ease: "back.out(2)" }, .95);
   done();
   addEventListener("resize", measure);
 

@@ -129,7 +129,9 @@ kbd { font: 500 .8em/1 var(--font); padding: .28em .5em; border-radius: 6px; bac
 .slide .win { box-shadow: 0 0 0 1px var(--edge), 0 50px 100px -40px rgba(30, 50, 20, .45), 0 18px 40px -20px rgba(30, 50, 20, .25); }
 .slide .m-scroll, .slide .m-ocr { max-width: 900px; margin: 0 auto; width: 100%; }
 .slide .m-clip, .slide .m-type { max-width: 820px; margin: 0 auto; width: 100%; }
-.tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-top: 56px; text-align: left; }
+.tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-top: 56px; text-align: left; position: relative; }
+.tab-sel { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; --c: 14px; --t: 2.5px; }
+.gs .slide, .gs .slide.on { transition: none; }
 .tab { position: relative; overflow: hidden; font: inherit; color: inherit; text-align: left; cursor: pointer; padding: 18px 18px 20px; border-radius: 18px; background: var(--card); border: 1px solid var(--edge); transition: border-color .2s, box-shadow .2s, transform .15s; }
 .tab:hover { transform: translateY(-2px); }
 .tab:active { transform: translateY(0) scale(.985); }
@@ -452,7 +454,7 @@ footer small a { text-decoration: underline; text-underline-offset: 2px; }
   .hero-row { grid-template-columns: minmax(0, 1fr); }
   .slides { margin-top: 48px; }
   /* tabs become a strip you swipe sideways */
-  .tabs { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; margin: 36px -24px 0; padding: 4px 24px 10px; scrollbar-width: none; }
+  .tabs { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; margin: 32px -24px 0; padding: 8px 24px 10px; scrollbar-width: none; }
   .tabs::-webkit-scrollbar { display: none; }
   .tab { flex: 0 0 230px; scroll-snap-align: start; }
   .tool, #scrolling, #clipboard, #completion { grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 52px 0; }
