@@ -158,6 +158,51 @@
     if (has(".hero-top")) gsap.to(".hero-top", { y: -60, opacity: .2, ease: "none", scrollTrigger: { trigger: ".hero-top", start: "top 10%", end: "bottom top", scrub: true } });
   });
 
+  // The screenshot picker can be tried: drag on it for a selection with its size, the flash, Escape cancels.
+  const tryPicker = (mock) => {
+    const desk = mock.querySelector(".desk"), sel = mock.querySelector(".sel"), loupe = mock.querySelector(".loupe"), flash = mock.querySelector(".flash");
+    const loupeStyle = loupe.getAttribute("style");
+    let start = null, shot = null;
+    const at = (e) => {
+      const r = desk.getBoundingClientRect();
+      return { x: gsap.utils.clamp(0, 100, (e.clientX - r.left) / r.width * 100), y: gsap.utils.clamp(0, 100, (e.clientY - r.top) / r.height * 100), r };
+    };
+    const reset = () => {
+      start = null; shot?.kill(); shot = null;
+      mock.classList.remove("live");
+      sel.removeAttribute("style"); flash.removeAttribute("style"); loupe.setAttribute("style", loupeStyle);
+    };
+    desk.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      reset();
+      desk.setPointerCapture(e.pointerId);
+      start = at(e);
+      mock.classList.add("live");
+    });
+    desk.addEventListener("pointermove", (e) => {
+      if (!start) return;
+      const p = at(e), k = devicePixelRatio || 1;
+      const w = Math.abs(p.x - start.x), h = Math.abs(p.y - start.y);
+      Object.assign(sel.style, { left: Math.min(p.x, start.x) + "%", top: Math.min(p.y, start.y) + "%", width: w + "%", height: h + "%" });
+      sel.style.setProperty("--pw", Math.round(w / 100 * p.r.width * k));
+      sel.style.setProperty("--ph", Math.round(h / 100 * p.r.height * k));
+      Object.assign(loupe.style, { left: p.x + "%", top: p.y + "%" });
+    });
+    desk.addEventListener("pointerup", (e) => {
+      if (!start) return;
+      const p = at(e), small = Math.abs(p.x - start.x) / 100 * p.r.width < 6 || Math.abs(p.y - start.y) / 100 * p.r.height < 6;
+      start = null;
+      if (small) return reset();
+      shot = gsap.timeline({ onComplete: reset })
+        .fromTo(flash, { opacity: .6 }, { opacity: 0, duration: .45, ease: "power2.out" })
+        .fromTo(sel, { scale: 1.03 }, { scale: 1, duration: .4, ease: "back.out(3)" }, 0)
+        .to(sel, { autoAlpha: 0, duration: .4 }, 1.4);
+    });
+    desk.addEventListener("pointercancel", reset);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && mock.classList.contains("live")) reset(); });
+  };
+  if (matchMedia("(pointer: fine)").matches) document.querySelectorAll(".m-pick").forEach(tryPicker);
+
   // The closing frame snaps around the last call to action.
   if (has(".final-box")) gsap.from(".final-box > i", {
     x: (i) => -out(i) * 2.5, y: (i) => -down(i) * 2.5, autoAlpha: 0, duration: .7, stagger: .05, ease: "back.out(1.8)",

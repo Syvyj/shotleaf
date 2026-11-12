@@ -356,6 +356,14 @@ footer small a { text-decoration: underline; text-underline-offset: 2px; }
 @keyframes p-sel { 0%, 12% { --pw: 0; --ph: 0; opacity: 0; } 13% { opacity: 1; --pw: 0; --ph: 0; } 55%, 86% { --pw: 860; --ph: 360; opacity: 1; } 92%, 100% { --pw: 860; --ph: 360; opacity: 0; } }
 @keyframes p-cur { 0% { left: 70%; top: 70%; } 12% { left: 11%; top: 16%; } 55%, 100% { left: 47%; top: 42%; } }
 @keyframes p-flash { 0%, 64% { opacity: 0; } 66% { opacity: .55; } 72%, 100% { opacity: 0; } }
+.m-pick .try { display: none; }
+@media (pointer: fine) {
+  .gs .m-pick .try { display: block; position: absolute; right: 3%; top: 4%; font: 600 1.5cqw/1 -apple-system, sans-serif; padding: .9cqw 1.4cqw; border-radius: 99px; background: #1d231b; color: #fff; }
+  .gs .m-pick .desk { cursor: crosshair; user-select: none; -webkit-user-select: none; }
+}
+.m-pick.live .sel, .m-pick.live .loupe, .m-pick.live .flash { animation: none; }
+.m-pick.live .sel { opacity: 1; }
+.m-pick.live .cursor, .m-pick.live .try { display: none; }
 
 /* — scrolling capture — */
 @property --sc { syntax: "<integer>"; inherits: true; initial-value: 2834; }
