@@ -91,7 +91,7 @@
       const { from, to } = e.detail;
       if (from === to) return;
       place(tabs[to], .55);
-      gsap.fromTo(slides[from], { autoAlpha: 1 }, {
+      gsap.fromTo(slides[from], { autoAlpha: 1, y: 0, scale: 1 }, {
         autoAlpha: 0, y: -12, scale: .985, duration: .35, ease: "power2.in", overwrite: true, clearProps: "opacity,visibility,transform,clipPath",
       });
       gsap.fromTo(slides[to], { autoAlpha: 0, y: 24, clipPath: "inset(8% 6% 8% 6% round 28px)" }, {
@@ -134,7 +134,7 @@
   if (rise.length) gsap.set(rise, { y: 34, autoAlpha: 0 });
   if (rise.length) ScrollTrigger.batch(rise, {
     start: "top 90%", once: true,
-    onEnter: (els) => gsap.to(els, { y: 0, autoAlpha: 1, duration: .75, stagger: .07, ease: "power3.out", overwrite: true, clearProps: "transform,opacity,visibility" }),
+    onEnter: (els) => gsap.to(els, { y: 0, autoAlpha: 1, duration: .75, stagger: .07, ease: "power3.out", overwrite: "auto", clearProps: "transform,opacity,visibility" }),
   });
 
   // Each tool's window opens like a selection as you reach it, its keys drop in.
@@ -177,6 +177,7 @@
       reset();
       desk.setPointerCapture(e.pointerId);
       start = at(e);
+      Object.assign(sel.style, { left: start.x + "%", top: start.y + "%", width: "0%", height: "0%" });
       mock.classList.add("live");
     });
     desk.addEventListener("pointermove", (e) => {
@@ -204,8 +205,8 @@
   if (matchMedia("(pointer: fine)").matches) document.querySelectorAll(".m-pick").forEach(tryPicker);
 
   // The numbers count up, the privacy icons pop in, install steps fill as you read them, the support spark turns in.
-  document.querySelectorAll("[data-count]").forEach((el) => gsap.from(el, {
-    textContent: 0, snap: { textContent: 1 }, duration: 1.4, ease: "power2.out",
+  document.querySelectorAll("[data-count]").forEach((el) => gsap.fromTo(el, { textContent: 0 }, {
+    textContent: +el.dataset.count, snap: { textContent: 1 }, duration: 1.4, ease: "power2.out", immediateRender: false,
     scrollTrigger: { trigger: el, start: "top 90%", once: true },
   }));
   const icons = document.querySelectorAll(".facts svg");
