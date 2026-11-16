@@ -586,3 +586,19 @@ details p { color: var(--muted); padding-left: 26px; }
 .missing { text-align: center; padding-top: 22vh; }
 .missing img { border-radius: 22px; }
 .missing h1 { font-size: clamp(28px, 4vw, 40px); }
+
+/* From the same author: the other apps, each card warmed by its own colour */
+.kin .head { margin-top: 110px; }
+.kin-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.kin-card { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 8px 20px; align-items: center; padding: 26px 56px 26px 26px; border-radius: 22px;
+  background: radial-gradient(90% 120% at 0% 0%, rgba(var(--tone), .16), transparent 60%), var(--card); border: 1px solid var(--edge); color: var(--text);
+  transition: transform .2s, border-color .2s, box-shadow .2s; }
+.kin-card:hover, .kin-card:focus-visible { transform: translateY(-2px); border-color: rgba(var(--tone), .6); box-shadow: 0 20px 44px -24px rgba(var(--tone), .7); }
+.kin-card img { grid-row: span 2; width: 64px; height: 64px; border-radius: 15px; }
+.kin-card b { display: block; font-weight: 600; font-size: 20px; letter-spacing: -.02em; margin-bottom: 4px; }
+.kin-card small { color: var(--muted); font-size: 15px; }
+.kin-tag { justify-self: start; font: 500 12px/1 var(--mono); font-style: normal; text-transform: uppercase; letter-spacing: .02em; color: var(--muted); }
+.kin-arrow { position: absolute; right: 22px; top: 22px; width: 20px; height: 20px; color: rgb(var(--tone)); transition: transform .2s; }
+.kin-card:hover .kin-arrow { transform: translate(2px, -2px); }
+@media (max-width: 760px) { .kin-cards { grid-template-columns: 1fr; } .kin-card { align-items: start; } }
+.kin { margin-bottom: 70px; }

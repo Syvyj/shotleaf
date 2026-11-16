@@ -118,6 +118,16 @@ The code is in the `ShotleafKit` Swift package (`Core`, `CaptureKit`, `Perceptio
 
 Bugs and ideas go to [Issues](https://github.com/Syvyj/shotleaf/issues/new/choose) (**Report a Problem…** in the menu fills in the versions); questions to [Discussions](https://github.com/Syvyj/shotleaf/discussions).
 
+## More from the author
+
+[![Likhtar Home](https://raw.githubusercontent.com/Syvyj/Syvyj/main/assets/likhtar-home-card.png)](https://likhtar.syvyj.dev)
+
+**Likhtar Home.** A calm home screen for Android TV and Google TV: films first, no ads. [Website](https://likhtar.syvyj.dev) · [GitHub](https://github.com/Syvyj/likhtar-home)
+
+[![Dropyk](https://raw.githubusercontent.com/Syvyj/Syvyj/main/assets/dropyk-card.png)](https://dropyk.syvyj.dev)
+
+**Dropyk.** Files and links from your phone to the TV in one scan. And [Quick Share on a Mac](https://github.com/Syvyj/dropyk-mac). [Website](https://dropyk.syvyj.dev) · [GitHub](https://github.com/Syvyj/dropyk-android)
+
 ## Support
 
 Donations support my time on Shotleaf and my other apps: [support the author](https://shotleaf.syvyj.dev/#support).
@@ -247,6 +257,16 @@ scripts/run.sh                 # зібрати, встановити в ~/Appli
 ## Питання, помилки, ідеї
 
 Помилки та ідеї — в [Issues](https://github.com/Syvyj/shotleaf/issues/new/choose) («Повідомити про проблему…» в меню сам підставить версії), питання — у [Discussions](https://github.com/Syvyj/shotleaf/discussions).
+
+## Від того ж автора
+
+[![Likhtar Home](https://raw.githubusercontent.com/Syvyj/Syvyj/main/assets/likhtar-home-card.png)](https://likhtar.syvyj.dev/uk/)
+
+**Likhtar Home.** Спокійний домашній екран для Android TV і Google TV: спершу фільми, без реклами. [Сайт](https://likhtar.syvyj.dev/uk/) · [GitHub](https://github.com/Syvyj/likhtar-home)
+
+[![Dropyk](https://raw.githubusercontent.com/Syvyj/Syvyj/main/assets/dropyk-card.png)](https://dropyk.syvyj.dev/uk/)
+
+**Dropyk.** Файли й посилання з телефона на телевізор одним скануванням. І [Quick Share на Mac](https://github.com/Syvyj/dropyk-mac). [Сайт](https://dropyk.syvyj.dev/uk/) · [GitHub](https://github.com/Syvyj/dropyk-android)
 
 ## Підтримка
 

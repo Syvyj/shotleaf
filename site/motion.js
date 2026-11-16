@@ -156,7 +156,7 @@
   });
 
   // Then the copy and the windows under them.
-  const rise = [...document.querySelectorAll(".head > p, .tool .about, .feats .feat, .facts li, .install li, .give a, .final-box > p, .final-box .btn, .guide-body figure")];
+  const rise = [...document.querySelectorAll(".head > p, .tool .about, .feats .feat, .facts li, .install li, .give a, .kin-card, .final-box > p, .final-box .btn, .guide-body figure")];
   if (rise.length) gsap.set(rise, { y: 34, autoAlpha: 0 });
   if (rise.length) ScrollTrigger.batch(rise, {
     start: "top 90%", once: true,
