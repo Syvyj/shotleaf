@@ -28,9 +28,12 @@ APP="$OUT/Shotleaf.app"
 cp -R build/ReleaseData/Build/Products/Release/Shotleaf.app "$APP"
 
 # Inside out: bundled libraries first, then the app with its entitlements (no get-task-allow).
-find "$APP/Contents/Frameworks" -maxdepth 1 \( -name "*.dylib" -o -name "*.framework" \) 2>/dev/null | while read -r lib; do
-  codesign --force --options runtime --timestamp=none -s "$IDENTITY" "$lib"
-done
+# (Since 0.3.0 there are none and no Frameworks folder; kept for when one comes back.)
+if [ -d "$APP/Contents/Frameworks" ]; then
+  find "$APP/Contents/Frameworks" -maxdepth 1 \( -name "*.dylib" -o -name "*.framework" \) | while read -r lib; do
+    codesign --force --options runtime --timestamp=none -s "$IDENTITY" "$lib"
+  done
+fi
 codesign --force --options runtime --timestamp=none --entitlements App/Shotleaf.entitlements -s "$IDENTITY" "$APP"
 codesign --verify --deep --strict "$APP"
 if codesign -d --entitlements - "$APP" 2>/dev/null | grep -q get-task-allow; then echo "get-task-allow left in" >&2; exit 1; fi
