@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 
 - Text completion is gone, with its emoji picker and typo fixes: it held about 2.5 GB of memory while you typed and needed a 3.6 GB download. The first launch deletes the downloaded model (from `~/.cache/huggingface`) and the writing samples it kept. Accessibility is now only for snippets and pasting from the history.
 - Shotleaf no longer uses any third-party libraries, so the download is smaller and the third-party licences page is gone.
