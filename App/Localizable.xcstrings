@@ -4049,6 +4049,16 @@
         }
       }
     },
+    "The disk is almost full (%@ free), so macOS can’t prepare text recognition. Free up a few gigabytes and try again.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Диск майже заповнений (вільно %@), тож macOS не може підготувати розпізнавання тексту. Звільніть кілька гігабайтів і спробуйте ще раз."
+          }
+        }
+      }
+    },
     "The downloaded app isn’t signed like this one.": {
       "localizations": {
         "uk": {

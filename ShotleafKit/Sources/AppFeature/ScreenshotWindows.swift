@@ -110,10 +110,20 @@ final class ScreenshotWindows {
     }
 
     /// A capture that didn't work (no permission…), said in the same window.
+    /// Room left on the startup disk, in bytes.
+    static var freeDisk: Int64? {
+        try? FileManager.default.homeDirectoryForCurrentUser
+            .resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]).volumeAvailableCapacityForImportantUsage
+    }
+
     func showProblem(_ error: Error) {
         let message: String = switch error {
         case AppError.permissionDenied:
             String(localized: "Shotleaf needs the Screen Recording permission. Allow it in System Settings → Privacy & Security, then restart Shotleaf.")
+        // Text recognition writes its compiled model to disk first: with the disk full it fails with an
+        // unreadable code ("CRImageReaderError", "E5RT … 13").
+        case _ where Self.freeDisk.map { $0 < 3_000_000_000 } == true:
+            String(localized: "The disk is almost full (\(ByteCountFormatter.string(fromByteCount: Self.freeDisk ?? 0, countStyle: .file)) free), so macOS can’t prepare text recognition. Free up a few gigabytes and try again.")
         default: error.localizedDescription
         }
         showText(message, title: "Couldn’t take the screenshot", sound: false)
