@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>Посібник — Shotleaf</title>
-<meta name="description" content="Як користуватися Shotleaf: скріншоти, текст з екрана, історія буфера обміну, сніпети, дописування тексту й налаштування, крок за кроком.">
+<meta name="description" content="Як користуватися Shotleaf: скріншоти, текст з екрана, історія буфера обміну, сніпети й налаштування, крок за кроком.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://shotleaf.syvyj.dev/uk/guide/">
 <meta property="og:title" content="Посібник Shotleaf">
@@ -17,7 +17,7 @@
 <link rel="alternate" hreflang="en" href="../../guide/">
 <link rel="preload" href="../../fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../fonts/geist-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../../style.css?v=173c0108">
+<link rel="stylesheet" href="../../style.css?v=26eb7385">
 <script>document.documentElement.classList.add("js"); setTimeout(() => document.documentElement.classList.add("ready"), 2500);</script>
 </head>
 <body>
@@ -64,7 +64,6 @@
         <li><a href="#text">Текст з екрана</a></li>
         <li><a href="#clipboard">Історія буфера</a></li>
         <li><a href="#snippets">Сніпети</a></li>
-        <li><a href="#completion">Дописування тексту</a></li>
         <li><a href="#photos">Водяні знаки на фото</a></li>
         <li><a href="#settings">Налаштування</a></li>
         <li><a href="#help">Якщо щось не працює</a></li>
@@ -85,9 +84,8 @@
   <figure><img src="../../assets/guide/setup-en.webp" width="1040" height="1006" loading="lazy" decoding="async" alt="Перша сторінка майстра: оберіть потрібні інструменти"></figure>
   <dl class="defs">
     <dt>Запис екрана</dt><dd>Для скріншотів і тексту з екрана. Без нього на знімку видно лише шпалери.</dd>
-    <dt>Універсальний доступ</dt><dd>Щоб вставляти з історії буфера в програму, де ви були, розгортати сніпети під час набору і дописувати текст.</dd>
+    <dt>Універсальний доступ</dt><dd>Щоб вставляти з історії буфера в програму, де ви були, і розгортати сніпети під час набору.</dd>
   </dl>
-  <p>Дописуванню тексту ще потрібна мовна модель Gemma 4 E2B (близько 3,6 ГБ). Вона необов’язкова: завантажте її з майстра або пізніше в <b>Налаштуваннях › Дописування</b>. Усе інше працює і без неї.</p>
   <p>Shotleaf живе в рядку меню: значок листка вгорі екрана. Кожен інструмент має й сполучення клавіш.</p>
   <figure class="menu"><img src="../../assets/guide/menu-uk.webp" width="692" height="858" loading="lazy" decoding="async" alt="Меню Shotleaf у рядку меню"></figure>
   <p><b>Оновлення.</b> Коли виходить нова версія, угорі меню з’являється <b>Оновити до Shotleaf…</b>. Shotleaf завантажує її, перевіряє, що вона справжня, і за кілька секунд перезапускається вже в ній, з усіма налаштуваннями й дозволами. Нову версію він шукає під час запуску й раз на день; вимкнути це можна в <b>Налаштуваннях › Загальні</b>.</p>
@@ -197,7 +195,7 @@
   <figure><img src="../../assets/guide/clipboard-actions-uk.webp" width="1560" height="1000" loading="lazy" decoding="async" alt="Швидкі дії для посилання"></figure>
   <h3>Приватність</h3>
   <ul>
-    <li>Паролі, які менеджери паролів позначають як приватні, не зберігаються ніколи, а з програм у <b>Налаштування › Буфер обміну › Ніколи в цих програмах</b> не береться нічого (і дописування в них вимкнене).</li>
+    <li>Паролі, які менеджери паролів позначають як приватні, не зберігаються ніколи, а з програм у <b>Налаштування › Буфер обміну › Ніколи в цих програмах</b> не береться нічого.</li>
     <li>Текст, схожий на номер картки чи токен доступу, не записується на диск і зникає з історії через хвилину, якщо ви його не закріпили.</li>
     <li>З рядка меню історію можна призупинити на 5 хвилин або очистити. Типово вона тримає 200 записів, картинки 30 днів; обидва числа є в налаштуваннях.</li>
   </ul>
@@ -222,36 +220,6 @@
   <h3>Редактор сніпетів</h3>
   <p><b>Редагувати сніпети…</b> у панелі чи в рядку меню. Ліворуч кольорові папки, посередині сніпети, праворуч той, що ви редагуєте, з його скороченням, папкою й картинками (вони вставляються разом із текстом). <b>Поділитися…</b> на папці дає її тексти й картинки файлами, щоб надіслати колезі.</p>
   <figure><img src="../../assets/guide/snippet-editor-uk.webp" width="1600" height="1088" loading="lazy" decoding="async" alt="Редактор сніпетів"></figure>
-</section>
-
-<section id="completion">
-  <h2>Дописування тексту</h2>
-  <p>Поки ви пишете в будь-якій програмі, після курсора з’являється сіра підказка. Прийміть її або не зважайте й пишіть далі. <b>Дописувати текст, поки я друкую</b> в рядку меню вмикає й вимикає її.</p>
-  <figure class="mockfig" aria-label="Речення набирається, сіра підказка, Tab бере слово"><div class="mock m-type" data-text="Привіт, Ганно! Дякую за новини. Давай зустрінемось " data-ghost="завтра о третій біля входу.">
-        <div class="win">
-          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Повідомлення<small>Ганна</small></div></div>
-          <div class="note"><span class="typed"></span><span class="caret"></span><span class="ghost"></span></div>
-          <div class="bar"><span class="b k-tab">Tab <i>наступне слово</i></span><span class="b k-all">⌥Tab <i>усе</i></span><span class="sp"></span><span class="b">esc <i>сховати</i></span></div>
-        </div>
-      </div></figure>
-  <table class="keys">
-    <tr><td><kbd>Tab</kbd></td><td>взяти наступне слово</td></tr>
-    <tr><td><kbd>⌥Tab</kbd></td><td>взяти всю підказку</td></tr>
-    <tr><td><kbd>esc</kbd></td><td>сховати її</td></tr>
-    <tr><td><kbd>:</kbd>слово</td><td>емодзі за назвою: <code>:fire</code> пропонує 🔥; наступні літери звужують список, <kbd>1</kbd>–<kbd>9</kbd> або клік вибирає</td></tr>
-  </table>
-  <p>Слово з помилкою отримує виправлення, яке теж береться клавішею <kbd>Tab</kbd>. Модель працює на вашому Mac: нічого з набраного нікуди не надсилається.</p>
-  <figure class="mockfig" aria-label="Емодзі за назвою: «:fi» пропонує вогонь, феєрверк та інше"><div class="mock m-emoji">
-        <div class="win">
-          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Повідомлення<small>Команда</small></div></div>
-          <div class="note">Ми сьогодні запустили сайт <span class="q">:fi</span><span class="caret"></span>
-            <div class="pick"><div class="e on"><span>🔥</span>fire<i>1</i></div><div class="e"><span>🎆</span>fireworks<i>2</i></div><div class="e"><span>🎇</span>sparkler<i>3</i></div><div class="e"><span>🧯</span>fire extinguisher<i>4</i></div></div>
-          </div>
-          <div class="bar"><span class="b go">Tab <i>перше</i></span><span class="b">1–9 <i>вибрати</i></span><span class="sp"></span><span class="b">esc <i>закрити</i></span></div>
-        </div>
-      </div></figure>
-  <p>У <b>Налаштуваннях › Дописування</b>: <b>Підказки</b> від обережних (лише певні й короткі) до сміливих; <b>Враховувати текст на екрані</b>, щоб підказки пасували до переписки чи сторінки, на яку ви відповідаєте; <b>Враховувати щойно скопійоване</b> (ніколи не пароль, номер картки чи токен); і <b>Вчитися мого стилю</b>: кілька ваших текстів, лише на цьому Mac, щоб підказки звучали як ви. <b>Забути мої тексти</b> їх видаляє.</p>
-  <figure><img src="../../assets/guide/settings-completion-uk.webp" width="1600" height="1264" loading="lazy" decoding="async" alt="Налаштування › Дописування"></figure>
 </section>
 
 <section id="photos">
@@ -290,12 +258,8 @@
     <p>Обом потрібен дозвіл Універсального доступу: дивіться <b>Налаштування › Дозволи</b>. Сніпетам ще потрібно, щоб їхній інструмент був увімкнений у <b>Загальних › Функції</b>.</p>
   </details>
   <details>
-    <summary>Під час набору немає сірих підказок</summary>
-    <p>Перевірте, що модель завантажена в <b>Налаштуваннях › Дописування</b> і що дописування ввімкнене в <b>Загальних › Функції</b>. Деякі програми не дають іншим читати свої текстові поля. Підказок немає в полях для паролів, під час захищеного вводу (sudo в терміналі, менеджер паролів), у терміналах і в програмах зі списку <b>Налаштування › Буфер обміну › Ніколи в цих програмах</b>.</p>
-  </details>
-  <details>
     <summary>Як видалити все?</summary>
-    <p><b>Налаштування › Загальні › Видалити всі дані Shotleaf…</b> видаляє історію, сніпети, недавні скріншоти, ваш стиль письма, модель і налаштування, а потім закриває програму. Після цього перетягніть Shotleaf із Програм у Смітник.</p>
+    <p><b>Налаштування › Загальні › Видалити всі дані Shotleaf…</b> видаляє історію, сніпети, недавні скріншоти й налаштування, а потім закриває програму. Після цього перетягніть Shotleaf із Програм у Смітник.</p>
   </details>
   <p class="note">Не вийшло? Напишіть на <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a> або створіть <a href="https://github.com/Syvyj/shotleaf/issues">issue на GitHub</a>. Якщо Shotleaf упав, додайте найновіший файл <code>Shotleaf-*.ips</code> з <code>~/Library/Logs/DiagnosticReports</code>.</p>
 </section>
@@ -316,7 +280,7 @@
 <script src="../../vendor/gsap.min.js" defer></script>
 <script src="../../vendor/ScrollTrigger.min.js" defer></script>
 <script src="../../vendor/lenis.min.js" defer></script>
-<script src="../../motion.js?v=173c0108" defer></script>
-<script src="../../mocks.js?v=173c0108" defer></script>
+<script src="../../motion.js?v=26eb7385" defer></script>
+<script src="../../mocks.js?v=26eb7385" defer></script>
 </body>
 </html>

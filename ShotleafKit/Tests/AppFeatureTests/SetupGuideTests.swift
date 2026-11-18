@@ -12,7 +12,7 @@ struct SetupGuideTests {
         let none: [PermissionKind: PermissionStatus] = [:]
         #expect(Tool.missing(on: Tool.allCases, status: none) == [.screenRecording, .accessibility])
         #expect(Tool.missing(on: [.screenshots], status: none) == [.screenRecording])
-        #expect(Tool.missing(on: [.clipboard, .completion], status: none) == [.accessibility])
+        #expect(Tool.missing(on: [.clipboard, .snippets], status: none) == [.accessibility])
         #expect(Tool.missing(on: [.screenshots, .snippets], status: [.screenRecording: .granted]) == [.accessibility])
         #expect(Tool.missing(on: [], status: none).isEmpty)
     }

@@ -95,9 +95,6 @@ public struct MenuBarRootView: View {
             }
         }
 
-        Toggle("Complete my text as I type", isOn: Binding(
-            get: { coordinator.completionEnabled }, set: { coordinator.setCompletion($0) }
-        ))
         Button("Settings…") {
             openSettings()
             coordinator.raiseSettingsWindow()

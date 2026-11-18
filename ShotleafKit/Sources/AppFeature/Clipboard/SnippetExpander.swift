@@ -3,7 +3,7 @@ import Carbon
 
 /// Abbreviations: typing a snippet's abbreviation (e.g. ";addr") anywhere
 /// replaces it with the snippet. Listens to key presses in other apps (needs
-/// Accessibility, which completion already has); secure fields never reach it.
+/// Accessibility); secure fields never reach it.
 /// The paste goes through the clipboard, which is put back right after.
 @MainActor
 final class SnippetExpander {

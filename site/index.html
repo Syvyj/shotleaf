@@ -17,7 +17,7 @@
 <link rel="alternate" hreflang="uk" href="uk/">
 <link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/geist-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="style.css?v=173c0108">
+<link rel="stylesheet" href="style.css?v=26eb7385">
 <!-- Motion is an extra: without JS (or if it fails to start) the page shows as is. -->
 <script>document.documentElement.classList.add("js"); setTimeout(() => document.documentElement.classList.add("ready"), 2500);</script>
 </head>
@@ -71,7 +71,7 @@
         <a class="btn primary" href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg>Download for Mac</a>
         <a class="btn quiet" href="#support">Support the author</a>
       </div>
-      <p class="rel"><a href="https://github.com/Syvyj/shotleaf/releases/tag/v0.2.2">Version 0.2.2</a> · November 11 · <b data-roll>221</b> downloads so far</p>
+      
       <p class="req">For macOS 15 and later on Apple silicon.</p>
     </div>
   </div>
@@ -176,20 +176,12 @@
         </div>
         <div class="dest"><span class="who"></span><span class="d"></span><span class="caret" style="background:#222"></span></div>
       </div></div>
-    <div class="slide" data-tab="type"><div class="mock m-type" data-text="Hi Anna, thanks for the update. Let’s meet " data-ghost="tomorrow at 3 by the entrance.">
-        <div class="win">
-          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Messages<small>Anna</small></div></div>
-          <div class="note"><span class="typed"></span><span class="caret"></span><span class="ghost"></span></div>
-          <div class="bar"><span class="b k-tab">Tab <i>next word</i></span><span class="b k-all">⌥Tab <i>all</i></span><span class="sp"></span><span class="b">esc <i>hide</i></span></div>
-        </div>
-      </div></div>
   </div>
   <div class="tabs" role="tablist">
     <button class="tab on" data-tab="shot" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">2</span></span><b>Screenshot</b><span>Area, window or full screen</span><i class="prog"></i></button>
     <button class="tab" data-tab="scroll" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">3</span></span><b>Scrolling screenshot</b><span>A long page as one image</span><i class="prog"></i></button>
     <button class="tab" data-tab="ocr" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">1</span></span><b>Text from screen</b><span>Copies text that can’t be selected</span><i class="prog"></i></button>
     <button class="tab" data-tab="clip" type="button"><span class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">V</span></span><b>Clipboard</b><span>Everything you copied, with search</span><i class="prog"></i></button>
-    <button class="tab" data-tab="type" type="button"><span class="caps"><span class="cap">Tab</span></span><b>Text completion</b><span>Suggests how to finish a sentence</span><i class="prog"></i></button>
   </div>
 </section>
 
@@ -313,19 +305,6 @@
       </div></div>
     <div class="feats"><div class="feat"><b>Abbreviations</b><span>Type “;reply” in any app and it turns into the full text.</span></div><div class="feat"><b>Folders</b><span>Coloured folders on the left, snippets on the right.</span></div><div class="feat"><b>Fill-ins</b><span>Today’s date, the time, what you copied, where the cursor ends up.</span></div><div class="feat"><b>Questions</b><span>A snippet can ask for a name or a number before it’s pasted.</span></div></div>
   </div>
-  <div class="tool" id="completion">
-    <div class="about"><div class="caps"><span class="cap">Tab</span></div><h3>Text completion</h3><p>As you type in any app, a grey suggestion appears after the cursor. Take it with Tab or keep typing.</p><a class="guide-link" href="guide/#completion">More in the guide<svg aria-hidden="true"><use href="#i-arrow-right-up"/></svg></a></div>
-    <div class="stagebox"><div class="mock m-emoji">
-        <div class="win">
-          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Messages<small>Team</small></div></div>
-          <div class="note">We launched the site today <span class="q">:fi</span><span class="caret"></span>
-            <div class="pick"><div class="e on"><span>🔥</span>fire<i>1</i></div><div class="e"><span>🎆</span>fireworks<i>2</i></div><div class="e"><span>🎇</span>sparkler<i>3</i></div><div class="e"><span>🧯</span>fire extinguisher<i>4</i></div></div>
-          </div>
-          <div class="bar"><span class="b go">Tab <i>first</i></span><span class="b">1–9 <i>pick</i></span><span class="sp"></span><span class="b">esc <i>close</i></span></div>
-        </div>
-      </div></div>
-    <div class="feats"><div class="feat"><b>Word by word</b><span><kbd>Tab</kbd> takes the next word, <kbd>⌥Tab</kbd> the whole suggestion, <kbd>esc</kbd> hides it.</span></div><div class="feat"><b>Works offline</b><span>A language model runs on your Mac; nothing you type is sent anywhere.</span></div><div class="feat"><b>Knows the context</b><span>Can take into account the chat on screen and what you just copied.</span></div><div class="feat"><b>Sounds like you</b><span>Learns from your own texts, on this Mac only. Forget them in one click.</span></div><div class="feat"><b>Emoji by name</b><span>Type <kbd>:</kbd> and a word, like :fire for 🔥.</span></div><div class="feat"><b>Typo fixes</b><span>A misspelled word gets a fix you take with Tab.</span></div></div><button class="more-feats" type="button" data-n="2">Show 2 more</button>
-  </div>
   <div class="tool more" id="photos">
     <div class="about"><h3>Watermark photos</h3><p>Add your watermark to a whole folder of photos at once. Place it the same way on every photo or move it by hand on each one. Photos keep their full quality and details; the originals aren’t changed.</p><a class="guide-link" href="guide/#photos">More in the guide<svg aria-hidden="true"><use href="#i-arrow-right-up"/></svg></a></div>
     <div class="stagebox"><div class="mock m-batch">
@@ -364,8 +343,8 @@
     </div>
     <ul class="facts">
       <li><svg aria-hidden="true"><use href="#i-user-cross-rounded"/></svg><b>No account</b><span>No sign-in, no analytics, no ads.</span></li>
-      <li><svg aria-hidden="true"><use href="#i-cpu-bolt"/></svg><b>Runs on your Mac</b><span>Text recognition and text completion work offline.</span></li>
-      <li><svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg><b>Online for three things only</b><span>The completion model (once, when you ask), the daily check for a new version (can be turned off), and links you make.</span></li>
+      <li><svg aria-hidden="true"><use href="#i-cpu-bolt"/></svg><b>Runs on your Mac</b><span>Text recognition and blurring private info work offline.</span></li>
+      <li><svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg><b>Online for two things only</b><span>The daily check for a new version (can be turned off) and links you make.</span></li>
       <li><svg aria-hidden="true"><use href="#i-cpu-bolt"/></svg><b>Light</b><span>0.0 % CPU at rest, about <span data-count="50">50</span> MB of memory, a <span data-count="14">14</span> MB download.</span></li>
       <li><svg aria-hidden="true"><use href="#i-shield-check"/></svg><b>Passwords left out</b><span>Passwords from password managers never enter the history; card numbers and tokens never reach the disk.</span></li>
       <li><svg aria-hidden="true"><use href="#i-link-round"/></svg><b>Links that expire</b><span>A screenshot you share by link is deleted after <span data-count="12">12</span> hours at most.</span></li>
@@ -431,7 +410,7 @@
 <script src="vendor/gsap.min.js" defer></script>
 <script src="vendor/ScrollTrigger.min.js" defer></script>
 <script src="vendor/lenis.min.js" defer></script>
-<script src="motion.js?v=173c0108" defer></script>
-<script src="mocks.js?v=173c0108" defer></script>
+<script src="motion.js?v=26eb7385" defer></script>
+<script src="mocks.js?v=26eb7385" defer></script>
 </body>
 </html>

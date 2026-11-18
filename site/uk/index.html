@@ -17,7 +17,7 @@
 <link rel="alternate" hreflang="en" href="../">
 <link rel="preload" href="../fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../fonts/geist-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../style.css?v=173c0108">
+<link rel="stylesheet" href="../style.css?v=26eb7385">
 <!-- Motion is an extra: without JS (or if it fails to start) the page shows as is. -->
 <script>document.documentElement.classList.add("js"); setTimeout(() => document.documentElement.classList.add("ready"), 2500);</script>
 </head>
@@ -71,7 +71,7 @@
         <a class="btn primary" href="https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg"><svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg>Завантажити для Mac</a>
         <a class="btn quiet" href="#support">Підтримати автора</a>
       </div>
-      <p class="rel"><a href="https://github.com/Syvyj/shotleaf/releases/tag/v0.2.2">Версія 0.2.2</a> · 11 листопада · вже <b data-roll>221</b> завантаження</p>
+      
       <p class="req">Для macOS 15 і новіших на Apple silicon.</p>
     </div>
   </div>
@@ -176,20 +176,12 @@
         </div>
         <div class="dest"><span class="who"></span><span class="d"></span><span class="caret" style="background:#222"></span></div>
       </div></div>
-    <div class="slide" data-tab="type"><div class="mock m-type" data-text="Привіт, Ганно! Дякую за новини. Давай зустрінемось " data-ghost="завтра о третій біля входу.">
-        <div class="win">
-          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Повідомлення<small>Ганна</small></div></div>
-          <div class="note"><span class="typed"></span><span class="caret"></span><span class="ghost"></span></div>
-          <div class="bar"><span class="b k-tab">Tab <i>наступне слово</i></span><span class="b k-all">⌥Tab <i>усе</i></span><span class="sp"></span><span class="b">esc <i>сховати</i></span></div>
-        </div>
-      </div></div>
   </div>
   <div class="tabs" role="tablist">
     <button class="tab on" data-tab="shot" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">2</span></span><b>Скріншот</b><span>Область, вікно або весь екран</span><i class="prog"></i></button>
     <button class="tab" data-tab="scroll" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">3</span></span><b>Довгий скріншот</b><span>Уся сторінка одним зображенням</span><i class="prog"></i></button>
     <button class="tab" data-tab="ocr" type="button"><span class="caps"><span class="cap">⌘</span><span class="cap">⇧</span><span class="cap">1</span></span><b>Текст з екрана</b><span>Копіює текст, який не виділяється</span><i class="prog"></i></button>
     <button class="tab" data-tab="clip" type="button"><span class="caps"><span class="cap">⇧</span><span class="cap">⌘</span><span class="cap">V</span></span><b>Буфер обміну</b><span>Усе скопійоване, з пошуком</span><i class="prog"></i></button>
-    <button class="tab" data-tab="type" type="button"><span class="caps"><span class="cap">Tab</span></span><b>Дописування тексту</b><span>Підказує, як закінчити речення</span><i class="prog"></i></button>
   </div>
 </section>
 
@@ -313,19 +305,6 @@
       </div></div>
     <div class="feats"><div class="feat"><b>Скорочення</b><span>Наберіть «;відп» у будь-якій програмі, і воно розгорнеться в повний текст.</span></div><div class="feat"><b>Папки</b><span>Кольорові папки ліворуч, сніпети праворуч.</span></div><div class="feat"><b>Підстановки</b><span>Сьогоднішня дата, час, скопійоване, місце курсора.</span></div><div class="feat"><b>Запитання</b><span>Сніпет може спитати ім’я чи число перед вставкою.</span></div></div>
   </div>
-  <div class="tool" id="completion">
-    <div class="about"><div class="caps"><span class="cap">Tab</span></div><h3>Дописування тексту</h3><p>Поки ви пишете в будь-якій програмі, після курсора з’являється сіра підказка. Прийміть її клавішею Tab або пишіть далі.</p><a class="guide-link" href="../uk/guide/#completion">Детальніше в посібнику<svg aria-hidden="true"><use href="#i-arrow-right-up"/></svg></a></div>
-    <div class="stagebox"><div class="mock m-emoji">
-        <div class="win">
-          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">Повідомлення<small>Команда</small></div></div>
-          <div class="note">Ми сьогодні запустили сайт <span class="q">:fi</span><span class="caret"></span>
-            <div class="pick"><div class="e on"><span>🔥</span>fire<i>1</i></div><div class="e"><span>🎆</span>fireworks<i>2</i></div><div class="e"><span>🎇</span>sparkler<i>3</i></div><div class="e"><span>🧯</span>fire extinguisher<i>4</i></div></div>
-          </div>
-          <div class="bar"><span class="b go">Tab <i>перше</i></span><span class="b">1–9 <i>вибрати</i></span><span class="sp"></span><span class="b">esc <i>закрити</i></span></div>
-        </div>
-      </div></div>
-    <div class="feats"><div class="feat"><b>По слову</b><span><kbd>Tab</kbd> бере наступне слово, <kbd>⌥Tab</kbd> усю підказку, <kbd>esc</kbd> ховає її.</span></div><div class="feat"><b>Працює без інтернету</b><span>Мовна модель працює на вашому Mac; нічого з набраного нікуди не надсилається.</span></div><div class="feat"><b>Розуміє контекст</b><span>Може враховувати переписку на екрані й те, що ви щойно скопіювали.</span></div><div class="feat"><b>Пише як ви</b><span>Вчиться на ваших текстах, лише на цьому Mac. Забути — одним кліком.</span></div><div class="feat"><b>Емодзі за назвою</b><span>Наберіть <kbd>:</kbd> і слово, наприклад :fire для 🔥.</span></div><div class="feat"><b>Виправлення одруківок</b><span>Слово з помилкою отримує виправлення, яке береться клавішею Tab.</span></div></div><button class="more-feats" type="button" data-n="2">Показати ще 2</button>
-  </div>
   <div class="tool more" id="photos">
     <div class="about"><h3>Водяні знаки на фото</h3><p>Додайте водяний знак одразу на цілу папку фото. Розмістіть його однаково на всіх або пересуньте вручну на кожному. Фото зберігають повну якість і дані про зйомку; оригінали не змінюються.</p><a class="guide-link" href="../uk/guide/#photos">Детальніше в посібнику<svg aria-hidden="true"><use href="#i-arrow-right-up"/></svg></a></div>
     <div class="stagebox"><div class="mock m-batch">
@@ -364,8 +343,8 @@
     </div>
     <ul class="facts">
       <li><svg aria-hidden="true"><use href="#i-user-cross-rounded"/></svg><b>Без акаунта</b><span>Ні входу, ні аналітики, ні реклами.</span></li>
-      <li><svg aria-hidden="true"><use href="#i-cpu-bolt"/></svg><b>Працює на вашому Mac</b><span>Розпізнавання й дописування тексту працюють без інтернету.</span></li>
-      <li><svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg><b>У мережу лише по три речі</b><span>Модель для дописування (один раз, коли попросите), щоденна перевірка нової версії (можна вимкнути) і посилання, які ви створюєте.</span></li>
+      <li><svg aria-hidden="true"><use href="#i-cpu-bolt"/></svg><b>Працює на вашому Mac</b><span>Розпізнавання тексту й розмиття приватного працюють без інтернету.</span></li>
+      <li><svg aria-hidden="true"><use href="#i-download-minimalistic"/></svg><b>У мережу лише по дві речі</b><span>Щоденна перевірка нової версії (можна вимкнути) і посилання, які ви створюєте.</span></li>
       <li><svg aria-hidden="true"><use href="#i-cpu-bolt"/></svg><b>Легкий</b><span>0.0 % процесора у спокої, близько <span data-count="50">50</span> МБ пам'яті, <span data-count="14">14</span> МБ завантаження.</span></li>
       <li><svg aria-hidden="true"><use href="#i-shield-check"/></svg><b>Паролі не потрапляють</b><span>Паролі з менеджерів паролів не потрапляють в історію; номери карток і токени не записуються на диск.</span></li>
       <li><svg aria-hidden="true"><use href="#i-link-round"/></svg><b>Посилання, що зникають</b><span>Скріншот, яким ви поділилися посиланням, видаляється щонайпізніше через <span data-count="12">12</span> годин.</span></li>
@@ -431,7 +410,7 @@
 <script src="../vendor/gsap.min.js" defer></script>
 <script src="../vendor/ScrollTrigger.min.js" defer></script>
 <script src="../vendor/lenis.min.js" defer></script>
-<script src="../motion.js?v=173c0108" defer></script>
-<script src="../mocks.js?v=173c0108" defer></script>
+<script src="../motion.js?v=26eb7385" defer></script>
+<script src="../mocks.js?v=26eb7385" defer></script>
 </body>
 </html>

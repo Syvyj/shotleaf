@@ -3,11 +3,11 @@ import Core
 import SwiftUI
 
 /// Puts text on the clipboard and presses keys in the app in front — always as
-/// Shotleaf's own events (the completion tap and the history skip them), with
+/// Shotleaf's own events (the snippet tap and the history skip them), with
 /// modifiers released.
 @MainActor
 enum Paster {
-    /// On every key event Shotleaf posts (pastes, snippets, completions), so its own taps skip them.
+    /// On every key event Shotleaf posts (pastes, snippets), so its own taps skip them.
     nonisolated static let marker: Int64 = 0x4150_494C // "APIL"
 
     /// Text on the clipboard, marked as Shotleaf's so the history doesn't keep it.

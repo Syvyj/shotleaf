@@ -19,7 +19,7 @@ struct ClipboardHistoryTests {
         #expect(!ClipboardHistory.looksSensitive("Project ID: alpha-1234"))
     }
 
-    @Test("A password manager's concealed copy, a card number, a token: private for the history and for completion alike")
+    @Test("A password manager's concealed copy, a card number, a token: private for the history")
     func privateCopies() {
         let board = NSPasteboard(name: .init("shotleaf-test-\(UUID())"))
         defer { board.releaseGlobally() }

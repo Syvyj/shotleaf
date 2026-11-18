@@ -36,7 +36,7 @@ extension SettingsRootView {
                 .confirmationDialog("Delete all Shotleaf data?", isPresented: $confirmDeleteAll) {
                     Button("Delete and Quit", role: .destructive) { coordinator.deleteAllData() }
                 } message: {
-                    Text("Clipboard history, snippets, recent screenshots, your writing style, settings, the link key and the completion model. Saved screenshots stay where you saved them. This can’t be undone.")
+                    Text("Clipboard history, snippets, recent screenshots, settings and the link key. Saved screenshots stay where you saved them. This can’t be undone.")
                 }
         } header: {
             Text("General")

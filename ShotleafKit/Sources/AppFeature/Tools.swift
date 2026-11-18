@@ -4,7 +4,7 @@ import Core
 /// The parts of Shotleaf that can be turned off (Settings → General → Tools).
 /// An off tool leaves the menu, frees its shortcuts and stops its background work.
 public enum Tool: String, CaseIterable, Identifiable, Sendable {
-    case screenshots, screenText, clipboard, snippets, completion
+    case screenshots, screenText, clipboard, snippets
     public var id: Self { self }
 
     var title: LocalizedStringKey {
@@ -13,7 +13,6 @@ public enum Tool: String, CaseIterable, Identifiable, Sendable {
         case .screenText: "Text from Screenshot"
         case .clipboard: "Clipboard History"
         case .snippets: "Snippets"
-        case .completion: "Text completion"
         }
     }
 
@@ -23,7 +22,6 @@ public enum Tool: String, CaseIterable, Identifiable, Sendable {
         case .screenText: [.screenshotText]
         case .clipboard: [.clipboard]
         case .snippets: [.snippets]
-        case .completion: []
         }
     }
 
@@ -32,7 +30,7 @@ public enum Tool: String, CaseIterable, Identifiable, Sendable {
     var permissions: [PermissionKind] {
         switch self {
         case .screenshots, .screenText: [.screenRecording]
-        case .clipboard, .snippets, .completion: [.accessibility]
+        case .clipboard, .snippets: [.accessibility]
         }
     }
 

@@ -4,10 +4,9 @@ import Observation
 import SwiftUI
 import ServiceManagement
 import OSLog
-import EmbeddedKit
 
 /// Wires Shotleaf together: global hotkeys → screenshots / text from a
-/// screenshot / scrolling capture, inline completion and its model, settings,
+/// screenshot / scrolling capture, clipboard and snippets, settings,
 /// permissions, onboarding. Pure wiring: the logic lives in the Kits and views.
 @MainActor
 @Observable
@@ -27,12 +26,8 @@ public final class AppCoordinator {
         try? FileManager.default.removeItem(at: AppInfo.supportFolder.appendingPathComponent("last-capture.png"))
         applyDockPolicy()
         refreshPermissions()
-        inlineCompletion.context.useScreen = container.settings.completionUsesScreen
-        inlineCompletion.context.useClipboard = container.settings.completionUsesClipboard
-        inlineCompletion.boldness = .init(container.settings.completionBoldness)
-        inlineCompletion.quickFixes = container.settings.completionQuickFixes
-        inlineCompletion.history.enabled = container.settings.completionLearnsStyle
-        if container.settings.completionEnabled { inlineCompletion.start() }
+        LeftoverCompletion.remove() // the model and writing history from versions with text completion
+        LeftoverCompletion.forgetSettings()
         screenshots.allClosed = { [weak self] in
             // The setup guide's first screenshot: back to the guide, which closing the editor left behind other apps.
             if self?.onboarding?.isVisible == true { self?.onboarding?.show() } else { SupportAsk.askIfDue() }
@@ -249,12 +244,10 @@ public final class AppCoordinator {
     public func deleteAllData() {
         clipboard.stop()
         expander.stop()
-        inlineCompletion.stop()
         try? FileManager.default.removeItem(at: AppInfo.supportFolder) // history, snippets, recent shots, style
         ShotLinks.token = nil
         try? SMAppService.mainApp.unregister()
         Task {
-            try? await EmbeddedModel.completion.delete()
             // Again: a save still in flight (a sensitive entry's expiry, a snippet) may have made the folder anew.
             try? FileManager.default.removeItem(at: AppInfo.supportFolder)
             UserDefaults.standard.removePersistentDomain(forName: AppInfo.bundleID)
@@ -319,10 +312,9 @@ public final class AppCoordinator {
 
     public internal(set) var toolsOff: Set<Tool> = Tool.savedOff
 
-    public func isOn(_ tool: Tool) -> Bool { tool == .completion ? completionEnabled : !toolsOff.contains(tool) }
+    public func isOn(_ tool: Tool) -> Bool { !toolsOff.contains(tool) }
 
     public func setTool(_ tool: Tool, on: Bool) {
-        if tool == .completion { setCompletion(on); return }
         if on { toolsOff.remove(tool) } else { toolsOff.insert(tool) }
         UserDefaults.standard.set(toolsOff.map(\.rawValue), forKey: Tool.offKey)
         for action in tool.actions { registerHotkey(action, on: on) }
@@ -345,9 +337,6 @@ public final class AppCoordinator {
     public func pauseHotkey() { container.hotkeys.stop() }
     public func resumeHotkey() { container.hotkeys.start() }
 
-    public internal(set) var modelState: EmbeddedState =
-        EmbeddedModel.completion.isDownloaded ? .ready(bytes: EmbeddedModel.completion.sizeOnDisk) : .notDownloaded
-    let inlineCompletion = InlineCompletion() // internal: the live test drives it
     /// A newer release than this one, once a check has found it (shown in the menu).
     public internal(set) var update: Updates.Release?
     /// An update is downloading and being checked (Shotleaf restarts when it's ready).

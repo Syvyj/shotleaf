@@ -10,7 +10,7 @@
 <link rel="icon" href="../assets/favicon.png" sizes="64x64">
 <link rel="alternate" hreflang="uk" href="../uk/privacy/">
 <link rel="preload" href="../fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../style.css?v=173c0108">
+<link rel="stylesheet" href="../style.css?v=26eb7385">
 </head>
 <body>
 <div class="wrap nav">
@@ -29,23 +29,21 @@
 <h2>What stays on your Mac</h2>
 <ul>
   <li><b>Clipboard history</b>: the last 200 items you copied; pictures are kept for 30 days. Screenshots you take join it too. You can change both, pin items, exclude apps, pause it or turn it off in Settings.</li>
-  <li>Passwords that password managers mark as private are never saved. Text that looks like a card number or an access token (API keys, JWTs) isn't saved to disk and is gone from the history after a minute, unless you pin it. Text completion never takes any of these as a hint either, and it stays off in password fields, while secure input is on (sudo, password managers), in terminals and in the apps you exclude.</li>
+  <li>Passwords that password managers mark as private are never saved. Text that looks like a card number or an access token (API keys, JWTs) isn't saved to disk and is gone from the history after a minute, unless you pin it.</li>
   <li><b>Snippets</b> and their pictures.</li>
   <li><b>Recent screenshots</b>: the last 10, so you can open them again. Clear them from the menu.</li>
-  <li><b>Your writing style</b>, if you turn it on (it's off at first, and needs the completion model): a few of your own finished texts, so completions sound like you. Texts with card numbers, tokens, emails or phone numbers are left out. “Forget” in Settings deletes them.</li>
 </ul>
-<p>All of it is in <code>~/Library/Application Support/Shotleaf</code>. Text recognition and text completion run on your Mac.</p>
+<p>All of it is in <code>~/Library/Application Support/Shotleaf</code>. Text recognition and blurring private info run on your Mac.</p>
 
 <h2>When Shotleaf goes online</h2>
 <ul>
-  <li>Downloading the completion model from Hugging Face, once, when you ask for it.</li>
   <li>Checking for a new version: at launch and once a day Shotleaf asks GitHub which release is the newest. Nothing about you is sent; turn it off in Settings › General.</li>
   <li>A link to a screenshot, when you press the link button: the picture goes to Shotleaf's link service on Cloudflare (<code>s.syvyj.dev</code>) and is deleted when the link expires (within 15 minutes of it), 12 hours at most. A picture over 5 MB goes as a JPEG that fits. Or to your own server, if you set one up. <b>Check</b> in Settings › Screenshot Links sends a 1-pixel picture the same way.</li>
 </ul>
 <p>Nothing else: no usage statistics, no crash reports sent on their own.</p>
 
 <h2>Permissions</h2>
-<p><b>Screen Recording</b> is for screenshots and text from the screen. <b>Accessibility</b> lets Shotleaf complete your text, expand snippets and paste from the history: it reads the field you type in, but doesn't read password fields.</p>
+<p><b>Screen Recording</b> is for screenshots and text from the screen. <b>Accessibility</b> lets Shotleaf expand snippets and paste from the history: it watches the keys you type for a snippet's abbreviation and presses ⌘V for you. Keys typed in password fields never reach it.</p>
 
 <h2>This website</h2>
 <p>No cookies, no analytics, no third-party scripts; fonts are served from this site. It is hosted on Cloudflare, which handles the requests.</p>

@@ -37,43 +37,6 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: "checksForUpdates") }
     }
 
-    /// Inline completion as you type (needs the built-in model).
-    public var completionEnabled: Bool {
-        get { defaults.object(forKey: "completionEnabled") as? Bool ?? true }
-        set { defaults.set(newValue, forKey: "completionEnabled") }
-    }
-
-    /// Inline completion may read the text on screen (OCR) for context.
-    public var completionUsesScreen: Bool {
-        get { defaults.object(forKey: "completionUsesScreen") as? Bool ?? true }
-        set { defaults.set(newValue, forKey: "completionUsesScreen") }
-    }
-
-    /// Inline completion may use what was just copied.
-    public var completionUsesClipboard: Bool {
-        get { defaults.object(forKey: "completionUsesClipboard") as? Bool ?? true }
-        set { defaults.set(newValue, forKey: "completionUsesClipboard") }
-    }
-
-    /// Inline completion: 0 cautious … 1 bold.
-    public var completionBoldness: Double {
-        get { defaults.object(forKey: "completionBoldness") as? Double ?? 0.5 }
-        set { defaults.set(newValue, forKey: "completionBoldness") }
-    }
-
-    /// Emoji for :shortcodes and one-key spelling fixes.
-    public var completionQuickFixes: Bool {
-        get { defaults.object(forKey: "completionQuickFixes") as? Bool ?? true }
-        set { defaults.set(newValue, forKey: "completionQuickFixes") }
-    }
-
-    /// Learn the user's style from their own texts (kept on this Mac). Off until the user
-    /// turns it on: it keeps what they wrote on disk.
-    public var completionLearnsStyle: Bool {
-        get { defaults.object(forKey: "completionLearnsStyle") as? Bool ?? false }
-        set { defaults.set(newValue, forKey: "completionLearnsStyle") }
-    }
-
     // MARK: Screenshots
 
     /// What a new screenshot does: open the editor, or go straight to the clipboard / a file.

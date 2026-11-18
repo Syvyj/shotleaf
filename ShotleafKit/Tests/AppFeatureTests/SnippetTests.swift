@@ -165,3 +165,30 @@ struct ClipboardPanelFocusTests {
     }
 }
 
+@Suite("After text completion was removed")
+struct LeftoverCompletionTests {
+    @Test("The model goes from the Hugging Face cache (where the environment put it), the writing samples from Shotleaf's folder; other models stay")
+    func removesLeftovers() throws {
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-leftover-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: home) }
+        let support = home.appendingPathComponent("Support")
+        let model = LeftoverCompletion.modelFolder(environment: [:], home: home)
+        #expect(model.path.hasSuffix(".cache/huggingface/hub/models--mlx-community--gemma-4-e2b-4bit"))
+        let other = model.deletingLastPathComponent().appendingPathComponent("models--someone--else")
+        for folder in [model.appendingPathComponent("snapshots"), other, support] {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        }
+        try Data("{}".utf8).write(to: support.appendingPathComponent("writing-history.json"))
+        try Data("[]".utf8).write(to: support.appendingPathComponent("snippets.json"))
+        LeftoverCompletion.remove(environment: [:], home: home, support: support)
+        #expect(!FileManager.default.fileExists(atPath: model.path))
+        #expect(!FileManager.default.fileExists(atPath: support.appendingPathComponent("writing-history.json").path))
+        #expect(FileManager.default.fileExists(atPath: other.path))
+        #expect(FileManager.default.fileExists(atPath: support.appendingPathComponent("snippets.json").path))
+        #expect(LeftoverCompletion.modelFolder(environment: ["HF_HOME": "/Volumes/X/hf"], home: home).path
+                == "/Volumes/X/hf/hub/models--mlx-community--gemma-4-e2b-4bit")
+        #expect(LeftoverCompletion.modelFolder(environment: ["HF_HUB_CACHE": "/Volumes/X/cache"], home: home).path
+                == "/Volumes/X/cache/models--mlx-community--gemma-4-e2b-4bit")
+    }
+}
+

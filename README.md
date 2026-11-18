@@ -26,7 +26,7 @@ Search and pin items in clipboard history, find screenshots and paste several it
 
 ## 03 · Let snippets do the typing
 
-Expand abbreviations into reusable text with dates, questions and pictures. Optional text completion runs from a model on your Mac.
+Expand abbreviations into reusable text with dates, questions and pictures.
 
 ![Shotleaf snippets](site/assets/guide/snippets-en.webp)
 
@@ -40,10 +40,9 @@ macOS 15 or later on Apple silicon (M1 or newer).
 2. Open it. Shotleaf isn't notarised by Apple, so the first time macOS says it can't check the app. Open **System Settings › Privacy & Security**, scroll down and click **Open Anyway**.
 3. The setup guide asks for two permissions:
    - **Screen Recording**: screenshots and text from the screen.
-   - **Accessibility**: text completion, snippets and pasting from the clipboard history.
+   - **Accessibility**: snippets and pasting from the clipboard history.
 
    Shotleaf restarts by itself after each one is turned on. Until both are on, the setup guide opens at every launch.
-4. Text completion needs its model, Gemma 4 E2B (about 3.6 GB). Download it from the setup guide or **Settings › Completion**. Everything else works without it.
 
 ### Updates
 
@@ -71,21 +70,19 @@ A shortcut doesn't fire? Another app may be using it. If your keyboard goes thro
 
 ## Privacy
 
-Shotleaf has no account and no analytics. Text recognition, blurring private info and completion run on your Mac. It goes online for three things only:
+Shotleaf has no account and no analytics. Text recognition and blurring private info run on your Mac. It goes online for two things only:
 
-- **The completion model**, downloaded once from Hugging Face when you ask for it. After that it loads from disk.
 - **The check for a new version**: at launch and once a day Shotleaf asks GitHub which release is the newest. Nothing about you is sent. Turn it off in **Settings › General**.
 - **Screenshot links**, when you press the link button: the picture goes to Shotleaf's link service on Cloudflare (`s.syvyj.dev`, code in `server/links`) and is deleted when the link expires (within 15 minutes of it), 12 hours at most. A picture over 5 MB goes as a JPEG that fits. You can use your own server instead (`server/shots`). **Check** in Settings › Screenshot Links sends a 1-pixel picture the same way.
 
-Passwords copied from password managers aren't kept in the history. Card numbers and access tokens stay in memory for a minute and never reach the disk, unless you pin them. Learning your writing style is off until you turn it on.
+Passwords copied from password managers aren't kept in the history. Card numbers and access tokens stay in memory for a minute and never reach the disk, unless you pin them.
 
 ## Where your data lives
 
 | | |
 |---|---|
-| Clipboard history, snippets, recent screenshots, writing style | `~/Library/Application Support/Shotleaf` |
+| Clipboard history, snippets, recent screenshots | `~/Library/Application Support/Shotleaf` |
 | Settings | `~/Library/Preferences/dev.syvyj.shotleaf.plist` |
-| Completion model | `~/.cache/huggingface/hub/models--mlx-community--gemma-4-e2b-4bit` |
 | Saved screenshots | the folder chosen in Settings (Desktop by default) |
 
 ### Uninstall
@@ -93,7 +90,7 @@ Passwords copied from password managers aren't kept in the history. Card numbers
 Quit Shotleaf, then delete the app and the folders above:
 
 ```bash
-rm -rf /Applications/Shotleaf.app ~/Library/Application\ Support/Shotleaf ~/.cache/huggingface/hub/models--mlx-community--gemma-4-e2b-4bit
+rm -rf /Applications/Shotleaf.app ~/Library/Application\ Support/Shotleaf
 defaults delete dev.syvyj.shotleaf
 ```
 
@@ -134,7 +131,7 @@ Donations support my time on Shotleaf and my other apps: [support the author](ht
 
 ## Licence
 
-[GPL-3.0-or-later](LICENSE). © 2026 Oleksii Ziuzin (Syvyj). Third-party components and their licences: `ShotleafKit/Sources/AppFeature/Resources/ThirdPartyNotices.txt`.
+[GPL-3.0-or-later](LICENSE). © 2026 Oleksii Ziuzin (Syvyj). Shotleaf uses no third-party libraries, only Apple's frameworks.
 
 ---
 
@@ -166,7 +163,7 @@ macOS 15+ · Apple silicon (M1 або новіший) · [GPL-3.0-or-later](LICE
 
 ## 03 · Доручіть повторення сніпетам
 
-Розгортайте скорочення в готовий текст із датами, запитаннями й картинками. Необов'язкове дописування тексту працює за допомогою моделі на вашому Mac.
+Розгортайте скорочення в готовий текст із датами, запитаннями й картинками.
 
 ![Сніпети Shotleaf](site/assets/guide/snippets-uk.webp)
 
@@ -180,10 +177,9 @@ macOS 15 або новіша на Apple silicon (M1 чи новіший).
 2. Відкрийте Shotleaf. Він поки не нотаризований Apple, тож першого разу macOS скаже, що не може перевірити програму. Відкрийте **Системні параметри › Приватність і безпека**, прогорніть униз і натисніть **Усе одно відкрити**.
 3. Посібник із налаштування попросить два дозволи:
    - **Запис екрана**: скріншоти й розпізнавання тексту.
-   - **Універсальний доступ**: дописування тексту, сніпети й вставка з історії буфера.
+   - **Універсальний доступ**: сніпети й вставка з історії буфера.
 
    Після кожного дозволу Shotleaf перезапускається сам. Поки обидва не ввімкнені, посібник відкривається при кожному запуску.
-4. Для дописування тексту потрібна модель Gemma 4 E2B (близько 3,6 ГБ). Завантажте її з посібника або в **Налаштуваннях › Дописування**. Усе інше працює без неї.
 
 ### Оновлення
 
@@ -211,21 +207,19 @@ macOS може перестати довіряти новій версії до�
 
 ## Приватність
 
-У Shotleaf немає облікового запису й аналітики. Розпізнавання тексту, розмиття приватного й дописування працюють на вашому Mac. У мережу він ходить лише по три речі:
+У Shotleaf немає облікового запису й аналітики. Розпізнавання тексту й розмиття приватного працюють на вашому Mac. У мережу він ходить лише по дві речі:
 
-- **Модель для дописування**: завантажується один раз із Hugging Face, коли ви про це попросите. Далі вона береться з диска.
 - **Перевірка нової версії**: під час запуску й раз на день Shotleaf питає в GitHub, який реліз найновіший. Нічого про вас не надсилається. Вимкнути можна в **Налаштуваннях › Загальні**.
 - **Посилання на скріншоти**, коли ви натискаєте кнопку посилання: картинка йде в сервіс посилань Shotleaf на Cloudflare (`s.syvyj.dev`, код у `server/links`) і видаляється, коли посилання спливає (протягом 15 хвилин після цього), щонайбільше за 12 годин. Картинка понад 5 МБ іде як JPEG, що вміщується в ліміт. Замість нього можна підключити власний сервер (`server/shots`). Кнопка **Перевірити** в Налаштуваннях › Посилання на скріншоти так само надсилає картинку в 1 піксель.
 
-Паролі, скопійовані з менеджерів паролів, в історії не зберігаються. Номери карток і токени доступу живуть у пам'яті хвилину й не потрапляють на диск, якщо ви їх не закріпите. Навчання вашому стилю письма вимкнене, доки ви його не ввімкнете.
+Паролі, скопійовані з менеджерів паролів, в історії не зберігаються. Номери карток і токени доступу живуть у пам'яті хвилину й не потрапляють на диск, якщо ви їх не закріпите.
 
 ## Де лежать ваші дані
 
 | | |
 |---|---|
-| Історія буфера, сніпети, останні скріншоти, стиль письма | `~/Library/Application Support/Shotleaf` |
+| Історія буфера, сніпети, останні скріншоти | `~/Library/Application Support/Shotleaf` |
 | Налаштування | `~/Library/Preferences/dev.syvyj.shotleaf.plist` |
-| Модель дописування | `~/.cache/huggingface/hub/models--mlx-community--gemma-4-e2b-4bit` |
 | Збережені скріншоти | тека з Налаштувань (спершу Робочий стіл) |
 
 ### Видалення
@@ -233,7 +227,7 @@ macOS може перестати довіряти новій версії до�
 Закрийте Shotleaf, потім видаліть програму й теки вище:
 
 ```bash
-rm -rf /Applications/Shotleaf.app ~/Library/Application\ Support/Shotleaf ~/.cache/huggingface/hub/models--mlx-community--gemma-4-e2b-4bit
+rm -rf /Applications/Shotleaf.app ~/Library/Application\ Support/Shotleaf
 defaults delete dev.syvyj.shotleaf
 ```
 
@@ -274,4 +268,4 @@ scripts/run.sh                 # зібрати, встановити в ~/Appli
 
 ## Ліцензія
 
-[GPL-3.0-or-later](LICENSE). © 2026 Oleksii Ziuzin (Syvyj). Сторонні компоненти та їхні ліцензії: `ShotleafKit/Sources/AppFeature/Resources/ThirdPartyNotices.txt`.
+[GPL-3.0-or-later](LICENSE). © 2026 Oleksii Ziuzin (Syvyj). Shotleaf не використовує сторонніх бібліотек, лише фреймворки Apple.

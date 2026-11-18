@@ -110,23 +110,5 @@ document.querySelectorAll(".m-snip").forEach(snippet);
   requestAnimationFrame(tick);
 })();
 
-// Text completion: a sentence is typed, a grey suggestion appears, Tab takes a word, ⌥Tab the rest.
-document.querySelectorAll(".m-type").forEach(async (m) => {
-  const typed = m.querySelector(".typed"), ghost = m.querySelector(".ghost"), tab = m.querySelector(".k-tab"), all = m.querySelector(".k-all");
-  const text = m.dataset.text, rest = m.dataset.ghost;
-  if (reduce) { typed.textContent = text; ghost.textContent = rest; return; }
-  const press = async (key) => { key.classList.add("hit"); await sleep(160); key.classList.remove("hit"); };
-  for (;;) {
-    typed.textContent = ""; ghost.textContent = "";
-    await visible(m); await sleep(700);
-    for (const ch of text) { typed.textContent += ch; await sleep(ch === " " ? 70 : 45 + Math.random() * 40); }
-    await sleep(450);
-    ghost.textContent = rest; await sleep(1300);
-    const first = rest.match(/^\S+\s?/)[0];
-    await press(tab); typed.textContent += first; ghost.textContent = rest.slice(first.length); await sleep(1100);
-    await press(all); typed.textContent += ghost.textContent; ghost.textContent = ""; await sleep(3200);
-  }
-});
-
 // Phones: a tool's long feature list opens on request.
 document.querySelectorAll(".more-feats").forEach((b) => b.addEventListener("click", () => b.closest(".tool").classList.add("open")));

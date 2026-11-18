@@ -5,7 +5,7 @@
 
 > Статуси: ✅ ПРИЙНЯТО · 🟡 ЗАПРОПОНОВАНО · ⏳ ОЧІКУЄ ПІДТВЕРДЖЕННЯ · ❌ ВІДХИЛЕНО · ⛔ СКАСОВАНО
 
-> **Поточний стан (2026-11-11).** Shotleaf 0.2.2: скріншоти з редактором, довгі скріншоти, текст з екрана (Vision), історія буфера, сніпети й необов'язкове дописування локальною Gemma 4 E2B через MLX. ШІ-панель і провайдери прибрано (ADR-0067). Код відкритий під GPL-3.0, збірки на GitHub Releases без Developer ID (ADR-0069). Записи до ADR-0067 про ШІ-панель — історичні. Дорожня карта ведеться окремо, поза репозиторієм.
+> **Поточний стан (2026-11-19).** Shotleaf: скріншоти з редактором, довгі скріншоти, текст з екрана (Vision), історія буфера й сніпети. ШІ-панель і провайдери прибрано (ADR-0067), дописування тексту з моделлю — теж (ADR-0071); сторонніх бібліотек не лишилося. Код відкритий під GPL-3.0, збірки на GitHub Releases без Developer ID (ADR-0069). Записи до ADR-0067 про ШІ-панель — історичні. Дорожня карта ведеться окремо, поза репозиторієм.
 
 ---
 
@@ -443,4 +443,15 @@ The private key can't be made again: back it up with the "Shotleaf Local Signing
 means users update once by hand to a build with a new public key. Unlike the certificate it never expires,
 so it also keeps updates checkable if the certificate's 2036 end comes first; `make-release.sh` refuses to
 build within a year of that date.
+
+## ADR-0071: Text completion removed (2026-11-19)
+
+Inline completion (Gemma 4 E2B on MLX, ADR-0006, ADR-0066) didn't earn its place: the owner didn't use it,
+its suggestions fell short of dedicated tools, it held about 2.5 GB of memory while typing (once ~12 GB
+before the MLX cache was capped in 0.2.2) and it needed a 3.6 GB download. The emoji picker and typo
+fixes ran on its keyboard watcher and went with it. Shotleaf now has no third-party libraries at all
+(MLX, swift-transformers and swift-huggingface were only for the model), so the third-party licences
+page went too. The first launch of a version without it deletes the downloaded model from the Hugging
+Face cache (`HF_HUB_CACHE` / `HF_HOME` respected), the kept writing samples and the completion settings
+(`LeftoverCompletion`). ADR-0006, ADR-0066 and the completion parts of later ADRs are history.
 

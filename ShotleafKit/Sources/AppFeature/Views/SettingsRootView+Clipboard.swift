@@ -35,7 +35,7 @@ extension SettingsRootView {
                     }
                 } label: {
                     Text("Never in these apps")
-                    Text("No clipboard history and no text completion in them.")
+                    Text("Nothing copied in them goes into the history.")
                 }
                 Button("Clear History") { coordinator.clipboard.clear() }
             }

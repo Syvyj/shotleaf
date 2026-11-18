@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>[[Guide — Shotleaf||Посібник — Shotleaf]]</title>
-<meta name="description" content="[[How to use Shotleaf: screenshots, text from the screen, clipboard history, snippets, text completion and settings, step by step.||Як користуватися Shotleaf: скріншоти, текст з екрана, історія буфера обміну, сніпети, дописування тексту й налаштування, крок за кроком.]]">
+<meta name="description" content="[[How to use Shotleaf: screenshots, text from the screen, clipboard history, snippets and settings, step by step.||Як користуватися Shotleaf: скріншоти, текст з екрана, історія буфера обміну, сніпети й налаштування, крок за кроком.]]">
 <meta property="og:type" content="article">
 <meta property="og:url" content="{{url}}">
 <meta property="og:title" content="[[Shotleaf guide||Посібник Shotleaf]]">
@@ -53,7 +53,6 @@
         <li><a href="#text">[[Text from the screen||Текст з екрана]]</a></li>
         <li><a href="#clipboard">[[Clipboard history||Історія буфера]]</a></li>
         <li><a href="#snippets">[[Snippets||Сніпети]]</a></li>
-        <li><a href="#completion">[[Text completion||Дописування тексту]]</a></li>
         <li><a href="#photos">[[Watermark photos||Водяні знаки на фото]]</a></li>
         <li><a href="#settings">[[Settings||Налаштування]]</a></li>
         <li><a href="#help">[[If something doesn’t work||Якщо щось не працює]]</a></li>
@@ -74,9 +73,8 @@
   <figure><img data-shot="setup" alt="[[The setup guide’s first page: pick the tools you want||Перша сторінка майстра: оберіть потрібні інструменти]]"></figure>
   <dl class="defs">
     <dt>[[Screen Recording||Запис екрана]]</dt><dd>[[For screenshots and for text from the screen. Without it a screenshot shows only the desktop picture.||Для скріншотів і тексту з екрана. Без нього на знімку видно лише шпалери.]]</dd>
-    <dt>[[Accessibility||Універсальний доступ]]</dt><dd>[[To paste from the clipboard history into the app you were in, to expand snippets as you type, and for text completion.||Щоб вставляти з історії буфера в програму, де ви були, розгортати сніпети під час набору і дописувати текст.]]</dd>
+    <dt>[[Accessibility||Універсальний доступ]]</dt><dd>[[To paste from the clipboard history into the app you were in and to expand snippets as you type.||Щоб вставляти з історії буфера в програму, де ви були, і розгортати сніпети під час набору.]]</dd>
   </dl>
-  <p>[[Text completion also needs its language model, Gemma 4 E2B (about 3.6 GB). It’s optional: download it from the setup guide or later in <b>Settings › Completion</b>. Everything else works without it.||Дописуванню тексту ще потрібна мовна модель Gemma 4 E2B (близько 3,6 ГБ). Вона необов’язкова: завантажте її з майстра або пізніше в <b>Налаштуваннях › Дописування</b>. Усе інше працює і без неї.]]</p>
   <p>[[Shotleaf lives in the menu bar: the leaf icon at the top of the screen. Every tool is also on a shortcut.||Shotleaf живе в рядку меню: значок листка вгорі екрана. Кожен інструмент має й сполучення клавіш.]]</p>
   <figure class="menu"><img data-shot="menu" alt="[[The Shotleaf menu in the menu bar||Меню Shotleaf у рядку меню]]"></figure>
   <p>[[<b>Updates.</b> When a new version is out, <b>Update to Shotleaf…</b> appears at the top of the menu. Shotleaf downloads it, checks that it’s genuine and restarts into it in a few seconds, with your settings and permissions. It looks for a new version at launch and once a day; turn that off in <b>Settings › General</b>.||<b>Оновлення.</b> Коли виходить нова версія, угорі меню з’являється <b>Оновити до Shotleaf…</b>. Shotleaf завантажує її, перевіряє, що вона справжня, і за кілька секунд перезапускається вже в ній, з усіма налаштуваннями й дозволами. Нову версію він шукає під час запуску й раз на день; вимкнути це можна в <b>Налаштуваннях › Загальні</b>.]]</p>
@@ -186,7 +184,7 @@
   <figure><img data-shot="clipboard-actions" alt="[[Quick actions for a link||Швидкі дії для посилання]]"></figure>
   <h3>[[Privacy||Приватність]]</h3>
   <ul>
-    <li>[[Passwords that password managers mark as private are never kept, and nothing is kept from the apps in <b>Settings › Clipboard › Never in these apps</b> (text completion stays off in them too).||Паролі, які менеджери паролів позначають як приватні, не зберігаються ніколи, а з програм у <b>Налаштування › Буфер обміну › Ніколи в цих програмах</b> не береться нічого (і дописування в них вимкнене).]]</li>
+    <li>[[Passwords that password managers mark as private are never kept, and nothing is kept from the apps in <b>Settings › Clipboard › Never in these apps</b>.||Паролі, які менеджери паролів позначають як приватні, не зберігаються ніколи, а з програм у <b>Налаштування › Буфер обміну › Ніколи в цих програмах</b> не береться нічого.]]</li>
     <li>[[Text that looks like a card number or an access token never reaches the disk and is gone from the history after a minute, unless you pin it.||Текст, схожий на номер картки чи токен доступу, не записується на диск і зникає з історії через хвилину, якщо ви його не закріпили.]]</li>
     <li>[[The menu bar can pause the history for 5 minutes or clear it. By default it keeps 200 entries, pictures for 30 days; both are in Settings.||З рядка меню історію можна призупинити на 5 хвилин або очистити. Типово вона тримає 200 записів, картинки 30 днів; обидва числа є в налаштуваннях.]]</li>
   </ul>
@@ -211,36 +209,6 @@
   <h3>[[The snippet editor||Редактор сніпетів]]</h3>
   <p>[[<b>Edit Snippets…</b> in the panel or the menu bar. Coloured folders on the left, snippets in the middle, the one you’re editing on the right with its abbreviation, folder and pictures (they’re pasted along with the text). <b>Share…</b> on a folder gives its texts and pictures as files, to send to a colleague.||<b>Редагувати сніпети…</b> у панелі чи в рядку меню. Ліворуч кольорові папки, посередині сніпети, праворуч той, що ви редагуєте, з його скороченням, папкою й картинками (вони вставляються разом із текстом). <b>Поділитися…</b> на папці дає її тексти й картинки файлами, щоб надіслати колезі.]]</p>
   <figure><img data-shot="snippet-editor" alt="[[The snippet editor||Редактор сніпетів]]"></figure>
-</section>
-
-<section id="completion">
-  <h2>[[Text completion||Дописування тексту]]</h2>
-  <p>[[As you type in any app, a grey suggestion appears after the cursor. Take it or ignore it and keep typing. <b>Complete my text as I type</b> in the menu bar turns it on and off.||Поки ви пишете в будь-якій програмі, після курсора з’являється сіра підказка. Прийміть її або не зважайте й пишіть далі. <b>Дописувати текст, поки я друкую</b> в рядку меню вмикає й вимикає її.]]</p>
-  <figure class="mockfig" aria-label="[[A sentence being typed, a grey suggestion, Tab takes a word||Речення набирається, сіра підказка, Tab бере слово]]"><div class="mock m-type" data-text="[[Hi Anna, thanks for the update. Let’s meet ||Привіт, Ганно! Дякую за новини. Давай зустрінемось ]]" data-ghost="[[tomorrow at 3 by the entrance.||завтра о третій біля входу.]]">
-        <div class="win">
-          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">[[Messages||Повідомлення]]<small>[[Anna||Ганна]]</small></div></div>
-          <div class="note"><span class="typed"></span><span class="caret"></span><span class="ghost"></span></div>
-          <div class="bar"><span class="b k-tab">Tab <i>[[next word||наступне слово]]</i></span><span class="b k-all">⌥Tab <i>[[all||усе]]</i></span><span class="sp"></span><span class="b">esc <i>[[hide||сховати]]</i></span></div>
-        </div>
-      </div></figure>
-  <table class="keys">
-    <tr><td><kbd>Tab</kbd></td><td>[[take the next word||взяти наступне слово]]</td></tr>
-    <tr><td><kbd>⌥Tab</kbd></td><td>[[take the whole suggestion||взяти всю підказку]]</td></tr>
-    <tr><td><kbd>esc</kbd></td><td>[[hide it||сховати її]]</td></tr>
-    <tr><td><kbd>:</kbd>[[word||слово]]</td><td>[[emoji by name: <code>:fire</code> offers 🔥; more letters narrow the list, <kbd>1</kbd>–<kbd>9</kbd> or a click picks||емодзі за назвою: <code>:fire</code> пропонує 🔥; наступні літери звужують список, <kbd>1</kbd>–<kbd>9</kbd> або клік вибирає]]</td></tr>
-  </table>
-  <p>[[A misspelled word gets a fix you take with <kbd>Tab</kbd> too. The model runs on your Mac: nothing you type is sent anywhere.||Слово з помилкою отримує виправлення, яке теж береться клавішею <kbd>Tab</kbd>. Модель працює на вашому Mac: нічого з набраного нікуди не надсилається.]]</p>
-  <figure class="mockfig" aria-label="[[Emoji by name: “:fi” offers fire, fireworks and more||Емодзі за назвою: «:fi» пропонує вогонь, феєрверк та інше]]"><div class="mock m-emoji">
-        <div class="win">
-          <div class="win-head"><svg class="logo" style="visibility:hidden"><use href="#logo"/></svg><div class="win-title">[[Messages||Повідомлення]]<small>[[Team||Команда]]</small></div></div>
-          <div class="note">[[We launched the site today ||Ми сьогодні запустили сайт ]]<span class="q">:fi</span><span class="caret"></span>
-            <div class="pick"><div class="e on"><span>🔥</span>fire<i>1</i></div><div class="e"><span>🎆</span>fireworks<i>2</i></div><div class="e"><span>🎇</span>sparkler<i>3</i></div><div class="e"><span>🧯</span>fire extinguisher<i>4</i></div></div>
-          </div>
-          <div class="bar"><span class="b go">Tab <i>[[first||перше]]</i></span><span class="b">1–9 <i>[[pick||вибрати]]</i></span><span class="sp"></span><span class="b">esc <i>[[close||закрити]]</i></span></div>
-        </div>
-      </div></figure>
-  <p>[[In <b>Settings › Completion</b>: <b>Suggestions</b> from cautious (only sure, short ones) to bold; <b>Use text on screen</b>, so suggestions fit the chat or page you’re answering; <b>Use what I just copied</b> (never a password, a card number or a token); and <b>Learn my style</b>: a few of your own texts, kept on this Mac only, so suggestions sound like you. <b>Forget what I wrote</b> deletes them.||У <b>Налаштуваннях › Дописування</b>: <b>Підказки</b> від обережних (лише певні й короткі) до сміливих; <b>Враховувати текст на екрані</b>, щоб підказки пасували до переписки чи сторінки, на яку ви відповідаєте; <b>Враховувати щойно скопійоване</b> (ніколи не пароль, номер картки чи токен); і <b>Вчитися мого стилю</b>: кілька ваших текстів, лише на цьому Mac, щоб підказки звучали як ви. <b>Забути мої тексти</b> їх видаляє.]]</p>
-  <figure><img data-shot="settings-completion" alt="[[Settings › Completion||Налаштування › Дописування]]"></figure>
 </section>
 
 <section id="photos">
@@ -279,12 +247,8 @@
     <p>[[Both need the Accessibility permission: see <b>Settings › Permissions</b>. Snippets also need their tool on in <b>General › Features</b>.||Обом потрібен дозвіл Універсального доступу: дивіться <b>Налаштування › Дозволи</b>. Сніпетам ще потрібно, щоб їхній інструмент був увімкнений у <b>Загальних › Функції</b>.]]</p>
   </details>
   <details>
-    <summary>[[No grey suggestions as I type||Під час набору немає сірих підказок]]</summary>
-    <p>[[Check that the model is downloaded in <b>Settings › Completion</b> and that text completion is on in <b>General › Features</b>. Some apps don’t let other apps read their text fields. There are no suggestions in password fields, while secure input is on (sudo in a terminal, a password manager), in terminals, or in the apps under <b>Settings › Clipboard › Never in these apps</b>.||Перевірте, що модель завантажена в <b>Налаштуваннях › Дописування</b> і що дописування ввімкнене в <b>Загальних › Функції</b>. Деякі програми не дають іншим читати свої текстові поля. Підказок немає в полях для паролів, під час захищеного вводу (sudo в терміналі, менеджер паролів), у терміналах і в програмах зі списку <b>Налаштування › Буфер обміну › Ніколи в цих програмах</b>.]]</p>
-  </details>
-  <details>
     <summary>[[How do I remove everything?||Як видалити все?]]</summary>
-    <p>[[<b>Settings › General › Delete All Shotleaf Data…</b> deletes the history, snippets, recent screenshots, your writing style, the model and the settings, then quits. Then drag Shotleaf from Applications to the Bin.||<b>Налаштування › Загальні › Видалити всі дані Shotleaf…</b> видаляє історію, сніпети, недавні скріншоти, ваш стиль письма, модель і налаштування, а потім закриває програму. Після цього перетягніть Shotleaf із Програм у Смітник.]]</p>
+    <p>[[<b>Settings › General › Delete All Shotleaf Data…</b> deletes the history, snippets, recent screenshots and the settings, then quits. Then drag Shotleaf from Applications to the Bin.||<b>Налаштування › Загальні › Видалити всі дані Shotleaf…</b> видаляє історію, сніпети, недавні скріншоти й налаштування, а потім закриває програму. Після цього перетягніть Shotleaf із Програм у Смітник.]]</p>
   </details>
   <p class="note">[[Still stuck? Write to <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a> or open an <a href="https://github.com/Syvyj/shotleaf/issues">issue on GitHub</a>. If Shotleaf crashed, attach the newest <code>Shotleaf-*.ips</code> file from <code>~/Library/Logs/DiagnosticReports</code>.||Не вийшло? Напишіть на <a href="mailto:shotleaf@syvyj.dev">shotleaf@syvyj.dev</a> або створіть <a href="https://github.com/Syvyj/shotleaf/issues">issue на GitHub</a>. Якщо Shotleaf упав, додайте найновіший файл <code>Shotleaf-*.ips</code> з <code>~/Library/Logs/DiagnosticReports</code>.]]</p>
 </section>

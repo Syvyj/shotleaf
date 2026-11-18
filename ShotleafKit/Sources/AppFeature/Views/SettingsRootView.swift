@@ -2,13 +2,12 @@ import SwiftUI
 import Core
 import SettingsKit
 
-/// Settings window: shortcuts, inline completion (and its model), general,
+/// Settings window: shortcuts, screenshots, clipboard, general,
 /// permissions.
 public struct SettingsRootView: View {
     @Bindable var coordinator: AppCoordinator
 
     @State var hotkeyError: String?
-    @State var showNotices = false
     @State var confirmDeleteAll = false
     @AppStorage(Sound.key) var sounds = true
     // Screenshots (the same keys SettingsStore reads).
@@ -27,12 +26,12 @@ public struct SettingsRootView: View {
         self.coordinator = coordinator
     }
 
-    /// Accessibility: read the field you type in, type suggestions. Screen Recording: screenshots.
+    /// Accessibility: paste from the history and expand snippets. Screen Recording: screenshots.
     let required: [PermissionKind] = [.accessibility, .screenRecording]
 
     /// The sidebar's panes.
     enum Pane: String, CaseIterable, Identifiable {
-        case general, shortcuts, screenshots, tools, clipboard, completion, permissions
+        case general, shortcuts, screenshots, tools, clipboard, permissions
         var id: Self { self }
 
         var title: LocalizedStringKey {
@@ -42,7 +41,6 @@ public struct SettingsRootView: View {
             case .screenshots: "Screenshots"
             case .tools: "Tools"
             case .clipboard: "Clipboard"
-            case .completion: "Completion"
             case .permissions: "Permissions"
             }
         }
@@ -54,7 +52,6 @@ public struct SettingsRootView: View {
             case .screenshots: "camera.viewfinder"
             case .tools: "pencil.tip.crop.circle"
             case .clipboard: "doc.on.clipboard"
-            case .completion: "text.cursor"
             case .permissions: "lock.shield"
             }
         }
@@ -90,7 +87,6 @@ public struct SettingsRootView: View {
                 .formStyle(.grouped)
                 .navigationTitle(Text(pane.title))
         }
-        .sheet(isPresented: $showNotices) { ThirdPartyNoticesView { showNotices = false } }
         .frame(width: 800, height: 600)
         .onAppear {
             coordinator.refreshPermissions()
@@ -111,7 +107,6 @@ public struct SettingsRootView: View {
             linksSection
         case .tools: toolsSection
         case .clipboard: clipboardSection
-        case .completion: completionSection
         case .permissions: permissionsSection
         }
     }
@@ -147,7 +142,6 @@ public struct SettingsRootView: View {
                     Link(AppInfo.email, destination: URL(string: "mailto:\(AppInfo.email)")!)
                     Link("Privacy", destination: AppInfo.privacyPage)
                     Link("Report a problem", destination: AppInfo.newIssue)
-                    Button("Third-party licences") { showNotices = true }.buttonStyle(.link)
                 }
             }
         }
@@ -173,43 +167,6 @@ public struct SettingsRootView: View {
         let short = info?["CFBundleShortVersionString"] as? String ?? "dev"
         let build = info?["CFBundleVersion"] as? String ?? "0"
         return String(localized: "Version \(short) (\(build))")
-    }
-
-    // MARK: Completion model
-
-    /// Download / progress / delete for the completion model.
-    @ViewBuilder
-    func modelRow(about: LocalizedStringKey) -> some View {
-        switch coordinator.modelState {
-        case .notDownloaded:
-            HStack {
-                Text(about).font(.callout).foregroundStyle(.secondary)
-                Spacer()
-                Button("Download") { coordinator.downloadModel() }
-            }
-        case .downloading(let fraction):
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    ProgressView(value: fraction)
-                    Button("Cancel") { coordinator.cancelModelDownload() }
-                }
-                Text(fraction < 1 ? String(localized: "Downloading… \(Int(fraction * 100))%") : String(localized: "Loading the model…"))
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-        case .ready(let bytes):
-            HStack {
-                Label("Downloaded · \(ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file))", systemImage: "checkmark.circle")
-                    .foregroundStyle(.green)
-                Spacer()
-                Button("Delete", role: .destructive) { coordinator.deleteModel() }
-            }
-        case .failed(let message):
-            HStack {
-                Text("Download failed: \(message)").font(.caption).foregroundStyle(.red).lineLimit(3)
-                Spacer()
-                Button("Try again") { coordinator.downloadModel() }
-            }
-        }
     }
 
     // MARK: Shortcut

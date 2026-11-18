@@ -3,8 +3,8 @@ import AppKit
 import Core
 
 /// First-run setup guide, built around a first result: pick the tools you want →
-/// allow only what those need, each permission explained where it's used → the
-/// completion model, optional → take a first screenshot → what else is there.
+/// allow only what those need, each permission explained where it's used →
+/// take a first screenshot → what else is there.
 /// Pages that don't apply are skipped. The page is saved, so the restart that
 /// follows granting a permission comes back to it.
 struct OnboardingView: View {
@@ -13,7 +13,7 @@ struct OnboardingView: View {
 
     static let pageKey = "setupGuidePage"
 
-    enum Page: String, CaseIterable { case tools, permissions, model, firstShot, tour }
+    enum Page: String, CaseIterable { case tools, permissions, firstShot, tour }
 
     private var page: Page { Page(rawValue: pageName) ?? .tools }
     private var toolsOn: [Tool] { Tool.allCases.filter(coordinator.isOn) }
@@ -23,14 +23,12 @@ struct OnboardingView: View {
     }
     private var missing: [PermissionKind] { Tool.missing(on: toolsOn, status: coordinator.permissions) }
     private func granted(_ kind: PermissionKind) -> Bool { coordinator.permissions[kind] == .granted }
-    private var modelReady: Bool { if case .ready = coordinator.modelState { true } else { false } }
 
     /// Whether a page has something to do; the one being shown always stays.
     private func applies(_ p: Page) -> Bool {
         switch p {
         case .tools, .tour: true
         case .permissions: !missing.isEmpty
-        case .model: coordinator.isOn(.completion) && !modelReady
         case .firstShot: coordinator.isOn(.screenshots)
         }
     }
@@ -47,7 +45,6 @@ struct OnboardingView: View {
                 switch page {
                 case .tools: toolsPage
                 case .permissions: permissionsPage
-                case .model: modelPage
                 case .firstShot: firstShotPage
                 case .tour: tourPage
                 }
@@ -84,7 +81,6 @@ struct OnboardingView: View {
         switch page {
         case .tools: "What do you need?"
         case .permissions: "Allow what these tools need"
-        case .model: "Text completion model"
         case .firstShot: "Take your first screenshot"
         case .tour: "You’re all set"
         }
@@ -94,7 +90,6 @@ struct OnboardingView: View {
         switch page {
         case .tools: "Turn on what you’ll use. You can change it any time in Settings › General › Features."
         case .permissions: "macOS asks you to allow these once. Nothing leaves your Mac."
-        case .model: "Optional. Everything else works without it, and you can download it later in Settings › Completion."
         case .firstShot: "The quickest way to see what Shotleaf does."
         case .tour: "Everything is also in the menu bar, under the Shotleaf icon."
         }
@@ -123,7 +118,6 @@ struct OnboardingView: View {
     private var nextLabel: LocalizedStringKey {
         switch page {
         case .permissions where !missing.isEmpty: "Skip for Now"
-        case .model where !modelReady: "Later"
         case .firstShot where coordinator.shotsThisRun == 0: "Skip"
         default: "Continue"
         }
@@ -185,7 +179,7 @@ struct OnboardingView: View {
             }
             Text(kind == .screenRecording
                  ? "Lets Shotleaf see the screen when you take a screenshot or copy text from one. Nothing is recorded or sent anywhere."
-                 : "Lets Shotleaf paste from the history, expand snippets and type completions into other apps. It never reads password fields.")
+                 : "Lets Shotleaf paste from the history and expand snippets in other apps. It never reads password fields.")
                 .fixedSize(horizontal: false, vertical: true)
             Text("For: \(users.map { String(localized: $0.titleResource) }.formatted(.list(type: .and).locale(Self.appLocale)))")
                 .font(Leaf.font(12)).foregroundStyle(.secondary)
@@ -205,28 +199,6 @@ struct OnboardingView: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(.primary.opacity(0.04)))
-    }
-
-    private var modelPage: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Gemma 4 E2B, about 3.6 GB. It runs only on this Mac: what you type never leaves it.")
-                .fixedSize(horizontal: false, vertical: true)
-            switch coordinator.modelState {
-            case .notDownloaded:
-                Button("Download") { coordinator.downloadModel() }.buttonStyle(LeafButtonStyle(prominent: true))
-            case .failed(let message):
-                Text(message).foregroundStyle(.orange)
-                Button("Try Again") { coordinator.downloadModel() }.buttonStyle(LeafButtonStyle(prominent: true))
-            case .downloading(let fraction):
-                HStack {
-                    ProgressView(value: fraction).frame(maxWidth: 280)
-                    Button("Cancel") { coordinator.cancelModelDownload() }.buttonStyle(LeafButtonStyle())
-                }
-                Text("It keeps downloading if you go on.").font(.caption).foregroundStyle(.secondary)
-            case .ready:
-                Label("Downloaded", systemImage: "checkmark.circle.fill").foregroundStyle(Leaf.ink)
-            }
-        }
     }
 
     @ViewBuilder private var firstShotPage: some View {
@@ -314,7 +286,6 @@ extension Tool {
         case .screenText: "text.viewfinder"
         case .clipboard: "doc.on.clipboard"
         case .snippets: "text.badge.plus"
-        case .completion: "text.cursor"
         }
     }
 
@@ -325,7 +296,6 @@ extension Tool {
         case .screenText: "Text from Screenshot"
         case .clipboard: "Clipboard History"
         case .snippets: "Snippets"
-        case .completion: "Text completion"
         }
     }
 
@@ -336,7 +306,6 @@ extension Tool {
         case .screenText: "Copy the words from any picture or app, recognised on your Mac."
         case .clipboard: "Everything you copied, searchable and ready to paste again."
         case .snippets: "Type a short abbreviation anywhere and get the whole text."
-        case .completion: "Grey suggestions as you type, from a small model on your Mac (a 3.6 GB download)."
         }
     }
 
@@ -347,7 +316,6 @@ extension Tool {
         case .screenText: "Select an area and its text opens, ready to copy."
         case .clipboard: "Search, then Return pastes the item into the app you were in."
         case .snippets: "Make one in the menu › Snippets › Edit Snippets…, then type its abbreviation anywhere."
-        case .completion: "Type in any app. Tab takes the next word, ⌥Tab the whole suggestion."
         }
     }
 }

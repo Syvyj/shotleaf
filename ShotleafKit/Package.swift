@@ -1,7 +1,7 @@
 // swift-tools-version: 6.1
 import PackageDescription
 
-// Shotleaf — screenshots, text from screenshots, clipboard and inline completion for macOS.
+// Shotleaf — screenshots, text from screenshots, clipboard history and snippets for macOS.
 // © 2026 Oleksii Ziuzin (Syvyj). Licensed under GPL-3.0-or-later, see LICENSE.
 // Single package, many targets: the compiler enforces module boundaries
 // (a target sees only what it declares in `dependencies`) without the
@@ -19,15 +19,6 @@ let package = Package(
         .library(name: "SettingsKit", targets: ["SettingsKit"]),
         .library(name: "AppFeature", targets: ["AppFeature"]),
     ],
-    dependencies: [
-        // On-device model (ADR-0006). The FoundationModels bridge needs the
-        // macOS 27 SDK, so that trait is off.
-        .package(url: "https://github.com/ml-explore/mlx-swift-lm", .upToNextMinor(from: "3.32.3"), traits: []),
-        .package(url: "https://github.com/ml-explore/mlx-swift", .upToNextMinor(from: "0.32.3")),
-        // Like MLX: minor updates only by hand (`swift package update` must not swap the tokenizer under users).
-        .package(url: "https://github.com/huggingface/swift-huggingface", .upToNextMinor(from: "0.13.0")),
-        .package(url: "https://github.com/huggingface/swift-transformers", .upToNextMinor(from: "1.3.4")),
-    ],
     targets: [
         // Foundation-only contracts and domain types. Depends on nothing.
         .target(name: "Core"),
@@ -36,29 +27,14 @@ let package = Package(
         .target(name: "CaptureKit", dependencies: ["Core"]),
         .target(name: "PerceptionKit", dependencies: ["Core"]),
         .target(name: "SettingsKit", dependencies: ["Core"]),
-        // The completion model: Gemma 4 E2B base on MLX. Heavy dependencies stay here.
-        .target(
-            name: "EmbeddedKit",
-            dependencies: [
-                "Core",
-                .product(name: "MLXLLM", package: "mlx-swift-lm"),
-                .product(name: "MLXLMCommon", package: "mlx-swift-lm"),
-                .product(name: "MLX", package: "mlx-swift"),
-                .product(name: "MLXHuggingFace", package: "mlx-swift-lm"),
-                .product(name: "HuggingFace", package: "swift-huggingface"),
-                .product(name: "Tokenizers", package: "swift-transformers"),
-            ]
-        ),
-
         // App composition layer (the only module that knows everything). The
         // .xcodeproj app target links this; `swift build` also compiles it so
         // App Shell logic is verified headlessly.
         .target(
             name: "AppFeature",
             dependencies: [
-                "Core", "CaptureKit", "PerceptionKit", "SettingsKit", "EmbeddedKit",
-            ],
-            resources: [.copy("Resources/ThirdPartyNotices.txt")] // scripts/make-notices.sh
+                "Core", "CaptureKit", "PerceptionKit", "SettingsKit",
+            ]
         ),
 
         .testTarget(name: "CoreTests", dependencies: ["Core", "SettingsKit"]),

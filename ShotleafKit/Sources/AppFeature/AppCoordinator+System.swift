@@ -4,7 +4,6 @@ import Observation
 import SwiftUI
 import ServiceManagement
 import OSLog
-import EmbeddedKit
 
 /// The Dock icon, language, opening at login, the setup guide and permissions.
 extension AppCoordinator {
@@ -108,7 +107,7 @@ extension AppCoordinator {
     static let reopenGuideKey = "reopenSetupGuide"
 
     /// What only works in a process that started with the permission on: the
-    /// keyboard taps (completion, snippets, pasting) and screen capture.
+    /// keyboard taps (snippets, pasting) and screen capture.
     static let restartPermissions: [PermissionKind] = [.accessibility, .screenRecording]
 
     /// Watches the permissions missing at launch; once the user grants one,

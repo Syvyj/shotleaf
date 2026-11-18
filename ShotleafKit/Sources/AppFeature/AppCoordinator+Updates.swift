@@ -4,7 +4,6 @@ import Observation
 import SwiftUI
 import ServiceManagement
 import OSLog
-import EmbeddedKit
 
 /// Looking for a new version and updating to it.
 extension AppCoordinator {
