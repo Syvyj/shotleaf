@@ -43,6 +43,13 @@ public enum CompletionEval {
             }
         }
         await running?.value
+        let mb = { (n: Int) in "\(n / 1_048_576) MB" }
+        print("done typing: process \(mb(footprint())), MLX active \(mb(EmbeddedModel.memory.active))")
+        await model.unload() // what the 10-minute idle timer does
+        for wait in [1, 5, 15] {
+            try? await Task.sleep(for: .seconds(wait))
+            print("after unload +\(wait) s: process \(mb(footprint())), MLX active \(mb(EmbeddedModel.memory.active)), cache \(mb(EmbeddedModel.memory.cache))")
+        }
     }
 
     /// What Activity Monitor shows as Memory.
