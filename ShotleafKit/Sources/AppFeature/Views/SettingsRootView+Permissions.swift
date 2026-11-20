@@ -22,7 +22,7 @@ extension SettingsRootView {
         } header: {
             Text("Permissions")
         } footer: {
-            Text("Accessibility lets Shotleaf complete text, expand snippets and paste from the clipboard history; Screen Recording — screenshots and text from the screen. Shotleaf restarts by itself once Accessibility is on.")
+            Text("Accessibility lets Shotleaf expand snippets and paste from the clipboard history; Screen Recording — screenshots and text from the screen. Shotleaf restarts by itself once Accessibility is on.")
         }
     }
 

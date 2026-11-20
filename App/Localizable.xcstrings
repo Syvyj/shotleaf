@@ -390,16 +390,6 @@
         }
       }
     },
-    "Built-in (Gemma 4 E2B, on this Mac)": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вбудована (Gemma 4 E2B, на цьому Mac)"
-          }
-        }
-      }
-    },
     "Can't reach the model server. Is LM Studio running with a model loaded?": {
       "localizations": {
         "uk": {
@@ -636,36 +626,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Кольори"
-          }
-        }
-      }
-    },
-    "Complete my text as I type": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дописувати текст, поки я друкую"
-          }
-        }
-      }
-    },
-    "Completion": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дописування"
-          }
-        }
-      }
-    },
-    "Completion model: Gemma 4 E2B base · about 3.6 GB, runs offline": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Модель для дописування: Gemma 4 E2B base · близько 3,6 ГБ, працює без інтернету"
           }
         }
       }
@@ -1010,16 +970,6 @@
         }
       }
     },
-    "Emoji and spelling fixes": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Емодзі та виправлення одруківок"
-          }
-        }
-      }
-    },
     "Enjoying Shotleaf?": {
       "localizations": {
         "uk": {
@@ -1136,16 +1086,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Відформатувати JSON"
-          }
-        }
-      }
-    },
-    "Gemma 4 E2B · about 3.6 GB download, runs offline, sees screenshots": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gemma 4 E2B · близько 3,6 ГБ, працює без інтернету, бачить скріншоти"
           }
         }
       }
@@ -2700,12 +2640,12 @@
         }
       }
     },
-    "Accessibility lets Shotleaf complete text, expand snippets and paste from the clipboard history; Screen Recording — screenshots and text from the screen. Shotleaf restarts by itself once Accessibility is on.": {
+    "Accessibility lets Shotleaf expand snippets and paste from the clipboard history; Screen Recording — screenshots and text from the screen. Shotleaf restarts by itself once Accessibility is on.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Універсальний доступ потрібен, щоб дописувати текст, розгортати сніпети й вставляти з історії буфера обміну; запис екрана — для скріншотів і тексту з екрана. Коли увімкнете універсальний доступ, Shotleaf сам перезапуститься."
+            "value": "Універсальний доступ потрібен, щоб розгортати сніпети й вставляти з історії буфера обміну; запис екрана — для скріншотів і тексту з екрана. Коли увімкнете універсальний доступ, Shotleaf сам перезапуститься."
           }
         }
       }
@@ -2870,12 +2810,12 @@
         }
       }
     },
-    "Clipboard history, snippets, recent screenshots, your writing style, settings, the link key and the completion model. Saved screenshots stay where you saved them. This can’t be undone.": {
+    "Clipboard history, snippets, recent screenshots, settings and the link key. Saved screenshots stay where you saved them. This can’t be undone.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Історію буфера обміну, сніпети, недавні скріншоти, ваш стиль письма, налаштування, ключ посилань і модель дописування. Збережені скріншоти лишаться там, куди ви їх зберегли. Скасувати це неможливо."
+            "value": "Історію буфера обміну, сніпети, недавні скріншоти, налаштування й ключ посилань. Збережені скріншоти лишаться там, куди ви їх зберегли. Скасувати це неможливо."
           }
         }
       }
@@ -2916,16 +2856,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Функції"
-          }
-        }
-      }
-    },
-    "Text completion": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Дописування тексту"
           }
         }
       }
@@ -3279,16 +3209,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Спробувати ще"
-          }
-        }
-      }
-    },
-    "Type : or ; for an emoji picker (1–9 or a click; letters filter, :fire → 🔥). A misspelled word gets a fix with Tab.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Наберіть : або ; — з'явиться панель емодзі (1–9 або клік; літери фільтрують, :fire → 🔥). Слово з одруківкою виправляється по Tab."
           }
         }
       }
@@ -4089,12 +4009,12 @@
         }
       }
     },
-    "No clipboard history and no text completion in them.": {
+    "Nothing copied in them goes into the history.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "У них не ведеться історія буфера й не працює дописування."
+            "value": "Нічого скопійованого в них не потрапляє в історію."
           }
         }
       }
@@ -4269,16 +4189,6 @@
         }
       }
     },
-    "Gemma 4 E2B, about 3.6 GB. It runs only on this Mac: what you type never leaves it.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gemma 4 E2B, близько 3,6 ГБ. Працює лише на цьому Mac: те, що ви пишете, нікуди не йде."
-          }
-        }
-      }
-    },
     "Grey suggestions as you type, from a small model on your Mac (a 3.6 GB download).": {
       "localizations": {
         "uk": {
@@ -4319,12 +4229,12 @@
         }
       }
     },
-    "Lets Shotleaf paste from the history, expand snippets and type completions into other apps. It never reads password fields.": {
+    "Lets Shotleaf paste from the history and expand snippets in other apps. It never reads password fields.": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Дає Shotleaf вставляти з історії, розгортати сніпети й дописувати текст в інших програмах. Поля паролів він не читає ніколи."
+            "value": "Дає Shotleaf вставляти з історії й розгортати сніпети в інших програмах. Поля паролів він не читає ніколи."
           }
         }
       }
@@ -4355,16 +4265,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Позначте щось інструментами вгорі редактора (наведіть на інструмент, щоб побачити його назву), а ⌘C скопіює знімок і закриє редактор."
-          }
-        }
-      }
-    },
-    "Optional. Everything else works without it, and you can download it later in Settings › Completion.": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Необов’язково. Усе інше працює без неї, а завантажити її можна пізніше в Налаштуваннях › Дописування."
           }
         }
       }
@@ -4445,16 +4345,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Зробіть перший скріншот"
-          }
-        }
-      }
-    },
-    "Text completion model": {
-      "localizations": {
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Модель для дописування"
           }
         }
       }

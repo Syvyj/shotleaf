@@ -68,7 +68,8 @@ async function remove(request, env, url) {
   if (!object) return notFound()
   const given = (request.headers.get("Authorization") || "").replace(/^Bearer /, "")
   const hash = object.customMetadata?.delete
-  if (!hash || (await sha256(given)) !== hash) return json(403, { error: "wrong delete token" })
+  const got = new TextEncoder().encode(await sha256(given)), want = new TextEncoder().encode(hash || "")
+  if (got.length !== want.length || !crypto.subtle.timingSafeEqual(got, want)) return json(403, { error: "wrong delete token" })
   await env.SHOTS.delete(match[1])
   return new Response(null, { status: 204 })
 }
@@ -87,7 +88,8 @@ async function show(env, url, id, raw) {
     return notFound()
   }
   const left = expires - Math.floor(Date.now() / 1000)
-  const headers = { "Cache-Control": `public, max-age=${Math.min(left, 3600)}`, "X-Robots-Tag": "noindex", "X-Content-Type-Options": "nosniff" }
+  // Short and private, so a deleted link stops showing within a minute.
+  const headers = { "Cache-Control": "private, max-age=60", "X-Robots-Tag": "noindex", "X-Content-Type-Options": "nosniff" }
   if (raw) return new Response(object.body, { headers: { ...headers, "Content-Type": object.httpMetadata.contentType } })
   const ext = object.httpMetadata.contentType === "image/png" ? "png" : "jpg"
   const image = `${base(url)}/${id}.${ext}`
