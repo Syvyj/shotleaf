@@ -19,7 +19,7 @@ private func pngWithText(_ text: String) throws -> Data {
     return try #require(NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]))
 }
 
-@Suite("OCR")
+@Suite("OCR", .disabled(if: ProcessInfo.processInfo.environment["CI"] != nil)) // Vision hangs on a runner without a GPU
 struct OCRTests {
     @Test("Vision reads Latin and Ukrainian text from an image")
     func recognizes() async throws {
