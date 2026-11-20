@@ -245,6 +245,8 @@ kbd { font: 500 .8em/1 var(--font); padding: .28em .5em; border-radius: 6px; bac
 .install li { list-style: none; counter-increment: s; padding: 24px 24px 26px; border-radius: 18px; background: var(--card); border: 1px solid var(--edge); color: var(--muted); font-size: 15.5px; }
 .install li::before { content: "0" counter(s); display: block; margin-bottom: 18px; font: 650 44px/1 var(--font); letter-spacing: -.04em; color: color-mix(in srgb, var(--leaf) calc(var(--fill, 0) * 100%), transparent); -webkit-text-stroke: 1.2px var(--leaf); }
 .install b { color: var(--text); font-weight: 600; }
+.brew { margin: 18px 0 0; color: var(--muted); font-size: 15px; }
+.brew code { font: .9em var(--mono); background: rgba(30, 50, 20, .06); padding: 3px 8px; border-radius: 6px; color: var(--text); user-select: all; overflow-wrap: anywhere; }
 
 /* the closing call to action, captured in the same frame as the hero */
 .final { margin-top: 150px; }
