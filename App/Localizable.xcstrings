@@ -4658,6 +4658,46 @@
           }
         }
       }
+    },
+    "Couldn’t check for updates": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося перевірити оновлення"
+          }
+        }
+      }
+    },
+    "GitHub didn’t answer. Check the internet connection and try again, or look at the releases page.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub не відповів. Перевірте з’єднання з інтернетом і спробуйте ще раз або перегляньте сторінку випусків."
+          }
+        }
+      }
+    },
+    "Open Releases Page": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити сторінку випусків"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Гаразд"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

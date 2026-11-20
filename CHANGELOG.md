@@ -7,6 +7,7 @@
 - Clipboard actions (⌘K): convert a color between HEX and RGB, Base64 encode and decode.
 - A deleted link stops showing within a minute (browsers kept it up to an hour).
 - Settings no longer mention text completion, and three settings texts reworded in 0.3.0 are in Ukrainian again.
+- Check for Updates says "up to date" instead of opening GitHub: it no longer uses GitHub's API, whose 60 checks an hour per address ran out behind a shared one. If GitHub can't be reached, it says so.
 - Updates: the restart gives up if Shotleaf didn't quit, instead of waiting in the background for good.
 
 ## 0.3.0

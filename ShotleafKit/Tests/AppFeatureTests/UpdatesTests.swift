@@ -23,32 +23,21 @@ func updateChecksum() {
     #expect(Updates.checksum(in: String(hex.dropLast())) == nil && Updates.checksum(in: hex + "a") == nil) // 63, 65
 }
 
-@Test("GitHub's latest-release answer gives the version, the disk image and its checksum file")
-func updateAnswer() throws {
-    let answer = """
-        {"tag_name": "v0.2.0", "name": "Shotleaf 0.2.0", "assets": [
-          {"name": "Shotleaf.dmg.sha256", "browser_download_url": "https://github.com/Syvyj/shotleaf/releases/download/v0.2.0/Shotleaf.dmg.sha256"},
-          {"name": "Shotleaf.dmg", "browser_download_url": "https://github.com/Syvyj/shotleaf/releases/download/v0.2.0/Shotleaf.dmg"}]}
-        """
-    let release = try Updates.release(from: Data(answer.utf8))
-    #expect(release.version == "0.2.0")
-    #expect(release.download.lastPathComponent == "Shotleaf.dmg" && release.checksum?.lastPathComponent == "Shotleaf.dmg.sha256")
-    // No checksum file: nothing to check the download against, so `prepare` refuses it.
-    let bare = try Updates.release(from: Data(#"{"tag_name": "V0.3", "assets": []}"#.utf8))
-    #expect(bare.version == "0.3" && bare.checksum == nil)
-    #expect(throws: (any Error).self) { try Updates.release(from: Data("<html>rate limited</html>".utf8)) }
+@Test("The latest release's page gives the version and its three files; any other page doesn't")
+func updateRelease() throws {
+    let release = try Updates.release(at: URL(string: "https://github.com/Syvyj/shotleaf/releases/tag/v0.4.0")!)
+    #expect(release.version == "0.4.0")
+    #expect(release.download.absoluteString == "https://github.com/Syvyj/shotleaf/releases/download/v0.4.0/Shotleaf.dmg")
+    #expect(release.checksum?.lastPathComponent == "Shotleaf.dmg.sha256" && release.signature?.lastPathComponent == "Shotleaf.dmg.sha256.sig")
+    #expect(throws: (any Error).self) { try Updates.release(at: URL(string: "https://github.com/Syvyj/shotleaf/releases")!) }
+    #expect(throws: (any Error).self) { try Updates.release(at: URL(string: "https://github.com/login")!) }
+    #expect(Data(base64Encoded: Updates.publicKey)?.count == 32) // a real Ed25519 public key is built in
 }
 
-@Test("The release's assets: the signed checksum is found too")
-func updateSignatureAsset() throws {
-    let answer = """
-        {"tag_name": "v0.2.1", "assets": [{"name": "Shotleaf.dmg", "browser_download_url": "https://example.com/Shotleaf.dmg"},
-          {"name": "Shotleaf.dmg.sha256", "browser_download_url": "https://example.com/Shotleaf.dmg.sha256"},
-          {"name": "Shotleaf.dmg.sha256.sig", "browser_download_url": "https://example.com/Shotleaf.dmg.sha256.sig"}]}
-        """
-    let release = try Updates.release(from: Data(answer.utf8))
-    #expect(release.checksum?.lastPathComponent == "Shotleaf.dmg.sha256" && release.signature?.lastPathComponent == "Shotleaf.dmg.sha256.sig")
-    #expect(Data(base64Encoded: Updates.publicKey)?.count == 32) // a real Ed25519 public key is built in
+@Test("Live: GitHub's latest release is found without the API", .disabled(if: ProcessInfo.processInfo.environment["CI"] != nil))
+func updateLatestLive() async throws {
+    let release = try await Updates.latest()
+    #expect(Updates.isNewer(release.version, than: "0.2.9"))
 }
 
 /// A release on disk: a disk image with a "Shotleaf.app" in it, its checksum file, and that file signed.

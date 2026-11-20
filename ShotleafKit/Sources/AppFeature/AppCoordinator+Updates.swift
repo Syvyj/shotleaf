@@ -62,7 +62,12 @@ extension AppCoordinator {
     /// "Check for Updates…": the answer right away, in a window.
     public func checkForUpdatesNow() {
         Task {
-            guard let release = try? await Updates.latest() else { NSWorkspace.shared.open(AppInfo.releases); return }
+            guard let release = try? await Updates.latest() else {
+                if !Ask.show(String(localized: "Couldn’t check for updates"),
+                    String(localized: "GitHub didn’t answer. Check the internet connection and try again, or look at the releases page."),
+                    buttons: [String(localized: "OK"), String(localized: "Open Releases Page")]) { NSWorkspace.shared.open(AppInfo.releases) }
+                return
+            }
             let newer = Updates.isNewer(release.version, than: Updates.current)
             update = newer ? release : nil
             if newer {

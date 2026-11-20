@@ -27,7 +27,6 @@ public enum Updates {
         return key.isValidSignature(signature, for: sums)
     }
 
-    static let api = URL(string: "https://api.github.com/repos/Syvyj/shotleaf/releases/latest")!
 
     static var current: String { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0" }
 
@@ -42,26 +41,27 @@ public enum Updates {
         return false
     }
 
+    /// github.com/…/releases/latest redirects to the newest release's tag page. That page, not the
+    /// API: the API allows 60 anonymous asks an hour per address, used up behind a shared one
+    /// (an office, a VPN), and "Check for Updates" then failed.
     static func latest() async throws -> Release {
-        var request = URLRequest(url: api, timeoutInterval: 20)
-        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
-        let (data, _) = try await URLSession.shared.data(for: request)
-        return try release(from: data)
+        var request = URLRequest(url: AppInfo.releases.appendingPathComponent("latest"), timeoutInterval: 20)
+        request.httpMethod = "HEAD"
+        let (_, response) = try await URLSession.shared.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200, let page = response.url else { throw URLError(.badServerResponse) }
+        return try release(at: page)
     }
 
-    /// GitHub's answer for the latest release → its version, disk image and checksum file.
-    nonisolated static func release(from data: Data) throws -> Release {
-        struct Answer: Decodable {
-            struct Asset: Decodable { let name: String; let browser_download_url: URL }
-            let tag_name: String
-            let assets: [Asset]
-        }
-        let answer = try JSONDecoder().decode(Answer.self, from: data)
-        let dmg = answer.assets.first { $0.name.hasSuffix(".dmg") }?.browser_download_url ?? AppInfo.releases
-        let sum = answer.assets.first { $0.name.hasSuffix(".dmg.sha256") }?.browser_download_url
-        let signature = answer.assets.first { $0.name.hasSuffix(".dmg.sha256.sig") }?.browser_download_url
-        return Release(version: answer.tag_name.trimmingCharacters(in: CharacterSet(charactersIn: "vV")), download: dmg, checksum: sum,
-                       signature: signature)
+    /// ".../releases/tag/v0.4.0" → that version and its files, by the names make-release.sh gives them.
+    nonisolated static func release(at page: URL) throws -> Release {
+        let parts = page.pathComponents
+        guard parts.count >= 2, parts[parts.count - 2] == "tag" else { throw URLError(.badServerResponse) }
+        let tag = parts[parts.count - 1]
+        let files = AppInfo.releases.appendingPathComponent("download").appendingPathComponent(tag)
+        return Release(version: tag.trimmingCharacters(in: CharacterSet(charactersIn: "vV")),
+                       download: files.appendingPathComponent("Shotleaf.dmg"),
+                       checksum: files.appendingPathComponent("Shotleaf.dmg.sha256"),
+                       signature: files.appendingPathComponent("Shotleaf.dmg.sha256.sig"))
     }
 
     // MARK: Installing
