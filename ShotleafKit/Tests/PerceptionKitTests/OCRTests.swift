@@ -36,4 +36,13 @@ struct OCRTests {
         let payload = try ScreenCaptureService.payload(png: pngWithText(""))
         #expect(try await VisionTextRecognizer().recognizeText(in: payload).isEmpty)
     }
+
+    @Test("A QR code gives what it holds, first")
+    func qrCode() async throws {
+        let filter = try #require(CIFilter(name: "CIQRCodeGenerator", parameters: ["inputMessage": Data("https://shotleaf.syvyj.dev/".utf8)]))
+        let code = try #require(filter.outputImage).transformed(by: CGAffineTransform(scaleX: 12, y: 12))
+        let png = try #require(NSBitmapImageRep(ciImage: code).representation(using: .png, properties: [:]))
+        let text = try await VisionTextRecognizer().recognizeText(in: ScreenCaptureService.payload(png: png))
+        #expect(text.hasPrefix("https://shotleaf.syvyj.dev/"))
+    }
 }

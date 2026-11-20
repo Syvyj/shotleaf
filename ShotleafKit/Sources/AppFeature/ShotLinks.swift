@@ -1,4 +1,5 @@
 import AppKit
+import Core
 import Security
 
 /// Expiring links to screenshots: Shotleaf's free service (server/links, on Cloudflare) unless the
@@ -75,40 +76,43 @@ enum ShotLinks {
         }
         guard let link = (answer?["url"] as? String).flatMap(URL.init(string:)) else { throw Failure.noAnswer }
         // The free service hands out a token per picture; an own server deletes with its key.
-        last = Made(url: link, key: answer?["delete"] as? String ?? token, until: Date().addingTimeInterval(Double(hours) * 3600))
+        links.add(Made(url: link, key: answer?["delete"] as? String ?? token, until: Date().addingTimeInterval(Double(hours) * 3600)))
         return link
     }
 
     // MARK: Taking a link down
 
-    struct Made { var url: URL, key: String?, until: Date }
+    struct Made: Codable, Hashable { var url: URL, key: String?, until: Date }
+
+    /// Links that still work, newest first; kept on disk so they can be deleted after a restart.
+    @MainActor static let links = LinkList(file: AppInfo.supportFolder.appendingPathComponent("links.json"))
 
     /// The link made last, while it still works: the one "Delete last link" takes down.
-    // ponytail: only the last link, forgotten on quit; a list on disk if people ask to delete older ones.
-    @MainActor private(set) static var last: Made? {
-        get { stored.flatMap { $0.until > Date() ? $0 : nil } }
-        set { stored = newValue }
-    }
-    @MainActor private static var stored: Made?
+    @MainActor static var last: Made? { links.active.first }
 
-    static func removal(_ made: Made) -> URLRequest {
+    static func removal(_ made: Made, key: String?) -> URLRequest {
         var request = URLRequest(url: made.url, timeoutInterval: 30)
         request.httpMethod = "DELETE"
-        if let key = made.key, !key.isEmpty { request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization") }
+        if let key = made.key ?? key, !key.isEmpty { request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization") }
         return request
     }
 
-    /// Deletes the last link's picture from the server. Already gone (404) counts as done.
+    /// Deletes a link's picture from the server. Already gone (404) counts as done.
     @MainActor
-    static func deleteLast() async throws {
-        guard let made = last else { return }
-        let (data, response) = try await URLSession.shared.data(for: removal(made))
+    static func delete(_ made: Made) async throws {
+        // An own server's key isn't kept on disk: after a restart it comes from the Keychain.
+        let (data, response) = try await URLSession.shared.data(for: removal(made, key: made.key == nil ? token : nil))
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
         guard status == 204 || status == 404 else {
             let answer = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
             throw Failure.rejected(answer?["error"] as? String ?? "HTTP \(status)")
         }
-        last = nil
+        links.remove(made)
+    }
+
+    @MainActor
+    static func deleteLast() async throws {
+        if let made = last { try await delete(made) }
     }
 
     // MARK: Keychain
@@ -193,4 +197,29 @@ enum ShotLinks {
               let hash = (info as? [String: Any])?[kSecCodeInfoUnique as String] as? Data else { return nil }
         return hash.map { String(format: "%02x", $0) }.joined()
     }()
+}
+
+/// The links made and not yet expired, saved as JSON so they can be deleted after a restart.
+@MainActor @Observable
+final class LinkList {
+    private let file: URL
+    private(set) var items: [ShotLinks.Made]
+
+    init(file: URL) {
+        self.file = file
+        items = (try? JSONDecoder().decode([ShotLinks.Made].self, from: Data(contentsOf: file))) ?? []
+    }
+
+    var active: [ShotLinks.Made] { items.filter { $0.until > Date() } }
+
+    func add(_ made: ShotLinks.Made) { save([made] + active) }
+    func remove(_ made: ShotLinks.Made) { save(active.filter { $0 != made }) }
+
+    private func save(_ new: [ShotLinks.Made]) {
+        items = new
+        try? FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+        // Only the free service's per-picture tokens go to disk; an own server's key stays in the Keychain.
+        let kept = new.map { $0.url.host() == URL(string: ShotLinks.freeService)?.host() ? $0 : ShotLinks.Made(url: $0.url, key: nil, until: $0.until) }
+        try? JSONEncoder().encode(kept).write(to: file, options: [.atomic, .completeFileProtection])
+    }
 }

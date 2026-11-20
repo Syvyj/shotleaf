@@ -127,11 +127,18 @@ extension AppCoordinator {
         }
     }
 
+    /// "Delete Now" in the menu's Screenshot Links; a failure is said in the usual window.
+    func deleteLink(_ made: ShotLinks.Made) {
+        Task {
+            do { try await ShotLinks.delete(made) } catch { screenshots.showProblem(error) }
+        }
+    }
+
     /// Opens a fresh copy once this one has quit (two copies can't run at once).
     static func relaunch() {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/sh")
-        task.arguments = ["-c", "while kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.1; done; open \"$0\"", Bundle.main.bundlePath]
+        task.arguments = ["-c", "\(Updates.waitForQuit); open \"$0\"", Bundle.main.bundlePath]
         try? task.run()
         NSApp.terminate(nil)
     }

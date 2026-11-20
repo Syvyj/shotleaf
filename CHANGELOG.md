@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+- Text from Screenshot reads QR codes and barcodes too: what they hold comes first, and a link in the text opens with "Open Link".
+- Screenshot Links in the menu bar menu: every link that still works, with time left, to copy, open or delete now, also after a restart (not just the last one).
+- Clipboard actions (⌘K): convert a color between HEX and RGB, Base64 encode and decode.
+- A deleted link stops showing within a minute (browsers kept it up to an hour).
+- Settings no longer mention text completion, and three settings texts reworded in 0.3.0 are in Ukrainian again.
+- Updates: the restart gives up if Shotleaf didn't quit, instead of waiting in the background for good.
+
 ## 0.3.0
 
 - Text completion is gone, with its emoji picker and typo fixes: it held about 2.5 GB of memory while you typed and needed a 3.6 GB download. The first launch deletes the downloaded model (from `~/.cache/huggingface`) and the writing samples it kept. Accessibility is now only for snippets and pasting from the history.

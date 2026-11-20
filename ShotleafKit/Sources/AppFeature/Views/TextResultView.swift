@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// Text read off a screenshot: editable, so a word the OCR got wrong can be
@@ -16,6 +17,13 @@ struct TextResultView: View {
         guard case .selection(let range)? = selection?.indices, !range.isEmpty,
               range.lowerBound >= text.startIndex, range.upperBound <= text.endIndex else { return nil }
         return String(text[range])
+    }
+
+    /// The first web link in the text (a QR code's comes first), to open in one click.
+    static func link(in text: String) -> URL? {
+        let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        return detector?.matches(in: text, range: NSRange(text.startIndex..., in: text))
+            .compactMap(\.url).first { ["http", "https"].contains($0.scheme?.lowercased()) }
     }
 
     var body: some View {
@@ -63,6 +71,14 @@ struct TextResultView: View {
                 .buttonStyle(LeafButtonStyle(prominent: true))
                 .keyboardShortcut("c", modifiers: .command)
                 .disabled(text.isEmpty)
+                if let link = Self.link(in: text) {
+                    Button("Open Link") {
+                        NSWorkspace.shared.open(link)
+                        close()
+                    }
+                    .buttonStyle(LeafButtonStyle())
+                    .help(link.absoluteString)
+                }
                 Spacer()
                 Button {
                     close()

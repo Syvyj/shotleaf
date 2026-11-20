@@ -61,6 +61,32 @@ struct ShotLinksTests {
     }
 }
 
+@Suite("Active links")
+@MainActor
+struct LinkListTests {
+    @Test("Newest first, kept across launches without expired ones; an own server's key never on disk")
+    func list() throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-linklist-\(UUID()).json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let soon = Date().addingTimeInterval(3600)
+        let free = ShotLinks.Made(url: URL(string: "https://s.syvyj.dev/AAAAAAAA")!, key: "token", until: soon)
+        let own = ShotLinks.Made(url: URL(string: "https://shots.example.com/BBBBBBBB")!, key: "server-key", until: soon)
+        let gone = ShotLinks.Made(url: URL(string: "https://s.syvyj.dev/CCCCCCCC")!, key: "t", until: Date().addingTimeInterval(-1))
+        let list = LinkList(file: file)
+        list.add(gone)
+        list.add(free)
+        list.add(own)
+        #expect(list.active == [own, free])
+        #expect(!(try String(contentsOf: file, encoding: .utf8)).contains("server-key"))
+        let again = LinkList(file: file)
+        #expect(again.active.map(\.url) == [own.url, free.url] && again.active[1].key == "token" && again.active[0].key == nil)
+        again.remove(free)
+        #expect(LinkList(file: file).active.map(\.url) == [own.url])
+        let delete = ShotLinks.removal(free, key: nil)
+        #expect(delete.httpMethod == "DELETE" && delete.value(forHTTPHeaderField: "Authorization") == "Bearer token")
+    }
+}
+
 @Suite("The link server's key in the Keychain", .disabled(if: ProcessInfo.processInfo.environment["CI"] != nil)) // a runner's keychain is locked
 struct ShotLinksKeyTests {
     @Test("Saved, read back, replaced, removed; a key in the old place moves and leaves nothing behind")

@@ -108,11 +108,11 @@ public enum Updates {
         guard checksum(in: String(decoding: sum, as: UTF8.self)) == digest else { throw Failure.checksum }
 
         let mount = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-update-\(UUID().uuidString)")
-        guard run("/usr/bin/hdiutil", "attach", dmg.path, "-nobrowse", "-readonly", "-noautoopen", "-mountpoint", mount.path) else { throw Failure.unpack }
-        defer { _ = run("/usr/bin/hdiutil", "detach", mount.path, "-force") }
+        guard await run("/usr/bin/hdiutil", "attach", dmg.path, "-nobrowse", "-readonly", "-noautoopen", "-mountpoint", mount.path) else { throw Failure.unpack }
+        defer { _ = try? Process.run(URL(fileURLWithPath: "/usr/bin/hdiutil"), arguments: ["detach", mount.path, "-force"]) }
         let staged = folder.appendingPathComponent(".Shotleaf-update.app")
         try? FileManager.default.removeItem(at: staged)
-        guard run("/usr/bin/ditto", mount.appendingPathComponent("Shotleaf.app").path, staged.path) else { throw Failure.unpack }
+        guard await run("/usr/bin/ditto", mount.appendingPathComponent("Shotleaf.app").path, staged.path) else { throw Failure.unpack }
         guard signedLike(staged) else {
             try? FileManager.default.removeItem(at: staged)
             throw Failure.signature
@@ -140,7 +140,7 @@ public enum Updates {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/sh")
         task.arguments = ["-c", """
-            while kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.1; done
+            \(waitForQuit)
             rm -rf "$2"
             if mv "$0" "$2" && mv "$1" "$0"; then rm -rf "$2"; else [ -d "$0" ] || mv "$2" "$0"; fi
             open "$0"
@@ -149,15 +149,22 @@ public enum Updates {
         NSApp.terminate(nil)
     }
 
-    @discardableResult
-    private static func run(_ tool: String, _ arguments: String...) -> Bool {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: tool)
-        task.arguments = arguments
-        task.standardOutput = FileHandle.nullDevice
-        task.standardError = FileHandle.nullDevice
-        do { try task.run() } catch { return false }
-        task.waitUntilExit()
-        return task.terminationStatus == 0
+    /// Shell lines that wait for this app to quit, giving up after 15 s (the quit was cancelled):
+    /// then nothing is swapped or opened.
+    static var waitForQuit: String {
+        "i=0; while kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do i=$((i+1)); [ $i -lt 150 ] || exit 1; sleep 0.1; done"
+    }
+
+    /// Runs a tool without holding a thread while it works.
+    private static func run(_ tool: String, _ arguments: String...) async -> Bool {
+        await withCheckedContinuation { done in
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: tool)
+            task.arguments = arguments
+            task.standardOutput = FileHandle.nullDevice
+            task.standardError = FileHandle.nullDevice
+            task.terminationHandler = { done.resume(returning: $0.terminationStatus == 0) }
+            do { try task.run() } catch { task.terminationHandler = nil; done.resume(returning: false) }
+        }
     }
 }

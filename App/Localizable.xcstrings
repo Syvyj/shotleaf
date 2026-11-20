@@ -4568,6 +4568,96 @@
           }
         }
       }
+    },
+    "Open Link": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити посилання"
+          }
+        }
+      }
+    },
+    "Convert color (HEX ↔ RGB)": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетворити колір (HEX ↔ RGB)"
+          }
+        }
+      }
+    },
+    "Decode Base64": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Розкодувати Base64"
+          }
+        }
+      }
+    },
+    "Encode Base64": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закодувати в Base64"
+          }
+        }
+      }
+    },
+    "Copy Link": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопіювати посилання"
+          }
+        }
+      }
+    },
+    "Open": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відкрити"
+          }
+        }
+      }
+    },
+    "Delete Now": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Видалити зараз"
+          }
+        }
+      }
+    },
+    "%lld min left": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ще %lld хв"
+          }
+        }
+      }
+    },
+    "%lld h left": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ще %lld год"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

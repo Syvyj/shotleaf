@@ -2,7 +2,7 @@ import Foundation
 
 /// ⌘K in the clipboard panel: what can be done to a text entry before pasting.
 enum ClipAction: CaseIterable, Identifiable {
-    case cleanLinks, uppercase, lowercase, capitalize, oneLine, trim, formatJSON, saveSnippet
+    case cleanLinks, uppercase, lowercase, capitalize, oneLine, trim, formatJSON, convertColor, decodeBase64, encodeBase64, saveSnippet
 
     var id: Self { self }
 
@@ -15,6 +15,9 @@ enum ClipAction: CaseIterable, Identifiable {
         case .oneLine: "Join into one line"
         case .trim: "Trim spaces"
         case .formatJSON: "Format JSON"
+        case .convertColor: "Convert color (HEX ↔ RGB)"
+        case .decodeBase64: "Decode Base64"
+        case .encodeBase64: "Encode Base64"
         case .saveSnippet: "Save as snippet"
         }
     }
@@ -28,6 +31,9 @@ enum ClipAction: CaseIterable, Identifiable {
         case .oneLine: "arrow.right.to.line"
         case .trim: "scissors"
         case .formatJSON: "curlybraces"
+        case .convertColor: "paintpalette"
+        case .decodeBase64: "lock.open"
+        case .encodeBase64: "lock"
         case .saveSnippet: "text.badge.star"
         }
     }
@@ -56,8 +62,33 @@ enum ClipAction: CaseIterable, Identifiable {
                   let pretty = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
             else { return nil }
             return String(data: pretty, encoding: .utf8)
+        case .convertColor: return Self.convertColor(text)
+        case .decodeBase64:
+            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard trimmed.count >= 8, let data = Data(base64Encoded: trimmed), let decoded = String(data: data, encoding: .utf8),
+                  !decoded.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) && !"\n\r\t".unicodeScalars.contains($0) })
+            else { return nil }
+            return decoded
+        case .encodeBase64: return Data(text.utf8).base64EncodedString()
         case .saveSnippet: return text
         }
+    }
+
+    /// "#1A2B3C" (or "1a2b3c", "#abc") ↔ "rgb(26, 43, 60)"; nil for anything else.
+    static func convertColor(_ text: String) -> String? {
+        let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Without "#" only six hex digits with a number among them: "decade" or "bad" stay words.
+        if let m = t.wholeMatch(of: /(?i)#([0-9a-f]{3}|[0-9a-f]{6})|(?=[a-f]*\d)([0-9a-f]{6})/) {
+            var hex = String(m.1 ?? m.2 ?? "")
+            if hex.count == 3 { hex = hex.map { "\($0)\($0)" }.joined() }
+            guard let v = Int(hex, radix: 16) else { return nil }
+            return "rgb(\(v >> 16), \(v >> 8 & 0xFF), \(v & 0xFF))"
+        }
+        if let m = t.wholeMatch(of: /(?i)rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*[\d.]+\s*)?\)/),
+           let r = Int(m.1), let g = Int(m.2), let b = Int(m.3), [r, g, b].allSatisfy({ $0 <= 255 }) {
+            return String(format: "#%02X%02X%02X", r, g, b)
+        }
+        return nil
     }
 
     /// Tracking parameters people never mean to share.

@@ -59,6 +59,20 @@ public struct MenuBarRootView: View {
                 Button("Clear Recent Screenshots") { coordinator.clearRecentShots() }
                     .disabled(coordinator.recentShots.isEmpty)
             }
+            if !ShotLinks.links.active.isEmpty {
+                Menu("Screenshot Links") {
+                    ForEach(ShotLinks.links.active, id: \.self) { made in
+                        Menu(Self.linkTitle(made)) {
+                            Button("Copy Link") {
+                                NSPasteboard.general.clearContents()
+                                NSPasteboard.general.setString(made.url.absoluteString, forType: .string)
+                            }
+                            Button("Open") { NSWorkspace.shared.open(made.url) }
+                            Button("Delete Now") { coordinator.deleteLink(made) }
+                        }
+                    }
+                }
+            }
 
         }
         Divider()
@@ -115,6 +129,13 @@ public struct MenuBarRootView: View {
     static func recentTitle(_ url: URL) -> String {
         guard let date = ScreenshotWindows.recentName.date(from: url.deletingPathExtension().lastPathComponent) else { return url.lastPathComponent }
         return date.formatted(date: Calendar.current.isDateInToday(date) ? .omitted : .abbreviated, time: .shortened)
+    }
+
+    /// "s.syvyj.dev/AbC12345 · 5 h left" (under an hour: minutes).
+    static func linkTitle(_ made: ShotLinks.Made) -> String {
+        let minutes = max(1, Int(made.until.timeIntervalSinceNow / 60))
+        let left = minutes < 60 ? String(localized: "\(minutes) min left") : String(localized: "\(minutes / 60) h left")
+        return "\(made.url.host() ?? "")\(made.url.path()) · \(left)"
     }
 
     /// Made once per shot: decoding ten full PNGs on every menu open was slow.

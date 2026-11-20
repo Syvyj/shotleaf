@@ -27,7 +27,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def release_info():
     """The newest release and how many times Shotleaf.dmg was downloaded over all releases; None when GitHub can't be reached."""
     try:
-        with urllib.request.urlopen("https://api.github.com/repos/Syvyj/shotleaf/releases?per_page=100", timeout=8) as r:
+        request = urllib.request.Request("https://api.github.com/repos/Syvyj/shotleaf/releases?per_page=100")
+        if os.environ.get("GITHUB_TOKEN"):  # in Actions: runners share an address, and the anonymous limit with it
+            request.add_header("Authorization", "Bearer " + os.environ["GITHUB_TOKEN"])
+        with urllib.request.urlopen(request, timeout=8) as r:
             releases = [rel for rel in json.load(r) if not rel["draft"] and not rel["prerelease"]]
         latest = releases[0]
         return {
