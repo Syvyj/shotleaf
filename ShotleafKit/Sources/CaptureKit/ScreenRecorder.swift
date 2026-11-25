@@ -1,3 +1,4 @@
+import AVFoundation
 import Core
 import CoreMedia
 import Foundation
@@ -20,17 +21,20 @@ public struct RecordingArea: Sendable, Equatable {
 
 /// Records an area of the screen to an H.264 MP4 with ScreenCaptureKit's
 /// `SCRecordingOutput`: native pixels, up to 30 fps, cursor and clicks shown, no audio.
+/// `SCRecordingOutput` can't pause, so each stretch between pauses is its own file
+/// (`Recording-1.mp4`, `Recording-2.mp4`, …), joined on `stop()`.
 public actor ScreenRecorder {
     private var stream: SCStream?
-    private var output: SCRecordingOutput?
+    private var output: SCRecordingOutput? // nil while paused
     private var finish: RecordingFinish?
     private var ended: StreamEnded? // SCStream keeps its delegate weakly
     private var url: URL?
+    private var segments: [URL] = []
 
     public init() {}
 
     /// Starts writing `area` to `url`. `windowIDs`: our own windows (the frame
-    /// around the area) that must not be in the video. `endedBySystem`: macOS stopped
+    /// around the area, the controls) that must not be in the video. `endedBySystem`: macOS stopped
     /// the stream itself (display gone, "Stop sharing"); call `stop()` to get the file.
     public func start(_ area: RecordingArea, to url: URL, excluding windowIDs: [CGWindowID],
                       endedBySystem: @escaping @Sendable () -> Void = {}) async throws {
@@ -47,33 +51,109 @@ public actor ScreenRecorder {
         let excluded = content.windows.filter { windowIDs.contains($0.windowID) }
         let filter = SCContentFilter(display: display, excludingWindows: excluded)
 
-        let settings = SCRecordingOutputConfiguration()
-        settings.outputURL = url
-        settings.outputFileType = .mp4
-        settings.videoCodecType = .h264
-        let finish = RecordingFinish()
-        let output = SCRecordingOutput(configuration: settings, delegate: finish)
-
         let ended = StreamEnded(endedBySystem)
         let stream = SCStream(filter: filter, configuration: Self.recordingConfig(for: area), delegate: ended)
-        try stream.addRecordingOutput(output) // before startCapture, or nothing is written
-        try await stream.startCapture()
-        (self.stream, self.output, self.finish, self.ended, self.url) = (stream, output, finish, ended, url)
+        (self.stream, self.ended, self.url, self.segments) = (stream, ended, url, [])
+        do {
+            try addSegment() // before startCapture, or nothing is written
+            try await stream.startCapture()
+        } catch {
+            (self.stream, self.output, self.finish, self.ended, self.url, self.segments) = (nil, nil, nil, nil, nil, [])
+            throw error
+        }
+    }
+
+    /// Finishes the current segment; the stream keeps running, nothing is written.
+    public func pause() async throws {
+        guard let stream, let output, let finish else { throw AppError.missingContext(String(localized: "Not recording")) }
+        (self.output, self.finish) = (nil, nil)
+        try stream.removeRecordingOutput(output)
+        _ = await finish.wait(timeout: .seconds(5))
+    }
+
+    /// Starts a new segment on the same stream.
+    public func resume() async throws {
+        guard stream != nil, output == nil else { throw AppError.missingContext(String(localized: "Not recording")) }
+        try addSegment()
     }
 
     /// Stops and returns the finished file (the URL given to `start`).
     public func stop() async throws -> URL {
-        guard let stream, let finish, let url else { throw AppError.missingContext(String(localized: "Not recording")) }
-        (self.stream, self.output, self.finish, self.ended, self.url) = (nil, nil, nil, nil, nil)
-        try? await stream.stopCapture()
+        guard let url else { throw AppError.missingContext(String(localized: "Not recording")) }
+        let segments = await end()
+        return try await Self.join(segments, into: url)
+    }
+
+    /// Stops and throws everything away: the segments and anything at the final URL.
+    public func cancel() async {
+        let url = self.url
+        for file in await end() + [url].compactMap({ $0 }) { try? FileManager.default.removeItem(at: file) }
+    }
+
+    /// Stops capture, waits for the current segment; the segments written.
+    private func end() async -> [URL] {
+        let (stream, finish, segments) = (self.stream, self.finish, self.segments)
+        (self.stream, self.output, self.finish, self.ended, self.url, self.segments) = (nil, nil, nil, nil, nil, [])
+        try? await stream?.stopCapture()
         // The file is complete only once the output says so. Stopped right after
         // start, it may never say anything: wait a little, then take what's there.
-        _ = await finish.wait(timeout: .seconds(5)) // a failure here is SCK’s raw words: the message below says it better
-        let size = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int) ?? 0
-        guard size > 0 else {
+        _ = await finish?.wait(timeout: .seconds(5)) // a failure here is SCK’s raw words: `join`'s message says it better
+        return segments
+    }
+
+    private func addSegment() throws {
+        guard let stream, let url else { return }
+        let segment = url.deletingLastPathComponent()
+            .appendingPathComponent("\(url.deletingPathExtension().lastPathComponent)-\(segments.count + 1).\(url.pathExtension)")
+        let settings = SCRecordingOutputConfiguration()
+        settings.outputURL = segment
+        settings.outputFileType = .mp4
+        settings.videoCodecType = .h264
+        let finish = RecordingFinish()
+        let output = SCRecordingOutput(configuration: settings, delegate: finish)
+        try stream.addRecordingOutput(output)
+        (self.output, self.finish) = (output, finish)
+        segments.append(segment)
+    }
+
+    /// Joins `segments` back to back into `url` without re-encoding and deletes them.
+    /// Empty (or missing) ones are skipped; a single one is just moved.
+    static func join(_ segments: [URL], into url: URL) async throws -> URL {
+        let files = FileManager.default
+        let written = segments.filter { ((try? files.attributesOfItem(atPath: $0.path)[.size] as? Int) ?? 0) > 0 }
+        guard let first = written.first else {
+            for segment in segments { try? files.removeItem(at: segment) }
             throw AppError.missingContext(String(localized: "Nothing was recorded — it was stopped too soon"))
         }
-        return url
+        // Deleted only once `url` is written: on a failure they are the only copy.
+        func joined() -> URL {
+            for segment in segments where segment != url { try? files.removeItem(at: segment) }
+            return url
+        }
+        if written.count == 1 {
+            if first != url {
+                try? files.removeItem(at: url)
+                try files.moveItem(at: first, to: url)
+            }
+            return joined()
+        }
+        let composition = AVMutableComposition()
+        guard let track = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid) else {
+            throw AppError.missingContext(String(localized: "Couldn’t record the screen"))
+        }
+        for segment in written {
+            let asset = AVURLAsset(url: segment)
+            guard let source = try await asset.loadTracks(withMediaType: .video).first else { continue }
+            let range = try await source.load(.timeRange)
+            try track.insertTimeRange(range, of: source, at: composition.duration)
+            if segment == first { track.preferredTransform = try await source.load(.preferredTransform) }
+        }
+        guard let export = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetPassthrough) else {
+            throw AppError.missingContext(String(localized: "Couldn’t record the screen"))
+        }
+        try? files.removeItem(at: url)
+        try await export.export(to: url, as: .mp4)
+        return joined()
     }
 
     /// What `start` asks ScreenCaptureKit for.

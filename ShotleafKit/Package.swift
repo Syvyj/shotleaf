@@ -38,7 +38,7 @@ let package = Package(
         ),
 
         .testTarget(name: "CoreTests", dependencies: ["Core", "SettingsKit"]),
-        .testTarget(name: "AppFeatureTests", dependencies: ["AppFeature", "PerceptionKit"]),
+        .testTarget(name: "AppFeatureTests", dependencies: ["AppFeature", "CaptureKit", "PerceptionKit"]),
         .testTarget(name: "PerceptionKitTests", dependencies: ["Core", "PerceptionKit", "CaptureKit"]),
     ]
 )
