@@ -81,6 +81,17 @@ public final class SettingsStore: @unchecked Sendable {
         set { defaults.set(newValue, forKey: Self.showsCursorKey) }
     }
 
+    /// Last size limit picked for an image / video (bytes); "Copy Smaller" and the recording window reuse it.
+    public var smallImageLimit: Int {
+        get { defaults.object(forKey: "smallImageLimit") as? Int ?? 1_000_000 }
+        set { defaults.set(newValue, forKey: "smallImageLimit") }
+    }
+
+    public var smallVideoLimit: Int {
+        get { defaults.object(forKey: "smallVideoLimit") as? Int ?? 8_000_000 }
+        set { defaults.set(newValue, forKey: "smallVideoLimit") }
+    }
+
     /// The first-run setup guide was finished (or dismissed).
     public var onboardingCompleted: Bool {
         get { defaults.bool(forKey: "onboardingCompleted") }
