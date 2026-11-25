@@ -173,7 +173,10 @@ extension ScreenshotView {
                 let provider = NSItemProvider()
                 provider.registerFileRepresentation(forTypeIdentifier: UTType.jpeg.identifier, fileOptions: [], visibility: .all) { done in
                     nonisolated(unsafe) let done = done
-                    Task { @MainActor in done(await drag(limit), false, nil) }
+                    Task { @MainActor in
+                        guard let url = await drag(limit) else { NSSound.beep(); done(nil, false, SmallFile.DoesNotFit()); return }
+                        done(url, false, nil)
+                    }
                     return nil
                 }
                 return provider
@@ -205,8 +208,10 @@ extension ScreenshotView {
         compressing = true
         Task {
             defer { compressing = false }
-            if await actions.copySmall(limit) { flash(String(localized: "Copied · JPEG under \(SmallFile.label(limit))")) }
-            else { NSSound.beep() }
+            if await actions.copySmall(limit) {
+                flash(String(localized: "Copied · JPEG under \(SmallFile.label(limit))"))
+                closeAfterCopying()
+            } else { NSSound.beep() }
         }
     }
 
