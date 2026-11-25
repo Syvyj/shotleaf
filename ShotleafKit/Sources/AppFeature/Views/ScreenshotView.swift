@@ -44,7 +44,7 @@ struct ScreenshotView: View {
     /// For double-click detection on marks.
     @State var lastClick: (id: Annotation.ID, at: Date)?
     @FocusState var textFocused: Bool
-    enum Flyout { case shapes, style, fontSize, backdrop, saveAs, copySmall, watermark, link, shrink }
+    enum Flyout { case shapes, style, fontSize, backdrop, saveAs, copySmall, watermark, link }
     /// Proportions the crop tool keeps while dragging.
     @State var cropAspect: CropAspect = .free
     @State var linking = false

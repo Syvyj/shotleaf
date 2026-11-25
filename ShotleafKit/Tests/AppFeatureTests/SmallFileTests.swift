@@ -16,10 +16,12 @@ enum TestImages {
         }
     }
 
-    static func writeHEIC(width: Int, height: Int) throws -> URL {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).heic")
+    static func writeHEIC(width: Int, height: Int) throws -> URL { try write(.heic, width: width, height: height) }
+
+    static func write(_ type: UTType, width: Int, height: Int) throws -> URL {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension(for: type)
         let image = try #require(noise(width: width, height: height))
-        let dest = try #require(CGImageDestinationCreateWithURL(url as CFURL, UTType.heic.identifier as CFString, 1, nil))
+        let dest = try #require(CGImageDestinationCreateWithURL(url as CFURL, type.identifier as CFString, 1, nil))
         CGImageDestinationAddImage(dest, image, nil)
         try #require(CGImageDestinationFinalize(dest))
         return url
@@ -31,8 +33,9 @@ struct SmallFileTests {
     @Test func limitsMatchSpec() { #expect(SmallFile.limits == [200_000, 500_000, 1_000_000, 8_000_000, 25_000_000]) }
 
     @Test func tallShotFitsUnderLimit() async throws {
-        let image = try #require(TestImages.noise(width: 2000, height: 30000))
-        let data = try #require(await SmallFile.jpeg(image, under: 1_000_000))
+        let url = try TestImages.write(.tiff, width: 2000, height: 30000) // TIFF: quick to write, unlike a PNG of noise
+        defer { try? FileManager.default.removeItem(at: url) }
+        let data = try #require(await SmallFile.jpeg(contentsOf: url, under: 1_000_000))
         #expect(data.count <= 1_000_000)
     }
 

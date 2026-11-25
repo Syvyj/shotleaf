@@ -9,12 +9,7 @@ public enum SmallFile {
     /// What Save as offers, in bytes.
     public static let limits = [200_000, 500_000, 1_000_000, 8_000_000, 25_000_000]
 
-    /// Off the main actor: a tall shot takes seconds to shrink.
-    nonisolated static func jpeg(_ image: CGImage, under limit: Int) async -> Data? {
-        await Task.detached(priority: .userInitiated) { fit(image, under: limit) }.value
-    }
-
-    /// A PNG, decoded off the main actor too.
+    /// A PNG, decoded and shrunk off the main actor: a tall shot takes seconds.
     nonisolated static func jpeg(png: Data, under limit: Int) async -> Data? {
         await Task.detached(priority: .userInitiated) {
             guard let image = NSBitmapImageRep(data: png)?.cgImage else { return nil }

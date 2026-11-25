@@ -77,11 +77,13 @@ struct EditorExtrasTests {
         let ctx = CGContext(data: &bytes, width: side, height: side, bitsPerComponent: 8, bytesPerRow: side * 4,
                             space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)!
         let noise = try #require(ctx.makeImage())
-        let data = try #require(await SmallFile.jpeg(noise, under: 200_000))
+        let data = try #require(await SmallFile.jpeg(png: Self.png(noise), under: 200_000))
         #expect(data.count <= 200_000)
         #expect(NSBitmapImageRep(data: data) != nil)
-        #expect(await SmallFile.jpeg(striped(), under: 1_000_000)!.count < 20_000) // already small: best quality
+        #expect(await SmallFile.jpeg(png: Self.png(striped()), under: 1_000_000)!.count < 20_000) // already small: best quality
     }
+
+    static func png(_ image: CGImage) -> Data { NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])! }
 
     private func blank(_ w: Int, _ h: Int) -> CGImage {
         CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
@@ -201,7 +203,6 @@ struct BigLinkTests {
         #expect(await ShotLinks.fitted(png, server: "https://shots.example.com") == png)
         #expect(await ShotLinks.fitted(Data([1, 2, 3]), server: ShotLinks.freeService) == Data([1, 2, 3]))
         // A limit nothing can meet gives nothing, never a file over the limit.
-        let big = try #require(NSBitmapImageRep(data: png)?.cgImage)
-        #expect(await SmallFile.jpeg(big, under: 100) == nil)
+        #expect(await SmallFile.jpeg(png: png, under: 100) == nil)
     }
 }
