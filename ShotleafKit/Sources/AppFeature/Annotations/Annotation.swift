@@ -197,6 +197,32 @@ enum ToolPrefs {
     }
 }
 
+/// Crop proportions offered while the crop tool is active.
+enum CropAspect: CaseIterable {
+    case free, wide16x9, square, portrait4x5, story9x16
+
+    /// width / height; nil = any.
+    var ratio: CGFloat? {
+        switch self {
+        case .free: nil
+        case .wide16x9: 16.0 / 9
+        case .square: 1
+        case .portrait4x5: 4.0 / 5
+        case .story9x16: 9.0 / 16
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .free: String(localized: "Free")
+        case .wide16x9: "16:9"
+        case .square: "1:1"
+        case .portrait4x5: "4:5"
+        case .story9x16: "9:16"
+        }
+    }
+}
+
 /// The marks on one screenshot, with undo/redo and the tool/color in use.
 @MainActor
 @Observable
@@ -321,6 +347,53 @@ final class AnnotationDocument {
         pushUndo()
         items = kept
         base = Base(image: cropped, size: area.size, cutOut: current.cutOut)
+        selection = nil
+    }
+
+    /// Long sides offered by the shrink menu.
+    static let presetLongSides = [1920, 1440, 1280, 1024, 800, 640]
+    /// Never shrink below this share of the original pixels.
+    static let minShrink: CGFloat = 0.1
+
+    /// Pixels of the picture now (the original until something replaced it).
+    func pixels(original image: CGImage) -> CGSize {
+        let current = base?.image ?? image
+        return CGSize(width: current.width, height: current.height)
+    }
+
+    /// A preset applies only if it makes the picture smaller (never upscale).
+    func canResize(original image: CGImage, toLongSide side: Int) -> Bool {
+        let p = pixels(original: image)
+        return CGFloat(side) < max(p.width, p.height)
+    }
+
+    /// Scales the picture to a long side in pixels — one undo step.
+    func resize(original image: CGImage, toLongSide side: Int) {
+        guard canResize(original: image, toLongSide: side) else { return }
+        let p = pixels(original: image)
+        resize(original: image, factor: CGFloat(side) / max(p.width, p.height))
+    }
+
+    /// Scales the picture and its marks by `factor` (below 1), never under 10 %
+    /// of the original pixels — one undo step. `original` is the capture.
+    func resize(original image: CGImage, factor: CGFloat, size: CGSize? = nil) {
+        let current = base ?? Base(image: image, size: size ?? CGSize(width: image.width, height: image.height))
+        let k = max(factor, Self.minShrink * CGFloat(image.width) / CGFloat(current.image.width))
+        guard k < 0.999 else { return }
+        let floorW = Int((Self.minShrink * CGFloat(image.width)).rounded(.up)), floorH = Int((Self.minShrink * CGFloat(image.height)).rounded(.up))
+        let w = max(floorW, Int((CGFloat(current.image.width) * k).rounded())), h = max(floorH, Int((CGFloat(current.image.height) * k).rounded()))
+        guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: current.image.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB)!,
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return }
+        ctx.interpolationQuality = .high
+        ctx.draw(current.image, in: CGRect(x: 0, y: 0, width: w, height: h))
+        guard let scaled = ctx.makeImage() else { return }
+        var moved = items
+        for i in moved.indices { moved[i].kind = AnnotationEditing.scaled(moved[i].kind, by: k) }
+        pushUndo()
+        items = moved
+        base = Base(image: scaled, size: CGSize(width: current.size.width * k, height: current.size.height * k), cutOut: current.cutOut)
         selection = nil
     }
 

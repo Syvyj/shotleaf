@@ -44,7 +44,9 @@ struct ScreenshotView: View {
     /// For double-click detection on marks.
     @State var lastClick: (id: Annotation.ID, at: Date)?
     @FocusState var textFocused: Bool
-    enum Flyout { case shapes, style, fontSize, backdrop, saveAs, copySmall, watermark, link }
+    enum Flyout { case shapes, style, fontSize, backdrop, saveAs, copySmall, watermark, link, shrink }
+    /// Proportions the crop tool keeps while dragging.
+    @State var cropAspect: CropAspect = .free
     @State var linking = false
     @State var compressing = false
     @State var removingBackground = false
@@ -73,6 +75,7 @@ struct ScreenshotView: View {
             header.zIndex(1) // tips and menus draw over the canvas
             canvas.overlay(alignment: .top) { toastPill }
                 .overlay(alignment: .topTrailing) { privatePill }
+                .overlay(alignment: .topTrailing) { aspectPill }
                 .overlay(alignment: .bottom) { keysHintPill }
             toolbar.zIndex(1) // its tips show above, over the canvas
         }
@@ -136,6 +139,20 @@ struct ScreenshotView: View {
     }
 
     /// With Blur picked: blurs faces, emails, phone numbers, cards and tokens in one go.
+    /// Crop proportions, over the canvas while the crop tool is active.
+    @ViewBuilder var aspectPill: some View {
+        if doc.tool == .crop {
+            HStack(spacing: 2) {
+                ForEach(CropAspect.allCases, id: \.self) { choice in
+                    Button { cropAspect = choice } label: { Text(choice.label).font(Leaf.font(12, .semibold)) }
+                        .buttonStyle(LeafButtonStyle(prominent: choice == cropAspect))
+                }
+            }
+            .instantTip("Crop proportions")
+            .padding(12)
+        }
+    }
+
     @ViewBuilder var privatePill: some View {
         if doc.tool == .blur {
             Button {

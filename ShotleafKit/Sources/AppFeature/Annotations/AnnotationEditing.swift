@@ -116,6 +116,38 @@ enum AnnotationEditing {
         return moved(kind, by: d)
     }
 
+    /// The mark when the whole picture is scaled by `k` (after "Shrink"): every
+    /// position and size follows, so marks stay on what they pointed at.
+    static func scaled(_ kind: Annotation.Kind, by k: CGFloat) -> Annotation.Kind {
+        func m(_ p: CGPoint) -> CGPoint { CGPoint(x: p.x * k, y: p.y * k) }
+        func m(_ r: CGRect) -> CGRect { CGRect(x: r.minX * k, y: r.minY * k, width: r.width * k, height: r.height * k) }
+        switch kind {
+        case .arrow(let a, let b): return .arrow(from: m(a), to: m(b))
+        case .measure(let a, let b): return .measure(from: m(a), to: m(b))
+        case .rectangle(let r): return .rectangle(m(r))
+        case .highlight(let r): return .highlight(m(r))
+        case .blur(let r): return .blur(m(r))
+        case .focus(let r): return .focus(m(r))
+        case .ellipse(let r): return .ellipse(m(r))
+        case .crop(let r): return .crop(m(r))
+        case .magnify(let r): return .magnify(m(r))
+        case .image(let picture, let r): return .image(picture, m(r))
+        case .pen(let points): return .pen(points.map(m))
+        case .erase(let r, let fill): return .erase(m(r), fill: fill)
+        case .step(let c, let n): return .step(center: m(c), number: n)
+        case .text(let o, let s, let tail, let w, let f): return .text(origin: m(o), string: s, tail: tail.map(m), width: w.map { $0 * k }, size: f * k)
+        case .piece(let source, let offset, let fill):
+            return .piece(source: m(source), offset: CGSize(width: offset.width * k, height: offset.height * k), fill: fill)
+        }
+    }
+
+    /// `rect` trimmed to `aspect`, keeping its top-left corner (and staying inside it).
+    static func constrained(_ rect: CGRect, to aspect: CropAspect) -> CGRect {
+        guard let ratio = aspect.ratio, rect.width > 0, rect.height > 0 else { return rect }
+        let width = min(rect.width, rect.height * ratio)
+        return CGRect(x: rect.minX, y: rect.minY, width: width, height: width / ratio)
+    }
+
     /// The mark with `handle` dragged to `p`. Corners keep the opposite corner
     /// fixed; dragging past it flips the box instead of inverting it.
     static func resized(_ kind: Annotation.Kind, _ handle: Handle, to p: CGPoint) -> Annotation.Kind {

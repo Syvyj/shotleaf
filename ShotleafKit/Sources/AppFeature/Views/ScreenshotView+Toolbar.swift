@@ -121,6 +121,7 @@ extension ScreenshotView {
                 .keyboardShortcut("t", modifiers: [])
                 .instantTip(liveText == nil ? "Select text on the shot" : "Back to marks", above: true)
             Spacer(minLength: 6)
+            if doc.crop == nil { shrinkButton } // the row has no room for both
             if doc.crop != nil {
                 Button("Apply crop") { doc.applyCrop(original: cgImage, size: displaySize) }
                     .buttonStyle(LeafButtonStyle(prominent: true))
@@ -141,6 +142,24 @@ extension ScreenshotView {
         .disabled(editingText)
         .fixedSize(horizontal: false, vertical: true)
     }
+
+    /// "−": shrinks the shot by 25 % (down to 10 % of the original); the menu picks a long side.
+    var shrinkButton: some View {
+        Menu {
+            ForEach(AnnotationDocument.presetLongSides, id: \.self) { side in
+                Button("Long side \(side) px") { shrink(longSide: side) }
+                    .disabled(!doc.canResize(original: cgImage, toLongSide: side))
+            }
+        } label: {
+            Image(systemName: "arrow.down.right.and.arrow.up.left").frame(height: 17)
+        } primaryAction: { shrink(factor: 0.75) }
+        .menuStyle(.button).menuIndicator(.hidden).buttonStyle(LeafButtonStyle()).fixedSize()
+        .keyboardShortcut("-", modifiers: [])
+        .instantTip("Shrink by 25% (-) — hold for sizes", above: true)
+    }
+
+    func shrink(factor: CGFloat) { doc.resize(original: cgImage, factor: factor, size: displaySize) }
+    func shrink(longSide: Int) { doc.resize(original: cgImage, toLongSide: longSide) }
 
     /// "Copy Smaller ▾": a click copies a JPEG under the remembered limit, the arrow picks another; drag gives the file.
     var copySmallButton: some View {

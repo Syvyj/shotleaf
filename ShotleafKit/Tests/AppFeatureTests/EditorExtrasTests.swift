@@ -82,6 +82,56 @@ struct EditorExtrasTests {
         #expect(NSBitmapImageRep(data: data) != nil)
         #expect(await SmallFile.jpeg(striped(), under: 1_000_000)!.count < 20_000) // already small: best quality
     }
+
+    private func blank(_ w: Int, _ h: Int) -> CGImage {
+        CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
+                  space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!.makeImage()!
+    }
+
+    @Test("Minus shrinks by 25% and stops at 10% of the original")
+    func minusShrinksBy25PercentDownTo10Percent() throws {
+        let image = blank(1000, 800), doc = AnnotationDocument()
+        doc.add(.rectangle(CGRect(x: 100, y: 100, width: 200, height: 40)))
+        doc.resize(original: image, factor: 0.75)
+        #expect(doc.base?.image.width == 750 && doc.base?.image.height == 600)
+        #expect(doc.base?.size == CGSize(width: 750, height: 600))
+        #expect(doc.items[0].kind == .rectangle(CGRect(x: 75, y: 75, width: 150, height: 30))) // marks follow
+        for _ in 0..<30 { doc.resize(original: image, factor: 0.75) }
+        #expect(doc.base?.image.width == 100 && doc.base?.image.height == 80)
+    }
+
+    @Test("Undo brings the size back")
+    func undoRestoresSize() {
+        let image = blank(1000, 800), doc = AnnotationDocument()
+        doc.resize(original: image, factor: 0.75)
+        doc.undo()
+        #expect(doc.base == nil)
+    }
+
+    @Test("A preset fits the long side, and a bigger one is off")
+    func presetFitsLongSide() {
+        let image = blank(3000, 1000), doc = AnnotationDocument()
+        #expect(doc.canResize(original: image, toLongSide: 1280))
+        doc.resize(original: image, toLongSide: 1280)
+        #expect(doc.base?.image.width == 1280 && doc.base?.image.height == 427)
+        #expect(!doc.canResize(original: image, toLongSide: 1920))
+        doc.resize(original: image, toLongSide: 1920)
+        #expect(doc.base?.image.width == 1280)
+    }
+
+    @Test("A cropped rectangle keeps the aspect inside the original")
+    func constrainedKeepsAspect() {
+        let source = CGRect(x: 0, y: 0, width: 500, height: 500)
+        let r = AnnotationEditing.constrained(source, to: .wide16x9)
+        #expect(abs(r.width / r.height - 16.0 / 9) < 0.01)
+        #expect(source.contains(r))
+        #expect(AnnotationEditing.constrained(source, to: .free) == source)
+    }
+
+    @Test("The minus key is not a tool key")
+    func minusKeyIsFree() {
+        #expect(AnnotationTool.allCases.allSatisfy { $0.defaultKey != "-" })
+    }
 }
 
 @Suite("Saving and links never lose a shot")

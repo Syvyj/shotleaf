@@ -251,7 +251,12 @@ extension ScreenshotView {
         case .magnify: // always round, from the corner dragged
             let side = max(rect.width, rect.height)
             return side >= 8 ? .magnify(CGRect(x: b.x < a.x ? a.x - side : a.x, y: b.y < a.y ? a.y - side : a.y, width: side, height: side)) : nil
-        case .crop: return big ? .crop(rect) : nil
+        case .crop: // a fixed proportion keeps the corner the drag started from
+            guard big else { return nil }
+            var r = AnnotationEditing.constrained(rect, to: cropAspect)
+            if b.x < a.x { r.origin.x = rect.maxX - r.width }
+            if b.y < a.y { r.origin.y = rect.maxY - r.height }
+            return .crop(r)
         case .ruler:
             let end = AnnotationEditing.snapped(a, b)
             return hypot(end.x - a.x, end.y - a.y) > 4 ? .measure(from: a, to: end) : nil

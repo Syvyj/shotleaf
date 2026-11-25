@@ -58,6 +58,7 @@ struct ScreenshotWindowTests {
         let display = CGSize(width: 260, height: 160)
         let doc = AnnotationDocument()
         doc.add(.crop(CGRect(x: 10, y: 10, width: 100, height: 60)))
+        doc.tool = .crop // the proportions pill shows too
         let noop = ScreenshotActions(copy: {}, save: { nil }, pin: {}, close: {}, dragFile: { nil })
         let view = ScreenshotView(image: NSImage(size: display), cgImage: Self.blankImage, pixelSize: CGSize(width: 520, height: 320),
                                   displaySize: display, actions: noop, doc: doc)

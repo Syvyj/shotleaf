@@ -1050,6 +1050,46 @@
         }
       }
     },
+    "Free": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вільно"
+          }
+        }
+      }
+    },
+    "Crop proportions": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пропорції обрізання"
+          }
+        }
+      }
+    },
+    "Shrink by 25% (-) — hold for sizes": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зменшити на 25% (-) — ⌘Z повертає"
+          }
+        }
+      }
+    },
+    "Long side %lld px": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Довга сторона %lld px"
+          }
+        }
+      }
+    },
     "For %lld h": {
       "localizations": {
         "uk": {
