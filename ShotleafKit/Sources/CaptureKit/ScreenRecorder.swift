@@ -24,13 +24,16 @@ public actor ScreenRecorder {
     private var stream: SCStream?
     private var output: SCRecordingOutput?
     private var finish: RecordingFinish?
+    private var ended: StreamEnded? // SCStream keeps its delegate weakly
     private var url: URL?
 
     public init() {}
 
     /// Starts writing `area` to `url`. `windowIDs`: our own windows (the frame
-    /// around the area) that must not be in the video.
-    public func start(_ area: RecordingArea, to url: URL, excluding windowIDs: [CGWindowID]) async throws {
+    /// around the area) that must not be in the video. `endedBySystem`: macOS stopped
+    /// the stream itself (display gone, "Stop sharing"); call `stop()` to get the file.
+    public func start(_ area: RecordingArea, to url: URL, excluding windowIDs: [CGWindowID],
+                      endedBySystem: @escaping @Sendable () -> Void = {}) async throws {
         guard stream == nil else { throw AppError.missingContext(String(localized: "Already recording")) }
         let content: SCShareableContent
         do {
@@ -51,16 +54,17 @@ public actor ScreenRecorder {
         let finish = RecordingFinish()
         let output = SCRecordingOutput(configuration: settings, delegate: finish)
 
-        let stream = SCStream(filter: filter, configuration: Self.recordingConfig(for: area), delegate: nil)
+        let ended = StreamEnded(endedBySystem)
+        let stream = SCStream(filter: filter, configuration: Self.recordingConfig(for: area), delegate: ended)
         try stream.addRecordingOutput(output) // before startCapture, or nothing is written
         try await stream.startCapture()
-        (self.stream, self.output, self.finish, self.url) = (stream, output, finish, url)
+        (self.stream, self.output, self.finish, self.ended, self.url) = (stream, output, finish, ended, url)
     }
 
     /// Stops and returns the finished file (the URL given to `start`).
     public func stop() async throws -> URL {
         guard let stream, let finish, let url else { throw AppError.missingContext(String(localized: "Not recording")) }
-        (self.stream, self.output, self.finish, self.url) = (nil, nil, nil, nil)
+        (self.stream, self.output, self.finish, self.ended, self.url) = (nil, nil, nil, nil, nil)
         try? await stream.stopCapture()
         // The file is complete only once the output says so. Stopped right after
         // start, it may never say anything: wait a little, then take what's there.
@@ -89,6 +93,15 @@ public actor ScreenRecorder {
         config.capturesAudio = false
         return config
     }
+}
+
+/// The stream's delegate: tells when the system ended the stream.
+final class StreamEnded: NSObject, SCStreamDelegate, Sendable {
+    private let handler: @Sendable () -> Void
+
+    init(_ handler: @escaping @Sendable () -> Void) { self.handler = handler }
+
+    func stream(_ stream: SCStream, didStopWithError error: any Error) { handler() }
 }
 
 /// The recording output's delegate: reports when the file is finished (or failed).

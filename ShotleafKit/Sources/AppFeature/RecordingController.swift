@@ -44,7 +44,10 @@ final class RecordingController: NSObject {
                 let frame = Self.frame(around: area)
                 self.frame = frame
                 let url = TempFolder.recordings.new().appendingPathComponent("Recording.mp4")
-                try await recorder.start(area, to: url, excluding: [CGWindowID(frame.windowNumber)])
+                // Ended by the system (display gone, "Stop sharing"): finish as Stop does.
+                try await recorder.start(area, to: url, excluding: [CGWindowID(frame.windowNumber)]) { [weak self] in
+                    Task { @MainActor in self?.stop() }
+                }
                 showStopItem()
                 phase = .recording
             } catch {
