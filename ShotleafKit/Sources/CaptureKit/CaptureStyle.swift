@@ -32,4 +32,29 @@ enum CaptureStyle {
     static func label(_ font: NSFont, color: NSColor = .white) -> [NSAttributedString.Key: Any] {
         [.font: font, .foregroundColor: color]
     }
+
+    /// The selection's frame: soft lime glow, then the gradient ring just outside `rect`.
+    static func drawFrame(_ rect: CGRect, ringWidth: CGFloat) {
+        let r = CaptureStyle.selectionRadius
+        let outline = NSBezierPath(roundedRect: rect, xRadius: r, yRadius: r)
+        NSGraphicsContext.saveGraphicsState()
+        let glow = NSShadow()
+        glow.shadowColor = CaptureStyle.lime.withAlphaComponent(0.7)
+        glow.shadowBlurRadius = 14
+        glow.set()
+        CaptureStyle.leaf.withAlphaComponent(0.6).setStroke()
+        outline.lineWidth = 2
+        outline.stroke()
+        NSGraphicsContext.restoreGraphicsState()
+
+        let ring = NSBezierPath(roundedRect: rect.insetBy(dx: -1, dy: -1), xRadius: r + 1, yRadius: r + 1)
+        ring.lineWidth = ringWidth
+        NSGraphicsContext.saveGraphicsState()
+        let strokeArea = NSBezierPath(roundedRect: rect.insetBy(dx: -2, dy: -2), xRadius: r + 2, yRadius: r + 2)
+        strokeArea.append(NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: r, yRadius: r))
+        strokeArea.windingRule = .evenOdd
+        strokeArea.addClip()
+        CaptureStyle.accentGradient.draw(in: ring.bounds.insetBy(dx: -2, dy: -2), angle: -30)
+        NSGraphicsContext.restoreGraphicsState()
+    }
 }

@@ -130,7 +130,7 @@ final class SelectionView: NSView {
 
         let focus = selection ?? (dragStart == nil ? hoveredWindow : nil)
         drawDim(except: focus)
-        if let focus { drawFrame(focus, isWindow: selection == nil) }
+        if let focus { CaptureStyle.drawFrame(focus, ringWidth: selection == nil ? 3 : 2) }
         if let selection { drawSizeLabel(for: selection) }
         if let cursor {
             if selection == nil { drawCrosshair(at: cursor) }
@@ -158,31 +158,6 @@ final class SelectionView: NSView {
         }
         CaptureStyle.dim.setFill()
         path.fill()
-    }
-
-    private func drawFrame(_ rect: CGRect, isWindow: Bool) {
-        let r = CaptureStyle.selectionRadius
-        let outline = NSBezierPath(roundedRect: rect, xRadius: r, yRadius: r)
-        // Soft glow, then the gradient stroke on top.
-        NSGraphicsContext.saveGraphicsState()
-        let glow = NSShadow()
-        glow.shadowColor = CaptureStyle.lime.withAlphaComponent(0.7)
-        glow.shadowBlurRadius = 14
-        glow.set()
-        CaptureStyle.leaf.withAlphaComponent(0.6).setStroke()
-        outline.lineWidth = 2
-        outline.stroke()
-        NSGraphicsContext.restoreGraphicsState()
-
-        let ring = NSBezierPath(roundedRect: rect.insetBy(dx: -1, dy: -1), xRadius: r + 1, yRadius: r + 1)
-        ring.lineWidth = isWindow ? 3 : 2
-        NSGraphicsContext.saveGraphicsState()
-        let strokeArea = NSBezierPath(roundedRect: rect.insetBy(dx: -2, dy: -2), xRadius: r + 2, yRadius: r + 2)
-        strokeArea.append(NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: r, yRadius: r))
-        strokeArea.windingRule = .evenOdd
-        strokeArea.addClip()
-        CaptureStyle.accentGradient.draw(in: ring.bounds.insetBy(dx: -2, dy: -2), angle: -30)
-        NSGraphicsContext.restoreGraphicsState()
     }
 
     private func drawSizeLabel(for rect: CGRect) {

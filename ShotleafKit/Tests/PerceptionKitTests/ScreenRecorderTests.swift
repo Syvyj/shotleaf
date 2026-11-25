@@ -33,3 +33,38 @@ struct ScreenRecorderTests {
         #expect(count.withLock { $0 } == 1)
     }
 }
+
+@Suite("Recording controls placement")
+@MainActor
+struct RecordingControlsPlacementTests {
+    let screen = CGRect(x: 0, y: 0, width: 1440, height: 875) // visible frame, Cocoa points
+    let size = CGSize(width: 200, height: 32)
+
+    @Test("Centred 8 pt under the frame")
+    func below() {
+        let area = CGRect(x: 400, y: 300, width: 600, height: 400)
+        // The frame's ring reaches 4 pt outside the area.
+        #expect(RecordingChrome.placement(size, area: area, visible: screen) == CGRect(x: 600, y: 300 - 4 - 8 - 32, width: 200, height: 32))
+    }
+
+    @Test("Above when there's no room below")
+    func above() {
+        let area = CGRect(x: 400, y: 20, width: 600, height: 400)
+        #expect(RecordingChrome.placement(size, area: area, visible: screen) == CGRect(x: 600, y: 420 + 4 + 8, width: 200, height: 32))
+    }
+
+    @Test("Inside near the bottom when neither fits")
+    func inside() {
+        #expect(RecordingChrome.placement(size, area: screen, visible: screen) == CGRect(x: 620, y: 8, width: 200, height: 32))
+        // A full-screen area reaching under the Dock: still within the visible frame.
+        let full = CGRect(x: 0, y: 0, width: 1440, height: 900), visible = CGRect(x: 0, y: 70, width: 1440, height: 805)
+        #expect(RecordingChrome.placement(size, area: full, visible: visible).minY == 78)
+    }
+
+    @Test("Clamped to the screen's edges")
+    func clamped() {
+        let left = CGRect(x: 0, y: 300, width: 100, height: 100), right = CGRect(x: 1380, y: 300, width: 60, height: 100)
+        #expect(RecordingChrome.placement(size, area: left, visible: screen).minX == 0)
+        #expect(RecordingChrome.placement(size, area: right, visible: screen).maxX == 1440)
+    }
+}
