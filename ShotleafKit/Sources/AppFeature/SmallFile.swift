@@ -41,8 +41,20 @@ public enum SmallFile {
 
     /// Shortcuts' "Compress Image": `<name>.jpg` in a fresh temp folder.
     public static func compressFile(_ url: URL, under limit: Int) async throws -> URL {
-        guard let jpeg = await jpeg(contentsOf: url, under: limit) else { throw DoesNotFit() }
-        let file = TempFolder.share.new().appendingPathComponent(url.deletingPathExtension().lastPathComponent + ".jpg")
+        try await compressImage(data: Data(contentsOf: url), filename: url.lastPathComponent, under: limit)
+    }
+
+    /// The same for bytes (Shortcuts may hand over no file). Only the JPEG is written.
+    public static func compressImage(data: Data, filename: String, under limit: Int) async throws -> URL {
+        let jpeg = await Task.detached(priority: .userInitiated) {
+            CGImageSourceCreateWithData(data as CFData, nil)
+                .flatMap { CGImageSourceCreateImageAtIndex($0, 0, nil) }
+                .flatMap { fit($0, under: limit) }
+        }.value
+        guard let jpeg else { throw DoesNotFit() }
+        var name = ((filename as NSString).lastPathComponent as NSString).deletingPathExtension // no "/" or ".." out of the folder
+        if name.isEmpty || name == "." || name == ".." || name == "/" { name = "Image" }
+        let file = TempFolder.share.new().appendingPathComponent(name + ".jpg")
         try jpeg.write(to: file)
         return file
     }

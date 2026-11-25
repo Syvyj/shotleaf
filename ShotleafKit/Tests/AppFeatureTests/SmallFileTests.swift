@@ -44,6 +44,7 @@ struct SmallFileTests {
 
     @Test func compressFileWritesJPEGUnderLimit() async throws {
         let png = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).png")
+        defer { try? FileManager.default.removeItem(at: png) }
         let image = try #require(TestImages.noise(width: 3000, height: 2000))
         let dest = try #require(CGImageDestinationCreateWithURL(png as CFURL, UTType.png.identifier as CFString, 1, nil))
         CGImageDestinationAddImage(dest, image, nil)
@@ -52,6 +53,22 @@ struct SmallFileTests {
         let data = try Data(contentsOf: url)
         #expect(url.lastPathComponent == png.deletingPathExtension().lastPathComponent + ".jpg")
         #expect(data.count <= 500_000 && data.starts(with: [0xFF, 0xD8, 0xFF]))
+    }
+
+    @Test func compressImageFromBytesStaysInItsFolder() async throws {
+        let image = try #require(TestImages.noise(width: 1500, height: 1000))
+        let data = NSMutableData()
+        let dest = try #require(CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, nil))
+        CGImageDestinationAddImage(dest, image, nil)
+        try #require(CGImageDestinationFinalize(dest))
+        let url = try await SmallFile.compressImage(data: data as Data, filename: "../../evil.png", under: 200_000)
+        #expect(url.lastPathComponent == "evil.jpg" && url.path.contains("Shotleaf Share"))
+        #expect(try Data(contentsOf: url).count <= 200_000)
+        let unnamed = try await SmallFile.compressImage(data: data as Data, filename: "", under: 200_000)
+        #expect(unnamed.lastPathComponent == "Image.jpg")
+        await #expect(throws: SmallFile.DoesNotFit.self) {
+            try await SmallFile.compressImage(data: Data("not a picture".utf8), filename: "x.png", under: 200_000)
+        }
     }
 
     @MainActor @Test func copyPutsJPEGAndFileNoPNG() throws {

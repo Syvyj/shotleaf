@@ -30,14 +30,11 @@ struct CompressImageIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult & ReturnsValue<IntentFile> {
-        var source = image.fileURL
-        if source == nil { // Shortcuts may hand over the bytes alone
-            let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
-            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-            source = folder.appendingPathComponent(image.filename)
-            try image.data.write(to: source!)
+        let jpeg = if let url = image.fileURL {
+            try await SmallFile.compressFile(url, under: limit.rawValue)
+        } else { // Shortcuts may hand over the bytes alone
+            try await SmallFile.compressImage(data: image.data, filename: image.filename, under: limit.rawValue)
         }
-        let jpeg = try await SmallFile.compressFile(source!, under: limit.rawValue)
         return .result(value: IntentFile(fileURL: jpeg, filename: jpeg.lastPathComponent, type: .jpeg))
     }
 }
