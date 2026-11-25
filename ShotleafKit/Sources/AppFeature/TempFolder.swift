@@ -1,9 +1,9 @@
 import Foundation
 
-/// Where dragged, pasted and shared files wait for the app that takes them. That app may read
-/// a file late, so nothing is removed until the next launch.
+/// Where dragged, pasted and shared files (and new screen recordings) wait for the app that
+/// takes them. That app may read a file late, so nothing is removed until the next launch.
 enum TempFolder: String, CaseIterable {
-    case drag = "Shotleaf Drag", paste = "Shotleaf Paste", share = "Shotleaf Share"
+    case drag = "Shotleaf Drag", paste = "Shotleaf Paste", share = "Shotleaf Share", recordings = "Shotleaf Recordings"
 
     private var root: URL { FileManager.default.temporaryDirectory.appendingPathComponent(rawValue, isDirectory: true) }
 

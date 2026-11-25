@@ -4778,6 +4778,86 @@
           }
         }
       }
+    },
+    "Record Screen": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Записати екран"
+          }
+        }
+      }
+    },
+    "Record Screen…": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Записати екран…"
+          }
+        }
+      }
+    },
+    "Stop Recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зупинити запис"
+          }
+        }
+      }
+    },
+    "Couldn’t record the screen": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося записати екран"
+          }
+        }
+      }
+    },
+    "Already recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запис уже йде"
+          }
+        }
+      }
+    },
+    "The screen to record is gone": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Екрана, який треба записати, більше немає"
+          }
+        }
+      }
+    },
+    "Not recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запис не йде"
+          }
+        }
+      }
+    },
+    "Nothing was recorded — it was stopped too soon": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нічого не записано — запис зупинено надто рано"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

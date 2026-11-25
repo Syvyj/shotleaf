@@ -33,6 +33,28 @@ struct HotkeyShortcutTests {
         #expect(HotkeyShortcut.with(id: "custom:garbage") == nil)
         #expect(HotkeyShortcut.with(id: "cmd-shift-2") == .captureDefault)
     }
+
+    @Test("Record Screen defaults to ⌘⇧6")
+    func recordDefaultIsCmdShift6() {
+        #expect(HotkeyAction.record.rawValue == "record")
+        #expect(HotkeyAction.record.defaultShortcut == .recordDefault)
+        #expect(HotkeyShortcut.recordDefault.id == "cmd-shift-6")
+        #expect(HotkeyShortcut.recordDefault.keyCode == UInt32(kVK_ANSI_6))
+        #expect(HotkeyShortcut.recordDefault.modifiers == UInt32(cmdKey | shiftKey))
+        #expect(HotkeyShortcut.with(id: "cmd-shift-6") == .recordDefault)
+    }
+
+    @Test("No two actions share a default shortcut")
+    func allDefaultShortcutsDiffer() {
+        let combos = HotkeyAction.allCases.map { [$0.defaultShortcut.keyCode, $0.defaultShortcut.modifiers] }
+        #expect(Set(combos).count == HotkeyAction.allCases.count)
+    }
+
+    @Test("Recordings are a temp folder kind, so launch clears them too")
+    func tempFolderHasRecordings() {
+        #expect(TempFolder.allCases.contains(.recordings))
+        #expect(TempFolder.recordings.rawValue == "Shotleaf Recordings")
+    }
 }
 
 @Suite("Several global hotkeys")

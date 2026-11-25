@@ -29,6 +29,16 @@ public struct ScreenCaptureService: CaptureService {
         return try Self.payload(png: Self.png(image))
     }
 
+    /// An area to record, picked like a screenshot region (no scrolling option).
+    public func pickRecordingArea() async throws -> RecordingArea {
+        guard CGPreflightScreenCaptureAccess() else {
+            CGRequestScreenCaptureAccess()
+            throw AppError.permissionDenied("Screen Recording")
+        }
+        let area = try await RegionPicker.shared.pickArea(allowScrolling: false)
+        return RecordingArea(displayID: area.displayID, rect: area.rect, scale: area.screen.backingScaleFactor)
+    }
+
     static func png(_ image: CGImage) throws -> Data {
         let data = NSMutableData()
         guard let dest = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, nil) else {

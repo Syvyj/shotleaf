@@ -18,6 +18,7 @@ public final class AppCoordinator {
     public init(container: AppContainer = AppContainer()) {
         self.container = container
         self.clipboard = ClipboardHistory(recognizer: container.recognizer)
+        self.recording = RecordingController(capture: container.capture)
     }
 
     public func start() async {
@@ -38,6 +39,11 @@ public final class AppCoordinator {
             let saved = snippets.save(title: String(localized: "Screenshot"), text: "", pngs: [png], folder: folder)
             return snippets.folder(saved.folder)?.name
         }
+        recording.finished = { url in
+            // For now the file in Finder; the recording window comes next.
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        }
+        recording.failed = { [weak self] in self?.screenshots.showProblem($0, title: "Couldn’t record the screen") }
         if isOn(.clipboard) { clipboard.start() }
         if isOn(.snippets) { expander.start() }
         Self.log.notice("startup permissions: \(String(describing: self.permissions), privacy: .public) bundle: \(Bundle.main.bundlePath, privacy: .public)")
@@ -69,6 +75,7 @@ public final class AppCoordinator {
                 case HotkeyAction.screenshotText.rawValue: self.textFromScreenshot()
                 case HotkeyAction.capture.rawValue: self.takeScreenshot()
                 case HotkeyAction.scrolling.rawValue: self.takeScrollingScreenshot()
+                case HotkeyAction.record.rawValue: self.recording.toggle()
                 case HotkeyAction.editLast.rawValue: self.editLastScreenshot()
                 case HotkeyAction.editClipboard.rawValue: self.editClipboardImage()
                 case HotkeyAction.clipboard.rawValue:
@@ -176,6 +183,15 @@ public final class AppCoordinator {
             }
         }
     }
+
+    // MARK: Recording
+
+    let recording: RecordingController
+
+    public var isRecording: Bool { recording.phase == .recording }
+
+    /// Record an area of the screen; while recording, stop.
+    public func toggleRecording() { recording.toggle() }
 
     /// A new shot: into the editor, or straight to the clipboard / a file
     /// (Settings → Screenshots). Kept for "Edit Last Screenshot" either way.

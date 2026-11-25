@@ -24,6 +24,13 @@ public struct MenuBarRootView: View {
             Button(Self.label(String(localized: "Scrolling Screenshot…"), coordinator.actionHotkeys[.scrolling])) {
                 coordinator.takeScrollingScreenshot()
             }
+            if coordinator.isRecording {
+                Button("Stop Recording") { coordinator.toggleRecording() }
+            } else {
+                Button(Self.label(String(localized: "Record Screen…"), coordinator.actionHotkeys[.record])) {
+                    coordinator.toggleRecording()
+                }
+            }
             Menu("Screenshot with Delay") {
                 Button("In 3 Seconds") { coordinator.takeScreenshot(delay: 3) }
                 Button("In 5 Seconds") { coordinator.takeScreenshot(delay: 5) }

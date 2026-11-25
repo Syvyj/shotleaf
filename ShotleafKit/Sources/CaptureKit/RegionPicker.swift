@@ -45,8 +45,9 @@ final class RegionPicker {
         try await pickArea().image()
     }
 
-    /// Just where the user pointed (scrolling capture films it live).
-    func pickArea() async throws -> Picked {
+    /// Just where the user pointed (scrolling capture films it live, recording records it).
+    /// `allowScrolling`: false hides S (scrolling screenshot), e.g. when picking an area to record.
+    func pickArea(allowScrolling: Bool = true) async throws -> Picked {
         guard continuation == nil else { throw AppError.cancelled } // already picking
         let frozen = try await freezeScreens()
         guard !frozen.isEmpty else { throw AppError.missingContext("No screen to capture") }
@@ -54,7 +55,7 @@ final class RegionPicker {
 
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
-            show(frozen, windowFrames: windowFrames)
+            show(frozen, windowFrames: windowFrames, allowScrolling: allowScrolling)
         }
     }
 
@@ -113,7 +114,7 @@ final class RegionPicker {
 
     // MARK: Overlay
 
-    private func show(_ frozen: [Frozen], windowFrames: [CGRect]) {
+    private func show(_ frozen: [Frozen], windowFrames: [CGRect], allowScrolling: Bool) {
         for item in frozen {
             let size = item.screen.frame.size
             let local = windowFrames
@@ -124,7 +125,8 @@ final class RegionPicker {
                 image: item.image,
                 scale: item.screen.backingScaleFactor,
                 windows: local,
-                canRepeat: last != nil
+                canRepeat: last != nil,
+                allowScrolling: allowScrolling
             ) { [weak self] outcome in
                 self?.complete(outcome, on: item, frozen: frozen)
             }

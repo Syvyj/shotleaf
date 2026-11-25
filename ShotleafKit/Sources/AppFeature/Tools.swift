@@ -18,7 +18,7 @@ public enum Tool: String, CaseIterable, Identifiable, Sendable {
 
     var actions: [HotkeyAction] {
         switch self {
-        case .screenshots: [.capture, .scrolling, .editLast, .editClipboard]
+        case .screenshots: [.capture, .scrolling, .record, .editLast, .editClipboard]
         case .screenText: [.screenshotText]
         case .clipboard: [.clipboard]
         case .snippets: [.snippets]

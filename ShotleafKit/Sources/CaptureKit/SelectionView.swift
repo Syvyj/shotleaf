@@ -17,6 +17,8 @@ final class SelectionView: NSView {
     /// Windows on this screen, front to back, in view points.
     private let windows: [CGRect]
     private let canRepeat: Bool
+    /// S (scrolling screenshot) is offered; off when picking an area to record.
+    private let allowScrolling: Bool
     private let finish: (Outcome) -> Void
 
     var dragStart: CGPoint?  // internal: state is set directly by the preview render test
@@ -26,12 +28,13 @@ final class SelectionView: NSView {
     /// S toggles: the next region becomes a scrolling screenshot.
     var scrolling = false
 
-    init(frame: CGRect, image: CGImage, scale: CGFloat, windows: [CGRect], canRepeat: Bool, finish: @escaping (Outcome) -> Void) {
+    init(frame: CGRect, image: CGImage, scale: CGFloat, windows: [CGRect], canRepeat: Bool, allowScrolling: Bool = true, finish: @escaping (Outcome) -> Void) {
         self.image = image
         self.nsImage = NSImage(cgImage: image, size: frame.size)
         self.scale = scale
         self.windows = windows
         self.canRepeat = canRepeat
+        self.allowScrolling = allowScrolling
         self.finish = finish
         super.init(frame: frame)
     }
@@ -106,7 +109,7 @@ final class SelectionView: NSView {
         case (53, _): finish(.cancel)                       // Esc
         case (36, _), (76, _), (_, "f"): finish(.region(bounds, scrolling: scrolling)) // Return / Enter / F
         case (_, "r") where canRepeat: finish(.repeatLast)
-        case (_, "s"):
+        case (_, "s") where allowScrolling:
             scrolling.toggle()
             needsDisplay = true
         case (_, "c"):                                      // eyedropper: copy the HEX under the cursor
@@ -292,7 +295,7 @@ final class SelectionView: NSView {
         var keys: [(String, String)] = [(String(localized: "drag"), String(localized: "area")), (String(localized: "click"), String(localized: "window")), ("↩", String(localized: "full screen"))]
         if canRepeat { keys.append(("R", String(localized: "repeat"))) }
         keys.append(("C", String(localized: "copy color")))
-        keys.append(("S", scrolling ? String(localized: "scrolling: on") : String(localized: "scrolling")))
+        if allowScrolling { keys.append(("S", scrolling ? String(localized: "scrolling: on") : String(localized: "scrolling"))) }
         keys.append(("esc", String(localized: "cancel")))
 
         // The windows' Leaves look: a light leaf panel, green keys, dark ink.
