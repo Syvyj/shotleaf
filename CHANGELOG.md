@@ -2,7 +2,7 @@
 
 ## 0.5.0
 
-- Record the screen (⌘⇧6): choose an area, stop with the red button or the timer in the menu bar. The cursor and clicks are shown; there is no sound. The recording is an H.264 MP4 that plays in Telegram and on older phones.
+- Record the screen (⌘⇧6): choose an area, and a lime frame marks it while a small bar beside it has the time, Pause, Stop and Cancel (Stop is in the menu bar too, and ⌘⇧6 stops as well). The cursor and clicks are shown; the frame and bar are not, and there is no sound. The recording is an H.264 MP4 that plays in Telegram and on older phones.
 - The recording opens in a window: trim it, then Copy (⏎), Drag, Save, make a GIF, or fit it under 8, 10 or 25 MB. A GIF is 12 frames a second, at most 960 px on the long side, smaller for a long clip.
 - Copy Smaller in the screenshot window: a JPEG under 200 KB, 500 KB, 1 MB, 8 MB or 25 MB. It remembers the last size and can be dragged too. Plain Copy, drag and Share still give the full PNG.
 - Clipboard history: ⌘K on an image offers "Compress to JPEG under…".
