@@ -91,7 +91,8 @@ final class RecordingController: NSObject {
         let began = Date()
         ticker = Task { [weak self] in
             while !Task.isCancelled {
-                self?.stopItem?.button?.title = Self.elapsed(Date().timeIntervalSince(began))
+                guard let self else { return }
+                stopItem?.button?.title = Self.elapsed(Date().timeIntervalSince(began))
                 try? await Task.sleep(for: .seconds(1))
             }
         }

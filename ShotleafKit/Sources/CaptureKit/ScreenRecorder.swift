@@ -64,10 +64,10 @@ public actor ScreenRecorder {
         try? await stream.stopCapture()
         // The file is complete only once the output says so. Stopped right after
         // start, it may never say anything: wait a little, then take what's there.
-        let failure = await finish.wait(timeout: .seconds(5))
+        _ = await finish.wait(timeout: .seconds(5)) // a failure here is SCK’s raw words: the message below says it better
         let size = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int) ?? 0
         guard size > 0 else {
-            throw failure ?? AppError.missingContext(String(localized: "Nothing was recorded — it was stopped too soon"))
+            throw AppError.missingContext(String(localized: "Nothing was recorded — it was stopped too soon"))
         }
         return url
     }

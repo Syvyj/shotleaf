@@ -50,7 +50,7 @@ final class RegionPicker {
     func pickArea(allowScrolling: Bool = true) async throws -> Picked {
         guard continuation == nil else { throw AppError.cancelled } // already picking
         let frozen = try await freezeScreens()
-        guard !frozen.isEmpty else { throw AppError.missingContext("No screen to capture") }
+        guard !frozen.isEmpty else { throw AppError.missingContext(String(localized: "No screen to capture")) }
         let windowFrames = Self.onScreenWindowFrames()
 
         return try await withCheckedThrowingContinuation { continuation in

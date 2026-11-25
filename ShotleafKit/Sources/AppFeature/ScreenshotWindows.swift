@@ -125,11 +125,11 @@ final class ScreenshotWindows {
         let message: String = switch error {
         case AppError.permissionDenied:
             String(localized: "Shotleaf needs the Screen Recording permission. Allow it in System Settings → Privacy & Security, then restart Shotleaf.")
+        case AppError.missingContext(let text): text // our own words come first, even on a full disk
         // Text recognition writes its compiled model to disk first: with the disk full it fails with an
         // unreadable code ("CRImageReaderError", "E5RT … 13").
         case _ where Self.freeDisk.map { $0 < 3_000_000_000 } == true:
             String(localized: "The disk is almost full (\(ByteCountFormatter.string(fromByteCount: Self.freeDisk ?? 0, countStyle: .file)) free), so macOS can’t prepare text recognition. Free up a few gigabytes and try again.")
-        case AppError.missingContext(let text): text
         default: error.localizedDescription
         }
         showText(message, title: title, sound: false)
@@ -210,7 +210,7 @@ final class ScreenshotWindows {
         return panel
     }
 
-    private func present(_ panel: FloatingPanel) {
+    func present(_ panel: FloatingPanel) {
         open[ObjectIdentifier(panel)] = panel
         panel.makeKeyAndOrderFront(nil)
     }

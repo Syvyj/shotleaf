@@ -27,7 +27,7 @@ final class ScrollCapture {
             throw AppError.permissionDenied("Screen Recording")
         }
         guard let display = content.displays.first(where: { $0.displayID == area.displayID }) else {
-            throw AppError.missingContext("No screen to capture")
+            throw AppError.missingContext(String(localized: "No screen to capture"))
         }
         let scale = area.screen.backingScaleFactor
         let filter = SCContentFilter(display: display, excludingApplications: content.applications.filter { $0.processID == getpid() },

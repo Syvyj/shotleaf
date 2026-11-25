@@ -4858,6 +4858,166 @@
           }
         }
       }
+    },
+    "Can’t encode the screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося закодувати знімок"
+          }
+        }
+      }
+    },
+    "Unreadable screenshot": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знімок не читається"
+          }
+        }
+      }
+    },
+    "No screen to capture": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Немає екрана для знімка"
+          }
+        }
+      }
+    },
+    "Recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запис"
+          }
+        }
+      }
+    },
+    "Drag": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетягнути"
+          }
+        }
+      }
+    },
+    "Original": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оригінал"
+          }
+        }
+      }
+    },
+    "Start": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Початок"
+          }
+        }
+      }
+    },
+    "End": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Кінець"
+          }
+        }
+      }
+    },
+    "Copied · GIF": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопійовано · GIF"
+          }
+        }
+      }
+    },
+    "Drag it into any app": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетягніть у будь-який застосунок"
+          }
+        }
+      }
+    },
+    "Drag the video into a chat or a folder": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Перетягніть відео в чат чи теку"
+          }
+        }
+      }
+    },
+    "Make a GIF and copy it": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зробити GIF і скопіювати"
+          }
+        }
+      }
+    },
+    "Under %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Під %@"
+          }
+        }
+      }
+    },
+    "Too long for %@ — trim it": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Задовге для %@ — обріжте"
+          }
+        }
+      }
+    },
+    "Couldn’t make the video file": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вдалося створити відеофайл"
+          }
+        }
+      }
+    },
+    "the recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "запис"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

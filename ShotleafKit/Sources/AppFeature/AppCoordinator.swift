@@ -39,10 +39,7 @@ public final class AppCoordinator {
             let saved = snippets.save(title: String(localized: "Screenshot"), text: "", pngs: [png], folder: folder)
             return snippets.folder(saved.folder)?.name
         }
-        recording.finished = { url in
-            // For now the file in Finder; the recording window comes next.
-            NSWorkspace.shared.activateFileViewerSelecting([url])
-        }
+        recording.finished = { [weak self] url in Task { await self?.screenshots.showRecording(url) } }
         recording.failed = { [weak self] in self?.screenshots.showProblem($0, title: "Couldn’t record the screen") }
         if isOn(.clipboard) { clipboard.start() }
         if isOn(.snippets) { expander.start() }

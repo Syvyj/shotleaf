@@ -42,10 +42,10 @@ public struct ScreenCaptureService: CaptureService {
     static func png(_ image: CGImage) throws -> Data {
         let data = NSMutableData()
         guard let dest = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, nil) else {
-            throw AppError.missingContext("Can't encode screenshot")
+            throw AppError.missingContext(String(localized: "Can’t encode the screenshot"))
         }
         CGImageDestinationAddImage(dest, image, nil)
-        guard CGImageDestinationFinalize(dest) else { throw AppError.missingContext("Can't encode screenshot") }
+        guard CGImageDestinationFinalize(dest) else { throw AppError.missingContext(String(localized: "Can’t encode the screenshot")) }
         return data as Data
     }
 
@@ -54,7 +54,7 @@ public struct ScreenCaptureService: CaptureService {
               let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
               let width = props[kCGImagePropertyPixelWidth] as? Int,
               let height = props[kCGImagePropertyPixelHeight] as? Int
-        else { throw AppError.missingContext("Unreadable screenshot") }
+        else { throw AppError.missingContext(String(localized: "Unreadable screenshot")) }
         return ImagePayload(data: data, width: width, height: height, mimeType: "image/png")
     }
 }
