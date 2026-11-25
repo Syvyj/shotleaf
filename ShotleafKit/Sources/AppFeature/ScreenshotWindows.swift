@@ -78,8 +78,11 @@ final class ScreenshotWindows {
                 let ask = Self.savePanel(.jpeg)
                 ask.beginSheetModal(for: panel) { response in
                     guard response == .OK, let url = ask.url else { return }
-                    guard let picture = NSBitmapImageRep(data: result())?.cgImage, let data = SmallFile.jpeg(picture, under: limit) else { NSSound.beep(); return }
-                    do { try data.write(to: url) } catch { SaveError.show(error, saving: String(localized: "the screenshot")) }
+                    let png = result()
+                    Task {
+                        guard let picture = NSBitmapImageRep(data: png)?.cgImage, let data = await SmallFile.jpeg(picture, under: limit) else { NSSound.beep(); return }
+                        do { try data.write(to: url) } catch { SaveError.show(error, saving: String(localized: "the screenshot")) }
+                    }
                 }
             },
             link: { hours in try await ShotLinks.upload(result(), hours: hours) },

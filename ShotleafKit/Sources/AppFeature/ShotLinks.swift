@@ -58,9 +58,9 @@ enum ShotLinks {
     }
 
     /// A PNG too big for the free service becomes the best JPEG that fits (an own server takes it as it is).
-    static func fitted(_ image: Data, server: String) -> Data {
+    static func fitted(_ image: Data, server: String) async -> Data {
         guard server == freeService, image.count > freeLimit, let picture = NSBitmapImageRep(data: image)?.cgImage,
-              let jpeg = SmallFile.jpeg(picture, under: freeLimit) else { return image }
+              let jpeg = await SmallFile.jpeg(picture, under: freeLimit) else { return image }
         return jpeg
     }
 
@@ -68,7 +68,7 @@ enum ShotLinks {
     /// The key goes only to the user's own server (the free service needs none, and reading it may ask for the password).
     @MainActor
     static func upload(_ image: Data, hours: Int, server: String = server, token: String? = ownServer ? token : nil) async throws -> URL {
-        guard let request = request(fitted(image, server: server), hours: hours, server: server, token: token) else { throw Failure.notSetUp }
+        guard let request = request(await fitted(image, server: server), hours: hours, server: server, token: token) else { throw Failure.notSetUp }
         let (data, response) = try await URLSession.shared.data(for: request)
         let answer = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         guard let status = (response as? HTTPURLResponse)?.statusCode, status == 201 else {

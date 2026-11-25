@@ -68,7 +68,7 @@ struct EditorExtrasTests {
     }
 
     @Test("JPEG under a limit stays under it")
-    func smallFile() throws {
+    func smallFile() async throws {
         // Noise doesn't compress: the limit must come from lower quality and then a smaller picture.
         let side = 1200
         var bytes = [UInt8](repeating: 0, count: side * side * 4)
@@ -77,10 +77,10 @@ struct EditorExtrasTests {
         let ctx = CGContext(data: &bytes, width: side, height: side, bitsPerComponent: 8, bytesPerRow: side * 4,
                             space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)!
         let noise = try #require(ctx.makeImage())
-        let data = try #require(SmallFile.jpeg(noise, under: 200_000))
+        let data = try #require(await SmallFile.jpeg(noise, under: 200_000))
         #expect(data.count <= 200_000)
         #expect(NSBitmapImageRep(data: data) != nil)
-        #expect(SmallFile.jpeg(striped(), under: 1_000_000)!.count < 20_000) // already small: best quality
+        #expect(await SmallFile.jpeg(striped(), under: 1_000_000)!.count < 20_000) // already small: best quality
     }
 }
 
@@ -112,7 +112,7 @@ struct SaveAndLinkTests {
 @Suite("Links for big shots")
 struct BigLinkTests {
     @Test("A PNG too big for the free link service goes as a JPEG that fits; an own server gets it as it is")
-    func fitted() throws {
+    func fitted() async throws {
         let side = 1400 // random noise: a PNG well over 5 MB
         var bytes = (0..<side * side * 4).map { _ in UInt8.random(in: 0...255) }
         let picture = try #require(bytes.withUnsafeMutableBytes { buffer in
@@ -121,12 +121,12 @@ struct BigLinkTests {
         })
         let png = try #require(NSBitmapImageRep(cgImage: picture).representation(using: .png, properties: [:]))
         try #require(png.count > ShotLinks.freeLimit)
-        let sent = ShotLinks.fitted(png, server: ShotLinks.freeService)
+        let sent = await ShotLinks.fitted(png, server: ShotLinks.freeService)
         #expect(sent.count <= ShotLinks.freeLimit && sent.prefix(3) == Data([0xFF, 0xD8, 0xFF]))
-        #expect(ShotLinks.fitted(png, server: "https://shots.example.com") == png)
-        #expect(ShotLinks.fitted(Data([1, 2, 3]), server: ShotLinks.freeService) == Data([1, 2, 3]))
+        #expect(await ShotLinks.fitted(png, server: "https://shots.example.com") == png)
+        #expect(await ShotLinks.fitted(Data([1, 2, 3]), server: ShotLinks.freeService) == Data([1, 2, 3]))
         // A limit nothing can meet gives nothing, never a file over the limit.
         let big = try #require(NSBitmapImageRep(data: png)?.cgImage)
-        #expect(SmallFile.jpeg(big, under: 100) == nil)
+        #expect(await SmallFile.jpeg(big, under: 100) == nil)
     }
 }
