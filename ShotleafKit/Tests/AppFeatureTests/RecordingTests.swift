@@ -1,5 +1,6 @@
 import AVFoundation
 import Testing
+@testable import AppFeature
 @testable import CaptureKit
 
 /// Here rather than next to the other ScreenRecorder tests: it reuses `TestVideo`.
@@ -56,5 +57,25 @@ struct RecordingJoinTests {
         FileManager.default.createFile(atPath: empty2.path, contents: Data())
         await #expect(throws: (any Error).self) { try await ScreenRecorder.join([empty2, missing], into: out()) }
         #expect(!FileManager.default.fileExists(atPath: empty2.path))
+    }
+}
+
+@Suite("Recorded time")
+@MainActor
+struct RecordedTimeTests {
+    @Test("Pauses aren't counted")
+    func pausesLeftOut() {
+        let t0 = Date(timeIntervalSinceReferenceDate: 0)
+        var clock = RecordedTime()
+        #expect(clock.elapsed(at: t0) == 0)
+        clock.run(at: t0)
+        #expect(clock.elapsed(at: t0 + 5) == 5)
+        clock.pause(at: t0 + 10)
+        #expect(clock.elapsed(at: t0 + 60) == 10) // stopped while paused
+        clock.pause(at: t0 + 70) // twice: no change
+        clock.run(at: t0 + 100)
+        clock.run(at: t0 + 110) // twice: keeps the first start
+        #expect(clock.elapsed(at: t0 + 115) == 25)
+        #expect(RecordingController.elapsed(clock.elapsed(at: t0 + 165)) == "01:15")
     }
 }

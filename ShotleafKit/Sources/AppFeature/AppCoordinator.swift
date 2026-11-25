@@ -195,7 +195,7 @@ public final class AppCoordinator {
 
     let recording: RecordingController
 
-    public var isRecording: Bool { recording.phase == .recording }
+    public var isRecording: Bool { recording.phase == .recording || recording.phase == .paused }
 
     /// Record an area of the screen; while recording, stop.
     public func toggleRecording() { recording.toggle() }

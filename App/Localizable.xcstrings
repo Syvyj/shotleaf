@@ -4809,6 +4809,36 @@
         }
       }
     },
+    "Pause": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пауза"
+          }
+        }
+      }
+    },
+    "Resume": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Продовжити"
+          }
+        }
+      }
+    },
+    "Cancel Recording": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скасувати запис"
+          }
+        }
+      }
+    },
     "Couldn’t record the screen": {
       "localizations": {
         "uk": {
