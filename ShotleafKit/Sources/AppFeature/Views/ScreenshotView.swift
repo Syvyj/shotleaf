@@ -44,8 +44,9 @@ struct ScreenshotView: View {
     /// For double-click detection on marks.
     @State var lastClick: (id: Annotation.ID, at: Date)?
     @FocusState var textFocused: Bool
-    enum Flyout { case shapes, style, fontSize, backdrop, saveAs, watermark, link }
+    enum Flyout { case shapes, style, fontSize, backdrop, saveAs, copySmall, watermark, link }
     @State var linking = false
+    @State var compressing = false
     @State var removingBackground = false
     @State var flyout: Flyout?
     /// The shape the shapes button shows when another tool is in use.
@@ -57,7 +58,7 @@ struct ScreenshotView: View {
     static let margin: CGFloat = 40
 
     /// Wide enough for the header (with the tools) and the action row.
-    static let minContentWidth: CGFloat = 970
+    static let minContentWidth: CGFloat = 1030
 
     var editingText: Bool { textDraft != nil }
 

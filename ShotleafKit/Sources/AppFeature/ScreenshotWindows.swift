@@ -80,11 +80,13 @@ final class ScreenshotWindows {
                     guard response == .OK, let url = ask.url else { return }
                     let png = result()
                     Task {
-                        guard let picture = NSBitmapImageRep(data: png)?.cgImage, let data = await SmallFile.jpeg(picture, under: limit) else { NSSound.beep(); return }
+                        guard let data = await SmallFile.jpeg(png: png, under: limit) else { NSSound.beep(); return }
                         do { try data.write(to: url) } catch { SaveError.show(error, saving: String(localized: "the screenshot")) }
                     }
                 }
             },
+            copySmall: { limit in await Self.copySmall(result(), limit: limit) },
+            dragSmallFile: { limit in await Self.smallDragFile(result(), limit: limit) },
             link: { hours in try await ShotLinks.upload(result(), hours: hours) },
             share: {
                 guard let view = panel.contentView else { return }
@@ -235,6 +237,22 @@ final class ScreenshotWindows {
         if let tiff = NSImage(data: png)?.tiffRepresentation { pasteboard.setData(tiff, forType: .tiff) }
         if own { pasteboard.setData(Data(), forType: ClipboardHistory.ownType) }
         Sound.copied()
+    }
+
+    /// Compresses under `limit`, puts the JPEG on the clipboard and remembers the limit.
+    static func copySmall(_ png: Data, limit: Int, settings: SettingsStore = settings) async -> Bool {
+        settings.smallImageLimit = limit
+        guard let jpeg = await SmallFile.jpeg(png: png, under: limit) else { return false }
+        SmallFile.copy(jpeg)
+        Sound.copied()
+        return true
+    }
+
+    /// The compressed JPEG as a file (kept until the next launch, like the PNG for a drag).
+    static func smallDragFile(_ png: Data, limit: Int) async -> URL? {
+        guard let jpeg = await SmallFile.jpeg(png: png, under: limit) else { return nil }
+        let url = TempFolder.drag.new().appendingPathComponent("Screenshot.jpg")
+        return (try? jpeg.write(to: url)) == nil ? nil : url
     }
 
     /// The PNG in another format; PDF pages are sized in points (`scale` px per pt).

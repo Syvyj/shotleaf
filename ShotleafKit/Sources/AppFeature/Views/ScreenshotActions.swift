@@ -15,6 +15,10 @@ struct ScreenshotActions {
     var saveAs: (UTType) -> Void = { _ in }
     /// "JPEG under 1 MB…": a smaller file for mail and chats (asks where).
     var saveSmall: (Int) -> Void = { _ in }
+    /// "Copy Smaller": a JPEG under that many bytes on the clipboard (remembers the limit); false if it didn't fit.
+    var copySmall: (Int) async -> Bool = { _ in false }
+    /// The same JPEG as a file, for dragging out; made when the drop asks for it.
+    var dragSmallFile: (Int) async -> URL? = { _ in nil }
     /// Uploads the result to the link server; the link lives that many hours.
     var link: (Int) async throws -> URL = { _ in throw ShotLinks.Failure.notSetUp }
     /// The system share menu (AirDrop, Messages, Mail…).

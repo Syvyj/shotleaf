@@ -4559,6 +4559,36 @@
         }
       }
     },
+    "Copy Smaller": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копіювати меншим"
+          }
+        }
+      }
+    },
+    "Copied · JPEG under %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопійовано · JPEG до %@"
+          }
+        }
+      }
+    },
+    "JPEG under %@ — drag it out too": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JPEG до %@ — можна й перетягнути"
+          }
+        }
+      }
+    },
     "JPEG under %@…": {
       "localizations": {
         "uk": {

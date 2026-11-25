@@ -59,8 +59,8 @@ enum ShotLinks {
 
     /// A PNG too big for the free service becomes the best JPEG that fits (an own server takes it as it is).
     static func fitted(_ image: Data, server: String) async -> Data {
-        guard server == freeService, image.count > freeLimit, let picture = NSBitmapImageRep(data: image)?.cgImage,
-              let jpeg = await SmallFile.jpeg(picture, under: freeLimit) else { return image }
+        guard server == freeService, image.count > freeLimit,
+              let jpeg = await SmallFile.jpeg(png: image, under: freeLimit) else { return image }
         return jpeg
     }
 

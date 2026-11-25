@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 @testable import Core
 @testable import PerceptionKit
 @testable import AppFeature
+@testable import SettingsKit
 
 @Suite("Screenshot window")
 @MainActor
@@ -257,4 +258,37 @@ func withDefaultToolKeys(_ body: () -> Void) {
     }
     ToolPrefs.reset()
     body()
+}
+
+@Suite("Copy Smaller", .serialized)
+@MainActor
+struct CopySmallTests {
+    static func noisePNG() throws -> Data {
+        let image = try #require(TestImages.noise(width: 600, height: 600))
+        return try #require(NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]))
+    }
+
+    @Test("Copy Smaller puts a JPEG under the limit on the clipboard and remembers the limit")
+    func copySmallUsesLimitAndRemembersChoice() async throws {
+        let store = SettingsStore(defaults: UserDefaults(suiteName: UUID().uuidString)!)
+        #expect(await ScreenshotWindows.copySmall(try Self.noisePNG(), limit: 200_000, settings: store))
+        let jpeg = try #require(NSPasteboard.general.data(forType: .init("public.jpeg")))
+        #expect(jpeg.count <= 200_000)
+        #expect(NSPasteboard.general.data(forType: .png) == nil)
+        #expect(store.smallImageLimit == 200_000)
+    }
+
+    @Test("Plain copy still puts the PNG")
+    func plainCopyStaysPNG() throws {
+        let png = try Self.noisePNG()
+        ScreenshotWindows.copy(png)
+        #expect(NSPasteboard.general.data(forType: .png) == png)
+        #expect(NSPasteboard.general.data(forType: .init("public.jpeg")) == nil)
+    }
+
+    @Test("A stored limit that isn't on offer falls back to 1 MB")
+    func unknownLimit() {
+        #expect(SmallFile.chosen(123) == 1_000_000)
+        #expect(SmallFile.chosen(500_000) == 500_000)
+    }
 }

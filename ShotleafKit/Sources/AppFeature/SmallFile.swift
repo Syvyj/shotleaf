@@ -14,6 +14,17 @@ enum SmallFile {
         await Task.detached(priority: .userInitiated) { fit(image, under: limit) }.value
     }
 
+    /// A PNG, decoded off the main actor too.
+    nonisolated static func jpeg(png: Data, under limit: Int) async -> Data? {
+        await Task.detached(priority: .userInitiated) {
+            guard let image = NSBitmapImageRep(data: png)?.cgImage else { return nil }
+            return fit(image, under: limit)
+        }.value
+    }
+
+    /// The remembered limit (1 MB if the stored one isn't on offer any more).
+    static func chosen(_ stored: Int) -> Int { limits.contains(stored) ? stored : 1_000_000 }
+
     /// Any picture ImageIO reads (PNG, HEIC, TIFF, JPEG).
     static func jpeg(contentsOf url: URL, under limit: Int) async -> Data? {
         await Task.detached(priority: .userInitiated) {
@@ -27,11 +38,11 @@ enum SmallFile {
     @MainActor
     static func copy(_ jpeg: Data) {
         let file = TempFolder.paste.new().appendingPathComponent("Screenshot.jpg")
-        try? jpeg.write(to: file)
+        let written = (try? jpeg.write(to: file)) != nil
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.setData(jpeg, forType: .init("public.jpeg"))
-        pasteboard.setString(file.absoluteString, forType: .fileURL)
+        if written { pasteboard.setString(file.absoluteString, forType: .fileURL) } // no file: the picture alone
         pasteboard.setData(Data(), forType: ClipboardHistory.ownType)
     }
 

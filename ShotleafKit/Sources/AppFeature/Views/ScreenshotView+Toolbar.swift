@@ -21,6 +21,7 @@ extension ScreenshotView {
             Button { copy() } label: { keyed(liveText == nil ? "Copy" : "Copy text", "⌘C", show: keys) }
                 .buttonStyle(LeafButtonStyle(prominent: true))
                 .keyboardShortcut("c", modifiers: .command)
+            if liveText == nil { copySmallButton }
             HStack(spacing: 2) {
                 Button {
                     if let url = actions.save() { flash(String(localized: "Saved to \(url.deletingLastPathComponent().lastPathComponent)")) }
@@ -139,6 +140,55 @@ extension ScreenshotView {
         }
         .disabled(editingText)
         .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// "Copy Smaller ▾": a click copies a JPEG under the remembered limit, the arrow picks another; drag gives the file.
+    var copySmallButton: some View {
+        let limit = SmallFile.chosen(ScreenshotWindows.settings.smallImageLimit)
+        return HStack(spacing: 2) {
+            Button { copySmall(limit) } label: {
+                if compressing { ProgressView().controlSize(.small).frame(height: 17) } else { Text("Copy Smaller") }
+            }
+            .onDrag {
+                nonisolated(unsafe) let drag = actions.dragSmallFile // the drop asks from another thread
+                let provider = NSItemProvider()
+                provider.registerFileRepresentation(forTypeIdentifier: UTType.jpeg.identifier, fileOptions: [], visibility: .all) { done in
+                    nonisolated(unsafe) let done = done
+                    Task { @MainActor in done(await drag(limit), false, nil) }
+                    return nil
+                }
+                return provider
+            }
+            .instantTip(String(localized: "JPEG under \(SmallFile.label(limit)) — drag it out too"), hidden: flyout == .copySmall, above: true)
+            Button { flyout = flyout == .copySmall ? nil : .copySmall } label: { chevron.frame(height: 17) }
+        }
+        .buttonStyle(LeafButtonStyle())
+        .disabled(compressing)
+        .overlay(alignment: .bottomLeading) {
+            if flyout == .copySmall {
+                flyoutCard(above: true) {
+                    ForEach(SmallFile.limits, id: \.self) { choice in
+                        Button { flyout = nil; copySmall(choice) } label: {
+                            Text(verbatim: "\(choice == limit ? "✓ " : "")\(SmallFile.label(choice))")
+                                .font(Leaf.font(13, .medium))
+                                .padding(.horizontal, 8).padding(.vertical, 4)
+                                .frame(width: 100, alignment: .leading)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
+    func copySmall(_ limit: Int) {
+        compressing = true
+        Task {
+            defer { compressing = false }
+            if await actions.copySmall(limit) { flash(String(localized: "Copied · JPEG under \(SmallFile.label(limit))")) }
+            else { NSSound.beep() }
+        }
     }
 
     func keyed(_ title: String, _ key: String, show: Bool) -> some View {
