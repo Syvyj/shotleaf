@@ -23,6 +23,7 @@ struct RecordingWindowTests {
         let file = try #require(pastedFile())
         #expect(file.pathExtension == "mp4")
         #expect(file != video) // trimmed into a new file
+        #expect(NSPasteboard.general.types?.contains(ClipboardHistory.ownType) == true) // no dead history entry
         #expect(FileManager.default.fileExists(atPath: file.path))
     }
 
@@ -42,6 +43,44 @@ struct RecordingWindowTests {
         #expect(abs(seconds - 1) < 0.2)
         #expect(FileManager.default.fileExists(atPath: video.path))
         #expect(try await model.current() == trimmed) // cached: not encoded again
+    }
+
+    @Test func limitBelowTheTrimReencodes() async throws {
+        let video = try await TestVideo.make(seconds: 2, width: 1600, height: 1000, fps: 30) // big enough to need a fit
+        let model = RecordingModel(original: video)
+        await model.load()
+        clip(model)
+        let trimmed = try await model.current()
+        let trimmedSize = try #require(trimmed.resourceValues(forKeys: [URLResourceKey.fileSizeKey]).fileSize)
+        let limit = trimmedSize / 2
+        model.limit = limit
+        let small = try await model.current()
+        #expect(small != trimmed)
+        let size = try #require(small.resourceValues(forKeys: [URLResourceKey.fileSizeKey]).fileSize)
+        #expect(size <= limit)
+        model.limit = nil
+        #expect(try await model.current() == trimmed)
+    }
+
+    @Test func limitOutOfReachIsTooLong() async throws {
+        let video = try await TestVideo.make(seconds: 2, width: 320, height: 240, fps: 30)
+        let model = RecordingModel(original: video)
+        await model.load()
+        model.limit = 500
+        await #expect(throws: VideoEditError.tooLong) { try await model.current() }
+    }
+
+    @Test func cancelledCopyLeavesTheClipboard() async throws {
+        let video = try await TestVideo.make(seconds: 2, width: 320, height: 240, fps: 30)
+        let model = RecordingModel(original: video)
+        await model.load()
+        clip(model)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString("keep", forType: .string)
+        let copy = Task { try await model.copy() } // the window closed while it encoded
+        copy.cancel()
+        await #expect(throws: (any Error).self) { try await copy.value }
+        #expect(NSPasteboard.general.string(forType: .string) == "keep")
     }
 
     @Test func untrimmedOriginalIsUsedAsIs() async throws {

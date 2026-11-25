@@ -4969,12 +4969,12 @@
         }
       }
     },
-    "Make a GIF and copy it": {
+    "Make a GIF and copy it — or drag it out": {
       "localizations": {
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Зробити GIF і скопіювати"
+            "value": "Зробити GIF і скопіювати — або перетягнути"
           }
         }
       }

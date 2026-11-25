@@ -52,8 +52,14 @@ final class RecordingModel {
         return try await cached("gif", range) { try await VideoEdit.gif(self.original, range: range) }
     }
 
-    func copy() async throws { Self.copy(try await current()) }
-    func copyGIF() async throws { Self.copy(try await gif()) }
+    /// Copies once the file is made, unless the window was closed (the task cancelled) meanwhile.
+    func copy() async throws { Self.copy(try await done(current())) }
+    func copyGIF() async throws { Self.copy(try await done(gif())) }
+
+    private func done(_ file: URL) throws -> URL {
+        try Task.checkCancellation()
+        return file
+    }
 
     /// Into the screenshots folder from Settings, named like a screenshot; nil if it couldn't be written (said in an alert).
     func save() async throws -> URL? {
@@ -80,11 +86,14 @@ final class RecordingModel {
     }
 
     /// The file on the clipboard, as Finder copies one: Telegram, Mail and Finder paste it with ⌘V.
-    /// Not marked as Shotleaf's own, like a plain screenshot copy: it lands in the clipboard history.
+    /// Marked as Shotleaf's own: a temp file gone at the next launch makes a dead history entry.
     static func copy(_ file: URL) {
+        let item = NSPasteboardItem()
+        item.setString(file.absoluteString, forType: .fileURL)
+        item.setData(Data(), forType: ClipboardHistory.ownType)
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.writeObjects([file as NSURL])
+        pasteboard.writeObjects([item])
         Sound.copied()
     }
 }

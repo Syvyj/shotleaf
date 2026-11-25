@@ -1,4 +1,5 @@
 import AVKit
+import Combine
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -10,6 +11,8 @@ struct RecordingView: View {
     let close: () -> Void
     @State private var player: AVPlayer
     @State private var busy = false
+    /// The encode in flight; closing cancels it so a late result never reaches the clipboard.
+    @State private var job: Task<Void, Never>?
     @State private var toast: String?
     @AppStorage(ScreenshotView.closeAfterCopyKey) private var closeAfterCopy = true
 
@@ -31,6 +34,13 @@ struct RecordingView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .frame(maxWidth: .infinity)
                 .overlay(alignment: .top) { toastPill }
+                .onReceive(player.publisher(for: \.rate)) { rate in
+                    // Play pressed at the end of the kept part (or outside it): start over from its start.
+                    let now = player.currentTime().seconds
+                    if rate > 0, now >= end - 0.05 || now < start {
+                        player.seek(to: model.range.start, toleranceBefore: .zero, toleranceAfter: .zero)
+                    }
+                }
             HStack(spacing: 10) {
                 TrimBar(start: start, end: end, duration: model.duration) { start, end, moved in
                     model.range = CMTimeRange(start: CMTime(seconds: start, preferredTimescale: 600),
@@ -70,7 +80,7 @@ struct RecordingView: View {
         HStack(spacing: 6) {
             HStack(spacing: 6) { buttons }.disabled(busy)
             Spacer()
-            Button(action: close) { keyed("Close", "esc") }
+            Button(action: closeWindow) { keyed("Close", "esc") }
                 .buttonStyle(LeafButtonStyle())
                 .keyboardShortcut(.cancelAction)
         }
@@ -82,7 +92,7 @@ struct RecordingView: View {
                 .keyboardShortcut(.defaultAction)
             Button { flash(String(localized: "Drag it into any app")) } label: { Text("Drag") }
                 .buttonStyle(LeafButtonStyle())
-                .onDrag(dragProvider)
+                .onDrag { dragProvider(.mpeg4Movie, model.current) }
                 .instantTip("Drag the video into a chat or a folder", above: true)
             Button {
                 run(copied: nil) {
@@ -93,7 +103,8 @@ struct RecordingView: View {
                 .buttonStyle(LeafButtonStyle())
             Button { run(copied: "Copied · GIF") { try await model.copyGIF() } } label: { Text(verbatim: "GIF") }
                 .buttonStyle(LeafButtonStyle())
-                .instantTip("Make a GIF and copy it", above: true)
+                .onDrag { dragProvider(.gif, model.gif) }
+                .instantTip("Make a GIF and copy it — or drag it out", above: true)
             limitMenu
     }
 
@@ -116,38 +127,55 @@ struct RecordingView: View {
         ScreenshotWindows.settings.smallVideoLimit = limit ?? 0
     }
 
-    /// The drop asks for the file when it lands, so a fit under a size can finish first.
-    private func dragProvider() -> NSItemProvider {
+    /// The drop asks for the file when it lands, so a fit under a size or a GIF can finish first.
+    private func dragProvider(_ type: UTType, _ file: @escaping @MainActor () async throws -> URL) -> NSItemProvider {
         let provider = NSItemProvider()
-        provider.registerFileRepresentation(forTypeIdentifier: UTType.mpeg4Movie.identifier, fileOptions: [], visibility: .all) { done in
+        provider.registerFileRepresentation(forTypeIdentifier: type.identifier, fileOptions: [], visibility: .all) { done in
             Task { @MainActor in
-                do { done(try await model.current(), false, nil) } catch { done(nil, false, error) }
+                do { done(try await file(), false, nil) } catch {
+                    report(error)
+                    done(nil, false, error)
+                }
             }
             return nil
         }
         return provider
     }
 
+    private func closeWindow() {
+        job?.cancel()
+        close()
+    }
+
     /// Runs an action with the buttons off and a spinner; `copied`: what to say, then close if Settings say so.
     private func run(copied: LocalizedStringResource?, _ action: @escaping () async throws -> Void) {
         busy = true
-        Task {
+        job = Task {
             defer { busy = false }
             do {
                 try await action()
                 guard let copied else { return }
                 flash(String(localized: copied))
                 if closeAfterCopy {
-                    try? await Task.sleep(for: .milliseconds(450)) // long enough to see "Copied"
+                    try await Task.sleep(for: .milliseconds(450)) // long enough to see "Copied"
                     close()
                 }
-            } catch VideoEditError.tooLong {
-                NSSound.beep()
-                flash(String(localized: "Too long for \(SmallFile.label(model.limit ?? 0)) — trim it"))
             } catch {
-                NSSound.beep()
-                flash(String(localized: "Couldn’t make the video file"))
+                report(error)
             }
+        }
+    }
+
+    /// A beep and why (nothing once the window was closed).
+    private func report(_ error: Error) {
+        switch error {
+        case is CancellationError: return
+        case VideoEditError.tooLong:
+            NSSound.beep()
+            flash(String(localized: "Too long for \(SmallFile.label(model.limit ?? 0)) — trim it"))
+        default:
+            NSSound.beep()
+            flash(String(localized: "Couldn’t make the video file"))
         }
     }
 
@@ -188,6 +216,8 @@ struct TrimBar: View {
     let duration: Double
     /// New start and end, and the time under the handle that moved (for the preview).
     let changed: (Double, Double, Double) -> Void
+    /// Where the handle being dragged was when grabbed, so it doesn't jump to the pointer.
+    @State private var grabbed: Double?
 
     enum Handle { case start, end }
     static let minLength = 0.5
@@ -231,11 +261,13 @@ struct TrimBar: View {
             .frame(width: Self.handleWidth, height: 26)
             .offset(x: offset)
             .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .named("trim")).onChanged { drag in
-                let t = Double((drag.location.x - Self.handleWidth) / track) * duration
+                let from = grabbed ?? (which == .start ? start : end)
+                if grabbed == nil { grabbed = from }
+                let t = from + Double(drag.translation.width / track) * duration
                 let (s, e) = Self.clamped(start: which == .start ? t : start, end: which == .end ? t : end,
                                           duration: duration, moving: which)
                 changed(s, e, which == .start ? s : e)
-            })
+            }.onEnded { _ in grabbed = nil })
             .accessibilityLabel(Text(which == .start ? "Start" : "End"))
     }
 }
