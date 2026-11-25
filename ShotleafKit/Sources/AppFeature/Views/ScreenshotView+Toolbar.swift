@@ -172,7 +172,6 @@ extension ScreenshotView {
                 nonisolated(unsafe) let drag = actions.dragSmallFile // the drop asks from another thread
                 let provider = NSItemProvider()
                 provider.registerFileRepresentation(forTypeIdentifier: UTType.jpeg.identifier, fileOptions: [], visibility: .all) { done in
-                    nonisolated(unsafe) let done = done
                     Task { @MainActor in
                         guard let url = await drag(limit) else { NSSound.beep(); done(nil, false, SmallFile.DoesNotFit()); return }
                         done(url, false, nil)
