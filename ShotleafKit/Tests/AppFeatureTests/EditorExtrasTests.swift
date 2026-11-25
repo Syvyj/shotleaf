@@ -103,9 +103,11 @@ struct EditorExtrasTests {
     @Test("Undo brings the size back")
     func undoRestoresSize() {
         let image = blank(1000, 800), doc = AnnotationDocument()
+        doc.add(.rectangle(CGRect(x: 100, y: 100, width: 200, height: 40)))
         doc.resize(original: image, factor: 0.75)
         doc.undo()
         #expect(doc.base == nil)
+        #expect(doc.items[0].kind == .rectangle(CGRect(x: 100, y: 100, width: 200, height: 40)))
     }
 
     @Test("A preset fits the long side, and a bigger one is off")
@@ -117,6 +119,29 @@ struct EditorExtrasTests {
         #expect(!doc.canResize(original: image, toLongSide: 1920))
         doc.resize(original: image, toLongSide: 1920)
         #expect(doc.base?.image.width == 1280)
+    }
+
+    @Test("A preset on a retina shot keeps the point size ratio and the marks in place")
+    func presetOnRetina() {
+        let image = blank(2000, 1000), doc = AnnotationDocument()
+        doc.add(.rectangle(CGRect(x: 100, y: 50, width: 200, height: 100)))
+        doc.resize(original: image, toLongSide: 1280, size: CGSize(width: 1000, height: 500))
+        #expect(doc.base?.image.width == 1280 && doc.base?.image.height == 640)
+        #expect(doc.base?.size == CGSize(width: 640, height: 320))
+        #expect(doc.items[0].kind == .rectangle(CGRect(x: 64, y: 32, width: 128, height: 64)))
+    }
+
+    @Test("Choosing a ratio constrains the crop already drawn")
+    func ratioOnExistingCrop() throws {
+        let doc = AnnotationDocument()
+        let id = doc.add(.crop(CGRect(x: 10, y: 10, width: 400, height: 400)))
+        let view = ScreenshotView(image: NSImage(size: CGSize(width: 500, height: 500)), cgImage: blank(500, 500),
+                                  pixelSize: CGSize(width: 500, height: 500), displaySize: CGSize(width: 500, height: 500),
+                                  actions: ScreenshotActions(copy: {}, save: { nil }, pin: {}, close: {}, dragFile: { nil }), doc: doc)
+        view.setCropAspect(.wide16x9)
+        guard case .crop(let r)? = doc.items.first(where: { $0.id == id })?.kind else { Issue.record("no crop"); return }
+        #expect(abs(r.width / r.height - 16.0 / 9) < 0.01)
+        #expect(r.minX == 10 && r.minY == 10)
     }
 
     @Test("A cropped rectangle keeps the aspect inside the original")

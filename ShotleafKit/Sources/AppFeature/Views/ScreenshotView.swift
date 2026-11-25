@@ -138,13 +138,20 @@ struct ScreenshotView: View {
         }
     }
 
-    /// With Blur picked: blurs faces, emails, phone numbers, cards and tokens in one go.
+    /// Picks a proportion and trims the crop already drawn to it.
+    func setCropAspect(_ choice: CropAspect) {
+        cropAspect = choice
+        if let crop = doc.crop, let id = doc.items.first(where: { if case .crop = $0.kind { true } else { false } })?.id {
+            doc.update(id, to: .crop(AnnotationEditing.constrained(crop, to: choice)))
+        }
+    }
+
     /// Crop proportions, over the canvas while the crop tool is active.
     @ViewBuilder var aspectPill: some View {
         if doc.tool == .crop {
             HStack(spacing: 2) {
                 ForEach(CropAspect.allCases, id: \.self) { choice in
-                    Button { cropAspect = choice } label: { Text(choice.label).font(Leaf.font(12, .semibold)) }
+                    Button { setCropAspect(choice) } label: { Text(choice.label).font(Leaf.font(12, .semibold)) }
                         .buttonStyle(LeafButtonStyle(prominent: choice == cropAspect))
                 }
             }
@@ -153,6 +160,7 @@ struct ScreenshotView: View {
         }
     }
 
+    /// With Blur picked: blurs faces, emails, phone numbers, cards and tokens in one go.
     @ViewBuilder var privatePill: some View {
         if doc.tool == .blur {
             Button {

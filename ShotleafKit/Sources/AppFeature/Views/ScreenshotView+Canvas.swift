@@ -121,7 +121,13 @@ extension ScreenshotView {
         case .move(let id, let original):
             return (id, AnnotationEditing.moved(original, by: CGSize(width: now.x - start.x, height: now.y - start.y)))
         case .resize(let id, let handle, let original):
-            return (id, AnnotationEditing.resized(original, handle, to: now))
+            let kind = AnnotationEditing.resized(original, handle, to: now)
+            guard case .crop(let old) = original, case .crop(let new) = kind else { return (id, kind) }
+            // A crop handle keeps the chosen proportion, anchored on the side not being dragged.
+            var r = AnnotationEditing.constrained(new, to: cropAspect)
+            if abs(new.minX - old.minX) > abs(new.maxX - old.maxX) { r.origin.x = new.maxX - r.width }
+            if abs(new.minY - old.minY) > abs(new.maxY - old.maxY) { r.origin.y = new.maxY - r.height }
+            return (id, .crop(r))
         default:
             return nil
         }

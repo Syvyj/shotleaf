@@ -368,10 +368,10 @@ final class AnnotationDocument {
     }
 
     /// Scales the picture to a long side in pixels — one undo step.
-    func resize(original image: CGImage, toLongSide side: Int) {
+    func resize(original image: CGImage, toLongSide side: Int, size: CGSize? = nil) {
         guard canResize(original: image, toLongSide: side) else { return }
         let p = pixels(original: image)
-        resize(original: image, factor: CGFloat(side) / max(p.width, p.height))
+        resize(original: image, factor: CGFloat(side) / max(p.width, p.height), size: size)
     }
 
     /// Scales the picture and its marks by `factor` (below 1), never under 10 %

@@ -153,13 +153,13 @@ extension ScreenshotView {
         } label: {
             Image(systemName: "arrow.down.right.and.arrow.up.left").frame(height: 17)
         } primaryAction: { shrink(factor: 0.75) }
-        .menuStyle(.button).menuIndicator(.hidden).buttonStyle(LeafButtonStyle()).fixedSize()
+        .menuStyle(.button).buttonStyle(LeafButtonStyle()).fixedSize()
         .keyboardShortcut("-", modifiers: [])
         .instantTip("Shrink by 25% (-) — hold for sizes", above: true)
     }
 
     func shrink(factor: CGFloat) { doc.resize(original: cgImage, factor: factor, size: displaySize) }
-    func shrink(longSide: Int) { doc.resize(original: cgImage, toLongSide: longSide) }
+    func shrink(longSide: Int) { doc.resize(original: cgImage, toLongSide: longSide, size: displaySize) }
 
     /// "Copy Smaller ▾": a click copies a JPEG under the remembered limit, the arrow picks another; drag gives the file.
     var copySmallButton: some View {
