@@ -6,7 +6,7 @@
 
 # Shotleaf
 
-Capture and annotate screenshots, find what you copied, and bring frequently used text back in a few keystrokes. Shotleaf lives in your Mac menu bar. Free and open source, with no account or tracking.
+Capture and annotate screenshots, record the screen, find what you copied, and bring frequently used text back in a few keystrokes. Shotleaf lives in your Mac menu bar. Free and open source, with no account or tracking.
 
 **[Download for Mac](https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg)** · [Website](https://shotleaf.syvyj.dev) · [Guide](https://shotleaf.syvyj.dev/guide/) · [Releases](https://github.com/Syvyj/shotleaf/releases)
 
@@ -14,7 +14,7 @@ macOS 15+ · Apple silicon (M1 or newer) · [GPL-3.0-or-later](LICENSE) · [![CI
 
 ## 01 · Capture and annotate
 
-Capture an area, a window, the screen or a scrolling page. Add arrows, text, shapes, backgrounds and watermarks; blur private information and copy text from images on your Mac.
+Capture an area, a window, the screen or a scrolling page. Add arrows, text, shapes, backgrounds and watermarks; blur private information and copy text from images on your Mac. Record an area of the screen as a video or GIF, and trim it. **Copy Smaller** makes a screenshot or a recording fit a chat's size limit (200 KB to 25 MB).
 
 ![Shotleaf screenshot editor with annotations](site/assets/guide/editor-en.webp)
 
@@ -59,18 +59,19 @@ macOS may stop trusting the new copy with its permissions even though the switch
 | Screenshot | ⌘⇧2 |
 | Scrolling screenshot | ⌘⇧3 |
 | Text from the screen | ⌘⇧1 |
+| Record screen | ⌘⇧6 |
 | Clipboard history | ⇧⌘V |
 | Snippets | ⇧⌘B |
 | Edit the last screenshot | ⌃⌥⌘E |
 | Edit an image from the clipboard | ⌃⌥⌘V |
 
-⌘⇧3 is also the macOS full-screen screenshot, and some apps use ⇧⌘V or ⇧⌘B. Change any of them in **Settings › Shortcuts**.
+⌘⇧3 is also the macOS full-screen screenshot and ⌘⇧6 is the Touch Bar screenshot, and some apps use ⇧⌘V or ⇧⌘B. Change any of them in **Settings › Shortcuts**.
 
 A shortcut doesn't fire? Another app may be using it. If your keyboard goes through a keyboard-sharing app (Deskflow, Synergy, Barrier), it sends symbols rather than keys, so shortcuts with digits can depend on the keyboard layout on each computer; a shortcut with a letter works in any layout.
 
 ## Privacy
 
-Shotleaf has no account and no analytics. Text recognition and blurring private info run on your Mac. It goes online for two things only:
+Shotleaf has no account and no analytics. Text recognition, blurring private info and screen recording (with trimming and compression) run on your Mac. It goes online for two things only:
 
 - **The check for a new version**: at launch and once a day Shotleaf asks GitHub which release is the newest. Nothing about you is sent. Turn it off in **Settings › General**.
 - **Screenshot links**, when you press the link button: the picture goes to Shotleaf's link service on Cloudflare (`s.syvyj.dev`, code in `server/links`) and is deleted when the link expires (within 15 minutes of it), 12 hours at most. A picture over 5 MB goes as a JPEG that fits. You can use your own server instead (`server/shots`). **Check** in Settings › Screenshot Links sends a 1-pixel picture the same way.
@@ -143,7 +144,7 @@ Donations support my time on Shotleaf and my other apps: [support the author](ht
 
 # Shotleaf
 
-Робіть і редагуйте скріншоти, знаходьте скопійоване й повертайте потрібний текст кількома натисканнями. Shotleaf живе в рядку меню Mac. Безкоштовний і з відкритим кодом, без акаунта й стеження.
+Робіть і редагуйте скріншоти, записуйте екран, знаходьте скопійоване й повертайте потрібний текст кількома натисканнями. Shotleaf живе в рядку меню Mac. Безкоштовний і з відкритим кодом, без акаунта й стеження.
 
 **[Завантажити для Mac](https://github.com/Syvyj/shotleaf/releases/latest/download/Shotleaf.dmg)** · [Сайт](https://shotleaf.syvyj.dev/uk/) · [Посібник](https://shotleaf.syvyj.dev/uk/guide/) · [Релізи](https://github.com/Syvyj/shotleaf/releases)
 
@@ -151,7 +152,7 @@ macOS 15+ · Apple silicon (M1 або новіший) · [GPL-3.0-or-later](LICE
 
 ## 01 · Знімайте й редагуйте
 
-Знімайте область, вікно, екран або довгу сторінку. Додавайте стрілки, текст, фігури, фони й водяні знаки; розмивайте приватні дані та копіюйте текст із зображень на Mac.
+Знімайте область, вікно, екран або довгу сторінку. Додавайте стрілки, текст, фігури, фони й водяні знаки; розмивайте приватні дані та копіюйте текст із зображень на Mac. Записуйте область екрана як відео чи GIF і обрізайте її. **Копіювати меншим** робить скріншот чи запис таким, що вміщується в ліміт чату (від 200 КБ до 25 МБ).
 
 ![Редактор скріншотів Shotleaf із позначками](site/assets/guide/editor-uk.webp)
 
@@ -196,18 +197,19 @@ macOS може перестати довіряти новій версії до�
 | Скріншот | ⌘⇧2 |
 | Довгий скріншот | ⌘⇧3 |
 | Текст зі скріншоту | ⌘⇧1 |
+| Запис екрана | ⌘⇧6 |
 | Історія буфера | ⇧⌘V |
 | Сніпети | ⇧⌘B |
 | Редагувати останній знімок | ⌃⌥⌘E |
 | Редагувати картинку з буфера | ⌃⌥⌘V |
 
-⌘⇧3 у macOS ще й знімок усього екрана, а деякі програми використовують ⇧⌘V чи ⇧⌘B. Будь-яку клавішу можна змінити в **Налаштуваннях › Гарячі клавіші**.
+⌘⇧3 у macOS ще й знімок усього екрана а ⌘⇧6 — знімок Touch Bar, а деякі програми використовують ⇧⌘V чи ⇧⌘B. Будь-яку клавішу можна змінити в **Налаштуваннях › Гарячі клавіші**.
 
 Клавіша не спрацьовує? Можливо, її зайняла інша програма. Якщо клавіатура працює через програму для спільної клавіатури (Deskflow, Synergy, Barrier), вона передає символи, а не клавіші, тож комбінації з цифрами можуть залежати від розкладки на кожному комп'ютері; комбінація з літерою працює в будь-якій розкладці.
 
 ## Приватність
 
-У Shotleaf немає облікового запису й аналітики. Розпізнавання тексту й розмиття приватного працюють на вашому Mac. У мережу він ходить лише по дві речі:
+У Shotleaf немає облікового запису й аналітики. Розпізнавання тексту, розмиття приватного і запис екрана (з обрізанням і стисканням) працюють на вашому Mac. У мережу він ходить лише по дві речі:
 
 - **Перевірка нової версії**: під час запуску й раз на день Shotleaf питає в GitHub, який реліз найновіший. Нічого про вас не надсилається. Вимкнути можна в **Налаштуваннях › Загальні**.
 - **Посилання на скріншоти**, коли ви натискаєте кнопку посилання: картинка йде в сервіс посилань Shotleaf на Cloudflare (`s.syvyj.dev`, код у `server/links`) і видаляється, коли посилання спливає (протягом 15 хвилин після цього), щонайбільше за 12 годин. Картинка понад 5 МБ іде як JPEG, що вміщується в ліміт. Замість нього можна підключити власний сервер (`server/shots`). Кнопка **Перевірити** в Налаштуваннях › Посилання на скріншоти так само надсилає картинку в 1 піксель.

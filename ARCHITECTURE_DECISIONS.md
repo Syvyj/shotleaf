@@ -456,3 +456,28 @@ page went too. The first launch of a version without it deletes the downloaded m
 Face cache (`HF_HUB_CACHE` / `HF_HOME` respected), the kept writing samples and the completion settings
 (`LeftoverCompletion`). ADR-0006, ADR-0066 and the completion parts of later ADRs are history.
 
+
+## ADR-0072: Screen recording with SCRecordingOutput, H.264, no audio, no video links (2026-11-25)
+
+Recording (⌘⇧6) uses `SCRecordingOutput`, which ScreenCaptureKit has had since macOS 15: the system writes the
+MP4, draws the cursor and highlights clicks (`showsCursor`, `showMouseClicks`), and encodes in hardware.
+The other way, `SCStream` plus our own `AVAssetWriter`, gives control over each frame but means much more
+code, with timing and memory to get right, which a 20–30 second clip of a bug doesn't need. The price is that
+Apple decides how clicks look and what the bitrate is. Trim uses `AVAssetExportSession`; "Under 8/10/25 MB"
+re-encodes with `AVAssetWriter` at a bitrate worked out from the length.
+
+The format is H.264, up to 30 fps, in native pixels. HEVC is smaller, but Telegram on older Android phones
+sometimes can't play it, and the point of a recording is that it plays wherever it is sent. No audio in 0.5.0:
+it would need the microphone permission and a choice of source, and the bug-report case doesn't need it.
+
+No video links: `s.syvyj.dev` stays pictures only. A video would change what the free link service stores and
+costs, and the size limits there were made for pictures. Share the file itself (Copy, Drag, Save).
+
+A GIF is built with ImageIO (frames from `AVAssetImageGenerator`). ImageIO can't write a GIF as a stream: every
+frame is held in memory until the file is finished. So a GIF is 12 fps with the long side at most 960 px, and
+a long clip gets a smaller size under a fixed pixel budget (frames x width x height), so memory stays bounded.
+
+Recordings, GIFs and compressed copies live in `TempFolder` and are removed at the next launch, not when the
+window closes: the app a file was pasted into may read it late. A compressed copy on the pasteboard is a JPEG
+plus its file URL, marked as Shotleaf's own (`ClipboardHistory.ownType`) so the history doesn't store it again
+as a large PNG.

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0
+
+- Record the screen (⌘⇧6): choose an area, stop with the red button or the timer in the menu bar. The cursor and clicks are shown; there is no sound. The recording is an H.264 MP4 that plays in Telegram and on older phones.
+- The recording opens in a window: trim it, then Copy (⏎), Drag, Save, make a GIF, or fit it under 8, 10 or 25 MB. A GIF is 12 frames a second, at most 960 px on the long side, smaller for a long clip.
+- Copy Smaller in the screenshot window: a JPEG under 200 KB, 500 KB, 1 MB, 8 MB or 25 MB. It remembers the last size and can be dragged too. Plain Copy, drag and Share still give the full PNG.
+- Clipboard history: ⌘K on an image offers "Compress to JPEG under…".
+- Editor: - shrinks the image by 25 %, the shrink button's menu has long sides from 1920 down to 640 px, and the crop tool has 16:9, 1:1, 4:5 and 9:16.
+- Shortcuts actions: Compress Image and Screenshot an Area.
+- Compressing no longer freezes the window, and its error messages are readable and in Ukrainian.
+- Recordings and compressed copies stay in a temporary folder until the next launch. Recording is local: nothing goes online, and screenshot links are still for pictures only.
+
 ## 0.4.0
 
 - Text from Screenshot reads QR codes and barcodes too: what they hold comes first, and a link in the text opens with "Open Link".
