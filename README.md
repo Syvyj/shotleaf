@@ -65,7 +65,7 @@ macOS may stop trusting the new copy with its permissions even though the switch
 | Edit the last screenshot | ⌃⌥⌘E |
 | Edit an image from the clipboard | ⌃⌥⌘V |
 
-⌘⇧3 is also the macOS full-screen screenshot and ⌘⇧6 is the Touch Bar screenshot, and some apps use ⇧⌘V or ⇧⌘B. Change any of them in **Settings › Shortcuts**.
+⌘⇧3 is also the macOS full-screen screenshot, on a Mac with a Touch Bar ⌘⇧6 is its screenshot, and some apps use ⇧⌘V or ⇧⌘B. Change any of them in **Settings › Shortcuts**.
 
 A shortcut doesn't fire? Another app may be using it. If your keyboard goes through a keyboard-sharing app (Deskflow, Synergy, Barrier), it sends symbols rather than keys, so shortcuts with digits can depend on the keyboard layout on each computer; a shortcut with a letter works in any layout.
 
@@ -203,7 +203,7 @@ macOS може перестати довіряти новій версії до�
 | Редагувати останній знімок | ⌃⌥⌘E |
 | Редагувати картинку з буфера | ⌃⌥⌘V |
 
-⌘⇧3 у macOS ще й знімок усього екрана а ⌘⇧6 — знімок Touch Bar, а деякі програми використовують ⇧⌘V чи ⇧⌘B. Будь-яку клавішу можна змінити в **Налаштуваннях › Гарячі клавіші**.
+⌘⇧3 у macOS ще й знімок усього екрана, на Mac із Touch Bar ⌘⇧6 — його знімок, а деякі програми використовують ⇧⌘V чи ⇧⌘B. Будь-яку клавішу можна змінити в **Налаштуваннях › Гарячі клавіші**.
 
 Клавіша не спрацьовує? Можливо, її зайняла інша програма. Якщо клавіатура працює через програму для спільної клавіатури (Deskflow, Synergy, Barrier), вона передає символи, а не клавіші, тож комбінації з цифрами можуть залежати від розкладки на кожному комп'ютері; комбінація з літерою працює в будь-якій розкладці.
 

@@ -456,11 +456,10 @@ page went too. The first launch of a version without it deletes the downloaded m
 Face cache (`HF_HUB_CACHE` / `HF_HOME` respected), the kept writing samples and the completion settings
 (`LeftoverCompletion`). ADR-0006, ADR-0066 and the completion parts of later ADRs are history.
 
-
 ## ADR-0072: Screen recording with SCRecordingOutput, H.264, no audio, no video links (2026-11-25)
 
 Recording (⌘⇧6) uses `SCRecordingOutput`, which ScreenCaptureKit has had since macOS 15: the system writes the
-MP4, draws the cursor and highlights clicks (`showsCursor`, `showMouseClicks`), and encodes in hardware.
+MP4 and encodes in hardware, and the stream is configured with `showsCursor` and `showMouseClicks`, so the system draws the cursor and highlights clicks.
 The other way, `SCStream` plus our own `AVAssetWriter`, gives control over each frame but means much more
 code, with timing and memory to get right, which a 20–30 second clip of a bug doesn't need. The price is that
 Apple decides how clicks look and what the bitrate is. Trim uses `AVAssetExportSession`; "Under 8/10/25 MB"
