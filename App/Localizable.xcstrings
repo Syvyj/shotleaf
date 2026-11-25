@@ -5018,6 +5018,146 @@
           }
         }
       }
+    },
+    "Size Limit": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Межа розміру"
+          }
+        }
+      }
+    },
+    "Compress Image": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стиснути картинку"
+          }
+        }
+      }
+    },
+    "Makes a JPEG of a picture that fits under the chosen size.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Робить із картинки JPEG, що вміщається у вибраний розмір."
+          }
+        }
+      }
+    },
+    "Compress ${image} under ${limit}": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стиснути ${image} до ${limit}"
+          }
+        }
+      }
+    },
+    "Screenshot an Area": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знімок області"
+          }
+        }
+      }
+    },
+    "Lets you pick an area of the screen and returns it as a PNG.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Дає вибрати область екрана й повертає її як PNG."
+          }
+        }
+      }
+    },
+    "The screenshot was cancelled.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знімок скасовано."
+          }
+        }
+      }
+    },
+    "Shotleaf isn't ready yet. Try again.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shotleaf ще не готовий. Спробуйте ще раз."
+          }
+        }
+      }
+    },
+    "This picture can't be made that small.": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цю картинку не вдається стиснути до такого розміру."
+          }
+        }
+      }
+    },
+    "200 KB": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "200 КБ"
+          }
+        }
+      }
+    },
+    "500 KB": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "500 КБ"
+          }
+        }
+      }
+    },
+    "1 MB": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 МБ"
+          }
+        }
+      }
+    },
+    "8 MB": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "8 МБ"
+          }
+        }
+      }
+    },
+    "25 MB": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "25 МБ"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

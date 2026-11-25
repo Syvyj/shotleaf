@@ -5,9 +5,9 @@ import UniformTypeIdentifiers
 
 /// "Save as › JPEG under 1 MB…": the best quality that fits the limit, then
 /// smaller pictures when even low quality doesn't. On white (JPEG has no transparency).
-enum SmallFile {
+public enum SmallFile {
     /// What Save as offers, in bytes.
-    static let limits = [200_000, 500_000, 1_000_000, 8_000_000, 25_000_000]
+    public static let limits = [200_000, 500_000, 1_000_000, 8_000_000, 25_000_000]
 
     /// Off the main actor: a tall shot takes seconds to shrink.
     nonisolated static func jpeg(_ image: CGImage, under limit: Int) async -> Data? {
@@ -32,6 +32,19 @@ enum SmallFile {
                   let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return nil }
             return fit(image, under: limit)
         }.value
+    }
+
+    /// Even the smallest JPEG doesn't fit (or the file isn't a picture).
+    public struct DoesNotFit: LocalizedError {
+        public var errorDescription: String? { String(localized: "This picture can't be made that small.") }
+    }
+
+    /// Shortcuts' "Compress Image": `<name>.jpg` in a fresh temp folder.
+    public static func compressFile(_ url: URL, under limit: Int) async throws -> URL {
+        guard let jpeg = await jpeg(contentsOf: url, under: limit) else { throw DoesNotFit() }
+        let file = TempFolder.share.new().appendingPathComponent(url.deletingPathExtension().lastPathComponent + ".jpg")
+        try jpeg.write(to: file)
+        return file
     }
 
     /// Puts the JPEG on the clipboard as a picture and as a file (no PNG/TIFF, so the app that takes it keeps it small).
@@ -64,7 +77,7 @@ enum SmallFile {
     }
 
     /// "1 MB", "500 KB" (the system's own words for sizes).
-    static func label(_ bytes: Int) -> String {
+    public static func label(_ bytes: Int) -> String {
         ByteCountFormatter.string(fromByteCount: Int64(bytes), countStyle: .file)
     }
 

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1A1A0000000000000000AA21 /* ShotleafApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA20 /* ShotleafApp.swift */; };
+		1A1A0000000000000000AA71 /* ShotleafIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA70 /* ShotleafIntents.swift */; };
 		1A1A0000000000000000AA23 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA24 /* Assets.xcassets */; };
 		1A1A0000000000000000AA25 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA26 /* Localizable.xcstrings */; };
 		1A1A0000000000000000AA27 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1A1A0000000000000000AA28 /* InfoPlist.xcstrings */; };
@@ -17,6 +18,7 @@
 /* Begin PBXFileReference section */
 		1A1A0000000000000000AA11 /* Shotleaf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shotleaf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A1A0000000000000000AA20 /* ShotleafApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotleafApp.swift; sourceTree = "<group>"; };
+		1A1A0000000000000000AA70 /* ShotleafIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotleafIntents.swift; sourceTree = "<group>"; };
 		1A1A0000000000000000AA24 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1A1A0000000000000000AA26 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		1A1A0000000000000000AA28 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
@@ -55,6 +57,7 @@
 			isa = PBXGroup;
 			children = (
 				1A1A0000000000000000AA20 /* ShotleafApp.swift */,
+				1A1A0000000000000000AA70 /* ShotleafIntents.swift */,
 				1A1A0000000000000000AA22 /* Shotleaf.entitlements */,
 				1A1A0000000000000000AA24 /* Assets.xcassets */,
 				1A1A0000000000000000AA26 /* Localizable.xcstrings */,
@@ -142,6 +145,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A1A0000000000000000AA21 /* ShotleafApp.swift in Sources */,
+				1A1A0000000000000000AA71 /* ShotleafIntents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

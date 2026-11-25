@@ -42,6 +42,18 @@ struct SmallFileTests {
         #expect(data.count <= 500_000 && data.starts(with: [0xFF, 0xD8, 0xFF]))
     }
 
+    @Test func compressFileWritesJPEGUnderLimit() async throws {
+        let png = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).png")
+        let image = try #require(TestImages.noise(width: 3000, height: 2000))
+        let dest = try #require(CGImageDestinationCreateWithURL(png as CFURL, UTType.png.identifier as CFString, 1, nil))
+        CGImageDestinationAddImage(dest, image, nil)
+        try #require(CGImageDestinationFinalize(dest))
+        let url = try await SmallFile.compressFile(png, under: 500_000)
+        let data = try Data(contentsOf: url)
+        #expect(url.lastPathComponent == png.deletingPathExtension().lastPathComponent + ".jpg")
+        #expect(data.count <= 500_000 && data.starts(with: [0xFF, 0xD8, 0xFF]))
+    }
+
     @MainActor @Test func copyPutsJPEGAndFileNoPNG() throws {
         SmallFile.copy(Data([0xFF, 0xD8, 0xFF, 0xD9]))
         let types = NSPasteboard.general.types ?? []

@@ -15,10 +15,14 @@ public final class AppCoordinator {
     var hotkeyTask: Task<Void, Never>?
 
     public internal(set) var permissions: [PermissionKind: PermissionStatus] = [:]
+    /// The running app's coordinator, for the Shortcuts actions.
+    public static weak var shared: AppCoordinator?
+
     public init(container: AppContainer = AppContainer()) {
         self.container = container
         self.clipboard = ClipboardHistory(recognizer: container.recognizer)
         self.recording = RecordingController(capture: container.capture)
+        Self.shared = self
     }
 
     public func start() async {
@@ -153,6 +157,12 @@ public final class AppCoordinator {
                 screenshots.showProblem(error)
             }
         }
+    }
+
+    /// Shortcuts' "Screenshot an Area": pick a region → its PNG, no window.
+    /// Esc throws `AppError.cancelled`.
+    public func captureForShortcut() async throws -> Data {
+        try await container.capture.captureRegion().data
     }
 
     /// Text from a screenshot: pick a region → its text (on-device OCR) in a
