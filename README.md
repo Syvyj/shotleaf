@@ -14,7 +14,7 @@ macOS 15+ · Apple silicon (M1 or newer) · [GPL-3.0-or-later](LICENSE) · [![CI
 
 ## 01 · Capture and annotate
 
-Capture an area, a window, the screen or a scrolling page. Add arrows, text, shapes, backgrounds and watermarks; blur private information and copy text from images on your Mac. Record an area of the screen as a video or GIF, and trim it. **Copy Smaller** makes a screenshot or a recording fit a chat's size limit (200 KB to 25 MB).
+Capture an area, a window, the screen or a scrolling page. Add arrows, text, shapes, backgrounds and watermarks; blur private information and copy text from images on your Mac. Record an area of the screen as a video or GIF, and trim it. **Copy Smaller** in the screenshot window gives a JPEG under a chat's size limit (200 KB to 25 MB); a recording fits with **Under 8 / 10 / 25 MB**.
 
 ![Shotleaf screenshot editor with annotations](site/assets/guide/editor-en.webp)
 
@@ -152,7 +152,7 @@ macOS 15+ · Apple silicon (M1 або новіший) · [GPL-3.0-or-later](LICE
 
 ## 01 · Знімайте й редагуйте
 
-Знімайте область, вікно, екран або довгу сторінку. Додавайте стрілки, текст, фігури, фони й водяні знаки; розмивайте приватні дані та копіюйте текст із зображень на Mac. Записуйте область екрана як відео чи GIF і обрізайте її. **Копіювати меншим** робить скріншот чи запис таким, що вміщується в ліміт чату (від 200 КБ до 25 МБ).
+Знімайте область, вікно, екран або довгу сторінку. Додавайте стрілки, текст, фігури, фони й водяні знаки; розмивайте приватні дані та копіюйте текст із зображень на Mac. Записуйте область екрана як відео чи GIF і обрізайте її. **Копіювати меншим** у вікні скріншота дає JPEG, що вміщується в ліміт чату (від 200 КБ до 25 МБ); запис вміщується з **Під 8 / 10 / 25 МБ**.
 
 ![Редактор скріншотів Shotleaf із позначками](site/assets/guide/editor-uk.webp)
 
