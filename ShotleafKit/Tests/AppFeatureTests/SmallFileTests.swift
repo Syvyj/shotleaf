@@ -73,13 +73,4 @@ struct SmallFileTests {
             try await SmallFile.compressImage(data: Data("not a picture".utf8), filename: "x.png", under: 200_000)
         }
     }
-
-    @MainActor @Test func copyPutsJPEGAndFileNoPNG() throws {
-        SmallFile.copy(Data([0xFF, 0xD8, 0xFF, 0xD9]))
-        let types = NSPasteboard.general.types ?? []
-        #expect(types.contains(.init("public.jpeg")) && types.contains(.fileURL) && types.contains(ClipboardHistory.ownType))
-        // `types` adds a TIFF the system converts on demand; what we wrote is on the item.
-        let written = NSPasteboard.general.pasteboardItems?.first?.types ?? []
-        #expect(!written.contains(.png) && !written.contains(.tiff))
-    }
 }

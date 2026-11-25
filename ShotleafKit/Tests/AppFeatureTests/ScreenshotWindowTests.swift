@@ -261,35 +261,46 @@ func withDefaultToolKeys(_ body: () -> Void) {
     body()
 }
 
-@Suite("Copy Smaller", .serialized)
-@MainActor
-struct CopySmallTests {
-    static func noisePNG() throws -> Data {
-        let image = try #require(TestImages.noise(width: 600, height: 600))
-        return try #require(NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]))
-    }
+extension SharedState {
+    @Suite("Copy Smaller")
+    @MainActor
+    struct CopySmallTests {
+        static func noisePNG() throws -> Data {
+            let image = try #require(TestImages.noise(width: 600, height: 600))
+            return try #require(NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]))
+        }
 
-    @Test("Copy Smaller puts a JPEG under the limit on the clipboard and remembers the limit")
-    func copySmallUsesLimitAndRemembersChoice() async throws {
-        let store = SettingsStore(defaults: UserDefaults(suiteName: UUID().uuidString)!)
-        #expect(await ScreenshotWindows.copySmall(try Self.noisePNG(), limit: 200_000, settings: store))
-        let jpeg = try #require(NSPasteboard.general.data(forType: .init("public.jpeg")))
-        #expect(jpeg.count <= 200_000)
-        #expect(NSPasteboard.general.data(forType: .png) == nil)
-        #expect(store.smallImageLimit == 200_000)
-    }
+        @Test("Copy Smaller puts a JPEG under the limit on the clipboard and remembers the limit")
+        func copySmallUsesLimitAndRemembersChoice() async throws {
+            let store = SettingsStore(defaults: UserDefaults(suiteName: UUID().uuidString)!)
+            #expect(await ScreenshotWindows.copySmall(try Self.noisePNG(), limit: 200_000, settings: store))
+            let jpeg = try #require(NSPasteboard.general.data(forType: .init("public.jpeg")))
+            #expect(jpeg.count <= 200_000)
+            #expect(NSPasteboard.general.data(forType: .png) == nil)
+            #expect(store.smallImageLimit == 200_000)
+        }
 
-    @Test("Plain copy still puts the PNG")
-    func plainCopyStaysPNG() throws {
-        let png = try Self.noisePNG()
-        ScreenshotWindows.copy(png)
-        #expect(NSPasteboard.general.data(forType: .png) == png)
-        #expect(NSPasteboard.general.data(forType: .init("public.jpeg")) == nil)
-    }
+        @Test func copyPutsJPEGAndFileNoPNG() throws {
+            SmallFile.copy(Data([0xFF, 0xD8, 0xFF, 0xD9]))
+            let types = NSPasteboard.general.types ?? []
+            #expect(types.contains(.init("public.jpeg")) && types.contains(.fileURL) && types.contains(ClipboardHistory.ownType))
+            // `types` adds a TIFF the system converts on demand; what we wrote is on the item.
+            let written = NSPasteboard.general.pasteboardItems?.first?.types ?? []
+            #expect(!written.contains(.png) && !written.contains(.tiff))
+        }
 
-    @Test("A stored limit that isn't on offer falls back to 1 MB")
-    func unknownLimit() {
-        #expect(SmallFile.chosen(123) == 1_000_000)
-        #expect(SmallFile.chosen(500_000) == 500_000)
+        @Test("Plain copy still puts the PNG")
+        func plainCopyStaysPNG() throws {
+            let png = try Self.noisePNG()
+            ScreenshotWindows.copy(png)
+            #expect(NSPasteboard.general.data(forType: .png) == png)
+            #expect(NSPasteboard.general.data(forType: .init("public.jpeg")) == nil)
+        }
+
+        @Test("A stored limit that isn't on offer falls back to 1 MB")
+        func unknownLimit() {
+            #expect(SmallFile.chosen(123) == 1_000_000)
+            #expect(SmallFile.chosen(500_000) == 500_000)
+        }
     }
 }

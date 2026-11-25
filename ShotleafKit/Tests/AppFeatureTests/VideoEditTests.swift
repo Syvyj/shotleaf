@@ -56,109 +56,111 @@ enum TestVideo {
     }
 }
 
-@Suite("Video edit", .serialized)  // fitThatCannotFitThrows looks at the shared recordings folder
-struct VideoEditTests {
-    private func seconds(_ s: Double) -> CMTime { CMTime(seconds: s, preferredTimescale: 600) }
-    private func size(_ url: URL) throws -> Int { try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0 }
+extension SharedState {
+    @Suite("Video edit")
+    struct VideoEditTests {
+        private func seconds(_ s: Double) -> CMTime { CMTime(seconds: s, preferredTimescale: 600) }
+        private func size(_ url: URL) throws -> Int { try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0 }
 
-    /// Movies in the recordings folder (other suites don't write there).
-    private func recordingMovies() -> [URL] {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent(TempFolder.recordings.rawValue)
-        let all = FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil)?.allObjects as? [URL] ?? []
-        return all.filter { $0.pathExtension == "mp4" }
-    }
-
-    @Test func bitrateFor8MBIn30s() { #expect(VideoEdit.bitrate(under: 8_000_000, seconds: 30) == 1_920_000) }
-
-    @Test func scaleNeverBelowQuarter() {
-        #expect(VideoEdit.scale(bitrate: 10_000, width: 3000, height: 2000, fps: 30) == 0.25)
-        #expect(VideoEdit.scale(bitrate: 50_000_000, width: 800, height: 600, fps: 30) == 1)
-    }
-
-    @Test func trimKeepsRange() async throws {
-        let source = try await TestVideo.make(seconds: 6, width: 640, height: 400, fps: 30)
-        defer { try? FileManager.default.removeItem(at: source) }
-        defer { try? FileManager.default.removeItem(at: source) }
-        let before = try Data(contentsOf: source)
-        let out = try await VideoEdit.trim(source, to: CMTimeRange(start: seconds(1), end: seconds(3)))
-        #expect(out != source)
-        let duration = try await AVURLAsset(url: out).load(.duration).seconds
-        #expect(abs(duration - 2) <= 0.1)
-        #expect(try Data(contentsOf: source) == before)
-    }
-
-    @Test func fitStaysUnderLimit() async throws {
-        let source = try await TestVideo.make(seconds: 10, width: 1600, height: 1000, fps: 30)
-        defer { try? FileManager.default.removeItem(at: source) }
-        #expect(try size(source) > 2_000_000)
-        let range = CMTimeRange(start: .zero, duration: seconds(10))
-        let out = try await VideoEdit.fit(source, range: range, under: 500_000)
-        #expect(try size(out) <= 500_000)
-        let tracks = try await AVURLAsset(url: out).loadTracks(withMediaType: .video)
-        #expect(tracks.count == 1)
-        let natural = try #require(try await tracks.first?.load(.naturalSize))
-        #expect(Int(natural.width) % 2 == 0 && Int(natural.height) % 2 == 0 && natural.width < 1600)
-    }
-
-    // ponytail: brief says 3000×2000 at 30 fps; 640×400 at 10 fps keeps it impossible (20 KB for 60 s)
-    // without generating minutes of 6-megapixel frames in debug.
-    @Test func fitThatCannotFitThrows() async throws {
-        let source = try await TestVideo.make(seconds: 60, width: 640, height: 400, fps: 10)
-        let range = CMTimeRange(start: .zero, duration: seconds(60))
-        let before = Set(recordingMovies())
-        await #expect(throws: VideoEditError.tooLong) {
-            try await VideoEdit.fit(source, range: range, under: 20_000)
+        /// Movies in the recordings folder (the suites that write there run one at a time: `SharedState`).
+        private func recordingMovies() -> [URL] {
+            let root = FileManager.default.temporaryDirectory.appendingPathComponent(TempFolder.recordings.rawValue)
+            let all = FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil)?.allObjects as? [URL] ?? []
+            return all.filter { $0.pathExtension == "mp4" }
         }
-        #expect(Set(recordingMovies()) == before)
-    }
 
-    @Test func gifIsSmallAndLooping() async throws {
-        let source = try await TestVideo.make(seconds: 2, width: 1920, height: 1080, fps: 30)
-        defer { try? FileManager.default.removeItem(at: source) }
-        let out = try await VideoEdit.gif(source, range: CMTimeRange(start: .zero, duration: seconds(2)))
-        let gif = try #require(CGImageSourceCreateWithURL(out as CFURL, nil))
-        #expect(abs(CGImageSourceGetCount(gif) - 24) <= 2)
-        let frame = try #require(CGImageSourceCreateImageAtIndex(gif, 0, nil))
-        #expect(max(frame.width, frame.height) == 960)
-        let props = CGImageSourceCopyProperties(gif, nil) as? [CFString: Any]
-        let gifProps = props?[kCGImagePropertyGIFDictionary] as? [CFString: Any]
-        #expect(gifProps?[kCGImagePropertyGIFLoopCount] as? Int == 0)
-    }
+        @Test func bitrateFor8MBIn30s() { #expect(VideoEdit.bitrate(under: 8_000_000, seconds: 30) == 1_920_000) }
 
-    @Test func fitKeepsRange() async throws {
-        let source = try await TestVideo.make(seconds: 6, width: 640, height: 400, fps: 30)
-        defer { try? FileManager.default.removeItem(at: source) }
-        let out = try await VideoEdit.fit(source, range: CMTimeRange(start: seconds(2), end: seconds(4)), under: 8_000_000)
-        let duration = try await AVURLAsset(url: out).load(.duration).seconds
-        #expect(abs(duration - 2) <= 0.1)
-    }
-
-    @Test func emptyRangeThrows() async throws {
-        let source = try await TestVideo.make(seconds: 1, width: 320, height: 200, fps: 30)
-        defer { try? FileManager.default.removeItem(at: source) }
-        let empty = CMTimeRange(start: seconds(0.5), duration: .zero)
-        await #expect(throws: VideoEditError.failed) { try await VideoEdit.fit(source, range: empty, under: 8_000_000) }
-        await #expect(throws: VideoEditError.failed) { try await VideoEdit.gif(source, range: empty) }
-        await #expect(throws: VideoEditError.failed) {
-            try await VideoEdit.gif(source, range: CMTimeRange(start: seconds(5), duration: seconds(1)))
+        @Test func scaleNeverBelowQuarter() {
+            #expect(VideoEdit.scale(bitrate: 10_000, width: 3000, height: 2000, fps: 30) == 0.25)
+            #expect(VideoEdit.scale(bitrate: 50_000_000, width: 800, height: 600, fps: 30) == 1)
         }
-    }
 
-    @Test func rangePastEndIsClamped() async throws {
-        let source = try await TestVideo.make(seconds: 2, width: 320, height: 200, fps: 30)
-        defer { try? FileManager.default.removeItem(at: source) }
-        let out = try await VideoEdit.gif(source, range: CMTimeRange(start: seconds(1), duration: seconds(10)))
-        let gif = try #require(CGImageSourceCreateWithURL(out as CFURL, nil))
-        #expect(abs(CGImageSourceGetCount(gif) - 12) <= 1)
-        let movie = try await VideoEdit.fit(source, range: CMTimeRange(start: seconds(1), duration: seconds(10)), under: 1_000_000)
-        #expect(abs(try await AVURLAsset(url: movie).load(.duration).seconds - 1) <= 0.1)
-    }
+        @Test func trimKeepsRange() async throws {
+            let source = try await TestVideo.make(seconds: 6, width: 640, height: 400, fps: 30)
+            defer { try? FileManager.default.removeItem(at: source) }
+            defer { try? FileManager.default.removeItem(at: source) }
+            let before = try Data(contentsOf: source)
+            let out = try await VideoEdit.trim(source, to: CMTimeRange(start: seconds(1), end: seconds(3)))
+            #expect(out != source)
+            let duration = try await AVURLAsset(url: out).load(.duration).seconds
+            #expect(abs(duration - 2) <= 0.1)
+            #expect(try Data(contentsOf: source) == before)
+        }
 
-    @Test func longGifStaysInPixelBudget() {
-        #expect(VideoEdit.gifLongSide(seconds: 2, width: 1920, height: 1080) == 960)
-        let side = VideoEdit.gifLongSide(seconds: 30, width: 1920, height: 1080)
-        let short = Int((Double(side) * 1080 / 1920).rounded(.up))
-        #expect(side < 960 && 360 * side * short <= VideoEdit.gifPixelBudget)
-        #expect(360 * (side + 2) * (side + 2) * 1080 / 1920 > VideoEdit.gifPixelBudget)  // not shrunk more than needed
+        @Test func fitStaysUnderLimit() async throws {
+            let source = try await TestVideo.make(seconds: 10, width: 1600, height: 1000, fps: 30)
+            defer { try? FileManager.default.removeItem(at: source) }
+            #expect(try size(source) > 2_000_000)
+            let range = CMTimeRange(start: .zero, duration: seconds(10))
+            let out = try await VideoEdit.fit(source, range: range, under: 500_000)
+            #expect(try size(out) <= 500_000)
+            let tracks = try await AVURLAsset(url: out).loadTracks(withMediaType: .video)
+            #expect(tracks.count == 1)
+            let natural = try #require(try await tracks.first?.load(.naturalSize))
+            #expect(Int(natural.width) % 2 == 0 && Int(natural.height) % 2 == 0 && natural.width < 1600)
+        }
+
+        // ponytail: brief says 3000×2000 at 30 fps; 640×400 at 10 fps keeps it impossible (20 KB for 60 s)
+        // without generating minutes of 6-megapixel frames in debug.
+        @Test func fitThatCannotFitThrows() async throws {
+            let source = try await TestVideo.make(seconds: 60, width: 640, height: 400, fps: 10)
+            let range = CMTimeRange(start: .zero, duration: seconds(60))
+            let before = Set(recordingMovies())
+            await #expect(throws: VideoEditError.tooLong) {
+                try await VideoEdit.fit(source, range: range, under: 20_000)
+            }
+            #expect(Set(recordingMovies()) == before)
+        }
+
+        @Test func gifIsSmallAndLooping() async throws {
+            let source = try await TestVideo.make(seconds: 2, width: 1920, height: 1080, fps: 30)
+            defer { try? FileManager.default.removeItem(at: source) }
+            let out = try await VideoEdit.gif(source, range: CMTimeRange(start: .zero, duration: seconds(2)))
+            let gif = try #require(CGImageSourceCreateWithURL(out as CFURL, nil))
+            #expect(abs(CGImageSourceGetCount(gif) - 24) <= 2)
+            let frame = try #require(CGImageSourceCreateImageAtIndex(gif, 0, nil))
+            #expect(max(frame.width, frame.height) == 960)
+            let props = CGImageSourceCopyProperties(gif, nil) as? [CFString: Any]
+            let gifProps = props?[kCGImagePropertyGIFDictionary] as? [CFString: Any]
+            #expect(gifProps?[kCGImagePropertyGIFLoopCount] as? Int == 0)
+        }
+
+        @Test func fitKeepsRange() async throws {
+            let source = try await TestVideo.make(seconds: 6, width: 640, height: 400, fps: 30)
+            defer { try? FileManager.default.removeItem(at: source) }
+            let out = try await VideoEdit.fit(source, range: CMTimeRange(start: seconds(2), end: seconds(4)), under: 8_000_000)
+            let duration = try await AVURLAsset(url: out).load(.duration).seconds
+            #expect(abs(duration - 2) <= 0.1)
+        }
+
+        @Test func emptyRangeThrows() async throws {
+            let source = try await TestVideo.make(seconds: 1, width: 320, height: 200, fps: 30)
+            defer { try? FileManager.default.removeItem(at: source) }
+            let empty = CMTimeRange(start: seconds(0.5), duration: .zero)
+            await #expect(throws: VideoEditError.failed) { try await VideoEdit.fit(source, range: empty, under: 8_000_000) }
+            await #expect(throws: VideoEditError.failed) { try await VideoEdit.gif(source, range: empty) }
+            await #expect(throws: VideoEditError.failed) {
+                try await VideoEdit.gif(source, range: CMTimeRange(start: seconds(5), duration: seconds(1)))
+            }
+        }
+
+        @Test func rangePastEndIsClamped() async throws {
+            let source = try await TestVideo.make(seconds: 2, width: 320, height: 200, fps: 30)
+            defer { try? FileManager.default.removeItem(at: source) }
+            let out = try await VideoEdit.gif(source, range: CMTimeRange(start: seconds(1), duration: seconds(10)))
+            let gif = try #require(CGImageSourceCreateWithURL(out as CFURL, nil))
+            #expect(abs(CGImageSourceGetCount(gif) - 12) <= 1)
+            let movie = try await VideoEdit.fit(source, range: CMTimeRange(start: seconds(1), duration: seconds(10)), under: 1_000_000)
+            #expect(abs(try await AVURLAsset(url: movie).load(.duration).seconds - 1) <= 0.1)
+        }
+
+        @Test func longGifStaysInPixelBudget() {
+            #expect(VideoEdit.gifLongSide(seconds: 2, width: 1920, height: 1080) == 960)
+            let side = VideoEdit.gifLongSide(seconds: 30, width: 1920, height: 1080)
+            let short = Int((Double(side) * 1080 / 1920).rounded(.up))
+            #expect(side < 960 && 360 * side * short <= VideoEdit.gifPixelBudget)
+            #expect(360 * (side + 2) * (side + 2) * 1080 / 1920 > VideoEdit.gifPixelBudget)  // not shrunk more than needed
+        }
     }
 }
