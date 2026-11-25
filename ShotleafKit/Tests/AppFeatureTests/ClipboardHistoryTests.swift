@@ -295,4 +295,35 @@ struct ImageClipActionTests {
         #expect(jpeg != nil && model.settings.smallImageLimit == 200_000)
         #expect(h.items.count == before)
     }
+
+    @Test("⌘K compression: a second run is ignored; closed or reopened before it ends, nothing is copied or pasted")
+    func compressAfterLeaving() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-imgleave-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let h = ClipboardHistory(folder: dir)
+        // An odd size, so no other test's JPEG on the shared pasteboard looks like this one.
+        let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 37, pixelsHigh: 29, bitsPerSample: 8, samplesPerPixel: 4,
+                                   hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+        var item = ClipItem(kind: .image, text: ""); item.hasImage = true
+        try rep.representation(using: .png, properties: [:])!.write(to: h.imageURL(item))
+        h.add(item)
+        let ours = try #require(await SmallFile.jpeg(contentsOf: h.imageURL(item), under: 200_000))
+        let panel = ClipboardPanelController(history: h, snippets: SnippetStore(file: dir.appendingPathComponent("s.json")))
+        defer { panel.close() }
+
+        panel.show()
+        let first = panel.run(.image(.compress(limit: 200_000)))
+        #expect(first != nil && panel.run(.image(.compress(limit: 200_000))) == nil)
+        panel.close()                                   // esc while it shrinks
+        await first?.value
+        #expect(NSPasteboard.general.data(forType: .init("public.jpeg")) != ours)
+
+        panel.show()
+        let second = panel.run(.image(.compress(limit: 200_000)))
+        panel.show()                                    // ⇧⌘V again: a new panel
+        await second?.value
+        #expect(panel.isShown)                          // the new panel isn't closed by the old task
+        #expect(NSPasteboard.general.data(forType: .init("public.jpeg")) != ours)
+    }
 }

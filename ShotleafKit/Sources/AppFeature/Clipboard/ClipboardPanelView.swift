@@ -284,6 +284,7 @@ struct ClipboardPanelView: View {
                     Image(systemName: action.symbol).font(.system(size: 13)).frame(width: 18)
                     Text(String(localized: action.title)).font(Leaf.font(13))
                     Spacer()
+                    if on, model.compressing { ProgressView().controlSize(.small) }
                 }
                 .foregroundStyle(on ? Leaf.ink : Color.primary)
                 .padding(.horizontal, 8).frame(height: 32)

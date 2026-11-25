@@ -21,6 +21,8 @@ final class ClipboardPanelModel {
     /// ⌘K: the actions list instead of the preview.
     var actionsShown = false { didSet { actionIndex = 0 } }
     var actionIndex = 0
+    /// A ⌘K compression is running (a spinner on its row; a second run is ignored).
+    var compressing = false
     var settings = ScreenshotWindows.settings
     var actions: [PanelAction] {
         guard let item = current else { return [] }
@@ -335,29 +337,38 @@ final class ClipboardPanelController {
         history.queue = []
     }
 
-    fileprivate func run(_ action: PanelAction) {
-        guard let model, let item = model.current else { return }
+    /// Runs a ⌘K action; a compression returns its task (for tests), nil while one already runs.
+    @discardableResult
+    func run(_ action: PanelAction) -> Task<Void, Never>? {
+        guard let model, let item = model.current else { return nil }
         if case .image(.compress(let limit)) = action {
+            guard !model.compressing else { return nil } // ↩ twice: one paste
+            model.compressing = true
+            let target = target
             // In the background: the panel stays alive while a big picture shrinks.
-            Task {
-                guard let jpeg = await model.compressed(under: limit) else { NSSound.beep(); return }
+            return Task {
+                defer { model.compressing = false }
+                let jpeg = await model.compressed(under: limit)
+                // Closed or reopened meanwhile: the user moved on, drop the result.
+                guard self.model === model, isShown, self.target == target else { return }
+                guard let jpeg else { NSSound.beep(); return }
                 SmallFile.copy(jpeg) // marked as ours: no new history entry
                 close()
                 pasteIntoTarget(.paste)
             }
-            return
         }
-        guard case .text(let action) = action else { return }
+        guard case .text(let action) = action else { return nil }
         if action == .saveSnippet {
             // The picked entries (or the current one) become one snippet, in the folder last opened.
             saveSnippet(model.entries(with: item), folder: model.snippetFolder)
             model.actionsShown = false
-            return
+            return nil
         }
-        guard let text = action.apply(item.text) else { return }
+        guard let text = action.apply(item.text) else { return nil }
         Paster.put(text)
         close()
         pasteIntoTarget(.paste)
+        return nil
     }
 
     /// Entries as one snippet: their texts and pictures.
