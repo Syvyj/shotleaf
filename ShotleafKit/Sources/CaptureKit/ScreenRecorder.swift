@@ -66,8 +66,8 @@ public actor ScreenRecorder {
     /// Finishes the current segment; the stream keeps running, nothing is written.
     public func pause() async throws {
         guard let stream, let output, let finish else { throw AppError.missingContext(String(localized: "Not recording")) }
-        (self.output, self.finish) = (nil, nil)
         try stream.removeRecordingOutput(output)
+        (self.output, self.finish) = (nil, nil)
         _ = await finish.wait(timeout: .seconds(5))
     }
 
@@ -117,12 +117,18 @@ public actor ScreenRecorder {
     }
 
     /// Joins `segments` back to back into `url` without re-encoding and deletes them.
-    /// Empty (or missing) ones are skipped; a single one is just moved.
+    /// Empty, missing or video-less ones are skipped; a single one is just moved.
     static func join(_ segments: [URL], into url: URL) async throws -> URL {
         let files = FileManager.default
         let written = segments.filter { ((try? files.attributesOfItem(atPath: $0.path)[.size] as? Int) ?? 0) > 0 }
-        guard let first = written.first else {
-            for segment in segments { try? files.removeItem(at: segment) }
+        // The asset too: a track whose asset is gone can't be inserted.
+        var tracks: [(url: URL, asset: AVURLAsset, track: AVAssetTrack)] = []
+        for segment in written {
+            let asset = AVURLAsset(url: segment)
+            if let track = try? await asset.loadTracks(withMediaType: .video).first { tracks.append((segment, asset, track)) }
+        }
+        guard let first = tracks.first else {
+            for segment in segments where !written.contains(segment) { try? files.removeItem(at: segment) } // empty ones only
             throw AppError.missingContext(String(localized: "Nothing was recorded — it was stopped too soon"))
         }
         // Deleted only once `url` is written: on a failure they are the only copy.
@@ -130,10 +136,10 @@ public actor ScreenRecorder {
             for segment in segments where segment != url { try? files.removeItem(at: segment) }
             return url
         }
-        if written.count == 1 {
-            if first != url {
+        if tracks.count == 1 {
+            if first.url != url {
                 try? files.removeItem(at: url)
-                try files.moveItem(at: first, to: url)
+                try files.moveItem(at: first.url, to: url)
             }
             return joined()
         }
@@ -141,12 +147,9 @@ public actor ScreenRecorder {
         guard let track = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid) else {
             throw AppError.missingContext(String(localized: "Couldn’t record the screen"))
         }
-        for segment in written {
-            let asset = AVURLAsset(url: segment)
-            guard let source = try await asset.loadTracks(withMediaType: .video).first else { continue }
-            let range = try await source.load(.timeRange)
-            try track.insertTimeRange(range, of: source, at: composition.duration)
-            if segment == first { track.preferredTransform = try await source.load(.preferredTransform) }
+        track.preferredTransform = try await first.track.load(.preferredTransform)
+        for (_, _, source) in tracks {
+            try track.insertTimeRange(try await source.load(.timeRange), of: source, at: composition.duration)
         }
         guard let export = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetPassthrough) else {
             throw AppError.missingContext(String(localized: "Couldn’t record the screen"))

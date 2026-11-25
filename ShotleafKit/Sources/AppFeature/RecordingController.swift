@@ -165,7 +165,8 @@ final class RecordingController: NSObject {
         stopItem = item
         ticker = Task { [weak self] in
             while !Task.isCancelled {
-                self?.refresh()
+                guard let self else { return }
+                refresh()
                 try? await Task.sleep(for: .seconds(0.5))
             }
         }

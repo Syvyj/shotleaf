@@ -57,6 +57,13 @@ struct RecordingJoinTests {
         FileManager.default.createFile(atPath: empty2.path, contents: Data())
         await #expect(throws: (any Error).self) { try await ScreenRecorder.join([empty2, missing], into: out()) }
         #expect(!FileManager.default.fileExists(atPath: empty2.path))
+
+        // Not empty but no video in it: kept when nothing could be joined (it may be all there is).
+        let junk = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).mp4")
+        FileManager.default.createFile(atPath: junk.path, contents: Data("not a movie".utf8))
+        defer { try? FileManager.default.removeItem(at: junk) }
+        await #expect(throws: (any Error).self) { try await ScreenRecorder.join([junk], into: out()) }
+        #expect(FileManager.default.fileExists(atPath: junk.path))
     }
 }
 

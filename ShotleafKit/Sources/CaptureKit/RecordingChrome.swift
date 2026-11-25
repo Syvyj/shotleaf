@@ -82,6 +82,9 @@ public final class RecordingControls {
         dot.heightAnchor.constraint(equalToConstant: 8).isActive = true
         time.font = CaptureStyle.mono(13)
         time.textColor = .white
+        time.alignment = .right
+        // Fits "000:00", so the capsule sized now never clips a long recording.
+        time.widthAnchor.constraint(equalToConstant: ceil(("000:00" as NSString).size(withAttributes: [.font: CaptureStyle.mono(13)]).width) + 4).isActive = true
         let stop = FirstClickButton(), cancel = FirstClickButton()
         Self.style(stop, "stop.fill", String(localized: "Stop Recording"))
         Self.style(cancel, "xmark", String(localized: "Cancel Recording"))
