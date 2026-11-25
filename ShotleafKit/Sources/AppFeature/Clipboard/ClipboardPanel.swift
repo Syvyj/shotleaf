@@ -21,11 +21,20 @@ final class ClipboardPanelModel {
     /// ⌘K: the actions list instead of the preview.
     var actionsShown = false { didSet { actionIndex = 0 } }
     var actionIndex = 0
-    var actions: [ClipAction] {
+    var settings = ScreenshotWindows.settings
+    var actions: [PanelAction] {
         guard let item = current else { return [] }
-        if marked.count > 1 || item.kind == .image { return [.saveSnippet] } // pictures and several: into a snippet
+        if marked.count > 1 { return [.text(.saveSnippet)] } // several: into a snippet
+        if item.kind == .image { return ImageClipAction.all(remembered: settings.smallImageLimit).map { .image($0) } + [.text(.saveSnippet)] }
         guard item.kind != .file else { return [] }
-        return ClipAction.available(for: item.text)
+        return ClipAction.available(for: item.text).map { .text($0) }
+    }
+
+    /// The current picture as a JPEG under `limit` (remembered); nil if it can't be made.
+    func compressed(under limit: Int) async -> Data? {
+        guard let item = current else { return nil }
+        settings.smallImageLimit = limit
+        return await SmallFile.jpeg(contentsOf: history.imageURL(item), under: limit)
     }
     /// A snippet with {?questions}, waiting for the answers.
     var asking: Snippet?
@@ -326,8 +335,19 @@ final class ClipboardPanelController {
         history.queue = []
     }
 
-    fileprivate func run(_ action: ClipAction) {
+    fileprivate func run(_ action: PanelAction) {
         guard let model, let item = model.current else { return }
+        if case .image(.compress(let limit)) = action {
+            // In the background: the panel stays alive while a big picture shrinks.
+            Task {
+                guard let jpeg = await model.compressed(under: limit) else { NSSound.beep(); return }
+                SmallFile.copy(jpeg) // marked as ours: no new history entry
+                close()
+                pasteIntoTarget(.paste)
+            }
+            return
+        }
+        guard case .text(let action) = action else { return }
         if action == .saveSnippet {
             // The picked entries (or the current one) become one snippet, in the folder last opened.
             saveSnippet(model.entries(with: item), folder: model.snippetFolder)

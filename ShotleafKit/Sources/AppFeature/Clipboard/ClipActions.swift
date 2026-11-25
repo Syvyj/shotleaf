@@ -1,5 +1,36 @@
 import Foundation
 
+/// ⌘K on a picture: paste it as a small JPEG.
+enum ImageClipAction: Hashable {
+    case compress(limit: Int)
+
+    var title: String.LocalizationValue {
+        switch self {
+        case .compress(let limit): "Compress to JPEG under \(SmallFile.label(limit))"
+        }
+    }
+
+    var symbol: String { "arrow.down.right.and.arrow.up.left" }
+
+    /// Every limit, the last chosen one first.
+    static func all(remembered: Int) -> [ImageClipAction] {
+        let first = SmallFile.chosen(remembered)
+        return ([first] + SmallFile.limits.filter { $0 != first }).map { .compress(limit: $0) }
+    }
+}
+
+/// A row of the ⌘K list.
+enum PanelAction: Hashable {
+    case text(ClipAction), image(ImageClipAction)
+
+    var title: String.LocalizationValue {
+        switch self { case .text(let a): a.title; case .image(let a): a.title }
+    }
+    var symbol: String {
+        switch self { case .text(let a): a.symbol; case .image(let a): a.symbol }
+    }
+}
+
 /// ⌘K in the clipboard panel: what can be done to a text entry before pasting.
 enum ClipAction: CaseIterable, Identifiable {
     case cleanLinks, uppercase, lowercase, capitalize, oneLine, trim, formatJSON, convertColor, decodeBase64, encodeBase64, saveSnippet

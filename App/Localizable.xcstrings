@@ -4559,6 +4559,16 @@
         }
       }
     },
+    "Compress to JPEG under %@": {
+      "localizations": {
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Стиснути до JPEG під %@"
+          }
+        }
+      }
+    },
     "Copy Smaller": {
       "localizations": {
         "uk": {

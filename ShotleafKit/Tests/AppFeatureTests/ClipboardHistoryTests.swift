@@ -1,5 +1,6 @@
 import Testing
 import AppKit
+import SettingsKit
 @testable import AppFeature
 
 @Suite("Clipboard history")
@@ -265,5 +266,33 @@ struct PrivateTextTests {
         board.setData(Data(count: ClipboardHistory.maxBytes + 1), forType: .rtf)
         let (item, _) = try #require(ClipboardHistory.read(board))
         #expect(item.text == "short" && item.rtf == nil)
+    }
+}
+
+@Suite("Compress a picture from the history")
+@MainActor
+struct ImageClipActionTests {
+    @Test("A picture offers every limit, the remembered one first; compressing remembers the limit and adds no entry")
+    func compress() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("shotleaf-imgact-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let h = ClipboardHistory(folder: dir)
+        let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 64, pixelsHigh: 64, bitsPerSample: 8, samplesPerPixel: 4,
+                                   hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)!
+        var item = ClipItem(kind: .image, text: ""); item.hasImage = true
+        try rep.representation(using: .png, properties: [:])!.write(to: h.imageURL(item))
+        h.add(item)
+        let model = ClipboardPanelModel(history: h, snippets: SnippetStore(file: dir.appendingPathComponent("s.json")))
+        model.settings = SettingsStore(defaults: UserDefaults(suiteName: "shotleaf-imgact-\(UUID())")!)
+        model.settings.smallImageLimit = 500_000
+        let offered = model.actions.compactMap { action -> Int? in
+            if case .image(.compress(let limit)) = action { return limit } else { return nil }
+        }
+        #expect(offered.first == 500_000 && offered.sorted() == SmallFile.limits)
+        let before = h.items.count
+        let jpeg = await model.compressed(under: 200_000)
+        #expect(jpeg != nil && model.settings.smallImageLimit == 200_000)
+        #expect(h.items.count == before)
     }
 }

@@ -10,7 +10,7 @@ struct ClipboardPanelView: View {
     var editSnippets: () -> Void = {}
     var pickTogether: ([ClipItem]) -> Void = { _ in }
     var pickQueue: ([ClipItem]) -> Void = { _ in }
-    var runAction: (ClipAction) -> Void = { _ in }
+    var runAction: (PanelAction) -> Void = { _ in }
     var saveSnippet: ([ClipItem], UUID?) -> Void = { _, _ in }
     let close: () -> Void
     @FocusState var searching: Bool
